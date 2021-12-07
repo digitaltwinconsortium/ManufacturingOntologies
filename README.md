@@ -4,13 +4,13 @@
 
 ### The Digital Twin Definition Language
 
-This work leverages the Digital Twin Definition Language (DTDL) is specified [here](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md).
+This work leverages the Digital Twin Definition Language (DTDL), which is specified [here](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md).
 
 
 
 ### Production Line Layout
 
-The production line is laid out as follows:
+The production line layout is as follows:
 
 ![Line](Docs/line.png)
 

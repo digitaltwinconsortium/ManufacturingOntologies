@@ -20,7 +20,7 @@ The production line is laid out as follows:
 
 The relationships between the models used in this ontology are described via the following diagram (taken from the [Azure Digital Twins Explorer](https://explorer.digitaltwins.azure.net/) tool):
 
-![relationships](Docs/modelrelationships.png | width=100)
+![relationships](Docs/modelrelationships.png | width=250)
 
 
 

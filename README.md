@@ -10,7 +10,7 @@ This work leverages the Digital Twin Definition Language (DTDL), which is specif
 
 ### Production Line Layout
 
-The production line layout is as follows (MES stands for Manufacturing Execution System):
+A typical production line is organized into a number of inter-connected stations that a product being manufactured has to pass through. The production line layout for this ontology is as follows (MES stands for Manufacturing Execution System):
 
 ![Line](Docs/line.png)
 

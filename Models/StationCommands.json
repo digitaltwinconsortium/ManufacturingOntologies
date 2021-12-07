@@ -11,10 +11,6 @@
       "name": "Reset"
     },
     {
-      "@type": "Command",
-      "name": "OpenPressureReleaseValve"
-    },
-    {
       "@type": "Relationship",
       "name": "Parent",
       "target": "dtmi:Station;1"

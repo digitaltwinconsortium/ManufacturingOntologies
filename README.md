@@ -10,7 +10,7 @@ This work leverages the Digital Twin Definition Language (DTDL), which is specif
 
 ### Production Line Layout
 
-The production line layout is as follows:
+The production line layout is as follows (MES stands for Manufacturing Execution System):
 
 ![Line](Docs/line.png)
 

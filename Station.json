@@ -1,0 +1,26 @@
+{
+  "@id": "dtmi:Station;1",
+  "@type": "Interface",
+  "contents": [
+    {
+      "@type": "Relationship",
+      "name": "Parent",
+      "target": "dtmi:MES;1"
+    },
+    {
+      "@type": "Relationship",
+      "name": "Previous",
+      "target": "dtmi:Station;1"
+    },
+    {
+      "@type": "Relationship",
+      "name": "Next",
+      "target": "dtmi:Station;1"
+    }
+  ],
+  "@context": [
+    "dtmi:dtdl:context;2"
+  ],
+  "comment": "opcua:informationmodel:https://uacloudlibrary.opcfoundation.org/infomodel/download/3695781514",
+  "displayName": "Station"
+}

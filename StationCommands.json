@@ -1,0 +1,27 @@
+{
+  "@id": "dtmi:StationCommands;1",
+  "@type": "Interface",
+  "contents": [
+    {
+      "@type": "Command",
+      "name": "Execute"
+    },
+    {
+      "@type": "Command",
+      "name": "Reset"
+    },
+    {
+      "@type": "Command",
+      "name": "OpenPressureReleaseValve"
+    },
+    {
+      "@type": "Relationship",
+      "name": "Parent",
+      "target": "dtmi:Station;1"
+    }
+  ],
+  "@context": [
+    "dtmi:dtdl:context;2"
+  ],
+  "displayName": "StationCommands"
+}

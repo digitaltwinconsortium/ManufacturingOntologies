@@ -28,7 +28,7 @@ The relationships between the models used in this ontology are described via the
 
 The underlying machine information model is based on OPC UA and can be used for Overall Equipment Effectiveness (OEE) calculation. It is derived from the Microsoft Azure IoT Connected Factory simulation defined [here](https://github.com/Azure/azure-iot-connected-factory/blob/main/Simulation/Factory/Station/StationModel.xml).
 
-
+<img src="Docs/modelrelationships.png" alt="relationships" width="100" />
 
 ### The Digital Twin Graph
 

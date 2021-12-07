@@ -20,7 +20,7 @@ The production line is laid out as follows:
 
 The relationships between the models used in this ontology are described via the following diagram (taken from the [Azure Digital Twins Explorer](https://explorer.digitaltwins.azure.net/) tool):
 
-![relationships](Docs/modelrelationships.png | width=250)
+<img src="Docs/modelrelationships.png" alt="relationships" width="250" />
 
 
 
@@ -28,7 +28,7 @@ The relationships between the models used in this ontology are described via the
 
 The underlying machine information model is based on OPC UA and can be used for Overall Equipment Effectiveness (OEE) calculation. It is derived from the Microsoft Azure IoT Connected Factory simulation defined [here](https://github.com/Azure/azure-iot-connected-factory/blob/main/Simulation/Factory/Station/StationModel.xml).
 
-<img src="Docs/modelrelationships.png" alt="relationships" width="100" />
+
 
 ### The Digital Twin Graph
 
@@ -41,7 +41,6 @@ The resulting digital twin graph is depicted below (taken from the [Azure Digita
 ### Overall Equipment Effectiveness (OEE) Calculation
 
 OEE is a common metric in production environments, see the reference calculation [here](https://www.oee.com/calculating-oee).
-
 
 
 

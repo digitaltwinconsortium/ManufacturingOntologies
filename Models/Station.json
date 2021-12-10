@@ -21,6 +21,6 @@
   "@context": [
     "dtmi:dtdl:context;2"
   ],
-  "comment": "dtmi:opcua:informationmodel:https://uacloudlibrary.opcfoundation.org/infomodel/download/3695781514;1",
+  "comment": "dtmi:opcua:informationmodel:https://uacloudlibrary.opcfoundation.org/infomodel/download/3496650353;1",
   "displayName": "Station"
 }

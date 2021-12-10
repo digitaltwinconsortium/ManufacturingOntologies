@@ -30,7 +30,7 @@ The underlying machine information model is based on OPC UA and can be used for 
 
 
 
-### The Digital Twin Graph
+### Digital Twin Graph
 
 The resulting digital twin graph is depicted below (taken from the [Azure Digital Twins Explorer](https://explorer.digitaltwins.azure.net/) tool):
 

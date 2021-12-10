@@ -2,7 +2,7 @@
 
 
 
-### The Digital Twin Definition Language
+### Digital Twin Definition Language
 
 This work leverages the Digital Twin Definition Language (DTDL), which is specified [here](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md).
 

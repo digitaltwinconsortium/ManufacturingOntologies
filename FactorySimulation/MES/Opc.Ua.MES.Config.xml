@@ -24,7 +24,7 @@
     <ApplicationCertificate>
       <StoreType>X509Store</StoreType>
       <StorePath>CurrentUser\UA_MachineDefault</StorePath>
-      <SubjectName>MES</SubjectName>
+      <SubjectName>UndefinedMESName</SubjectName>
     </ApplicationCertificate>
 
     <!-- The list of certification authorities. 

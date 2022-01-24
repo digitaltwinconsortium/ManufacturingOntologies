@@ -79,6 +79,11 @@ namespace Mes.Simulation
                 application.ApplicationType = ApplicationType.Client;
                 application.ConfigSectionName = "Opc.Ua.MES";
 
+                // replace the certificate subject name in the configuration
+                string configFilePath = Path.Combine(Directory.GetCurrentDirectory(), application.ConfigSectionName + ".Config.xml");
+                string configFileContent = File.ReadAllText(configFilePath).Replace("UndefinedMESName", "MES." + args[0]);
+                File.WriteAllText(configFilePath, configFileContent);
+
                 // load the application configuration
                 ApplicationConfiguration appConfiguration = application.LoadApplicationConfiguration(false).Result;
 

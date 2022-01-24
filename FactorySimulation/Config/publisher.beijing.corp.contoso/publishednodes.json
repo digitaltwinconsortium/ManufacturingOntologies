@@ -1,15 +1,147 @@
 // Beijing
 [
   {
-    "EndpointUrl": "opc.tcp://192.168.178.99:61210/UA/SampleClient",
+    "EndpointUrl": "opc.tcp://assembly.beijing1.corp.contoso/ua/beijing1",
     "UseSecurity": true,
     "OpcNodes": [
-      {
-        "Id": "ns=4;i=1274"
-      },
-      {
-        "Id": "ns=4;i=1278"
-      }
+      { "Id": "ns=2;i=379" }, // product serial number
+      { "Id": "ns=2;i=385" }, // num manufactured products
+      { "Id": "ns=2;i=391" }, // num discarded products
+      { "Id": "ns=2;i=398" }, // running time
+      { "Id": "ns=2;i=399" }, // faulty time
+      { "Id": "ns=2;i=400" }, // status
+      { "Id": "ns=2;i=406" }, // energy consumption
+      { "Id": "ns=2;i=412" }, // ideal cycle time
+      { "Id": "ns=2;i=418" }, // actual cycle time
+      { "Id": "ns=2;i=434" } // pressure
+    ]
+  },
+  {
+    "EndpointUrl": "opc.tcp://test.beijing1.corp.contoso/ua/beijing1",
+    "UseSecurity": true,
+    "OpcNodes": [
+      { "Id": "ns=2;i=379" }, // product serial number
+      { "Id": "ns=2;i=385" }, // num manufactured products
+      { "Id": "ns=2;i=391" }, // num discarded products
+      { "Id": "ns=2;i=398" }, // running time
+      { "Id": "ns=2;i=399" }, // faulty time
+      { "Id": "ns=2;i=400" }, // status
+      { "Id": "ns=2;i=406" }, // energy consumption
+      { "Id": "ns=2;i=412" }, // ideal cycle time
+      { "Id": "ns=2;i=418" }, // actual cycle time
+      { "Id": "ns=2;i=434" } // pressure
+    ]
+  },
+  {
+    "EndpointUrl": "opc.tcp://packaging.beijing1.corp.contoso/ua/beijing1",
+    "UseSecurity": true,
+    "OpcNodes": [
+      { "Id": "ns=2;i=379" }, // product serial number
+      { "Id": "ns=2;i=385" }, // num manufactured products
+      { "Id": "ns=2;i=391" }, // num discarded products
+      { "Id": "ns=2;i=398" }, // running time
+      { "Id": "ns=2;i=399" }, // faulty time
+      { "Id": "ns=2;i=400" }, // status
+      { "Id": "ns=2;i=406" }, // energy consumption
+      { "Id": "ns=2;i=412" }, // ideal cycle time
+      { "Id": "ns=2;i=418" }, // actual cycle time
+      { "Id": "ns=2;i=434" } // pressure
+    ]
+  },
+  {
+    "EndpointUrl": "opc.tcp://assembly.beijing2.corp.contoso/ua/beijing2",
+    "UseSecurity": true,
+    "OpcNodes": [
+      { "Id": "ns=2;i=379" }, // product serial number
+      { "Id": "ns=2;i=385" }, // num manufactured products
+      { "Id": "ns=2;i=391" }, // num discarded products
+      { "Id": "ns=2;i=398" }, // running time
+      { "Id": "ns=2;i=399" }, // faulty time
+      { "Id": "ns=2;i=400" }, // status
+      { "Id": "ns=2;i=406" }, // energy consumption
+      { "Id": "ns=2;i=412" }, // ideal cycle time
+      { "Id": "ns=2;i=418" }, // actual cycle time
+      { "Id": "ns=2;i=434" } // pressure
+    ]
+  },
+  {
+    "EndpointUrl": "opc.tcp://test.beijing2.corp.contoso/ua/beijing2",
+    "UseSecurity": true,
+    "OpcNodes": [
+      { "Id": "ns=2;i=379" }, // product serial number
+      { "Id": "ns=2;i=385" }, // num manufactured products
+      { "Id": "ns=2;i=391" }, // num discarded products
+      { "Id": "ns=2;i=398" }, // running time
+      { "Id": "ns=2;i=399" }, // faulty time
+      { "Id": "ns=2;i=400" }, // status
+      { "Id": "ns=2;i=406" }, // energy consumption
+      { "Id": "ns=2;i=412" }, // ideal cycle time
+      { "Id": "ns=2;i=418" }, // actual cycle time
+      { "Id": "ns=2;i=434" } // pressure
+    ]
+  },
+  {
+    "EndpointUrl": "opc.tcp://packaging.beijing2.corp.contoso/ua/beijing2",
+    "UseSecurity": true,
+    "OpcNodes": [
+      { "Id": "ns=2;i=379" }, // product serial number
+      { "Id": "ns=2;i=385" }, // num manufactured products
+      { "Id": "ns=2;i=391" }, // num discarded products
+      { "Id": "ns=2;i=398" }, // running time
+      { "Id": "ns=2;i=399" }, // faulty time
+      { "Id": "ns=2;i=400" }, // status
+      { "Id": "ns=2;i=406" }, // energy consumption
+      { "Id": "ns=2;i=412" }, // ideal cycle time
+      { "Id": "ns=2;i=418" }, // actual cycle time
+      { "Id": "ns=2;i=434" } // pressure
+    ]
+  },
+  {
+    "EndpointUrl": "opc.tcp://assembly.beijing3.corp.contoso/ua/beijing3",
+    "UseSecurity": true,
+    "OpcNodes": [
+      { "Id": "ns=2;i=379" }, // product serial number
+      { "Id": "ns=2;i=385" }, // num manufactured products
+      { "Id": "ns=2;i=391" }, // num discarded products
+      { "Id": "ns=2;i=398" }, // running time
+      { "Id": "ns=2;i=399" }, // faulty time
+      { "Id": "ns=2;i=400" }, // status
+      { "Id": "ns=2;i=406" }, // energy consumption
+      { "Id": "ns=2;i=412" }, // ideal cycle time
+      { "Id": "ns=2;i=418" }, // actual cycle time
+      { "Id": "ns=2;i=434" } // pressure
+    ]
+  },
+  {
+    "EndpointUrl": "opc.tcp://test.beijing3.corp.contoso/ua/beijing3",
+    "UseSecurity": true,
+    "OpcNodes": [
+      { "Id": "ns=2;i=379" }, // product serial number
+      { "Id": "ns=2;i=385" }, // num manufactured products
+      { "Id": "ns=2;i=391" }, // num discarded products
+      { "Id": "ns=2;i=398" }, // running time
+      { "Id": "ns=2;i=399" }, // faulty time
+      { "Id": "ns=2;i=400" }, // status
+      { "Id": "ns=2;i=406" }, // energy consumption
+      { "Id": "ns=2;i=412" }, // ideal cycle time
+      { "Id": "ns=2;i=418" }, // actual cycle time
+      { "Id": "ns=2;i=434" } // pressure
+    ]
+  },
+  {
+    "EndpointUrl": "opc.tcp://packaging.beijing3.corp.contoso/ua/beijing3",
+    "UseSecurity": true,
+    "OpcNodes": [
+      { "Id": "ns=2;i=379" }, // product serial number
+      { "Id": "ns=2;i=385" }, // num manufactured products
+      { "Id": "ns=2;i=391" }, // num discarded products
+      { "Id": "ns=2;i=398" }, // running time
+      { "Id": "ns=2;i=399" }, // faulty time
+      { "Id": "ns=2;i=400" }, // status
+      { "Id": "ns=2;i=406" }, // energy consumption
+      { "Id": "ns=2;i=412" }, // ideal cycle time
+      { "Id": "ns=2;i=418" }, // actual cycle time
+      { "Id": "ns=2;i=434" } // pressure
     ]
   }
 ]

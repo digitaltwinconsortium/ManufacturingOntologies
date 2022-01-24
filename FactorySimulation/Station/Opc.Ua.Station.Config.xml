@@ -4,9 +4,9 @@
   xmlns="http://opcfoundation.org/UA/SDK/Configuration.xsd"
   schemaLocation="./Schema/ApplicationConfiguration.xsd"
 >
-  <ApplicationName>[Station]Station</ApplicationName>
-  <ApplicationUri>urn:localhost:[Station]Station</ApplicationUri>
-  <ProductUri>http://contoso.com/UA/[Station]Station</ProductUri>
+  <ApplicationName>Station</ApplicationName>
+  <ApplicationUri>urn:localhost:Station</ApplicationUri>
+  <ProductUri>http://contoso.com/UA/Station</ProductUri>
   <ApplicationType>Server_0</ApplicationType>
   
 

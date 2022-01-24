@@ -1,15 +1,51 @@
 // Munich
 [
   {
-    "EndpointUrl": "opc.tcp://192.168.178.99:61210/UA/SampleClient",
+    "EndpointUrl": "opc.tcp://assembly.munich.corp.contoso/ua/munich",
     "UseSecurity": true,
     "OpcNodes": [
-      {
-        "Id": "ns=4;i=1274"
-      },
-      {
-        "Id": "ns=4;i=1278"
-      }
+      { "Id": "ns=2;i=379" }, // product serial number
+      { "Id": "ns=2;i=385" }, // num manufactured products
+      { "Id": "ns=2;i=391" }, // num discarded products
+      { "Id": "ns=2;i=398" }, // running time
+      { "Id": "ns=2;i=399" }, // faulty time
+      { "Id": "ns=2;i=400" }, // status
+      { "Id": "ns=2;i=406" }, // energy consumption
+      { "Id": "ns=2;i=412" }, // ideal cycle time
+      { "Id": "ns=2;i=418" }, // actual cycle time
+      { "Id": "ns=2;i=434" } // pressure
+    ]
+  },
+  {
+    "EndpointUrl": "opc.tcp://test.munich.corp.contoso/ua/munich",
+    "UseSecurity": true,
+    "OpcNodes": [
+      { "Id": "ns=2;i=379" }, // product serial number
+      { "Id": "ns=2;i=385" }, // num manufactured products
+      { "Id": "ns=2;i=391" }, // num discarded products
+      { "Id": "ns=2;i=398" }, // running time
+      { "Id": "ns=2;i=399" }, // faulty time
+      { "Id": "ns=2;i=400" }, // status
+      { "Id": "ns=2;i=406" }, // energy consumption
+      { "Id": "ns=2;i=412" }, // ideal cycle time
+      { "Id": "ns=2;i=418" }, // actual cycle time
+      { "Id": "ns=2;i=434" } // pressure
+    ]
+  },
+  {
+    "EndpointUrl": "opc.tcp://packaging.munich.corp.contoso/ua/munich",
+    "UseSecurity": true,
+    "OpcNodes": [
+      { "Id": "ns=2;i=379" }, // product serial number
+      { "Id": "ns=2;i=385" }, // num manufactured products
+      { "Id": "ns=2;i=391" }, // num discarded products
+      { "Id": "ns=2;i=398" }, // running time
+      { "Id": "ns=2;i=399" }, // faulty time
+      { "Id": "ns=2;i=400" }, // status
+      { "Id": "ns=2;i=406" }, // energy consumption
+      { "Id": "ns=2;i=412" }, // ideal cycle time
+      { "Id": "ns=2;i=418" }, // actual cycle time
+      { "Id": "ns=2;i=434" } // pressure
     ]
   }
 ]

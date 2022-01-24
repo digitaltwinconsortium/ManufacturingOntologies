@@ -6,6 +6,7 @@ namespace Mes.Simulation
     using Opc.Ua.Configuration;
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Runtime.Serialization;
     using System.Threading;
     using System.Threading.Tasks;
@@ -63,23 +64,33 @@ namespace Mes.Simulation
 
         static Timer m_timer = null;
 
-        public static void Main()
+        public static void Main(string[] args)
         {
             try
             {
+                if (args.Length != 1)
+                {
+                    throw new ArgumentException("You must specify a production line name as command line argument!");
+                }
+
                 ApplicationInstance.MessageDlg = new ApplicationMessageDlg();
                 ApplicationInstance application = new ApplicationInstance();
                 application.ApplicationName = "Manufacturing Execution System";
                 application.ApplicationType = ApplicationType.Client;
                 application.ConfigSectionName = "Opc.Ua.MES";
 
-                // load the application configuration.
+                // load the application configuration
                 ApplicationConfiguration appConfiguration = application.LoadApplicationConfiguration(false).Result;
 
-                // check the application certificate.
+                // check the application certificate
                 application.CheckApplicationInstanceCertificate(false, 0).Wait();
 
-                // get list of cached endpoints.
+                // replace the production line name in the list of endpoints to connect to.
+                string endpointsFilePath = Path.Combine(Directory.GetCurrentDirectory(), application.ConfigSectionName + ".Endpoints.xml");
+                string endpointsFileContent = File.ReadAllText(endpointsFilePath).Replace("munich", args[0]);
+                File.WriteAllText(endpointsFilePath, endpointsFileContent);
+
+                // load list of endpoints to connect to
                 ConfiguredEndpointCollection endpoints = appConfiguration.LoadCachedEndpoints(true);
                 endpoints.DiscoveryUrls = appConfiguration.ClientConfiguration.WellKnownDiscoveryUrls;
 
@@ -93,7 +104,7 @@ namespace Mes.Simulation
                     throw new ArgumentException("Can not load station definition from configuration file!");
                 }
 
-                // connect to all servers.
+                // connect to all servers
                 m_sessionAssembly = new SessionHandler();
                 m_sessionTest = new SessionHandler();
                 m_sessionPackaging = new SessionHandler();

@@ -2,44 +2,52 @@
 @Echo off
 
 Echo Disconnecting from networks...
-docker network disconnect -f munich.corp.contoso scada2194.munich.corp.contoso 
-docker network disconnect -f munich.corp.contoso scada1634.munich.corp.contoso 
-docker network disconnect -f munich.corp.contoso scada8344.munich.corp.contoso 
-docker network disconnect -f munich.corp.contoso mes0254.munich.corp.contoso 
-docker network disconnect -f capetown.corp.contoso scadacp008.capetown.corp.contoso 
-docker network disconnect -f capetown.corp.contoso cptw1634.capetown.corp.contoso 
-docker network disconnect -f capetown.corp.contoso scada1144.capetown.corp.contoso 
-docker network disconnect -f capetown.corp.contoso mes3221.capetown.corp.contoso 
-docker network disconnect -f mumbai.corp.contoso scadacp008.mumbai.corp.contoso 
-docker network disconnect -f mumbai.corp.contoso cptw1634.mumbai.corp.contoso 
-docker network disconnect -f mumbai.corp.contoso scada1144.mumbai.corp.contoso 
-docker network disconnect -f mumbai.corp.contoso mes3221.mumbai.corp.contoso 
-docker network disconnect -f seattle.corp.contoso sea103.seattle.corp.contoso 
-docker network disconnect -f seattle.corp.contoso sea102.seattle.corp.contoso 
-docker network disconnect -f seattle.corp.contoso sea101.seattle.corp.contoso 
-docker network disconnect -f seattle.corp.contoso sea001.seattle.corp.contoso 
-docker network disconnect -f beijing.corp.contoso beijing103.beijing.corp.contoso 
-docker network disconnect -f beijing.corp.contoso beijing102.beijing.corp.contoso 
-docker network disconnect -f beijing.corp.contoso beijing101.beijing.corp.contoso 
-docker network disconnect -f beijing.corp.contoso beijing001.beijing.corp.contoso 
-docker network disconnect -f beijing.corp.contoso beijing201.beijing.corp.contoso 
-docker network disconnect -f beijing.corp.contoso beijing202.beijing.corp.contoso 
-docker network disconnect -f beijing.corp.contoso beijing203.beijing.corp.contoso 
-docker network disconnect -f beijing.corp.contoso beijing002.beijing.corp.contoso 
-docker network disconnect -f beijing.corp.contoso beijing004.beijing.corp.contoso 
-docker network disconnect -f beijing.corp.contoso beijing005.beijing.corp.contoso 
-docker network disconnect -f beijing.corp.contoso beijing006.beijing.corp.contoso 
-docker network disconnect -f beijing.corp.contoso beijing003.beijing.corp.contoso 
-docker network disconnect -f rio.corp.contoso rio103.rio.corp.contoso 
-docker network disconnect -f rio.corp.contoso rio102.rio.corp.contoso 
-docker network disconnect -f rio.corp.contoso rio101.rio.corp.contoso 
-docker network disconnect -f rio.corp.contoso rio001.rio.corp.contoso 
-docker network disconnect -f munich.corp.contoso publisher.munich.corp.contoso 
-docker network disconnect -f capetown.corp.contoso publisher.capetown.corp.contoso 
-docker network disconnect -f mumbai.corp.contoso publisher.mumbai.corp.contoso 
-docker network disconnect -f seattle.corp.contoso publisher.seattle.corp.contoso 
-docker network disconnect -f beijing.corp.contoso publisher.beijing.corp.contoso 
-docker network disconnect -f rio.corp.contoso publisher.rio.corp.contoso 
+docker network disconnect -f munich.corp.contoso assembly.munich.corp.contoso
+docker network disconnect -f munich.corp.contoso test.munich.corp.contoso
+docker network disconnect -f munich.corp.contoso packaging.munich.corp.contoso
+docker network disconnect -f munich.corp.contoso MES.munich.corp.contoso
+
+docker network disconnect -f capetown.corp.contoso assembly.capetown.corp.contoso
+docker network disconnect -f capetown.corp.contoso test.capetown.corp.contoso
+docker network disconnect -f capetown.corp.contoso packaging.capetown.corp.contoso
+docker network disconnect -f capetown.corp.contoso MES.capetown.corp.contoso
+
+docker network disconnect -f mumbai.corp.contoso assembly.mumbai.corp.contoso
+docker network disconnect -f mumbai.corp.contoso test.mumbai.corp.contoso
+docker network disconnect -f mumbai.corp.contoso packaging.mumbai.corp.contoso
+docker network disconnect -f mumbai.corp.contoso MES.mumbai.corp.contoso
+
+docker network disconnect -f seattle.corp.contoso assembly.seattle.corp.contoso
+docker network disconnect -f seattle.corp.contoso test.seattle.corp.contoso
+docker network disconnect -f seattle.corp.contoso packaging.seattle.corp.contoso
+docker network disconnect -f seattle.corp.contoso MES.seattle.corp.contoso
+
+docker network disconnect -f beijing.corp.contoso assembly.beijing1.corp.contoso
+docker network disconnect -f beijing.corp.contoso test.beijing1.corp.contoso
+docker network disconnect -f beijing.corp.contoso packaging.beijing1.corp.contoso
+docker network disconnect -f beijing.corp.contoso MES.beijing1.corp.contoso
+
+docker network disconnect -f beijing.corp.contoso assembly.beijing2.corp.contoso
+docker network disconnect -f beijing.corp.contoso test.beijing2.corp.contoso
+docker network disconnect -f beijing.corp.contoso packaging.beijing2.corp.contoso
+docker network disconnect -f beijing.corp.contoso MES.beijing2.corp.contoso
+
+docker network disconnect -f beijing.corp.contoso assembly.beijing3.corp.contoso
+docker network disconnect -f beijing.corp.contoso test.beijing3.corp.contoso
+docker network disconnect -f beijing.corp.contoso packaging.beijing3.corp.contoso
+docker network disconnect -f beijing.corp.contoso MES.beijing3.corp.contoso
+
+docker network disconnect -f rio.corp.contoso assembly.rio.corp.contoso
+docker network disconnect -f rio.corp.contoso test.rio.corp.contoso
+docker network disconnect -f rio.corp.contoso packaging.rio.corp.contoso
+docker network disconnect -f rio.corp.contoso MES.rio.corp.contoso
+
+docker network disconnect -f munich.corp.contoso publisher.munich.corp.contoso
+docker network disconnect -f capetown.corp.contoso publisher.capetown.corp.contoso
+docker network disconnect -f mumbai.corp.contoso publisher.mumbai.corp.contoso
+docker network disconnect -f seattle.corp.contoso publisher.seattle.corp.contoso
+docker network disconnect -f beijing.corp.contoso publisher.beijing.corp.contoso
+docker network disconnect -f rio.corp.contoso publisher.rio.corp.contoso
 
 Echo Stopping containers...
 FOR /f "tokens=*" %%i IN ('docker ps -a -q') DO docker stop %%i

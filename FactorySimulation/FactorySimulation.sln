@@ -1,0 +1,48 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Station", "Station\Station.csproj", "{2E1BA50D-E998-4C99-90F8-BEE207FD7CEF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MES", "MES\MES.csproj", "{68787539-6C61-4096-8C24-0BD7710F9C7E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{76B67AA2-0F21-470C-BB63-2F0FEFAF7B95}"
+	ProjectSection(SolutionItems) = preProject
+		BuildAndRunSimulation.cmd = BuildAndRunSimulation.cmd
+		Dockerfile = Dockerfile
+		StopSimulation.cmd = StopSimulation.cmd
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{B5CF718D-5A9E-4744-917F-BEE6B25E7E73}"
+	ProjectSection(SolutionItems) = preProject
+		Config\publisher.rio.corp.contoso\publishednodes.json = Config\publisher.rio.corp.contoso\publishednodes.json
+		Config\publisher.capetown.corp.contoso\publishednodes.json = Config\publisher.capetown.corp.contoso\publishednodes.json
+		Config\publisher.mumbai.corp.contoso\publishednodes.json = Config\publisher.mumbai.corp.contoso\publishednodes.json
+		Config\publisher.munich.corp.contoso\publishednodes.json = Config\publisher.munich.corp.contoso\publishednodes.json
+		Config\publisher.seattle.corp.contoso\publishednodes.json = Config\publisher.seattle.corp.contoso\publishednodes.json
+		Config\publisher.beijing.corp.contoso\publishednodes.json = Config\publisher.beijing.corp.contoso\publishednodes.json
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2E1BA50D-E998-4C99-90F8-BEE207FD7CEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E1BA50D-E998-4C99-90F8-BEE207FD7CEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E1BA50D-E998-4C99-90F8-BEE207FD7CEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E1BA50D-E998-4C99-90F8-BEE207FD7CEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68787539-6C61-4096-8C24-0BD7710F9C7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68787539-6C61-4096-8C24-0BD7710F9C7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68787539-6C61-4096-8C24-0BD7710F9C7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68787539-6C61-4096-8C24-0BD7710F9C7E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {20C453B8-C514-460F-AECD-C786582ABC39}
+	EndGlobalSection
+EndGlobal

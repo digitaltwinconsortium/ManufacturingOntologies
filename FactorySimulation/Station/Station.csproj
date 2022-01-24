@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <DebugType>portable</DebugType>
+    <AssemblyName>Station</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <PackageId>Station</PackageId>
+    <StartupObject>Station.Simulation.Program</StartupObject>
+    <RootNamespace>Station.Simulation</RootNamespace>
+    <BaseOutputPath>bin\</BaseOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Opc.Ua.Station.Config.xml" />
+    <None Remove="Station.NodeSet2.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Opc.Ua.Station.Config.xml">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Station.NodeSet2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.4.367.75" />
+  </ItemGroup>
+
+</Project>

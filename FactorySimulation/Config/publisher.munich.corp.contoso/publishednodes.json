@@ -1,0 +1,15 @@
+// Munich
+[
+  {
+    "EndpointUrl": "opc.tcp://192.168.178.99:61210/UA/SampleClient",
+    "UseSecurity": true,
+    "OpcNodes": [
+      {
+        "Id": "ns=4;i=1274"
+      },
+      {
+        "Id": "ns=4;i=1278"
+      }
+    ]
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Station": {
+      "commandName": "Project",
+      "commandLineArgs": "scada2194 opc.tcp://scada2194.munich.corp.contoso:51210/ua/munich/productionline0/assemblystation 200 6 yes"
+    }
+  }
+}

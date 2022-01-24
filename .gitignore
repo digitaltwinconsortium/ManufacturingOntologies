@@ -3,3 +3,9 @@
 ################################################################################
 
 /.vs
+/FactorySimulation/BuildOutput
+/FactorySimulation/.vs/FactorySimulation
+/FactorySimulation/MES/bin/Release/netcoreapp3.1
+/FactorySimulation/MES/obj
+/FactorySimulation/Station/bin/Release/netcoreapp3.1
+/FactorySimulation/Station/obj

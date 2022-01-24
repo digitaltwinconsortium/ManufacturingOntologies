@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<opc:ModelDesign
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:opc="http://opcfoundation.org/UA/ModelDesign.xsd"
+  xmlns:ua="http://opcfoundation.org/UA/"
+  xmlns:uax="http://opcfoundation.org/UA/2008/02/Types.xsd"
+	xmlns="http://opcfoundation.org/UA/Station/"
+  TargetNamespace="http://opcfoundation.org/UA/Station/"
+>
+
+  <!-- 
+  This element defines the mappings between the URIs used to identify namespaces and the symbols used in code.
+  User defined design files can include other user defined design files.
+  The location of included design files is specified with the FilePath attribute (absolute or relative path without the .xml suffix).
+  -->
+  <opc:Namespaces>
+    <opc:Namespace Name="OpcUa" Prefix="Opc.Ua" InternalPrefix="Opc.Ua.Server" XmlNamespace="http://opcfoundation.org/UA/2008/02/Types.xsd">http://opcfoundation.org/UA/</opc:Namespace>
+    <opc:Namespace Name="Station" Prefix="Station">http://opcfoundation.org/UA/Station/</opc:Namespace>
+  </opc:Namespaces>
+
+  <!--StationProductType--> 
+  <opc:ObjectType SymbolicName="StationProductType" BaseType="ua:BaseObjectType">
+    <opc:Description>Product parameter</opc:Description>
+    <opc:Children>
+      <opc:Variable SymbolicName="ProductSerialNumber" DataType="ua:UInt64" ValueRank="Scalar" AccessLevel="Read" />
+      <opc:Variable SymbolicName="NumberOfManufacturedProducts" DataType="ua:UInt64" ValueRank="Scalar" AccessLevel="Read" />
+      <opc:Variable SymbolicName="NumberOfDiscardedProducts" DataType="ua:UInt64" ValueRank="Scalar" AccessLevel="Read" />
+    </opc:Children>
+  </opc:ObjectType>
+
+  <!--TelemetryType--> 
+  <opc:ObjectType SymbolicName="TelemetryType" BaseType="ua:BaseObjectType">
+    <opc:Description>Base telemetry data</opc:Description>
+    <opc:Children>
+      <opc:Variable SymbolicName="OverallRunningTime" DataType="ua:UInt64" ValueRank="Scalar" AccessLevel="Read" />
+      <opc:Variable SymbolicName="FaultyTime" DataType="ua:UInt64" ValueRank="Scalar" AccessLevel="Read" />
+      <opc:Variable SymbolicName="Status" DataType="ua:Integer" ValueRank="Scalar"  AccessLevel="Read" />
+      <opc:Variable SymbolicName="EnergyConsumption" DataType="ua:Double" ValueRank="Scalar" AccessLevel="Read" />
+      <opc:Variable SymbolicName="Pressure" DataType="ua:Double" ValueRank="Scalar" AccessLevel="Read" />
+      <opc:Variable SymbolicName="IdealCycleTime" DataType="ua:UInt64" ValueRank="Scalar" AccessLevel="ReadWrite" />
+      <opc:Variable SymbolicName="ActualCycleTime" DataType="ua:UInt64" ValueRank="Scalar" AccessLevel="Read" />
+    </opc:Children>
+  </opc:ObjectType>
+
+  <!--ExecuteMethodType-->
+  <opc:Method SymbolicName="ExecuteMethodType" BaseType="ua:BaseObjectType">
+    <opc:InputArguments>
+      <opc:Argument Name="SerialNumber" DataType="ua:UInt64" ValueRank="Scalar" AccessLevel="ReadWrite">
+        <opc:Description>The serial number of the part to be manufactured</opc:Description>
+      </opc:Argument>
+    </opc:InputArguments>
+  </opc:Method>
+
+  <!--StationCommandType--> 
+  <opc:ObjectType SymbolicName="StationCommandsType" BaseType="ua:BaseObjectType">
+    <opc:Description>Station Commands</opc:Description>
+    <opc:Children>
+      <opc:Method SymbolicName="Execute" TypeDefinition="ExecuteMethodType" />
+      <opc:Method SymbolicName="Reset" />
+      <opc:Method SymbolicName="OpenPressureReleaseValve" />
+    </opc:Children>
+  </opc:ObjectType>
+
+  <opc:ObjectType SymbolicName="StationType" BaseType="ua:BaseObjectType" SupportsEvents="true">
+    <opc:Description>Station</opc:Description>
+    <opc:Children>
+      <opc:Object SymbolicName="StationProduct" TypeDefinition="StationProductType" SupportsEvents="true"> </opc:Object>
+      <opc:Object SymbolicName="StationTelemetry" TypeDefinition="TelemetryType" SupportsEvents="true"> </opc:Object>
+      <opc:Object SymbolicName="StationCommands" TypeDefinition="StationCommandsType" SupportsEvents="true"> </opc:Object>
+   </opc:Children>
+  </opc:ObjectType>
+
+  <!-- Declare an instance of a Station. -->
+  <opc:Object SymbolicName="StationInstance" TypeDefinition="StationType" SupportsEvents="true">
+    <opc:BrowseName>StationInstance</opc:BrowseName>
+     <!--Link the instance back to the ObjectsFolder--> 
+    <opc:References>
+      <opc:Reference IsInverse="true">
+        <opc:ReferenceType>ua:Organizes</opc:ReferenceType>
+        <opc:TargetId>ua:ObjectsFolder</opc:TargetId>
+      </opc:Reference>
+    </opc:References>
+  </opc:Object>
+  
+</opc:ModelDesign>

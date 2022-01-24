@@ -33,7 +33,7 @@ namespace Station.Simulation
         private const ulong c_pressureStableTime = 30 * 1000;  // [ms]
         private const ulong c_pressureDefault = 2500;          // [mbar]
         private const ulong c_pressureHigh = 6000;             // [mbar]
-        private DateTime m_pressureStableStartTime = DateTime.Now;
+        private DateTime m_pressureStableStartTime = DateTime.UtcNow;
         private double m_pressure = c_pressureDefault;         // [mbar]
 
         private StationStatus m_status = StationStatus.Ready;
@@ -228,7 +228,7 @@ namespace Station.Simulation
 
             m_productSerialNumber = (ulong)inputArguments[0];
 
-            m_cycleStartTime = DateTime.Now;
+            m_cycleStartTime = DateTime.UtcNow;
 
             m_status = StationStatus.WorkInProgress;
 
@@ -277,7 +277,7 @@ namespace Station.Simulation
         private ServiceResult OpenPressureReleaseValve(ISystemContext context, MethodState method, IList<object> inputArguments, IList<object> outputArguments)
         {
             m_pressure = c_pressureDefault;
-            m_pressureStableStartTime = DateTime.Now;
+            m_pressureStableStartTime = DateTime.UtcNow;
 
             UpdateNodeValues();
 
@@ -291,6 +291,7 @@ namespace Station.Simulation
             if (variableState != null)
             {
                 variableState.Value = m_numberOfManufacturedProducts;
+                variableState.Timestamp = DateTime.UtcNow;
                 variableState.ClearChangeMasks(SystemContext, false);
             }
 
@@ -299,6 +300,7 @@ namespace Station.Simulation
             if (variableState != null)
             {
                 variableState.Value = m_numberOfDiscardedProducts;
+                variableState.Timestamp = DateTime.UtcNow;
                 variableState.ClearChangeMasks(SystemContext, false);
             }
 
@@ -307,6 +309,7 @@ namespace Station.Simulation
             if (variableState != null)
             {
                 variableState.Value = m_productSerialNumber;
+                variableState.Timestamp = DateTime.UtcNow;
                 variableState.ClearChangeMasks(SystemContext, false);
             }
 
@@ -315,6 +318,7 @@ namespace Station.Simulation
             if (variableState != null)
             {
                 variableState.Value = m_actualCycleTime;
+                variableState.Timestamp = DateTime.UtcNow;
                 variableState.ClearChangeMasks(SystemContext, false);
             }
 
@@ -323,6 +327,7 @@ namespace Station.Simulation
             if (variableState != null)
             {
                 variableState.Value = m_energyConsumption;
+                variableState.Timestamp = DateTime.UtcNow;
                 variableState.ClearChangeMasks(SystemContext, false);
             }
 
@@ -331,6 +336,7 @@ namespace Station.Simulation
             if (variableState != null)
             {
                 variableState.Value = m_faultyTime;
+                variableState.Timestamp = DateTime.UtcNow;
                 variableState.ClearChangeMasks(SystemContext, false);
             }
 
@@ -339,6 +345,7 @@ namespace Station.Simulation
             if (variableState != null)
             {
                 variableState.Value = m_idealCycleTime;
+                variableState.Timestamp = DateTime.UtcNow;
                 variableState.ClearChangeMasks(SystemContext, false);
             }
 
@@ -347,6 +354,7 @@ namespace Station.Simulation
             if (variableState != null)
             {
                 variableState.Value = m_overallRunningTime;
+                variableState.Timestamp = DateTime.UtcNow;
                 variableState.ClearChangeMasks(SystemContext, false);
             }
 
@@ -355,6 +363,7 @@ namespace Station.Simulation
             if (variableState != null)
             {
                 variableState.Value = m_pressure;
+                variableState.Timestamp = DateTime.UtcNow;
                 variableState.ClearChangeMasks(SystemContext, false);
             }
 
@@ -363,7 +372,7 @@ namespace Station.Simulation
             if (variableState != null)
             {
                 variableState.Value = m_status;
-                variableState.Timestamp = DateTime.Now;
+                variableState.Timestamp = DateTime.UtcNow;
                 variableState.ClearChangeMasks(SystemContext, false);
             }
                         
@@ -398,7 +407,7 @@ namespace Station.Simulation
                 m_numberOfManufacturedProducts++;
             }
 
-            m_actualCycleTime = (ulong)(DateTime.Now - m_cycleStartTime).TotalMilliseconds;
+            m_actualCycleTime = (ulong)(DateTime.UtcNow - m_cycleStartTime).TotalMilliseconds;
 
             double idealCycleTime = m_idealCycleTime;
 
@@ -412,7 +421,7 @@ namespace Station.Simulation
 
             // For stations configured to generate alerts, calculate pressure
             // Pressure will be stable for c_pressureStableTime and then will increase to c_pressureHigh and stay there until OpenPressureReleaseValve() is called
-            if (Program.GenerateAlerts && (((DateTime.Now - m_pressureStableStartTime).TotalMilliseconds) > c_pressureStableTime))
+            if (Program.GenerateAlerts && (((DateTime.UtcNow - m_pressureStableStartTime).TotalMilliseconds) > c_pressureStableTime))
             {
                 // slowly increase pressure until c_pressureHigh is reached
                 m_pressure += NormalDistribution(m_random, (cycleTimeModifier - 1.0) * 10.0, 10.0);

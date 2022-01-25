@@ -54,7 +54,7 @@ This repository contains a production line simulation made up of several Station
 
 The digital twin graph for the simulated production line is depicted below (taken from the [Azure Digital Twins Explorer](https://explorer.digitaltwins.azure.net/) tool):
 
-![twingraphsim](Docs/FactorySimulationTwin.png)
+<img src="Docs/FactorySimulationTwin.png" alt="relationships" width="500" />
 
 
 

@@ -10,11 +10,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{76B67AA2-0F21-470C-BB63-2F0FEFAF7B95}"
 	ProjectSection(SolutionItems) = preProject
 		..\.gitignore = ..\.gitignore
-		BuildAndRunSimulation.cmd = BuildAndRunSimulation.cmd
-		Dockerfile = Dockerfile
 		..\LICENSE = ..\LICENSE
 		..\README.md = ..\README.md
-		StopSimulation.cmd = StopSimulation.cmd
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{B5CF718D-5A9E-4744-917F-BEE6B25E7E73}"
@@ -25,6 +22,31 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{B5CF71
 		Config\publisher.munich.corp.contoso\publishednodes.json = Config\publisher.munich.corp.contoso\publishednodes.json
 		Config\publisher.seattle.corp.contoso\publishednodes.json = Config\publisher.seattle.corp.contoso\publishednodes.json
 		Config\publisher.beijing.corp.contoso\publishednodes.json = Config\publisher.beijing.corp.contoso\publishednodes.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{5D5C241D-F3A8-4F06-9E9A-36E031212384}"
+	ProjectSection(SolutionItems) = preProject
+		..\Docs\FactorySimulationTwin.png = ..\Docs\FactorySimulationTwin.png
+		..\Docs\line.png = ..\Docs\line.png
+		..\Docs\modelrelationships.png = ..\Docs\modelrelationships.png
+		..\Docs\twingraph.png = ..\Docs\twingraph.png
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{1A63931E-229D-4667-90D4-0E900E0C327A}"
+	ProjectSection(SolutionItems) = preProject
+		BuildAndRunSimulation.cmd = BuildAndRunSimulation.cmd
+		Dockerfile = Dockerfile
+		StopSimulation.cmd = StopSimulation.cmd
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TwinModels", "TwinModels", "{3FBCD654-B7B7-4EDA-9FE5-331D6933CCBD}"
+	ProjectSection(SolutionItems) = preProject
+		..\Models\MES.json = ..\Models\MES.json
+		..\Models\Station.json = ..\Models\Station.json
+		..\Models\StationCommands.json = ..\Models\StationCommands.json
+		..\Models\StationProduct.json = ..\Models\StationProduct.json
+		..\Models\StationTelemetry.json = ..\Models\StationTelemetry.json
+		..\TwinGraph\twingraph.json = ..\TwinGraph\twingraph.json
 	EndProjectSection
 EndProject
 Global
@@ -44,6 +66,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5D5C241D-F3A8-4F06-9E9A-36E031212384} = {76B67AA2-0F21-470C-BB63-2F0FEFAF7B95}
+		{1A63931E-229D-4667-90D4-0E900E0C327A} = {76B67AA2-0F21-470C-BB63-2F0FEFAF7B95}
+		{3FBCD654-B7B7-4EDA-9FE5-331D6933CCBD} = {76B67AA2-0F21-470C-BB63-2F0FEFAF7B95}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {20C453B8-C514-460F-AECD-C786582ABC39}

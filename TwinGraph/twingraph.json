@@ -6,91 +6,91 @@
     "digitalTwins": [
       {
         "$dtId": "MESInstance",
-        "$etag": "W/\"1BF8C3C3-418E-4AE1-9B9A-8FEDDA798A03\"",
+        "$etag": "1BF8C3C3-418E-4AE1-9B9A-8FEDDA798A03",
         "$metadata": {
           "$model": "dtmi:MES;1"
         }
       },
       {
         "$dtId": "MetalPressing",
-        "$etag": "W/\"A4359BF7-E27B-4128-A427-2AACAA9C27F7\"",
+        "$etag": "A4359BF7-E27B-4128-A427-2AACAA9C27F7",
         "$metadata": {
           "$model": "dtmi:Station;1"
         }
       },
       {
         "$dtId": "ChassisWelding",
-        "$etag": "W/\"8BCBC9D7-CBC9-4D0F-B4A4-2792B41EB851\"",
+        "$etag": "8BCBC9D7-CBC9-4D0F-B4A4-2792B41EB851",
         "$metadata": {
           "$model": "dtmi:Station;1"
         }
       },
       {
         "$dtId": "ChassisCleaningAndPainting",
-        "$etag": "W/\"B4F403CE-B1F7-4964-A43F-05453C707CEC\"",
+        "$etag": "B4F403CE-B1F7-4964-A43F-05453C707CEC",
         "$metadata": {
           "$model": "dtmi:Station;1"
         }
       },
       {
         "$dtId": "GlassInstallation",
-        "$etag": "W/\"EF04F82B-A1D7-4AE6-9053-CEDC58F98FB1\"",
+        "$etag": "EF04F82B-A1D7-4AE6-9053-CEDC58F98FB1",
         "$metadata": {
           "$model": "dtmi:Station;1"
         }
       },
       {
         "$dtId": "ElectricalWiringAndInstallation",
-        "$etag": "W/\"7AEBC77E-347D-4DB8-8633-1A8CA2670CE1\"",
+        "$etag": "7AEBC77E-347D-4DB8-8633-1A8CA2670CE1",
         "$metadata": {
           "$model": "dtmi:Station;1"
         }
       },
       {
         "$dtId": "CarpetsAndSealsInstallation",
-        "$etag": "W/\"BBC99712-B8FD-40CA-9525-E2505D10E9F6\"",
+        "$etag": "BBC99712-B8FD-40CA-9525-E2505D10E9F6",
         "$metadata": {
           "$model": "dtmi:Station;1"
         }
       },
       {
         "$dtId": "AxlesAndEngineInstallation",
-        "$etag": "W/\"5F931D6F-6160-4B04-9CEE-AD5138EEAA76\"",
+        "$etag": "5F931D6F-6160-4B04-9CEE-AD5138EEAA76",
         "$metadata": {
           "$model": "dtmi:Station;1"
         }
       },
       {
         "$dtId": "DashboardAndHeaterInstallation",
-        "$etag": "W/\"1C5FDFDD-F0F3-4DE6-8EA6-4C5326B6F849\"",
+        "$etag": "1C5FDFDD-F0F3-4DE6-8EA6-4C5326B6F849",
         "$metadata": {
           "$model": "dtmi:Station;1"
         }
       },
       {
         "$dtId": "SeatsInstallation",
-        "$etag": "W/\"FB21AADD-23D6-48A0-8B61-D0BDCF4CE17F\"",
+        "$etag": "FB21AADD-23D6-48A0-8B61-D0BDCF4CE17F",
         "$metadata": {
           "$model": "dtmi:Station;1"
         }
       },
       {
         "$dtId": "DoorsAndBumperInstallation",
-        "$etag": "W/\"07FDC06A-EF96-461D-B6FB-8CF6C02F5B47\"",
+        "$etag": "07FDC06A-EF96-461D-B6FB-8CF6C02F5B47",
         "$metadata": {
           "$model": "dtmi:Station;1"
         }
       },
       {
         "$dtId": "WheelsInstallation",
-        "$etag": "W/\"E59FA0AF-2AFA-4C8B-A6D5-CD91680E9DDD\"",
+        "$etag": "E59FA0AF-2AFA-4C8B-A6D5-CD91680E9DDD",
         "$metadata": {
           "$model": "dtmi:Station;1"
         }
       },
       {
         "$dtId": "FinalQA",
-        "$etag": "W/\"562D4E3D-7669-41CF-83DF-10A2A7D5C1F1\"",
+        "$etag": "562D4E3D-7669-41CF-83DF-10A2A7D5C1F1",
         "$metadata": {
           "$model": "dtmi:Station;1"
         }
@@ -99,238 +99,238 @@
     "relationships": [
       {
         "$relationshipId": "Parent",
-        "$etag": "W/\"0E161AF4-3DB4-4FFF-B5EF-92786C3E3B81\"",
+        "$etag": "0E161AF4-3DB4-4FFF-B5EF-92786C3E3B81",
         "$sourceId": "MetalPressing",
         "$targetId": "MESInstance",
         "$relationshipName": "Parent"
       },
       {
         "$relationshipId": "Parent",
-        "$etag": "W/\"A6C652C9-36BB-42ED-8760-0542430D874D\"",
+        "$etag": "A6C652C9-36BB-42ED-8760-0542430D874D",
         "$sourceId": "ChassisWelding",
         "$targetId": "MESInstance",
         "$relationshipName": "Parent"
       },
       {
         "$relationshipId": "Parent",
-        "$etag": "W/\"DDBD3428-BA02-4803-96A3-28EF3BDE04CF\"",
+        "$etag": "DDBD3428-BA02-4803-96A3-28EF3BDE04CF",
         "$sourceId": "ChassisCleaningAndPainting",
         "$targetId": "MESInstance",
         "$relationshipName": "Parent"
       },
       {
         "$relationshipId": "Parent",
-        "$etag": "W/\"AAE2CE46-738D-4856-B1DA-5925D2985C97\"",
+        "$etag": "AAE2CE46-738D-4856-B1DA-5925D2985C97",
         "$sourceId": "GlassInstallation",
         "$targetId": "MESInstance",
         "$relationshipName": "Parent"
       },
       {
         "$relationshipId": "Parent",
-        "$etag": "W/\"7A54992B-996C-4F58-9090-9E87DFFB94F5\"",
+        "$etag": "7A54992B-996C-4F58-9090-9E87DFFB94F5",
         "$sourceId": "ElectricalWiringAndInstallation",
         "$targetId": "MESInstance",
         "$relationshipName": "Parent"
       },
       {
         "$relationshipId": "Parent",
-        "$etag": "W/\"FBD5961B-9608-49DE-B845-7F55A9D0C63D\"",
+        "$etag": "FBD5961B-9608-49DE-B845-7F55A9D0C63D",
         "$sourceId": "CarpetsAndSealsInstallation",
         "$targetId": "MESInstance",
         "$relationshipName": "Parent"
       },
       {
         "$relationshipId": "Parent",
-        "$etag": "W/\"373D2354-8C22-4B27-9C0F-79B4024BC173\"",
+        "$etag": "373D2354-8C22-4B27-9C0F-79B4024BC173",
         "$sourceId": "AxlesAndEngineInstallation",
         "$targetId": "MESInstance",
         "$relationshipName": "Parent"
       },
       {
         "$relationshipId": "Parent",
-        "$etag": "W/\"331173C9-D6A1-4A21-B5EB-14C8137D6036\"",
+        "$etag": "331173C9-D6A1-4A21-B5EB-14C8137D6036",
         "$sourceId": "DashboardAndHeaterInstallation",
         "$targetId": "MESInstance",
         "$relationshipName": "Parent"
       },
       {
         "$relationshipId": "Parent",
-        "$etag": "W/\"D2A74610-E80A-4D2F-931F-51363F2CEA42\"",
+        "$etag": "D2A74610-E80A-4D2F-931F-51363F2CEA42",
         "$sourceId": "SeatsInstallation",
         "$targetId": "MESInstance",
         "$relationshipName": "Parent"
       },
       {
         "$relationshipId": "Parent",
-        "$etag": "W/\"7310DF1F-7B2B-4910-BC9F-93AC05BD6475\"",
+        "$etag": "7310DF1F-7B2B-4910-BC9F-93AC05BD6475",
         "$sourceId": "DoorsAndBumperInstallation",
         "$targetId": "MESInstance",
         "$relationshipName": "Parent"
       },
       {
         "$relationshipId": "Parent",
-        "$etag": "W/\"BEF26D5D-5A0A-4231-90C1-C40121B25C25\"",
+        "$etag": "BEF26D5D-5A0A-4231-90C1-C40121B25C25",
         "$sourceId": "WheelsInstallation",
         "$targetId": "MESInstance",
         "$relationshipName": "Parent"
       },
       {
         "$relationshipId": "Parent",
-        "$etag": "W/\"19D31A26-0422-44D3-85E3-E7DBE0472EF3\"",
+        "$etag": "19D31A26-0422-44D3-85E3-E7DBE0472EF3",
         "$sourceId": "FinalQA",
         "$targetId": "MESInstance",
         "$relationshipName": "Parent"
       },
       {
         "$relationshipId": "Next",
-        "$etag": "W/\"D08D1EFA-0CD0-47C3-9E94-DA769DD7E955\"",
+        "$etag": "D08D1EFA-0CD0-47C3-9E94-DA769DD7E955",
         "$sourceId": "MetalPressing",
         "$targetId": "ChassisWelding",
         "$relationshipName": "Next"
       },
       {
         "$relationshipId": "Next",
-        "$etag": "W/\"685752BB-AC83-4534-8821-720983426062\"",
+        "$etag": "685752BB-AC83-4534-8821-720983426062",
         "$sourceId": "ChassisWelding",
         "$targetId": "ChassisCleaningAndPainting",
         "$relationshipName": "Next"
       },
       {
         "$relationshipId": "Next",
-        "$etag": "W/\"A2E2A222-3FEE-4321-AD1E-003413A89DB7\"",
+        "$etag": "A2E2A222-3FEE-4321-AD1E-003413A89DB7",
         "$sourceId": "ChassisCleaningAndPainting",
         "$targetId": "GlassInstallation",
         "$relationshipName": "Next"
       },
       {
         "$relationshipId": "Next",
-        "$etag": "W/\"CD5D3265-2E0A-4D1E-B636-9446E277D6DD\"",
+        "$etag": "CD5D3265-2E0A-4D1E-B636-9446E277D6DD",
         "$sourceId": "GlassInstallation",
         "$targetId": "ElectricalWiringAndInstallation",
         "$relationshipName": "Next"
       },
       {
         "$relationshipId": "Next",
-        "$etag": "W/\"DFEF18DC-07C7-4CE5-992C-BF9FE8150B30\"",
+        "$etag": "DFEF18DC-07C7-4CE5-992C-BF9FE8150B30",
         "$sourceId": "ElectricalWiringAndInstallation",
         "$targetId": "CarpetsAndSealsInstallation",
         "$relationshipName": "Next"
       },
       {
         "$relationshipId": "Next",
-        "$etag": "W/\"5EBF6A3E-D176-4FB9-BB47-DD6195181680\"",
+        "$etag": "5EBF6A3E-D176-4FB9-BB47-DD6195181680",
         "$sourceId": "CarpetsAndSealsInstallation",
         "$targetId": "AxlesAndEngineInstallation",
         "$relationshipName": "Next"
       },
       {
         "$relationshipId": "Next",
-        "$etag": "W/\"93CC4F0A-140F-4ADC-A3CF-D42CAB023D52\"",
+        "$etag": "93CC4F0A-140F-4ADC-A3CF-D42CAB023D52",
         "$sourceId": "AxlesAndEngineInstallation",
         "$targetId": "DashboardAndHeaterInstallation",
         "$relationshipName": "Next"
       },
       {
         "$relationshipId": "Next",
-        "$etag": "W/\"DBF69695-58DC-47E3-9DE6-7E2DDDA6704D\"",
+        "$etag": "DBF69695-58DC-47E3-9DE6-7E2DDDA6704D",
         "$sourceId": "DashboardAndHeaterInstallation",
         "$targetId": "SeatsInstallation",
         "$relationshipName": "Next"
       },
       {
         "$relationshipId": "Next",
-        "$etag": "W/\"06A88CE0-4023-457E-A043-CFB0D1771057\"",
+        "$etag": "06A88CE0-4023-457E-A043-CFB0D1771057",
         "$sourceId": "SeatsInstallation",
         "$targetId": "DoorsAndBumperInstallation",
         "$relationshipName": "Next"
       },
       {
         "$relationshipId": "Next",
-        "$etag": "W/\"65F0BD31-DDAC-4ECA-BDCD-760C6A3AB11B\"",
+        "$etag": "65F0BD31-DDAC-4ECA-BDCD-760C6A3AB11B",
         "$sourceId": "DoorsAndBumperInstallation",
         "$targetId": "WheelsInstallation",
         "$relationshipName": "Next"
       },
       {
         "$relationshipId": "Next",
-        "$etag": "W/\"57605DAF-4ECC-4932-B193-0644711BC58F\"",
+        "$etag": "57605DAF-4ECC-4932-B193-0644711BC58F",
         "$sourceId": "WheelsInstallation",
         "$targetId": "FinalQA",
         "$relationshipName": "Next"
       },
       {
         "$relationshipId": "Previous",
-        "$etag": "W/\"8C1451AF-AD8D-4F02-9654-B602578CB08D\"",
+        "$etag": "8C1451AF-AD8D-4F02-9654-B602578CB08D",
         "$sourceId": "ChassisWelding",
         "$targetId": "MetalPressing",
         "$relationshipName": "Previous"
       },
       {
         "$relationshipId": "Previous",
-        "$etag": "W/\"0FA080FF-A983-4C0A-850A-68DF5CC595D1\"",
+        "$etag": "0FA080FF-A983-4C0A-850A-68DF5CC595D1",
         "$sourceId": "ChassisCleaningAndPainting",
         "$targetId": "ChassisWelding",
         "$relationshipName": "Previous"
       },
       {
         "$relationshipId": "Previous",
-        "$etag": "W/\"994819A8-1944-43EC-8ABC-DB0F6DC7EDAA\"",
+        "$etag": "994819A8-1944-43EC-8ABC-DB0F6DC7EDAA",
         "$sourceId": "GlassInstallation",
         "$targetId": "ChassisCleaningAndPainting",
         "$relationshipName": "Previous"
       },
       {
         "$relationshipId": "Previous",
-        "$etag": "W/\"C6077791-8617-47B4-90D3-E9EA9CF79B85\"",
+        "$etag": "C6077791-8617-47B4-90D3-E9EA9CF79B85",
         "$sourceId": "ElectricalWiringAndInstallation",
         "$targetId": "GlassInstallation",
         "$relationshipName": "Previous"
       },
       {
         "$relationshipId": "Previous",
-        "$etag": "W/\"533FDBCA-4888-4BD1-8422-CC23689966F7\"",
+        "$etag": "533FDBCA-4888-4BD1-8422-CC23689966F7",
         "$sourceId": "CarpetsAndSealsInstallation",
         "$targetId": "ElectricalWiringAndInstallation",
         "$relationshipName": "Previous"
       },
       {
         "$relationshipId": "Previous",
-        "$etag": "W/\"55D33D49-EF50-4E48-87E1-01B95D56F02E\"",
+        "$etag": "55D33D49-EF50-4E48-87E1-01B95D56F02E",
         "$sourceId": "AxlesAndEngineInstallation",
         "$targetId": "CarpetsAndSealsInstallation",
         "$relationshipName": "Previous"
       },
       {
         "$relationshipId": "Previous",
-        "$etag": "W/\"47648D8A-DA37-4D26-93B5-CD4C486B3306\"",
+        "$etag": "47648D8A-DA37-4D26-93B5-CD4C486B3306",
         "$sourceId": "DashboardAndHeaterInstallation",
         "$targetId": "AxlesAndEngineInstallation",
         "$relationshipName": "Previous"
       },
       {
         "$relationshipId": "Previous",
-        "$etag": "W/\"9BE44111-9017-433F-882F-3D1E13A719F5\"",
+        "$etag": "9BE44111-9017-433F-882F-3D1E13A719F5",
         "$sourceId": "SeatsInstallation",
         "$targetId": "DashboardAndHeaterInstallation",
         "$relationshipName": "Previous"
       },
       {
         "$relationshipId": "Previous",
-        "$etag": "W/\"F23CF5BC-71F2-4E2D-8C35-48C19F0E0A30\"",
+        "$etag": "F23CF5BC-71F2-4E2D-8C35-48C19F0E0A30",
         "$sourceId": "DoorsAndBumperInstallation",
         "$targetId": "SeatsInstallation",
         "$relationshipName": "Previous"
       },
       {
         "$relationshipId": "Previous",
-        "$etag": "W/\"D676ADB7-DEF3-4907-88B3-7A463638E7E2\"",
+        "$etag": "D676ADB7-DEF3-4907-88B3-7A463638E7E2",
         "$sourceId": "WheelsInstallation",
         "$targetId": "DoorsAndBumperInstallation",
         "$relationshipName": "Previous"
       },
       {
         "$relationshipId": "Previous",
-        "$etag": "W/\"3E1969FB-E93B-4A72-875C-AC8AF6C10AB6\"",
+        "$etag": "3E1969FB-E93B-4A72-875C-AC8AF6C10AB6",
         "$sourceId": "FinalQA",
         "$targetId": "WheelsInstallation",
         "$relationshipName": "Previous"

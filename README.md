@@ -44,8 +44,6 @@ OEE is a common metric in production environments, see the reference calculation
 
 
 
-
-
 ## Production Line Simulation
 
 This repository also contains a production line simulation made up of several Stations, leveraging the machine information model described above, as well as a simple Manufacturing Execution System (MES). Both the Stations and the MES are containerized for easy deployment.

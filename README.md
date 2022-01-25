@@ -26,7 +26,7 @@ The relationships between the models used in this ontology are described via the
 
 ### Machine Information Model
 
-The underlying machine information model is based on OPC UA and can be used for Overall Equipment Effectiveness (OEE) calculation. It is derived from the Microsoft Azure IoT Connected Factory simulation defined [here](https://github.com/Azure/azure-iot-connected-factory/blob/main/Simulation/Factory/Station/StationModel.xml).
+The underlying machine information model is based on OPC UA and can be used for Overall Equipment Effectiveness (OEE) calculation. It is defined [here](https://github.com/digitaltwinconsortium/AutomotiveManufacturingDTDLOntology/blob/main/FactorySimulation/Station/Station.NodeSet2.xml) and is also available in the UA Cloud Library [here](https://uacloudlibrary.opcfoundation.org/).
 
 
 

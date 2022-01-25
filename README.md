@@ -52,7 +52,7 @@ This repository contains a production line simulation made up of several Station
 
 ### Installation Instructions
 
-To install the production line simulation, you need a PC or virtual machine. Then follow these steps:
+To install the production line simulation, you need a Windows PC or virtual machine with at least 8GB of memory. Then follow these steps:
 * Use an existing Azure subscription you have admin access to or get a free Azure subscription from [here](https://azure.microsoft.com/en-us/free).
 * Deploy an S1 Azure IoT Hub into your Azure subscription. Once deployed, create 6 devices and call them publisher.munich.corp.contoso, publisher.capetown.corp.contoso, publisher.mumbai.corp.contoso, publisher.seattle.corp.contoso, publisher.beijing.corp.contoso and publisher.rio.corp.contoso.
 * Download and install the latest .NET Core SDK (not just the Runtime!) from [here](https://dotnet.microsoft.com/en-us/download/dotnet).

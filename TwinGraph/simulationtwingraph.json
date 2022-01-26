@@ -1,0 +1,232 @@
+{
+  "digitalTwinsFileInfo": {
+    "fileVersion": "1.0.0"
+  },
+  "digitalTwinsGraph": {
+    "digitalTwins": [
+      {
+        "$dtId": "Assembly",
+        "$etag": "W/\"823325d8-6227-4123-aff2-1f34174fda43\"",
+        "$metadata": {
+          "$model": "dtmi:Station;1"
+        }
+      },
+      {
+        "$dtId": "Test",
+        "$etag": "W/\"aea1f3e0-0253-45ba-bf17-93b72edc2a47\"",
+        "$metadata": {
+          "$model": "dtmi:Station;1"
+        }
+      },
+      {
+        "$dtId": "Packaging",
+        "$etag": "W/\"0dd5cf86-da84-4c1f-a581-34353f1671e0\"",
+        "$metadata": {
+          "$model": "dtmi:Station;1"
+        }
+      },
+      {
+        "$dtId": "MESInstance",
+        "$etag": "W/\"bb8e70ef-6e13-4ada-8449-905ba609ad09\"",
+        "$metadata": {
+          "$model": "dtmi:MES;1"
+        }
+      }
+    ],
+    "relationships": [
+      {
+        "$relationshipId": "7e802b53-6eb1-42f6-8f4d-110529c855a2",
+        "$sourceId": "Assembly",
+        "$targetId": "Test",
+        "$relationshipName": "Next",
+        "$etag": "W/\"e1eb075b-5fb6-43fd-bc0f-2aec14bdcba7\""
+      },
+      {
+        "$relationshipId": "47d74609-9916-4ec3-b263-8f1d039b8519",
+        "$sourceId": "Assembly",
+        "$targetId": "MESInstance",
+        "$relationshipName": "Parent",
+        "$etag": "W/\"123722ae-3ae3-4d8f-b4e2-28d3c0764774\""
+      },
+      {
+        "$relationshipId": "cb907a69-698a-4fc5-bf3c-6f719b6419f1",
+        "$sourceId": "Test",
+        "$targetId": "Assembly",
+        "$relationshipName": "Previous",
+        "$etag": "W/\"26515bd3-6dda-4731-9580-80aaedb997d2\""
+      },
+      {
+        "$relationshipId": "07445aee-e81b-460c-af39-ccaf566c4ed8",
+        "$sourceId": "Test",
+        "$targetId": "MESInstance",
+        "$relationshipName": "Parent",
+        "$etag": "W/\"6e40866d-c35e-4846-95fc-261b401b9227\""
+      },
+      {
+        "$relationshipId": "829a857a-bf96-4bd1-8c05-aeac2547f9af",
+        "$sourceId": "Test",
+        "$targetId": "Packaging",
+        "$relationshipName": "Next",
+        "$etag": "W/\"f4f2a5b3-c42a-4ec4-a975-1f4ef55932b7\""
+      },
+      {
+        "$relationshipId": "2a81093f-694a-4201-bb3c-a5b2d986e9a4",
+        "$sourceId": "Packaging",
+        "$targetId": "Test",
+        "$relationshipName": "Previous",
+        "$etag": "W/\"c7dc42fa-1712-4cf8-92c4-de97599607e0\""
+      },
+      {
+        "$relationshipId": "177c979f-742a-427c-9638-0c283722f277",
+        "$sourceId": "Packaging",
+        "$targetId": "MESInstance",
+        "$relationshipName": "Parent",
+        "$etag": "W/\"7a8affef-363f-4c8b-8f05-99b74ebb0788\""
+      }
+    ]
+  },
+  "digitalTwinsModels": [
+    {
+      "@id": "dtmi:MES;1",
+      "@type": "Interface",
+      "contents": [
+        {
+          "@type": "Command",
+          "name": "Execute"
+        },
+        {
+          "@type": "Command",
+          "name": "Reset"
+        }
+      ],
+      "@context": [
+        "dtmi:dtdl:context;2"
+      ],
+      "displayName": "MES"
+    },
+    {
+      "@id": "dtmi:Station;1",
+      "@type": "Interface",
+      "contents": [
+        {
+          "@type": "Relationship",
+          "name": "Parent",
+          "target": "dtmi:MES;1"
+        },
+        {
+          "@type": "Relationship",
+          "name": "Previous",
+          "target": "dtmi:Station;1"
+        },
+        {
+          "@type": "Relationship",
+          "name": "Next",
+          "target": "dtmi:Station;1"
+        }
+      ],
+      "@context": [
+        "dtmi:dtdl:context;2"
+      ],
+      "comment": "dtmi:opcua:informationmodel:https://uacloudlibrary.opcfoundation.org/infomodel/download/1627266626;1",
+      "displayName": "Station"
+    },
+    {
+      "@id": "dtmi:StationCommands;1",
+      "@type": "Interface",
+      "contents": [
+        {
+          "@type": "Command",
+          "name": "Execute"
+        },
+        {
+          "@type": "Command",
+          "name": "Reset"
+        },
+        {
+          "@type": "Relationship",
+          "name": "Parent",
+          "target": "dtmi:Station;1"
+        }
+      ],
+      "@context": [
+        "dtmi:dtdl:context;2"
+      ],
+      "displayName": "StationCommands"
+    },
+    {
+      "@id": "dtmi:StationProduct;1",
+      "@type": "Interface",
+      "contents": [
+        {
+          "@type": "Telemetry",
+          "name": "ProductSerialNumber",
+          "schema": "long"
+        },
+        {
+          "@type": "Telemetry",
+          "name": "NumberOfManufacturedProducts",
+          "schema": "long"
+        },
+        {
+          "@type": "Telemetry",
+          "name": "NumberOfDiscardedProducts",
+          "schema": "long"
+        },
+        {
+          "@type": "Relationship",
+          "name": "Parent",
+          "target": "dtmi:Station;1"
+        }
+      ],
+      "@context": [
+        "dtmi:dtdl:context;2"
+      ],
+      "displayName": "StationProduct"
+    },
+    {
+      "@id": "dtmi:StationTelemetry;1",
+      "@type": "Interface",
+      "contents": [
+        {
+          "@type": "Telemetry",
+          "name": "OverallRunningTime",
+          "schema": "long"
+        },
+        {
+          "@type": "Telemetry",
+          "name": "FaultyTime",
+          "schema": "long"
+        },
+        {
+          "@type": "Telemetry",
+          "name": "Status",
+          "schema": "integer"
+        },
+        {
+          "@type": "Telemetry",
+          "name": "EnergyConsumption",
+          "schema": "double"
+        },
+        {
+          "@type": "Telemetry",
+          "name": "IdealCycleTime",
+          "schema": "long"
+        },
+        {
+          "@type": "Telemetry",
+          "name": "ActualCycleTime",
+          "schema": "long"
+        },
+        {
+          "@type": "Relationship",
+          "name": "Parent",
+          "target": "dtmi:Station;1"
+        }
+      ],
+      "@context": [
+        "dtmi:dtdl:context;2"
+      ],
+      "displayName": "StationTelemetry"
+    }
+  ]
+}

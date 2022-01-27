@@ -20,9 +20,9 @@ The relationships between the models used in this ontology are described via the
 
 The underlying machine information model is based on OPC UA and can be used for Overall Equipment Effectiveness (OEE) calculation. It is defined [here](https://github.com/digitaltwinconsortium/ManufacturingDTDLOntologies/blob/main/FactorySimulation/Station/Station.NodeSet2.xml) and is also available in the UA Cloud Library [here](https://uacloudlibrary.opcfoundation.org/).
 
-### Digital Twin Graph
+### Automotive Digital Twin Graph
 
-The resulting digital twin graph is depicted below (taken from the [Azure Digital Twins Explorer](https://explorer.digitaltwins.azure.net/) tool):
+The digital twin graph for an automotive production line is depicted below (taken from the [Azure Digital Twins Explorer](https://explorer.digitaltwins.azure.net/) tool):
 
 ![twingraph](Docs/twingraph.png)
 
@@ -30,7 +30,7 @@ The resulting digital twin graph is depicted below (taken from the [Azure Digita
 
 This repository also contains a production line simulation made up of several Stations, leveraging the machine information model described above, as well as a simple Manufacturing Execution System (MES). Both the Stations and the MES are containerized for easy deployment.
 
-### Digital Twin Graph
+### Simulation Digital Twin Graph
 
 The digital twin graph for the simulated production line is depicted below (taken from the [Azure Digital Twins Explorer](https://explorer.digitaltwins.azure.net/) tool):
 

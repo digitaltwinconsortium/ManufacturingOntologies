@@ -1,0 +1,12 @@
+.create-or-alter function  CalculateAvgEnergyConsumption(stationName:string,hoursInShift:int) {
+let shiftEndTime = now();
+let shiftStartTime = datetime_add('hour', -hoursInShift, shiftEndTime);
+let averageEnergyConsumption = toscalar(
+opcua_telemetry
+| where SourceTimestamp > shiftStartTime and SourceTimestamp < shiftEndTime
+| where DataSetWriterID has stationName
+| where ExpandedNodeID == "EnergyConsumption"
+| extend energy = todouble(Value)
+| summarize avg(energy));
+print averageEnergyConsumption
+}

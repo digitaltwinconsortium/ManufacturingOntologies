@@ -41,13 +41,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{1A63931E
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TwinModels", "TwinModels", "{3FBCD654-B7B7-4EDA-9FE5-331D6933CCBD}"
 	ProjectSection(SolutionItems) = preProject
+		..\TwinGraph\automotivetwingraph.json = ..\TwinGraph\automotivetwingraph.json
 		..\Models\MES.json = ..\Models\MES.json
 		..\TwinGraph\simulationtwingraph.json = ..\TwinGraph\simulationtwingraph.json
 		..\Models\Station.json = ..\Models\Station.json
 		..\Models\StationCommands.json = ..\Models\StationCommands.json
 		..\Models\StationProduct.json = ..\Models\StationProduct.json
 		..\Models\StationTelemetry.json = ..\Models\StationTelemetry.json
-		..\TwinGraph\twingraph.json = ..\TwinGraph\twingraph.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ADXQueries", "ADXQueries", "{0719DA37-3043-4EBE-B71E-5BEE08F57459}"
+	ProjectSection(SolutionItems) = preProject
+		..\ADXQueries\EnergyConsumptionCalculation.kql = ..\ADXQueries\EnergyConsumptionCalculation.kql
+		..\ADXQueries\OEECalculation.kql = ..\ADXQueries\OEECalculation.kql
+		..\ADXQueries\OPCUAPubSubDatasetExpand.kql = ..\ADXQueries\OPCUAPubSubDatasetExpand.kql
+		..\ADXQueries\OPCUAPubSubRawExpand.kql = ..\ADXQueries\OPCUAPubSubRawExpand.kql
 	EndProjectSection
 EndProject
 Global
@@ -72,6 +80,7 @@ Global
 		{5D5C241D-F3A8-4F06-9E9A-36E031212384} = {76B67AA2-0F21-470C-BB63-2F0FEFAF7B95}
 		{1A63931E-229D-4667-90D4-0E900E0C327A} = {76B67AA2-0F21-470C-BB63-2F0FEFAF7B95}
 		{3FBCD654-B7B7-4EDA-9FE5-331D6933CCBD} = {76B67AA2-0F21-470C-BB63-2F0FEFAF7B95}
+		{0719DA37-3043-4EBE-B71E-5BEE08F57459} = {76B67AA2-0F21-470C-BB63-2F0FEFAF7B95}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {20C453B8-C514-460F-AECD-C786582ABC39}

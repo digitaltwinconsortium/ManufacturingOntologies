@@ -1,0 +1,55 @@
+.create-or-alter function  CalculateOEE(stationName:string,idealCycleTime:int,hoursInShift:int) {
+// calculation from https://www.oee.com/calculating-oee/
+let idealRunningTime = hoursInShift * 60 * 60 * 1000; // [ms]
+let shiftEndTime = now();
+let shiftStartTime = datetime_add('hour', -hoursInShift, shiftEndTime);
+let numProdEnd = toscalar(
+opcua_telemetry
+| where SourceTimestamp > shiftStartTime and SourceTimestamp < shiftEndTime
+| where DataSetWriterID has stationName
+| where ExpandedNodeID == "NumberOfManufacturedProducts"
+| extend numProd = toint(Value)
+| summarize max(numProd));
+let numProdStart = toscalar(
+opcua_telemetry
+| where SourceTimestamp > shiftStartTime and SourceTimestamp < shiftEndTime
+| where DataSetWriterID has stationName
+| where ExpandedNodeID == "NumberOfManufacturedProducts"
+| extend numProd = toint(Value)
+| summarize min(numProd));
+let numScrapEnd = toscalar(
+opcua_telemetry
+| where SourceTimestamp > shiftStartTime and SourceTimestamp < shiftEndTime
+| where DataSetWriterID has stationName
+| where ExpandedNodeID == "NumberOfDiscardedProducts"
+| extend numDisc = toint(Value)
+| summarize max(numDisc));
+let numScrapStart = toscalar(
+opcua_telemetry
+| where SourceTimestamp > shiftStartTime and SourceTimestamp < shiftEndTime
+| where DataSetWriterID has stationName
+| where ExpandedNodeID == "NumberOfDiscardedProducts"
+| extend numDisc = toint(Value)
+| summarize min(numDisc));
+let numProdShift = numProdEnd - numProdStart;
+let numScrapShift = numScrapEnd - numScrapStart;
+let actualCycleTime = toscalar(
+opcua_telemetry
+| where SourceTimestamp > shiftStartTime and SourceTimestamp < shiftEndTime
+| where DataSetWriterID has stationName
+| where ExpandedNodeID == "ActualCycleTime"
+| extend cycleTime = toint(Value)
+| summarize avg(cycleTime));
+let faultyTimeShift = toscalar(
+opcua_telemetry
+| where SourceTimestamp > shiftStartTime and SourceTimestamp < shiftEndTime
+| where DataSetWriterID has stationName
+| where ExpandedNodeID == "FaultyTime"
+| extend faultyTime = toint(Value)
+| summarize sum(faultyTime));
+let availability = todouble(idealRunningTime - faultyTimeShift) / todouble(idealRunningTime);
+let performance = todouble(idealCycleTime) * todouble(numProdShift + numScrapShift) / todouble(idealRunningTime - faultyTimeShift);
+let quality = todouble(numProdShift) / todouble(numProdShift + numScrapShift);
+let oee = availability * performance * quality;
+print oee
+}

@@ -1,0 +1,8 @@
+.create-or-alter function OPCUADatasetExpand {
+    opcua_intermediate
+    | mv-apply payload on (
+        extend key = tostring(bag_keys(payload)[0])
+        | extend p = payload[key]
+        | project ExpandedNodeId = key, Value = todynamic(p.Value), SourceTimestamp = todatetime(p.SourceTimestamp)
+    )
+}

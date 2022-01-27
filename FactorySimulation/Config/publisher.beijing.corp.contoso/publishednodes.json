@@ -13,7 +13,7 @@
       { "Id": "ns=2;i=406" }, // energy consumption
       { "Id": "ns=2;i=412" }, // ideal cycle time
       { "Id": "ns=2;i=418" }, // actual cycle time
-      { "Id": "ns=2;i=434" } // pressure
+      { "Id": "ns=2;i=434" }  // pressure
     ]
   },
   {
@@ -29,7 +29,7 @@
       { "Id": "ns=2;i=406" }, // energy consumption
       { "Id": "ns=2;i=412" }, // ideal cycle time
       { "Id": "ns=2;i=418" }, // actual cycle time
-      { "Id": "ns=2;i=434" } // pressure
+      { "Id": "ns=2;i=434" }  // pressure
     ]
   },
   {
@@ -45,7 +45,7 @@
       { "Id": "ns=2;i=406" }, // energy consumption
       { "Id": "ns=2;i=412" }, // ideal cycle time
       { "Id": "ns=2;i=418" }, // actual cycle time
-      { "Id": "ns=2;i=434" } // pressure
+      { "Id": "ns=2;i=434" }  // pressure
     ]
   },
   {
@@ -61,7 +61,7 @@
       { "Id": "ns=2;i=406" }, // energy consumption
       { "Id": "ns=2;i=412" }, // ideal cycle time
       { "Id": "ns=2;i=418" }, // actual cycle time
-      { "Id": "ns=2;i=434" } // pressure
+      { "Id": "ns=2;i=434" }  // pressure
     ]
   },
   {
@@ -77,7 +77,7 @@
       { "Id": "ns=2;i=406" }, // energy consumption
       { "Id": "ns=2;i=412" }, // ideal cycle time
       { "Id": "ns=2;i=418" }, // actual cycle time
-      { "Id": "ns=2;i=434" } // pressure
+      { "Id": "ns=2;i=434" }  // pressure
     ]
   },
   {
@@ -93,7 +93,7 @@
       { "Id": "ns=2;i=406" }, // energy consumption
       { "Id": "ns=2;i=412" }, // ideal cycle time
       { "Id": "ns=2;i=418" }, // actual cycle time
-      { "Id": "ns=2;i=434" } // pressure
+      { "Id": "ns=2;i=434" }  // pressure
     ]
   },
   {
@@ -109,7 +109,7 @@
       { "Id": "ns=2;i=406" }, // energy consumption
       { "Id": "ns=2;i=412" }, // ideal cycle time
       { "Id": "ns=2;i=418" }, // actual cycle time
-      { "Id": "ns=2;i=434" } // pressure
+      { "Id": "ns=2;i=434" }  // pressure
     ]
   },
   {
@@ -125,7 +125,7 @@
       { "Id": "ns=2;i=406" }, // energy consumption
       { "Id": "ns=2;i=412" }, // ideal cycle time
       { "Id": "ns=2;i=418" }, // actual cycle time
-      { "Id": "ns=2;i=434" } // pressure
+      { "Id": "ns=2;i=434" }  // pressure
     ]
   },
   {
@@ -141,7 +141,7 @@
       { "Id": "ns=2;i=406" }, // energy consumption
       { "Id": "ns=2;i=412" }, // ideal cycle time
       { "Id": "ns=2;i=418" }, // actual cycle time
-      { "Id": "ns=2;i=434" } // pressure
+      { "Id": "ns=2;i=434" }  // pressure
     ]
   }
 ]

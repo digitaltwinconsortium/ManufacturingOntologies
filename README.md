@@ -69,6 +69,7 @@ Production Line | Ideal Cycle Time (in seconds)
 	Beijing 2	|				8
 	Beijing 3	|				4
 	Rio			|				10
+-----------------------------------------------
 
 ## License
 

@@ -59,17 +59,17 @@ OEE is a common metric in production environments, see the reference calculation
 
 The simulation is configured to include 8 production lines by default and the configuration can be altered in the BuildAndRunSimulation.cmd script. The default configuration is depicted below:
 
-Production Line | Ideal Cycle Time (in seconds)
-----------------|------------------------------
-	Munich		|				6        
-	Capetown    |				8
-	Mumbai		|				11
-	Seattle		|				6
-	Beijing 1	|				9
-	Beijing 2	|				8
-	Beijing 3	|				4
-	Rio			|				10
------------------------------------------------
+| Production Line | Ideal Cycle Time (in seconds) |
+|:---------------:|:-----------------------------:|
+| Munich | 6 |
+| Capetown | 8 |
+| Mumbai | 11 |
+| Seattle |	6 |
+| Beijing 1	| 9 |
+| Beijing 2	| 8 |
+| Beijing 3	| 4 |
+| Rio |	10 |
+
 
 ## License
 

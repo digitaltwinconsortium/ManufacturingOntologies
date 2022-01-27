@@ -55,6 +55,21 @@ If you want to store the OPC UA PubSub telemetry data in a time-series database 
 
 OEE is a common metric in production environments, see the reference calculation [here](https://www.oee.com/calculating-oee).
 
+### Default Simulation Configuration
+
+The simulation is configured to include 8 production lines by default and the configuration can be altered in the BuildAndRunSimulation.cmd script. The default configuration is depicted below:
+
+Production Line | Ideal Cycle Time (in seconds)
+----------------|------------------------------
+	Munich		|				6        
+	Capetown    |				8
+	Mumbai		|				11
+	Seattle		|				6
+	Beijing 1	|				9
+	Beijing 2	|				8
+	Beijing 3	|				4
+	Rio			|				10
+
 ## License
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a>

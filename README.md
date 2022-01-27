@@ -1,12 +1,8 @@
 # Manufacturing Ontologies
 
-
-
 ## Digital Twin Definition Language
 
 These ontologoes leverage the Digital Twin Definition Language (DTDL), which is specified [here](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md).
-
-
 
 ### Production Line Layout
 
@@ -14,21 +10,15 @@ A typical production line is organized into a number of inter-connected stations
 
 ![Line](Docs/line.png)
 
-
-
 ### Model Relationships
 
 The relationships between the models used in this ontology are described via the following diagram (taken from the [Azure Digital Twins Explorer](https://explorer.digitaltwins.azure.net/) tool):
 
 <img src="Docs/modelrelationships.png" alt="relationships" width="500" />
 
-
-
 ### Machine Information Model
 
 The underlying machine information model is based on OPC UA and can be used for Overall Equipment Effectiveness (OEE) calculation. It is defined [here](https://github.com/digitaltwinconsortium/ManufacturingDTDLOntologies/blob/main/FactorySimulation/Station/Station.NodeSet2.xml) and is also available in the UA Cloud Library [here](https://uacloudlibrary.opcfoundation.org/).
-
-
 
 ### Digital Twin Graph
 
@@ -36,27 +26,15 @@ The resulting digital twin graph is depicted below (taken from the [Azure Digita
 
 ![twingraph](Docs/twingraph.png)
 
-
-
-### Overall Equipment Effectiveness (OEE) Calculation
-
-OEE is a common metric in production environments, see the reference calculation [here](https://www.oee.com/calculating-oee).
-
-
-
 ## Production Line Simulation
 
 This repository also contains a production line simulation made up of several Stations, leveraging the machine information model described above, as well as a simple Manufacturing Execution System (MES). Both the Stations and the MES are containerized for easy deployment.
-
-
 
 ### Digital Twin Graph
 
 The digital twin graph for the simulated production line is depicted below (taken from the [Azure Digital Twins Explorer](https://explorer.digitaltwins.azure.net/) tool):
 
 <img src="Docs/FactorySimulationTwin.png" alt="relationships" width="250" />
-
-
 
 ### Installation Instructions
 
@@ -73,7 +51,9 @@ To install the production line simulation, you need a Windows PC or virtual mach
 
 If you want to store the OPC UA PubSub telemetry data in a time-series database and do further analysis on it, you can deploy an instance of Azure Data Explorer (ADX) from the Azure Portal and connect is directly to your IoT Hub you set up above by following the steps in the lower half of the article from [here](https://www.linkedin.com/pulse/using-azure-data-explorer-opc-ua-erich-barnstedt/). Once you do that, you can e.g. calculate the OEE using the ADX queries found [here](https://github.com/digitaltwinconsortium/ManufacturingDTDLOntologies/tree/main/ADXQueries).
 
+### Overall Equipment Effectiveness (OEE) Calculation
 
+OEE is a common metric in production environments, see the reference calculation [here](https://www.oee.com/calculating-oee).
 
 ## License
 

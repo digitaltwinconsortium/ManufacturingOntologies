@@ -1,4 +1,4 @@
-.create-or-alter function  CalculateOEE(stationName:string,idealCycleTime:int,hoursInShift:int) {
+.create-or-alter function  CalculateOEEForStation(stationName:string,idealCycleTime:int,hoursInShift:int) {
 // calculation from https://www.oee.com/calculating-oee/
 let idealRunningTime = hoursInShift * 60 * 60 * 1000; // [ms]
 let shiftEndTime = now();
@@ -51,5 +51,5 @@ let availability = todouble(idealRunningTime - faultyTimeShift) / todouble(ideal
 let performance = todouble(idealCycleTime) * todouble(numProdShift + numScrapShift) / todouble(idealRunningTime - faultyTimeShift);
 let quality = todouble(numProdShift) / todouble(numProdShift + numScrapShift);
 let oee = availability * performance * quality;
-print oee
+toscalar(oee)
 }

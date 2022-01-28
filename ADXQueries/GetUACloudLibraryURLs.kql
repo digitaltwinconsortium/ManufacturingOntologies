@@ -1,0 +1,5 @@
+.create-or-alter function GetUACloudLibraryURLs {
+let ADTendpoint = "https://ontologies.api.eus2.digitaltwins.azure.net";
+let ADTquery = "SELECT T.$dtId as tid, T.OPCUAModelURL FROM DIGITALTWINS T WHERE IS_PRIMITIVE(T.OPCUAModelURL) AND IS_PRIMITIVE(T.$dtId)";
+evaluate azure_digital_twins_query_request(ADTendpoint, ADTquery);
+}

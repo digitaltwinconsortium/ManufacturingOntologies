@@ -1,23 +1,16 @@
 
 namespace PressureRelief
 {
-    using Kusto.Data;
-    using Kusto.Data.Common;
-    using Kusto.Data.Net.Client;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
-    using Microsoft.IdentityModel.Clients.ActiveDirectory;
+    using Newtonsoft.Json.Linq;
     using System;
-    using System.Data;
-    using System.Net.Http;
-    using System.Text;
-    using System.Text.Json;
-    using System.Threading.Tasks;
+    using System.Net;
 
     public class ADXQuery
     {
         [FunctionName("ADXQuery")]
-        public async Task Run([TimerTrigger("*/15 * * * * *")]TimerInfo myTimer, ILogger log)
+        public void Run([TimerTrigger("*/15 * * * * *")]TimerInfo myTimer, ILogger log)
         {
             string applicationClientId = Environment.GetEnvironmentVariable("APPLICATION_ID");
             string applicationKey = Environment.GetEnvironmentVariable("APPLICATION_KEY");
@@ -25,65 +18,37 @@ namespace PressureRelief
             string tenantId = Environment.GetEnvironmentVariable("AAD_TENANT_ID");
             
             string query = "opcua_telemetry"
-                         + " | where ExpandedNodeID == \"Pressure\""
-                         + " | where DataSetWriterID has \"assembly.munich\"" 
+                         + " | where ExpandedNodeID == 'Pressure'"
+                         + " | where DataSetWriterID has 'assembly.munich'" 
                          + " | where SourceTimestamp > now() - 16s"
                          + " | order by SourceTimestamp desc"
                          + " | extend value = todouble(Value)"
                          + " | where value > 4500" // [mbar]
-                         + " | project SourceTimestamp, value";
-
-            ClientRequestProperties clientRequestProperties = new ClientRequestProperties()
-            {
-                ClientRequestId = Guid.NewGuid().ToString()
-            };
-
+                         + " | project ExpandedNodeID";
             try
             {
-                ICslQueryProvider queryProvider = KustoClientFactory.CreateCslQueryProvider(new KustoConnectionStringBuilder(adxInstanceURL + "ontologies")
-                .WithAadApplicationKeyAuthentication(
-                applicationClientId,
-                applicationKey,
-                tenantId));
+                WebClient webClient = new WebClient();
 
-                using (IDataReader reader = queryProvider.ExecuteQuery(query, clientRequestProperties))
-                {
-                    while (reader.Read())
-                    {
-                        if (reader.FieldCount == 2)
-                        {
-                            log.LogWarning("High pressure detected at " + reader.GetDateTime(0).ToString() + ": " + reader.GetDouble(1).ToString());
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                log.LogError(ex.Message);
-            }
-
-            try
-            {
-                HttpClient webClient = new HttpClient
-                {
-                    BaseAddress = new Uri(adxInstanceURL + "/v2/rest/query")
-                };
-
-                // acquire token for web request
-                AuthenticationContext authContext = new AuthenticationContext("https://login.microsoftonline.com/" + tenantId);
-                ClientCredential applicationCredentials = new ClientCredential(applicationClientId, applicationKey);
-                AuthenticationResult result = await authContext.AcquireTokenAsync(adxInstanceURL, applicationCredentials).ConfigureAwait(false);
-                webClient.DefaultRequestHeaders.Add("Authorization", "bearer " + result.AccessToken);
+                // acquire OAuth2 token via AAD REST endpoint
+                webClient.Headers.Add("Accept", "application/json");
+                webClient.Headers.Add("Content-Type", "application/x-www-form-urlencoded"); 
+                string content = $"grant_type=client_credentials&resource={adxInstanceURL}&client_id={applicationClientId}&client_secret={applicationKey}";
+                string response = webClient.UploadString("https://login.microsoftonline.com/" + tenantId + "/oauth2/token", "POST", content);
                 
-                HttpContent content = new StringContent(JsonSerializer.Serialize(query), Encoding.UTF8, "application/json");
-                HttpResponseMessage response = await webClient.PostAsync(webClient.BaseAddress, content).ConfigureAwait(false);
-                log.LogInformation(response.ToString());
+                // call ADX REST endpoint with query
+                webClient.Headers.Add("Authorization", "bearer " + JObject.Parse(response)["access_token"].ToString());
+                webClient.Headers.Add("Content-Type", "application/json");
+                response = webClient.UploadString(adxInstanceURL + "/v2/rest/query", "POST", "{ \"db\":\"ontologies\", \"csl\":\"" + query + "\" }");
+                if (response.Contains("Pressure"))
+                {
+                    log.LogWarning("High pressure detected!");
+                }
 
                 webClient.Dispose();
             }
             catch (Exception ex)
             {
-                log.LogError(ex.Message, ex);
+                log.LogError(new EventId(), ex, ex.Message);
             }
         }
     }

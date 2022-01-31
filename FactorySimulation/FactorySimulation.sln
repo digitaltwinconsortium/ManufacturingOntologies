@@ -55,6 +55,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ADXQueries", "ADXQueries", 
 		..\ADXQueries\OEECalculationForStation.kql = ..\ADXQueries\OEECalculationForStation.kql
 		..\ADXQueries\OPCUAPubSubDatasetExpand.kql = ..\ADXQueries\OPCUAPubSubDatasetExpand.kql
 		..\ADXQueries\OPCUAPubSubRawExpand.kql = ..\ADXQueries\OPCUAPubSubRawExpand.kql
+		..\ADXQueries\SampleAnomalyDetection.kql = ..\ADXQueries\SampleAnomalyDetection.kql
 		..\ADXQueries\SampleDashboardQuery.kql = ..\ADXQueries\SampleDashboardQuery.kql
 	EndProjectSection
 EndProject

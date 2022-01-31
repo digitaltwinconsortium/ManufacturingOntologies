@@ -1,0 +1,9 @@
+let range=3h;
+opcua_telemetry
+| where ExpandedNodeID == "EnergyConsumption"
+| where DataSetWriterID has "assembly.munich"
+| where SourceTimestamp > now()-range and SourceTimestamp < now()
+| order by SourceTimestamp desc
+| make-series num=avg(todouble(Value)) on SourceTimestamp from now()-range to now() step 1s by ExpandedNodeID, DataSetWriterID 
+| extend (anomalies, score, baseline) = series_decompose_anomalies(num, 1.0, -1, 'linefit')
+| render anomalychart with(anomalycolumns=anomalies, legend=hidden)

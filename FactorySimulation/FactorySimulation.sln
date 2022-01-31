@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.32112.339
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32106.194
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Station", "Station\Station.csproj", "{2E1BA50D-E998-4C99-90F8-BEE207FD7CEF}"
 EndProject
@@ -45,14 +45,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TwinModels", "TwinModels", 
 		..\Models\MES.json = ..\Models\MES.json
 		..\TwinGraph\simulationtwingraph.json = ..\TwinGraph\simulationtwingraph.json
 		..\Models\Station.json = ..\Models\Station.json
-		..\Models\StationCommands.json = ..\Models\StationCommands.json
-		..\Models\StationProduct.json = ..\Models\StationProduct.json
-		..\Models\StationTelemetry.json = ..\Models\StationTelemetry.json
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ADXQueries", "ADXQueries", "{0719DA37-3043-4EBE-B71E-5BEE08F57459}"
 	ProjectSection(SolutionItems) = preProject
 		..\ADXQueries\EnergyConsumptionCalculation.kql = ..\ADXQueries\EnergyConsumptionCalculation.kql
+		..\ADXQueries\GetUACloudLibraryURLs.kql = ..\ADXQueries\GetUACloudLibraryURLs.kql
 		..\ADXQueries\OEECalculationForLine.kql = ..\ADXQueries\OEECalculationForLine.kql
 		..\ADXQueries\OEECalculationForStation.kql = ..\ADXQueries\OEECalculationForStation.kql
 		..\ADXQueries\OPCUAPubSubDatasetExpand.kql = ..\ADXQueries\OPCUAPubSubDatasetExpand.kql

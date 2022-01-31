@@ -16,11 +16,16 @@
       "@type": "Relationship",
       "name": "Next",
       "target": "dtmi:Station;1"
+    },
+    {
+      "@type": "Property",
+      "name": "OPCUAModelURL",
+      "schema": "string",
+      "writable": true
     }
   ],
   "@context": [
     "dtmi:dtdl:context;2"
   ],
-  "comment": "dtmi:opcua:informationmodel:https://uacloudlibrary.opcfoundation.org/infomodel/download/1627266626;1",
   "displayName": "Station"
 }

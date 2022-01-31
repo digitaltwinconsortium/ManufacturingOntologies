@@ -11,3 +11,6 @@
 /FactorySimulation/Station/obj
 /FactorySimulation/Station/bin/Debug
 /FactorySimulation/MES/bin/Debug/netcoreapp3.1
+/FactorySimulation/PressureRelief/.vs/PressureRelief
+/FactorySimulation/PressureRelief/obj
+/FactorySimulation/PressureRelief/bin/Debug/net6.0

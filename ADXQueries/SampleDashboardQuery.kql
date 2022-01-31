@@ -1,0 +1,8 @@
+opcua_telemetry
+| where ExpandedNodeID == "EnergyConsumption"
+| where DataSetWriterID has "assembly.munich"
+| where SourceTimestamp > _startTime and SourceTimestamp < _endTime
+| order by SourceTimestamp desc
+| extend var = todouble(Value)
+| project SourceTimestamp, var
+| render timechart

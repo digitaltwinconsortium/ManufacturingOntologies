@@ -61,18 +61,18 @@ To install the production line simulation, you need a Windows PC or virtual mach
 If you want to store the OPC UA PubSub telemetry data in a time-series database and do further analysis on it, you can deploy an instance of Azure Data Explorer (ADX) from the Azure Portal and connect is directly to your IoT Hub you set up above by following the steps in the lower half of the article from [here](https://www.linkedin.com/pulse/using-azure-data-explorer-opc-ua-erich-barnstedt/). Once you do that, you can e.g. calculate the OEE using the ADX queries found [here](https://github.com/digitaltwinconsortium/ManufacturingDTDLOntologies/tree/main/ADXQueries).
 
 Also, if you want to test a "digital feedback loop", i.e. triggering a command on one of the OPC UA servers in the simulation from the cloud, based on a time-series reaching a certain threshold (the simulated pressure), then deploy the PressureRelief Azure Function in your Azure subscription and define the following environment variables in the Azure portal for the Function:
-        ADX_INSTANCE_URL
-        ADX_DB_NAME
-        AAD_TENANT_ID
-        APPLICATION_KEY
-        APPLICATION_ID
-        IOT_HUB_NAME
-        IOT_HUB_KEY
-        OPC_TWIN_NAME"
-        UA_SERVER_ENDPOINT
-        UA_SERVER_METHOD_ID
-        UA_SERVER_OBJECT_ID
-        UA_SERVER_DNS_NAME
+       * ADX_INSTANCE_URL
+       * ADX_DB_NAME
+       * AAD_TENANT_ID
+       * APPLICATION_KEY
+       * APPLICATION_ID
+       * IOT_HUB_NAME
+       * IOT_HUB_KEY
+       * OPC_TWIN_NAME
+       * UA_SERVER_ENDPOINT
+       * UA_SERVER_METHOD_ID
+       * UA_SERVER_OBJECT_ID
+       * UA_SERVER_DNS_NAME
 
 ### Overall Equipment Effectiveness (OEE) Calculation
 

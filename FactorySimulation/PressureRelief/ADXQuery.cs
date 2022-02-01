@@ -27,6 +27,7 @@ namespace PressureRelief
             string uaServerEndpoint = Environment.GetEnvironmentVariable("UA_SERVER_ENDPOINT");
             string uaServerMethodID = Environment.GetEnvironmentVariable("UA_SERVER_METHOD_ID");
             string uaServerObjectID = Environment.GetEnvironmentVariable("UA_SERVER_OBJECT_ID");
+            string uaServerDNSName = Environment.GetEnvironmentVariable("UA_SERVER_DNS_NAME");
             
             try
             {
@@ -41,7 +42,7 @@ namespace PressureRelief
                 // call ADX REST endpoint with query
                 string query = "opcua_telemetry"
                              + " | where ExpandedNodeID == 'Pressure'"
-                             + " | where DataSetWriterID has 'assembly.munich'"
+                             + " | where DataSetWriterID has '" + uaServerDNSName + "'"
                              + " | where SourceTimestamp > now() - 16s"
                              + " | order by SourceTimestamp desc"
                              + " | extend value = todouble(Value)"

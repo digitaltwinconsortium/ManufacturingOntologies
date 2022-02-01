@@ -14,7 +14,7 @@ A typical production line is organized into a number of inter-connected stations
 
 The relationships between the models used in this ontology are described via the following diagram (taken from the [Azure Digital Twins Explorer](https://explorer.digitaltwins.azure.net/) tool):
 
-<img src="Docs/modelrelationships.png" alt="relationships" width="500" />
+<img src="Docs/modelrelationships.png" alt="relationships" width="300" />
 
 ### Machine Information Model
 

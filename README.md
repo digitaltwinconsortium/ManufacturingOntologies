@@ -34,7 +34,7 @@ This repository also contains a production line simulation made up of several St
 
 The digital twin graph for the simulated production line is depicted below (taken from the [Azure Digital Twins Explorer](https://explorer.digitaltwins.azure.net/) tool):
 
-<img src="Docs/FactorySimulationTwin.png" alt="relationships" width="250" />
+<img src="Docs/FactorySimulationTwin.png" alt="relationships" width="300" />
 
 ### Installation Instructions
 

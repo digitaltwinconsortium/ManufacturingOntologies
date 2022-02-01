@@ -39,17 +39,40 @@ The digital twin graph for the simulated production line is depicted below (take
 ### Installation Instructions
 
 To install the production line simulation, you need a Windows PC or virtual machine with at least 8GB of memory. Then follow these steps:
+
 * Use an existing Azure subscription you have admin access to or get a free Azure subscription from [here](https://azure.microsoft.com/en-us/free).
-* Deploy an S1 Azure IoT Hub into your Azure subscription. Once deployed, create 6 devices and call them publisher.munich.corp.contoso, publisher.capetown.corp.contoso, publisher.mumbai.corp.contoso, publisher.seattle.corp.contoso, publisher.beijing.corp.contoso and publisher.rio.corp.contoso.
+
+* Deploy an S1 Azure IoT Hub into your Azure subscription. Once deployed, create 6 devices and call them publisher.munich.corp.contoso, publisher.capetown.corp.contoso, publisher.mumbai.corp.contoso, publisher.seattle.corp.contoso, publisher.beijing.corp.contoso and publisher.rio.corp.contoso. Create another 6 devices, but replace the word "publisher" with "twin", i.e. twin.munich.corp.contoso,etc.
+
 * Download and install the latest .NET Core SDK (not just the Runtime!) from [here](https://dotnet.microsoft.com/en-us/download/dotnet).
+
 * Download and install Docker Desktop from [here](https://www.docker.com/products/docker-desktop), including the Windows Subsystem for Linux (WSL) integration. After installation and a required system restart, accept the license terms and install the WSL2 Linux kernel by following the instructions. Then verify that Docker Desktop is running in the Windows System Tray.
+
 * Browse to [here](https://github.com/digitaltwinconsortium/ManufacturingDTDLOntologies) and select Code -> Download Zip. Unzip the contents to a directory of your choice.
+
 * Open a command prompt and navigate to the FactorySimulation directory of the Zip you just downloaded.
-* Edit the BuildAndRunSimulation.cmd and replace the ENTER_PUBLISHER_DEVICE_CONNECTION_STRING_HERE placeholder string with the primary connection strings of the 6 IoT Hub devices you have created earlier. The connection strings can be accssed by clicking on the names of the devices in the Azure Portal.
+
+* Edit the BuildAndRunSimulation.cmd and replace the ENTER_PUBLISHER_DEVICE_CONNECTION_STRING_HERE placeholder string with the primary connection strings of the 6 IoT Hub publisher devices you have created earlier. Also replace the ENTER_TWIN_DEVICE_CONNECTION_STRING_HERE string with the primary connection strings of the 6 IoT Hub twin devices you have created earlier. The connection strings can be accssed by clicking on the names of the devices in the Azure Portal.
+
 * Run the BuildAndRunSimulation.cmd script. This will build the code and Docker container, setup the Docker networks and run the simulation. A total of 8 production lines will be started, each with 3 stations each (assembly, test and packaging) as well as an MES per line and an OPC Publisher instance per factory location. There are 6 locations in total: Munich, Capetown, Mumbai, Seattle, Beijing and Rio.
+
 * Open the Docker Desktop Dashboard by clicking the Docker icon in the Windows system Tray and check out the logs of an MES and a Publisher by clicking on their names to verify that the simulated production has started and OPC UA PubSub telemetry messages are being sent to IoT Hub. Additionally, you can use the Azure IoT Explorer tool from [here](https://github.com/Azure/azure-iot-explorer/releases) by entering the IoT Hub Owner Primary Connection String in the tool, selecting one of the OPC Publishers and clicking on Telemetry -> Start.
 
 If you want to store the OPC UA PubSub telemetry data in a time-series database and do further analysis on it, you can deploy an instance of Azure Data Explorer (ADX) from the Azure Portal and connect is directly to your IoT Hub you set up above by following the steps in the lower half of the article from [here](https://www.linkedin.com/pulse/using-azure-data-explorer-opc-ua-erich-barnstedt/). Once you do that, you can e.g. calculate the OEE using the ADX queries found [here](https://github.com/digitaltwinconsortium/ManufacturingDTDLOntologies/tree/main/ADXQueries).
+
+Also, if you want to test a "digital feedback loop", i.e. triggering a command on one of the OPC UA servers in the simulation from the cloud, based on a time-series reaching a certain threshold (the simulated pressure), then deploy the PressureRelief Azure Function in your Azure subscription and define the following environment variables in the Azure portal for the Function:
+        ADX_INSTANCE_URL
+        ADX_DB_NAME
+        AAD_TENANT_ID
+        APPLICATION_KEY
+        APPLICATION_ID
+        IOT_HUB_NAME
+        IOT_HUB_KEY
+        OPC_TWIN_NAME"
+        UA_SERVER_ENDPOINT
+        UA_SERVER_METHOD_ID
+        UA_SERVER_OBJECT_ID
+        UA_SERVER_DNS_NAME
 
 ### Overall Equipment Effectiveness (OEE) Calculation
 

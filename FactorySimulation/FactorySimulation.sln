@@ -61,6 +61,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ADXQueries", "ADXQueries", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PressureRelief", "PressureRelief\PressureRelief.csproj", "{98BA2738-3111-4896-8C09-106AB041D066}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{F0B6D9E0-3342-4EFB-B130-CED6108E944E}"
+	ProjectSection(SolutionItems) = preProject
+		..\Docs\FactorySimulationTwin.png = ..\Docs\FactorySimulationTwin.png
+		..\Docs\line.png = ..\Docs\line.png
+		..\Docs\modelrelationships.png = ..\Docs\modelrelationships.png
+		..\Docs\twingraph.png = ..\Docs\twingraph.png
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

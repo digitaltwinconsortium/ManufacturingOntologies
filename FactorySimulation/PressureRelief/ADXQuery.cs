@@ -47,7 +47,7 @@ namespace PressureRelief
                              + " | where SourceTimestamp > now() - 16s"
                              + " | order by SourceTimestamp desc"
                              + " | extend value = todouble(Value)"
-                             + " | where value > 4500" // [mbar]
+                             + " | where value > 4000" // [mbar]
                              + " | project ExpandedNodeID";
 
                 webClient.Headers.Remove("Accept");

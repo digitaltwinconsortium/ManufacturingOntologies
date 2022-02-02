@@ -121,7 +121,7 @@ namespace Station.Simulation
         {
             // add behaviour to our methods
             MethodState methodState = predefinedNode as MethodState;
-            if (methodState != null)
+            if (( methodState != null) && (methodState.ModellingRuleId == null))
             {
                 if (methodState.DisplayName == "Execute")
                 {

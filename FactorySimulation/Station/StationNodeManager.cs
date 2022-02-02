@@ -30,7 +30,6 @@ namespace Station.Simulation
         private const int c_failureCycleTime = 5000;                      // [ms]
         private DateTime m_cycleStartTime;
 
-        private const ulong c_pressureStableTime = 30 * 1000;  // [ms]
         private const ulong c_pressureDefault = 2500;          // [mbar]
         private const ulong c_pressureHigh = 6000;             // [mbar]
         private DateTime m_pressureStableStartTime = DateTime.UtcNow;
@@ -420,20 +419,20 @@ namespace Station.Simulation
             m_energyConsumption = (powerConsumption * ((double)m_actualCycleTime / 1000.0)) / 3600.0;
 
             // For stations configured to generate alerts, calculate pressure
-            // Pressure will be stable for c_pressureStableTime and then will increase to c_pressureHigh and stay there until OpenPressureReleaseValve() is called
-            if (Program.GenerateAlerts && (((DateTime.UtcNow - m_pressureStableStartTime).TotalMilliseconds) > c_pressureStableTime))
+            if (Program.GenerateAlerts)
             {
                 // slowly increase pressure until c_pressureHigh is reached
-                m_pressure += NormalDistribution(m_random, (cycleTimeModifier - 1.0) * 10.0, 10.0);
+                m_pressure += Math.Abs(NormalDistribution(m_random, (cycleTimeModifier - 1.0) * 10.0, 10.0));
 
-                if (m_pressure <= c_pressureDefault)
+                // keep pressure within our bounds
+                if (m_pressure < c_pressureDefault)
                 {
-                    m_pressure = c_pressureDefault * NormalDistribution(m_random, 0.0, 10.0);
+                    m_pressure = c_pressureDefault;
                 }
 
-                if (m_pressure >= c_pressureHigh)
+                if (m_pressure > c_pressureHigh)
                 {
-                    m_pressure = c_pressureHigh * NormalDistribution(m_random, 0.0, 10.0);
+                    m_pressure = c_pressureHigh;
                 }
             }
         }

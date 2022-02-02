@@ -7,28 +7,28 @@ let numProdEnd = toscalar(
 opcua_telemetry
 | where SourceTimestamp > shiftStartTime and SourceTimestamp < shiftEndTime
 | where DataSetWriterID has stationName
-| where ExpandedNodeID == "NumberOfManufacturedProducts"
+| where ExpandedNodeID == "http://opcfoundation.org/UA/Station/#i=385"
 | extend numProd = toint(Value)
 | summarize max(numProd));
 let numProdStart = toscalar(
 opcua_telemetry
 | where SourceTimestamp > shiftStartTime and SourceTimestamp < shiftEndTime
 | where DataSetWriterID has stationName
-| where ExpandedNodeID == "NumberOfManufacturedProducts"
+| where ExpandedNodeID == "http://opcfoundation.org/UA/Station/#i=385"
 | extend numProd = toint(Value)
 | summarize min(numProd));
 let numScrapEnd = toscalar(
 opcua_telemetry
 | where SourceTimestamp > shiftStartTime and SourceTimestamp < shiftEndTime
 | where DataSetWriterID has stationName
-| where ExpandedNodeID == "NumberOfDiscardedProducts"
+| where ExpandedNodeID == "http://opcfoundation.org/UA/Station/#i=391"
 | extend numDisc = toint(Value)
 | summarize max(numDisc));
 let numScrapStart = toscalar(
 opcua_telemetry
 | where SourceTimestamp > shiftStartTime and SourceTimestamp < shiftEndTime
 | where DataSetWriterID has stationName
-| where ExpandedNodeID == "NumberOfDiscardedProducts"
+| where ExpandedNodeID == "http://opcfoundation.org/UA/Station/#i=391"
 | extend numDisc = toint(Value)
 | summarize min(numDisc));
 let numProdShift = numProdEnd - numProdStart;
@@ -37,14 +37,14 @@ let actualCycleTime = toscalar(
 opcua_telemetry
 | where SourceTimestamp > shiftStartTime and SourceTimestamp < shiftEndTime
 | where DataSetWriterID has stationName
-| where ExpandedNodeID == "ActualCycleTime"
+| where ExpandedNodeID == "http://opcfoundation.org/UA/Station/#i=418"
 | extend cycleTime = toint(Value)
 | summarize avg(cycleTime));
 let faultyTimeShift = toscalar(
 opcua_telemetry
 | where SourceTimestamp > shiftStartTime and SourceTimestamp < shiftEndTime
 | where DataSetWriterID has stationName
-| where ExpandedNodeID == "FaultyTime"
+| where ExpandedNodeID == "http://opcfoundation.org/UA/Station/#i=399"
 | extend faultyTime = toint(Value)
 | summarize sum(faultyTime));
 let availability = todouble(idealRunningTime - faultyTimeShift) / todouble(idealRunningTime);

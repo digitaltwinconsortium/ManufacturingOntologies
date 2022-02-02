@@ -40,8 +40,9 @@ namespace PressureRelief
                 string response = webClient.UploadString("https://login.microsoftonline.com/" + tenantId + "/oauth2/token", "POST", content);
 
                 // call ADX REST endpoint with query
+                string pressureExpandedNodeID = "http://opcfoundation.org/UA/Station/#i=434";
                 string query = "opcua_telemetry"
-                             + " | where ExpandedNodeID == 'Pressure'"
+                             + " | where ExpandedNodeID == '" + pressureExpandedNodeID + "'"
                              + " | where DataSetWriterID has '" + uaServerDNSName + "'"
                              + " | where SourceTimestamp > now() - 16s"
                              + " | order by SourceTimestamp desc"
@@ -54,7 +55,7 @@ namespace PressureRelief
                 webClient.Headers.Add("Authorization", "bearer " + JObject.Parse(response)["access_token"].ToString());
                 webClient.Headers.Add("Content-Type", "application/json");
                 response = webClient.UploadString(adxInstanceURL + "/v2/rest/query", "POST", "{ \"db\":\"" + adxDatabaseName + "\", \"csl\":\"" + query + "\" }");
-                if (response.Contains("Pressure"))
+                if (response.Contains(pressureExpandedNodeID))
                 {
                     log.LogWarning("High pressure detected!");
 

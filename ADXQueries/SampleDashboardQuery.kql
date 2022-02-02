@@ -1,5 +1,5 @@
 opcua_telemetry
-| where ExpandedNodeID == "EnergyConsumption"
+| where ExpandedNodeID == "http://opcfoundation.org/UA/Station/#i=406"
 | where DataSetWriterID has "assembly.munich"
 | where SourceTimestamp > _startTime and SourceTimestamp < _endTime
 | order by SourceTimestamp desc

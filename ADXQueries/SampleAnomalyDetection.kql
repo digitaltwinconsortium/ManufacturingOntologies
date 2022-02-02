@@ -1,6 +1,6 @@
 let range=3h;
 opcua_telemetry
-| where ExpandedNodeID == "EnergyConsumption"
+| where ExpandedNodeID == "http://opcfoundation.org/UA/Station/#i=406"
 | where DataSetWriterID has "assembly.munich"
 | where SourceTimestamp > now()-range and SourceTimestamp < now()
 | order by SourceTimestamp desc

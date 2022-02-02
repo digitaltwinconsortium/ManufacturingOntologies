@@ -49,6 +49,13 @@ docker network disconnect -f seattle.corp.contoso publisher.seattle.corp.contoso
 docker network disconnect -f beijing.corp.contoso publisher.beijing.corp.contoso
 docker network disconnect -f rio.corp.contoso publisher.rio.corp.contoso
 
+docker network disconnect -f munich.corp.contoso twin.munich.corp.contoso
+docker network disconnect -f capetown.corp.contoso twin.capetown.corp.contoso
+docker network disconnect -f mumbai.corp.contoso twin.mumbai.corp.contoso
+docker network disconnect -f seattle.corp.contoso twin.seattle.corp.contoso
+docker network disconnect -f beijing.corp.contoso twin.beijing.corp.contoso
+docker network disconnect -f rio.corp.contoso twin.rio.corp.contoso
+
 Echo Stopping containers...
 FOR /f "tokens=*" %%i IN ('docker ps -a -q') DO docker stop %%i
 

@@ -3,48 +3,64 @@
 let idealRunningTime = hoursInShift * 60 * 60 * 1000; // [ms]
 let shiftEndTime = now();
 let shiftStartTime = datetime_add('hour', -hoursInShift, shiftEndTime);
+let nodeIDNumberOfManufacturedProducts = toscalar(
+opcfoundation_org_UA_Station
+| where DisplayName == "NumberOfManufacturedProducts"
+| project ExpandedNodeID);
 let numProdEnd = toscalar(
 opcua_telemetry
 | where SourceTimestamp > shiftStartTime and SourceTimestamp < shiftEndTime
 | where DataSetWriterID has stationName
-| where ExpandedNodeID == "http://opcfoundation.org/UA/Station/#i=385"
+| where ExpandedNodeID == nodeIDNumberOfManufacturedProducts
 | extend numProd = toint(Value)
 | summarize max(numProd));
 let numProdStart = toscalar(
 opcua_telemetry
 | where SourceTimestamp > shiftStartTime and SourceTimestamp < shiftEndTime
 | where DataSetWriterID has stationName
-| where ExpandedNodeID == "http://opcfoundation.org/UA/Station/#i=385"
+| where ExpandedNodeID == nodeIDNumberOfManufacturedProducts
 | extend numProd = toint(Value)
 | summarize min(numProd));
+let nodeIDNumberOfDiscardedProducts = toscalar(
+opcfoundation_org_UA_Station
+| where DisplayName == "NumberOfDiscardedProducts"
+| project ExpandedNodeID);
 let numScrapEnd = toscalar(
 opcua_telemetry
 | where SourceTimestamp > shiftStartTime and SourceTimestamp < shiftEndTime
 | where DataSetWriterID has stationName
-| where ExpandedNodeID == "http://opcfoundation.org/UA/Station/#i=391"
+| where ExpandedNodeID == nodeIDNumberOfDiscardedProducts
 | extend numDisc = toint(Value)
 | summarize max(numDisc));
 let numScrapStart = toscalar(
 opcua_telemetry
 | where SourceTimestamp > shiftStartTime and SourceTimestamp < shiftEndTime
 | where DataSetWriterID has stationName
-| where ExpandedNodeID == "http://opcfoundation.org/UA/Station/#i=391"
+| where ExpandedNodeID == nodeIDNumberOfDiscardedProducts
 | extend numDisc = toint(Value)
 | summarize min(numDisc));
 let numProdShift = numProdEnd - numProdStart;
 let numScrapShift = numScrapEnd - numScrapStart;
+let nodeIDActualCycleTime = toscalar(
+opcfoundation_org_UA_Station
+| where DisplayName == "ActualCycleTime"
+| project ExpandedNodeID);
 let actualCycleTime = toscalar(
 opcua_telemetry
 | where SourceTimestamp > shiftStartTime and SourceTimestamp < shiftEndTime
 | where DataSetWriterID has stationName
-| where ExpandedNodeID == "http://opcfoundation.org/UA/Station/#i=418"
+| where ExpandedNodeID == nodeIDActualCycleTime
 | extend cycleTime = toint(Value)
 | summarize avg(cycleTime));
+let nodeIDFaultyTime = toscalar(
+opcfoundation_org_UA_Station
+| where DisplayName == "FaultyTime"
+| project ExpandedNodeID);
 let faultyTimeShift = toscalar(
 opcua_telemetry
 | where SourceTimestamp > shiftStartTime and SourceTimestamp < shiftEndTime
 | where DataSetWriterID has stationName
-| where ExpandedNodeID == "http://opcfoundation.org/UA/Station/#i=399"
+| where ExpandedNodeID == nodeIDFaultyTime
 | extend faultyTime = toint(Value)
 | summarize sum(faultyTime));
 let availability = todouble(idealRunningTime - faultyTimeShift) / todouble(idealRunningTime);

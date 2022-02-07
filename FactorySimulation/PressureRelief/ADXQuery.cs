@@ -44,7 +44,7 @@ namespace PressureRelief
                 string query = "opcua_telemetry"
                              + " | where ExpandedNodeID == '" + pressureExpandedNodeID + "'"
                              + " | where DataSetWriterID has '" + uaServerDNSName + "'"
-                             + " | where SourceTimestamp > now() - 30s"
+                             + " | where SourceTimestamp > now() - 1m"
                              + " | order by SourceTimestamp desc"
                              + " | extend value = todouble(Value)"
                              + " | where value > 4000" // [mbar]

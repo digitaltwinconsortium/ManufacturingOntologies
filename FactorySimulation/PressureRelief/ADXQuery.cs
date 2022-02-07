@@ -23,7 +23,7 @@ namespace PressureRelief
             string tenantId = Environment.GetEnvironmentVariable("AAD_TENANT_ID");
             string iotHubName = Environment.GetEnvironmentVariable("IOT_HUB_NAME");
             string iotHubKey = Environment.GetEnvironmentVariable("IOT_HUB_KEY");
-            string opcTwinName = Environment.GetEnvironmentVariable("OPC_TWIN_NAME");
+            string uaCommanderName = Environment.GetEnvironmentVariable("UACOMMANDER_NAME");
             string uaServerEndpoint = Environment.GetEnvironmentVariable("UA_SERVER_ENDPOINT");
             string uaServerMethodID = Environment.GetEnvironmentVariable("UA_SERVER_METHOD_ID");
             string uaServerObjectID = Environment.GetEnvironmentVariable("UA_SERVER_OBJECT_ID");
@@ -71,17 +71,12 @@ namespace PressureRelief
                                     + "&se=" + expiry
                                     + "&skn=iothubowner";
 
-                    // call OPC UA method on UA Server via OPC Twin via IoT Hub REST endpoint
-                    MethodCallPayload payload = new MethodCallPayload();
-                    payload.Endpoint.Url = uaServerEndpoint;
-                    payload.Request.MethodId = uaServerMethodID; 
-                    payload.Request.ObjectId = uaServerObjectID; // the parent UA node of the method
-                    string payloadString = JsonConvert.SerializeObject(payload, Formatting.Indented);
-
+                    // call OPC UA method on UA Server via UACommander via IoT Hub REST endpoint
                     webClient.Headers.Remove("Authorization");
                     webClient.Headers.Add("Authorization", sasToken);
-                    string url = "https://" + iotHubName + ".azure-devices.net/twins/" + opcTwinName + "/methods?api-version=2018-06-30";
-                    response = webClient.UploadString(url, "POST", "{ \"methodName\":\"methodcall_v2\", \"responseTimeoutInSeconds\":\"200\", \"payload\":" + payloadString + " }");
+                    string url = "https://" + iotHubName + ".azure-devices.net/twins/" + uaCommanderName + "/methods?api-version=2018-06-30";
+                    string payloadString = "{ \"Endpoint\": \"" + uaServerEndpoint + "\", \"MethodNodeId\": \"" + uaServerMethodID + "\", \"ParentNodeId\": \"" + uaServerObjectID + "\", \"Arguments\": null }";
+                    response = webClient.UploadString(url, "POST", "{ \"methodName\":\"Command\", \"responseTimeoutInSeconds\":\"200\", \"payload\":" + payloadString + " }");
                     if (response.Contains("\"status\":200"))
                     {
                         log.LogInformation("Pressure release valve opened.");

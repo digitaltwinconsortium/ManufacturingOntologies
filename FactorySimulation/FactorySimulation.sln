@@ -50,6 +50,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ADXQueries", "ADXQueries", "{0719DA37-3043-4EBE-B71E-5BEE08F57459}"
 	ProjectSection(SolutionItems) = preProject
 		..\ADXQueries\EnergyConsumptionCalculation.kql = ..\ADXQueries\EnergyConsumptionCalculation.kql
+		..\ADXQueries\ForecastingProduction.kql = ..\ADXQueries\ForecastingProduction.kql
 		..\ADXQueries\GetUACloudLibraryURLs.kql = ..\ADXQueries\GetUACloudLibraryURLs.kql
 		..\ADXQueries\OEECalculationForLine.kql = ..\ADXQueries\OEECalculationForLine.kql
 		..\ADXQueries\OEECalculationForStation.kql = ..\ADXQueries\OEECalculationForStation.kql

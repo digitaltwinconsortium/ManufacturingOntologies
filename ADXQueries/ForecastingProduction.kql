@@ -1,0 +1,13 @@
+let horizon = (_endTime - _startTime) / 2;
+let dt = 1m;
+let nodeID = toscalar(
+opcfoundation_org_UA_Station
+| where DisplayName == "NumberOfManufacturedProducts"
+| project ExpandedNodeID);
+opcua_telemetry
+| where ExpandedNodeID == nodeID
+| where DataSetWriterID has "assembly.munich"
+| where SourceTimestamp >_startTime and SourceTimestamp < _endTime
+| order by SourceTimestamp desc
+| make-series actual=avg(toint(Value)) on SourceTimestamp from _startTime to _endTime + horizon step dt by ExpandedNodeID, DataSetWriterID 
+| extend forecast = series_decompose_forecast(actual, toint(horizon/dt))

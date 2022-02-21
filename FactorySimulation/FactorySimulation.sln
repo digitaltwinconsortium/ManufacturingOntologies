@@ -41,9 +41,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{1A63931E
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TwinModels", "TwinModels", "{3FBCD654-B7B7-4EDA-9FE5-331D6933CCBD}"
 	ProjectSection(SolutionItems) = preProject
-		..\TwinGraph\automotivetwingraph.json = ..\TwinGraph\automotivetwingraph.json
 		..\Models\MES.json = ..\Models\MES.json
-		..\TwinGraph\simulationtwingraph.json = ..\TwinGraph\simulationtwingraph.json
 		..\Models\Station.json = ..\Models\Station.json
 	EndProjectSection
 EndProject
@@ -51,6 +49,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ADXQueries", "ADXQueries", 
 	ProjectSection(SolutionItems) = preProject
 		..\ADXQueries\EnergyConsumptionCalculation.kql = ..\ADXQueries\EnergyConsumptionCalculation.kql
 		..\ADXQueries\ForecastingProduction.kql = ..\ADXQueries\ForecastingProduction.kql
+		..\ADXQueries\GetStationsForLineMunich.kql = ..\ADXQueries\GetStationsForLineMunich.kql
 		..\ADXQueries\GetUACloudLibraryURLs.kql = ..\ADXQueries\GetUACloudLibraryURLs.kql
 		..\ADXQueries\OEECalculationForLine.kql = ..\ADXQueries\OEECalculationForLine.kql
 		..\ADXQueries\OEECalculationForStation.kql = ..\ADXQueries\OEECalculationForStation.kql
@@ -68,6 +67,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{F0B6D9E0-3
 		..\Docs\line.png = ..\Docs\line.png
 		..\Docs\modelrelationships.png = ..\Docs\modelrelationships.png
 		..\Docs\twingraph.png = ..\Docs\twingraph.png
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TwinGraphs", "TwinGraphs", "{505EFED3-31F4-4A60-9892-7C3626133701}"
+	ProjectSection(SolutionItems) = preProject
+		..\TwinGraph\automotivetwingraph.json = ..\TwinGraph\automotivetwingraph.json
+		..\TwinGraph\simulationtwingraph.json = ..\TwinGraph\simulationtwingraph.json
 	EndProjectSection
 EndProject
 Global
@@ -97,6 +102,7 @@ Global
 		{1A63931E-229D-4667-90D4-0E900E0C327A} = {76B67AA2-0F21-470C-BB63-2F0FEFAF7B95}
 		{3FBCD654-B7B7-4EDA-9FE5-331D6933CCBD} = {76B67AA2-0F21-470C-BB63-2F0FEFAF7B95}
 		{0719DA37-3043-4EBE-B71E-5BEE08F57459} = {76B67AA2-0F21-470C-BB63-2F0FEFAF7B95}
+		{505EFED3-31F4-4A60-9892-7C3626133701} = {76B67AA2-0F21-470C-BB63-2F0FEFAF7B95}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {20C453B8-C514-460F-AECD-C786582ABC39}

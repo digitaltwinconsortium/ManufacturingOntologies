@@ -24,7 +24,6 @@ exit /b 1
 Echo Building Factory Simulation...
 dotnet restore
 dotnet publish -c Release -o .\BuildOutput
-Xcopy /E /I /Y .\BuildOutput\bin .\BuildOutput
 
 Echo Copying Publisher config files...
 Xcopy /E /I /Y .\Config C:\docker\Config

@@ -59,8 +59,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ADXQueries", "ADXQueries", 
 		..\ADXQueries\SampleDashboardQuery.kql = ..\ADXQueries\SampleDashboardQuery.kql
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PressureRelief", "PressureRelief\PressureRelief.csproj", "{98BA2738-3111-4896-8C09-106AB041D066}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{F0B6D9E0-3342-4EFB-B130-CED6108E944E}"
 	ProjectSection(SolutionItems) = preProject
 		..\Docs\FactorySimulationTwin.png = ..\Docs\FactorySimulationTwin.png
@@ -89,10 +87,6 @@ Global
 		{68787539-6C61-4096-8C24-0BD7710F9C7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{68787539-6C61-4096-8C24-0BD7710F9C7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{68787539-6C61-4096-8C24-0BD7710F9C7E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{98BA2738-3111-4896-8C09-106AB041D066}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{98BA2738-3111-4896-8C09-106AB041D066}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{98BA2738-3111-4896-8C09-106AB041D066}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{98BA2738-3111-4896-8C09-106AB041D066}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -22,3 +22,15 @@
 /FactorySimulation/PressureRelief/Properties/serviceDependencies.pressurereleaf - Zip Deploy.json.user
 /FactorySimulation/PressureRelief/bin/Release/netcoreapp3.1
 /FactorySimulation/PressureRelief/PressureRelief.csproj.user
+/PressureRelief/.vs/PressureRelief
+/PressureRelief/bin
+/PressureRelief/obj
+/PressureRelief/Properties/PublishProfiles
+/PressureRelief/Properties/launchSettings.json
+/PressureRelief/Properties/ServiceDependencies/pressurereleaf - Zip Deploy
+/PressureRelief/Properties/serviceDependencies.pressurereleaf - Zip Deploy.json.user
+/PressureRelief/Properties/serviceDependencies.pressurereleaf - Zip Deploy.json
+/PressureRelief/Properties/serviceDependencies.local.json.user
+/PressureRelief/Properties/serviceDependencies.local.json
+/PressureRelief/Properties/serviceDependencies.json
+/PressureRelief/PressureRelief.csproj.user

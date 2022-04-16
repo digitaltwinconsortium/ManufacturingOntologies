@@ -1,6 +1,6 @@
 let nodeID = toscalar(
 opcfoundation_org_UA_Station
-| where DisplayName == "Status"
+| where DisplayName == "1:Status"
 | project ExpandedNodeID);
 opcua_telemetry
 | where ExpandedNodeID == nodeID

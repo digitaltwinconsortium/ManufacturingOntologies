@@ -2,7 +2,7 @@ let horizon = (_endTime - _startTime) / 2;
 let dt = 1m;
 let nodeID = toscalar(
 opcfoundation_org_UA_Station
-| where DisplayName == "NumberOfManufacturedProducts"
+| where DisplayName == "1:NumberOfManufacturedProducts"
 | project ExpandedNodeID);
 opcua_telemetry
 | where ExpandedNodeID == nodeID

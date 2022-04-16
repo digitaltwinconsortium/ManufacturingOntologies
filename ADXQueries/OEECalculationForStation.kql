@@ -5,7 +5,7 @@ let shiftEndTime = now();
 let shiftStartTime = datetime_add('hour', -hoursInShift, shiftEndTime);
 let nodeIDNumberOfManufacturedProducts = toscalar(
 opcfoundation_org_UA_Station
-| where DisplayName == "NumberOfManufacturedProducts"
+| where DisplayName == "1:NumberOfManufacturedProducts"
 | project ExpandedNodeID);
 let numProdEnd = toscalar(
 opcua_telemetry
@@ -23,7 +23,7 @@ opcua_telemetry
 | summarize min(numProd));
 let nodeIDNumberOfDiscardedProducts = toscalar(
 opcfoundation_org_UA_Station
-| where DisplayName == "NumberOfDiscardedProducts"
+| where DisplayName == "1:NumberOfDiscardedProducts"
 | project ExpandedNodeID);
 let numScrapEnd = toscalar(
 opcua_telemetry
@@ -43,7 +43,7 @@ let numProdShift = numProdEnd - numProdStart;
 let numScrapShift = numScrapEnd - numScrapStart;
 let nodeIDActualCycleTime = toscalar(
 opcfoundation_org_UA_Station
-| where DisplayName == "ActualCycleTime"
+| where DisplayName == "1:ActualCycleTime"
 | project ExpandedNodeID);
 let actualCycleTime = toscalar(
 opcua_telemetry
@@ -54,7 +54,7 @@ opcua_telemetry
 | summarize avg(cycleTime));
 let nodeIDFaultyTime = toscalar(
 opcfoundation_org_UA_Station
-| where DisplayName == "FaultyTime"
+| where DisplayName == "1:FaultyTime"
 | project ExpandedNodeID);
 let faultyTimeShift = toscalar(
 opcua_telemetry

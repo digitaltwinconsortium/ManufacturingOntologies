@@ -3,7 +3,7 @@ let shiftEndTime = now();
 let shiftStartTime = datetime_add('hour', -hoursInShift, shiftEndTime);
 let nodeID = toscalar(
 opcfoundation_org_UA_Station
-| where DisplayName == "EnergyConsumption"
+| where DisplayName == "1:EnergyConsumption"
 | project ExpandedNodeID);
 let averageEnergyConsumption = toscalar(
 opcua_telemetry

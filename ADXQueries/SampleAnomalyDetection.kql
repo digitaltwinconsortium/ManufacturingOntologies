@@ -1,7 +1,7 @@
 let range=3h;
 let nodeID = toscalar(
 opcfoundation_org_UA_Station
-| where DisplayName == "EnergyConsumption"
+| where DisplayName == "1:EnergyConsumption"
 | project ExpandedNodeID);
 opcua_telemetry
 | where ExpandedNodeID == nodeID

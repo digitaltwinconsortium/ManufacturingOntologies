@@ -27,8 +27,9 @@ namespace PressureRelief
             string uaServerEndpoint = Environment.GetEnvironmentVariable("UA_SERVER_ENDPOINT");
             string uaServerMethodID = Environment.GetEnvironmentVariable("UA_SERVER_METHOD_ID");
             string uaServerObjectID = Environment.GetEnvironmentVariable("UA_SERVER_OBJECT_ID");
-            string uaServerDNSName = Environment.GetEnvironmentVariable("UA_SERVER_DNS_NAME");
-            
+            string uaServerApplicationName = Environment.GetEnvironmentVariable("UA_SERVER_APPLICATION_NAME");
+            string uaServerLocationName = Environment.GetEnvironmentVariable("UA_SERVER_LOCATION_NAME");
+
             try
             {
                 WebClient webClient = new WebClient();
@@ -40,22 +41,23 @@ namespace PressureRelief
                 string response = webClient.UploadString("https://login.microsoftonline.com/" + tenantId + "/oauth2/token", "POST", content);
 
                 // call ADX REST endpoint with query
-                string pressureExpandedNodeID = "http://opcfoundation.org/UA/Station/#i=434";
-                string query = "opcua_telemetry"
-                             + " | where ExpandedNodeID == '" + pressureExpandedNodeID + "'"
-                             + " | where DataSetWriterID has '" + uaServerDNSName + "'"
-                             + " | where SourceTimestamp > now() - 2m" // SourceTimestamp is when the data was generated in the UA server, so take cloud ingestion time into account!
-                             + " | order by SourceTimestamp desc"
-                             + " | extend value = todouble(Value)"
-                             + " | where value > 4000" // [mbar]
-                             + " | project ExpandedNodeID";
+                string query = "opcua_metadata_lkv"
+                               + "| where Name contains '" + uaServerApplicationName + "'"
+                               + "| where Name contains '" + uaServerLocationName + "'"
+                               + "| join kind = inner(opcua_telemetry"
+                               + "    | where Name == 'Pressure'"
+                               + ") on DataSetWriterID"
+                               + "| order by Timestamp desc"
+                               + "| extend value = toint(Value)"
+                               + "| where value > 4000"
+                               + "| project Name";
 
                 webClient.Headers.Remove("Accept");
                 webClient.Headers.Remove("Content-Type");
                 webClient.Headers.Add("Authorization", "bearer " + JObject.Parse(response)["access_token"].ToString());
                 webClient.Headers.Add("Content-Type", "application/json");
                 response = webClient.UploadString(adxInstanceURL + "/v2/rest/query", "POST", "{ \"db\":\"" + adxDatabaseName + "\", \"csl\":\"" + query + "\" }");
-                if (response.Contains(pressureExpandedNodeID))
+                if (response.Contains(uaServerApplicationName))
                 {
                     log.LogWarning("High pressure detected!");
 

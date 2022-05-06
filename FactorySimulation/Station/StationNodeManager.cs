@@ -31,8 +31,6 @@ namespace Station.Simulation
         private DateTime m_cycleStartTime;
 
         private const ulong c_pressureDefault = 2500;          // [mbar]
-        private const ulong c_pressureHigh = 6000;             // [mbar]
-        private DateTime m_pressureStableStartTime = DateTime.UtcNow;
         private double m_pressure = c_pressureDefault;         // [mbar]
 
         private StationStatus m_status = StationStatus.Ready;
@@ -276,7 +274,6 @@ namespace Station.Simulation
         private ServiceResult OpenPressureReleaseValve(ISystemContext context, MethodState method, IList<object> inputArguments, IList<object> outputArguments)
         {
             m_pressure = c_pressureDefault;
-            m_pressureStableStartTime = DateTime.UtcNow;
 
             UpdateNodeValues();
 
@@ -418,22 +415,13 @@ namespace Station.Simulation
             // energy consumption [kWh] = (PowerConsumption [kW] * actualCycleTime [s]) / 3600
             m_energyConsumption = (powerConsumption * ((double)m_actualCycleTime / 1000.0)) / 3600.0;
 
-            // For stations configured to generate alerts, calculate pressure
-            if (Program.GenerateAlerts)
+            // slowly increase pressure until c_pressureHigh is reached
+            m_pressure += Math.Abs(NormalDistribution(m_random, (cycleTimeModifier - 1.0) * 10.0, 10.0));
+
+            // keep pressure within our bounds
+            if (m_pressure < c_pressureDefault)
             {
-                // slowly increase pressure until c_pressureHigh is reached
-                m_pressure += Math.Abs(NormalDistribution(m_random, (cycleTimeModifier - 1.0) * 10.0, 10.0));
-
-                // keep pressure within our bounds
-                if (m_pressure < c_pressureDefault)
-                {
-                    m_pressure = c_pressureDefault;
-                }
-
-                if (m_pressure > c_pressureHigh)
-                {
-                    m_pressure = c_pressureHigh;
-                }
+                m_pressure = c_pressureDefault;
             }
         }
 

@@ -11,8 +11,6 @@ namespace Station.Simulation
 
     public class Program
     {
-        public static bool GenerateAlerts { get; set; }
-
         public static double PowerConsumption { get; set; }
 
         public static ulong CycleTime { get; set; }
@@ -70,7 +68,6 @@ namespace Station.Simulation
             // calculate our power consumption in [kW] and cycle time in [s]
             PowerConsumption = ulong.Parse(args[2], NumberStyles.Integer);
             CycleTime = ulong.Parse(args[3], NumberStyles.Integer);
-            GenerateAlerts = (args[4] == "yes") ? true : false;
 
             // print out our configuration
             Console.WriteLine("OPC UA Server Configuration:");
@@ -79,7 +76,6 @@ namespace Station.Simulation
             Console.WriteLine("Application URI: " + config.ApplicationUri);
             Console.WriteLine("Power consumption: " + PowerConsumption.ToString() + "kW");
             Console.WriteLine("Cycle time: " + CycleTime.ToString() + "s");
-            Console.WriteLine("Generate alerts:" + GenerateAlerts.ToString());
             Console.WriteLine();
 
             // check the application certificate.

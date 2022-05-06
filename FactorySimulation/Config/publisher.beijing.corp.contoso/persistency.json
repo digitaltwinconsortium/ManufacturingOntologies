@@ -1,0 +1,695 @@
+[
+  {
+    "EndpointUrl": "opc.tcp://assembly.beijing1.corp.contoso/ua/beijing1/",
+    "OpcNodes": [
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=379",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=385",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=391",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=398",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=399",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=400",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=406",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=412",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=418",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=434",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      }
+    ],
+    "OpcEvents": [],
+    "OpcAuthenticationMode": "Anonymous"
+  },
+  {
+    "EndpointUrl": "opc.tcp://test.beijing1.corp.contoso/ua/beijing1/",
+    "OpcNodes": [
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=379",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=385",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=391",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=398",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=399",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=400",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=406",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=412",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=418",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=434",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      }
+    ],
+    "OpcEvents": [],
+    "OpcAuthenticationMode": "Anonymous"
+  },
+  {
+    "EndpointUrl": "opc.tcp://packaging.beijing1.corp.contoso/ua/beijing1/",
+    "OpcNodes": [
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=379",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=385",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=391",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=398",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=399",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=400",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=406",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=412",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=418",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=434",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      }
+    ],
+    "OpcEvents": [],
+    "OpcAuthenticationMode": "Anonymous"
+  },
+  {
+    "EndpointUrl": "opc.tcp://assembly.beijing2.corp.contoso/ua/beijing2/",
+    "OpcNodes": [
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=379",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=385",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=391",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=398",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=399",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=400",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=406",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=412",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=418",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=434",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      }
+    ],
+    "OpcEvents": [],
+    "OpcAuthenticationMode": "Anonymous"
+  },
+  {
+    "EndpointUrl": "opc.tcp://test.beijing2.corp.contoso/ua/beijing2/",
+    "OpcNodes": [
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=379",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=385",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=391",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=398",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=399",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=400",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=406",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=412",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=418",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=434",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      }
+    ],
+    "OpcEvents": [],
+    "OpcAuthenticationMode": "Anonymous"
+  },
+  {
+    "EndpointUrl": "opc.tcp://packaging.beijing2.corp.contoso/ua/beijing2/",
+    "OpcNodes": [
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=379",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=385",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=391",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=398",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=399",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=400",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=406",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=412",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=418",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=434",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      }
+    ],
+    "OpcEvents": [],
+    "OpcAuthenticationMode": "Anonymous"
+  },
+  {
+    "EndpointUrl": "opc.tcp://assembly.beijing3.corp.contoso/ua/beijing3/",
+    "OpcNodes": [
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=379",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=385",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=391",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=398",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=399",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=400",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=406",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=412",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=418",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=434",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      }
+    ],
+    "OpcEvents": [],
+    "OpcAuthenticationMode": "Anonymous"
+  },
+  {
+    "EndpointUrl": "opc.tcp://test.beijing3.corp.contoso/ua/beijing3/",
+    "OpcNodes": [
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=379",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=385",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=391",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=398",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=399",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=400",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=406",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=412",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=418",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=434",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      }
+    ],
+    "OpcEvents": [],
+    "OpcAuthenticationMode": "Anonymous"
+  },
+  {
+    "EndpointUrl": "opc.tcp://packaging.beijing3.corp.contoso/ua/beijing3/",
+    "OpcNodes": [
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=379",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=385",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=391",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=398",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=399",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=400",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=406",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=412",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=418",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station/;i=434",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      }
+    ],
+    "OpcEvents": [],
+    "OpcAuthenticationMode": "Anonymous"
+  }
+]

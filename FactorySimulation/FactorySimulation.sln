@@ -14,16 +14,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{B5CF718D-5A9E-4744-917F-BEE6B25E7E73}"
-	ProjectSection(SolutionItems) = preProject
-		Config\publisher.rio.corp.contoso\publishednodes.json = Config\publisher.rio.corp.contoso\publishednodes.json
-		Config\publisher.capetown.corp.contoso\publishednodes.json = Config\publisher.capetown.corp.contoso\publishednodes.json
-		Config\publisher.mumbai.corp.contoso\publishednodes.json = Config\publisher.mumbai.corp.contoso\publishednodes.json
-		Config\publisher.munich.corp.contoso\publishednodes.json = Config\publisher.munich.corp.contoso\publishednodes.json
-		Config\publisher.seattle.corp.contoso\publishednodes.json = Config\publisher.seattle.corp.contoso\publishednodes.json
-		Config\publisher.beijing.corp.contoso\publishednodes.json = Config\publisher.beijing.corp.contoso\publishednodes.json
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{5D5C241D-F3A8-4F06-9E9A-36E031212384}"
 	ProjectSection(SolutionItems) = preProject
 		..\Docs\FactorySimulationTwin.png = ..\Docs\FactorySimulationTwin.png
@@ -47,14 +37,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TwinModels", "TwinModels", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ADXQueries", "ADXQueries", "{0719DA37-3043-4EBE-B71E-5BEE08F57459}"
 	ProjectSection(SolutionItems) = preProject
-		..\ADXQueries\EnergyConsumptionCalculation.kql = ..\ADXQueries\EnergyConsumptionCalculation.kql
+		..\ADXQueries\CalculateAvgEnergyConsumption.kql = ..\ADXQueries\CalculateAvgEnergyConsumption.kql
+		..\ADXQueries\CalculateOEE.kql = ..\ADXQueries\CalculateOEE.kql
+		..\ADXQueries\CalculateOEEForStation.kql = ..\ADXQueries\CalculateOEEForStation.kql
 		..\ADXQueries\ForecastingProduction.kql = ..\ADXQueries\ForecastingProduction.kql
 		..\ADXQueries\GetStationsForLineMunich.kql = ..\ADXQueries\GetStationsForLineMunich.kql
 		..\ADXQueries\GetUACloudLibraryURLs.kql = ..\ADXQueries\GetUACloudLibraryURLs.kql
-		..\ADXQueries\OEECalculationForLine.kql = ..\ADXQueries\OEECalculationForLine.kql
-		..\ADXQueries\OEECalculationForStation.kql = ..\ADXQueries\OEECalculationForStation.kql
-		..\ADXQueries\OPCUAPubSubDatasetExpand.kql = ..\ADXQueries\OPCUAPubSubDatasetExpand.kql
-		..\ADXQueries\OPCUAPubSubRawExpand.kql = ..\ADXQueries\OPCUAPubSubRawExpand.kql
+		..\ADXQueries\OPCUADatasetExpand.kql = ..\ADXQueries\OPCUADatasetExpand.kql
+		..\ADXQueries\OPCUAMetadataExpand.kql = ..\ADXQueries\OPCUAMetadataExpand.kql
+		..\ADXQueries\OPCUARawExpand.kql = ..\ADXQueries\OPCUARawExpand.kql
 		..\ADXQueries\SampleAnomalyDetection.kql = ..\ADXQueries\SampleAnomalyDetection.kql
 		..\ADXQueries\SampleDashboardQuery.kql = ..\ADXQueries\SampleDashboardQuery.kql
 	EndProjectSection

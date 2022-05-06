@@ -52,7 +52,9 @@ To install the production line simulation, you need a Windows PC or virtual mach
 
 * Open a command prompt and navigate to the FactorySimulation directory of the Zip you just downloaded.
 
-* Edit the BuildAndRunSimulation.cmd and replace the ENTER_PUBLISHER_DEVICE_CONNECTION_STRING_HERE placeholder string with the primary connection strings of the 6 IoT Hub Publisher devices you have created earlier. Also replace the ENTER_IOT_HUB_HOSTNAME_HERE with the name of your IoT Hub. Also replace the ENTER_UACOMMANDER_DEVICE_KEY_HERE string with the primary key of the 6 IoT Hub UACommander devices you have created earlier. All of this data can be accssed by clicking on the names of the devices in the Azure Portal.
+* Edit the settings.json file for each publisher directory located in the Config directory. Replace [myiothub] with the name of your IoT Hub and replace [publisherkey] with the primary key of the 6 IoT Hub publisher devices you have created earlier. This data can be accessed by clicking on the names of the devices in the Azure Portal.
+
+* Edit the BuildAndRunSimulation.cmd script and replace the ENTER_IOT_HUB_HOSTNAME_HERE with the name of your IoT Hub. Also replace the ENTER_UACOMMANDER_DEVICE_KEY_HERE string with the primary key of the 6 IoT Hub uacommander devices you have created earlier. Again, this data can be accessed by clicking on the names of the devices in the Azure Portal.
 
 * Run the BuildAndRunSimulation.cmd script from the FactorySimulation folder. This will build the code and Docker container, setup the Docker networks and run the simulation. A total of 8 production lines will be started, each with 3 stations each (assembly, test and packaging) as well as an MES per line and an OPC Publisher instance per factory location. There are 6 locations in total: Munich, Capetown, Mumbai, Seattle, Beijing and Rio.
 
@@ -93,6 +95,19 @@ The simulation is configured to include 8 production lines by default and the co
 | Beijing 3	| 4 |
 | Rio |	10 |
 
+### OPC UA Node IDs of Station OPC UA Server
+
+The following OPC UA Node IDs are used in the Station OPC UA Server for telemetry to the cloud
+* i=379 - manufactured product serial number
+* i=385 - number of manufactured products
+* i=391 - number of discarded products
+* i=398 - running time
+* i=399 - faulty time
+* i=400 - status (0=station ready to do work, 1=work in progress, 2=work done and good part manufactured, 3=work done and scrap manufactured, 4=station in fault state)
+* i=406 - energy consumption
+* i=412 - ideal cycle time
+* i=418 - actual cycle time
+* i=434 - pressure
 
 ## License
 

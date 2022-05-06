@@ -1,7 +1,8 @@
-.create-or-alter function OPCUARawExpand {
+.create-or-alter function OPCUARawExpand() {
     opcua_raw
     |mv-expand records = payload.Messages
     |project 
         DataSetWriterID = tostring(records["DataSetWriterId"]),
+        Timestamp = todatetime(records["Timestamp"]),
         Payload = todynamic(records["Payload"])
 }

@@ -1,0 +1,73 @@
+.create-or-alter function CalculateOEEForStation(stationName:string,location:string,idealCycleTime:int,hoursInShift:int) {
+// calculation from https://www.oee.com/calculating-oee/
+let idealRunningTime = hoursInShift * 60 * 60 * 1000; // [ms]
+let shiftEndTime = now();
+let shiftStartTime = datetime_add('hour', -hoursInShift, shiftEndTime);
+let numProdEnd = toscalar(
+opcua_metadata_lkv
+| where Name contains stationName
+| where Name contains location
+| join kind=inner (opcua_telemetry
+    | where Name == "NumberOfManufacturedProducts"
+    | where Timestamp > shiftStartTime and Timestamp < shiftEndTime
+) on DataSetWriterID
+| extend numProd = toint(Value)
+| summarize max(numProd));
+let numProdStart = toscalar(
+opcua_metadata_lkv
+| where Name contains stationName
+| where Name contains location
+| join kind=inner (opcua_telemetry
+    | where Name == "NumberOfManufacturedProducts"
+    | where Timestamp > shiftStartTime and Timestamp < shiftEndTime
+) on DataSetWriterID
+| extend numProd = toint(Value)
+| summarize min(numProd));
+let numScrapEnd = toscalar(
+opcua_metadata_lkv
+| where Name contains stationName
+| where Name contains location
+| join kind=inner (opcua_telemetry
+    | where Name == "NumberOfDiscardedProducts"
+    | where Timestamp > shiftStartTime and Timestamp < shiftEndTime
+) on DataSetWriterID
+| extend numDisc = toint(Value)
+| summarize max(numDisc));
+let numScrapStart = toscalar(
+opcua_metadata_lkv
+| where Name contains stationName
+| where Name contains location
+| join kind=inner (opcua_telemetry
+    | where Name == "NumberOfDiscardedProducts"
+    | where Timestamp > shiftStartTime and Timestamp < shiftEndTime
+) on DataSetWriterID
+| extend numDisc = toint(Value)
+| summarize min(numDisc));
+let numProdShift = numProdEnd - numProdStart;
+let numScrapShift = numScrapEnd - numScrapStart;
+let actualCycleTime = toscalar(
+opcua_metadata_lkv
+| where Name contains stationName
+| where Name contains location
+| join kind=inner (opcua_telemetry
+    | where Name == "ActualCycleTime"
+    | where Timestamp > shiftStartTime and Timestamp < shiftEndTime
+) on DataSetWriterID
+| extend cycleTime = toint(Value)
+| summarize avg(cycleTime));
+let faultyTimeShift = toscalar(
+opcua_metadata_lkv
+| where Name contains stationName
+| where Name contains location
+| join kind=inner (opcua_telemetry
+    | where Name == "FaultyTime"
+    | where Timestamp > shiftStartTime and Timestamp < shiftEndTime
+) on DataSetWriterID
+| extend faultyTime = toint(Value)
+| summarize sum(faultyTime));
+let availability = todouble(idealRunningTime - faultyTimeShift) / todouble(idealRunningTime);
+let performance = todouble(idealCycleTime) * todouble(numProdShift + numScrapShift) / todouble(idealRunningTime - faultyTimeShift);
+let quality = todouble(numProdShift) / todouble(numProdShift + numScrapShift);
+let oee = availability * performance * quality;
+toscalar(oee)
+}

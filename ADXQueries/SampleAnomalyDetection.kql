@@ -1,13 +1,10 @@
-let range=3h;
-let nodeID = toscalar(
-opcfoundation_org_UA_Station
-| where DisplayName == "EnergyConsumption"
-| project ExpandedNodeID);
-opcua_telemetry
-| where ExpandedNodeID == nodeID
-| where DataSetWriterID has "assembly.munich"
-| where SourceTimestamp > now()-range and SourceTimestamp < now()
-| order by SourceTimestamp desc
-| make-series num=avg(todouble(Value)) on SourceTimestamp from now()-range to now() step 1s by ExpandedNodeID, DataSetWriterID 
-| extend (anomalies, score, baseline) = series_decompose_anomalies(num, 1.0, -1, 'linefit')
-| render anomalychart with(anomalycolumns=anomalies, legend=hidden)
+opcua_metadata_lkv
+| where Name contains "assembly"
+| where Name contains "seattle"
+| join kind=inner (opcua_telemetry
+    | where Name == "EnergyConsumption"
+    | where Timestamp > _startTime and Timestamp < _endTime
+) on DataSetWriterID
+| order by Timestamp desc
+| make-series num=avg(todouble(Value)) on Timestamp from _startTime to _endTime step 1s 
+| extend (anomalies, score, baseline) = series_decompose_anomalies(num, 0.5, -1, 'linefit')

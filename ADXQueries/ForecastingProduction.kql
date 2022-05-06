@@ -1,13 +1,12 @@
 let horizon = (_endTime - _startTime) / 2;
 let dt = 1m;
-let nodeID = toscalar(
-opcfoundation_org_UA_Station
-| where DisplayName == "NumberOfManufacturedProducts"
-| project ExpandedNodeID);
-opcua_telemetry
-| where ExpandedNodeID == nodeID
-| where DataSetWriterID has "assembly.munich"
-| where SourceTimestamp >_startTime and SourceTimestamp < _endTime
-| order by SourceTimestamp desc
-| make-series actual=avg(toint(Value)) on SourceTimestamp from _startTime to _endTime + horizon step dt by ExpandedNodeID, DataSetWriterID 
+opcua_metadata_lkv
+| where Name contains "assembly"
+| where Name contains "seattle"
+| join kind=inner (opcua_telemetry
+    | where Name == "NumberOfManufacturedProducts"
+    | where Timestamp > _startTime and Timestamp < _endTime
+) on DataSetWriterID
+| order by Timestamp desc
+| make-series actual=avg(toint(Value)) on Timestamp from _startTime to _endTime + horizon step dt
 | extend forecast = series_decompose_forecast(actual, toint(horizon/dt))

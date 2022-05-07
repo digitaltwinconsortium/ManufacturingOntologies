@@ -50,6 +50,7 @@ namespace PressureRelief
                                + "| order by Timestamp desc"
                                + "| extend value = toint(Value)"
                                + "| where value > 4000"
+                               + "| where Timestamp > now() - 2m" // Timestamp is when the data was generated in the UA server, so we take cloud ingestion time into account!"
                                + "| project Name";
 
                 webClient.Headers.Remove("Accept");

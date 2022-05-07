@@ -38,7 +38,7 @@ The digital twin graph for the simulated production line is depicted below (take
 
 ### Architecture
 
-<img src="Docs/architecture.png" alt="architecture" width="300" />
+<img src="Docs/architecture.png" alt="architecture" width="900" />
 
 ### Installation Instructions
 

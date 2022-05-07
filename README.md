@@ -36,6 +36,10 @@ The digital twin graph for the simulated production line is depicted below (take
 
 <img src="Docs/FactorySimulationTwin.png" alt="relationships" width="300" />
 
+### Architecture
+
+<img src="Docs/architecture.png" alt="architecture" width="300" />
+
 ### Installation Instructions
 
 To install the production line simulation, you need a Windows PC or virtual machine with at least 8GB of memory. Then follow these steps:

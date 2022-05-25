@@ -46,7 +46,7 @@ To install the production line simulation, you need a Windows PC or virtual mach
 
 * Use an existing Azure subscription you have admin access to or get a free Azure subscription from [here](https://azure.microsoft.com/en-us/free).
 
-* Deploy an S1 Azure IoT Hub into your Azure subscription. Once deployed, create 6 devices and call them publisher.munich.corp.contoso, publisher.capetown.corp.contoso, publisher.mumbai.corp.contoso, publisher.seattle.corp.contoso, publisher.beijing.corp.contoso and publisher.rio.corp.contoso. Create another 6 devices, but replace the word "publisher" with "uacommander", i.e. uacommander.munich.corp.contoso,etc.
+* Deploy an S2 Azure IoT Hub into your Azure subscription. Once deployed, create 6 devices and call them publisher.munich.corp.contoso, publisher.capetown.corp.contoso, publisher.mumbai.corp.contoso, publisher.seattle.corp.contoso, publisher.beijing.corp.contoso and publisher.rio.corp.contoso. Create another 6 devices, but replace the word "publisher" with "uacommander", i.e. uacommander.munich.corp.contoso,etc.
 
 * Download and install the latest .NET Core SDK (not just the Runtime!) from [here](https://dotnet.microsoft.com/en-us/download/dotnet).
 

@@ -3,10 +3,9 @@ namespace PressureRelief
 {
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using System;
-    using System.Net;
+    using System.Net.Http;
     using System.Security.Cryptography;
     using System.Text;
     using System.Web;
@@ -32,13 +31,15 @@ namespace PressureRelief
 
             try
             {
-                WebClient webClient = new WebClient();
+                HttpClient webClient = new HttpClient();
 
                 // acquire OAuth2 token via AAD REST endpoint
-                webClient.Headers.Add("Accept", "application/json");
-                webClient.Headers.Add("Content-Type", "application/x-www-form-urlencoded"); 
+                webClient.DefaultRequestHeaders.Add("Accept", "application/json");
                 string content = $"grant_type=client_credentials&resource={adxInstanceURL}&client_id={applicationClientId}&client_secret={applicationKey}";
-                string response = webClient.UploadString("https://login.microsoftonline.com/" + tenantId + "/oauth2/token", "POST", content);
+                HttpResponseMessage responseMessage = webClient.Send(new HttpRequestMessage(HttpMethod.Post, "https://login.microsoftonline.com/" + tenantId + "/oauth2/token") {
+                    Content = new StringContent(content, Encoding.UTF8, "application/x-www-form-urlencoded")
+                });
+                string response = responseMessage.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
                 // call ADX REST endpoint with query
                 string query = "opcua_metadata_lkv"
@@ -50,14 +51,16 @@ namespace PressureRelief
                                + "| order by Timestamp desc"
                                + "| extend value = toint(Value)"
                                + "| where value > 4000"
-                               + "| where Timestamp > now() - 2m" // Timestamp is when the data was generated in the UA server, so we take cloud ingestion time into account!"
+                               + "| where Timestamp > now() - 10m" // Timestamp is when the data was generated in the UA server, so we take cloud ingestion time into account!"
                                + "| project Name";
 
-                webClient.Headers.Remove("Accept");
-                webClient.Headers.Remove("Content-Type");
-                webClient.Headers.Add("Authorization", "bearer " + JObject.Parse(response)["access_token"].ToString());
-                webClient.Headers.Add("Content-Type", "application/json");
-                response = webClient.UploadString(adxInstanceURL + "/v2/rest/query", "POST", "{ \"db\":\"" + adxDatabaseName + "\", \"csl\":\"" + query + "\" }");
+                webClient.DefaultRequestHeaders.Remove("Accept");
+                webClient.DefaultRequestHeaders.Add("Authorization", "bearer " + JObject.Parse(response)["access_token"].ToString());
+                responseMessage = webClient.Send(new HttpRequestMessage(HttpMethod.Post, adxInstanceURL + "/v2/rest/query") {
+                    Content = new StringContent("{ \"db\":\"" + adxDatabaseName + "\", \"csl\":\"" + query + "\" }", Encoding.UTF8, "application/json")
+                });
+
+                response = responseMessage.Content.ReadAsStringAsync().GetAwaiter().GetResult();
                 if (response.Contains(uaServerApplicationName))
                 {
                     log.LogWarning("High pressure detected!");
@@ -75,11 +78,15 @@ namespace PressureRelief
                                     + "&skn=iothubowner";
 
                     // call OPC UA method on UA Server via UACommander via IoT Hub REST endpoint
-                    webClient.Headers.Remove("Authorization");
-                    webClient.Headers.Add("Authorization", sasToken);
+                    webClient.DefaultRequestHeaders.Remove("Authorization");
+                    webClient.DefaultRequestHeaders.Add("Authorization", sasToken);
                     string url = "https://" + iotHubName + ".azure-devices.net/twins/" + uaCommanderName + "/methods?api-version=2018-06-30";
                     string payloadString = "{ \"Endpoint\": \"" + uaServerEndpoint + "\", \"MethodNodeId\": \"" + uaServerMethodID + "\", \"ParentNodeId\": \"" + uaServerObjectID + "\", \"Arguments\": null }";
-                    response = webClient.UploadString(url, "POST", "{ \"methodName\":\"Command\", \"responseTimeoutInSeconds\":\"200\", \"payload\":" + payloadString + " }");
+                    responseMessage = webClient.Send(new HttpRequestMessage(HttpMethod.Post, url) {
+                        Content = new StringContent("{ \"methodName\":\"Command\", \"responseTimeoutInSeconds\":\"200\", \"payload\":" + payloadString + " }", Encoding.UTF8, "application/json")
+                    });
+
+                    response = responseMessage.Content.ReadAsStringAsync().GetAwaiter().GetResult();
                     if (response.Contains("\"status\":200"))
                     {
                         log.LogInformation("Pressure release valve opened.");

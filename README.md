@@ -80,6 +80,8 @@ Also, if you want to test a "digital feedback loop", i.e. triggering a command o
 * UA_SERVER_OBJECT_ID
 * UA_SERVER_DNS_NAME
 
+Please note: If you update your Docker Desktop runtime environment, you will need to stop and restart the simulation!
+
 ### Overall Equipment Effectiveness (OEE) Calculation
 
 OEE is a common metric in production environments, see the reference calculation [here](https://www.oee.com/calculating-oee). In the simulation, OEE is calculated on a continous basis and the MES is continously running, i.e. there are no planned stopages in the production. This can be changed by introducing shift times and starting and stopping the MES at the beginning and at the end of a shift. The shift times can also be imported into ADX via one-click ingestion (for example in Excel format) and the OEE calculation functions updated with this data, see [here](https://docs.microsoft.com/en-us/azure/data-explorer/ingest-data-one-click).

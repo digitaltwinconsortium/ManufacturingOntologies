@@ -94,6 +94,8 @@ namespace Station.Simulation
             }
         }
 
+        // Nodeset2 files can be edited using e.g. the SIEMENS OPC UA Modeling Editor (SiOME)
+        // see https://support.industry.siemens.com/cs/document/109755133/siemens-opc-ua-modeling-editor-(siome)-for-implementing-opc-ua-companion-specification
         private void ImportNodeset2Xml(IDictionary<NodeId, IList<IReference>> externalReferences, string resourcepath)
         {
             NodeStateCollection predefinedNodes = new NodeStateCollection();

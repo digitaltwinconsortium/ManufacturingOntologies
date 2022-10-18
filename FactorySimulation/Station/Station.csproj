@@ -10,6 +10,7 @@
     <RootNamespace>Station.Simulation</RootNamespace>
     <BaseOutputPath>bin\</BaseOutputPath>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>.</DockerfileContext>
   </PropertyGroup>
 
   <ItemGroup>

@@ -5,10 +5,10 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["Station/Station.csproj", "Station/"]
-RUN dotnet restore "Station/Station.csproj"
+COPY ["Station.csproj", "."]
+RUN dotnet restore "./Station.csproj"
 COPY . .
-WORKDIR "/src/Station"
+WORKDIR "/src/."
 RUN dotnet build "Station.csproj" -c Release -o /app/build
 
 FROM build AS publish

@@ -48,8 +48,6 @@ To install the production line simulation, you need a Windows PC or virtual mach
 
 * Deploy an S2 Azure IoT Hub into your Azure subscription. Once deployed, create 6 devices and call them publisher.munich.corp.contoso, publisher.capetown.corp.contoso, publisher.mumbai.corp.contoso, publisher.seattle.corp.contoso, publisher.beijing.corp.contoso and publisher.rio.corp.contoso. Create another 6 devices, but replace the word "publisher" with "uacommander", i.e. uacommander.munich.corp.contoso,etc.
 
-* Download and install the latest .NET Core SDK (not just the Runtime!) from [here](https://dotnet.microsoft.com/en-us/download/dotnet).
-
 * Download and install Docker Desktop from [here](https://www.docker.com/products/docker-desktop), including the Windows Subsystem for Linux (WSL) integration. After installation and a required system restart, accept the license terms and install the WSL2 Linux kernel by following the instructions. Then verify that Docker Desktop is running in the Windows System Tray and enable Kubernetes in Settings.
 
 * Browse to [here](https://github.com/digitaltwinconsortium/ManufacturingDTDLOntologies) and select Code -> Download Zip. Unzip the contents to a directory of your choice.
@@ -58,9 +56,9 @@ To install the production line simulation, you need a Windows PC or virtual mach
 
 * Edit the settings.json file for each publisher directory located in the Config directory. Replace [myiothub] with the name of your IoT Hub and replace [publisherkey] with the primary key of the 6 IoT Hub publisher devices you have created earlier. This data can be accessed by clicking on the names of the devices in the Azure Portal.
 
-* Edit the BuildAndRunSimulation.cmd script and replace the ENTER_IOT_HUB_HOSTNAME_HERE with the name of your IoT Hub. Also replace the ENTER_UACOMMANDER_DEVICE_KEY_HERE string with the primary key of the 6 IoT Hub uacommander devices you have created earlier. Again, this data can be accessed by clicking on the names of the devices in the Azure Portal.
+* Edit the StartSimulation.cmd script and replace the ENTER_IOT_HUB_HOSTNAME_HERE with the name of your IoT Hub. Also replace the ENTER_UACOMMANDER_DEVICE_KEY_HERE string with the primary key of the 6 IoT Hub uacommander devices you have created earlier. Again, this data can be accessed by clicking on the names of the devices in the Azure Portal.
 
-* Run the BuildAndRunSimulation.cmd script from the FactorySimulation folder. This will build the code and Docker container, setup the Docker networks and run the simulation. A total of 8 production lines will be started, each with 3 stations each (assembly, test and packaging) as well as an MES per line and an OPC Publisher instance per factory location. There are 6 locations in total: Munich, Capetown, Mumbai, Seattle, Beijing and Rio.
+* Run the StartSimulation.cmd script from the FactorySimulation folder. This will run the simulation. A total of 8 production lines will be started, each with 3 stations each (assembly, test and packaging) as well as an MES per line and an OPC Publisher instance per factory location. There are 6 locations in total: Munich, Capetown, Mumbai, Seattle, Beijing and Rio.
 
 * Open the Docker Desktop Dashboard by clicking the Docker icon in the Windows system Tray and check out the logs of an MES and a Publisher by clicking on their names to verify that the simulated production has started and OPC UA PubSub telemetry messages are being sent to IoT Hub. Additionally, you can use the Azure IoT Explorer tool from [here](https://github.com/Azure/azure-iot-explorer/releases) by entering the IoT Hub Owner Primary Connection String in the tool, selecting one of the OPC Publishers and clicking on Telemetry -> Start.
 
@@ -88,7 +86,7 @@ OEE is a common metric in production environments, see the reference calculation
 
 ### Default Simulation Configuration
 
-The simulation is configured to include 8 production lines by default and the configuration can be altered in the BuildAndRunSimulation.cmd script. The default configuration is depicted below:
+The simulation is configured to include 8 production lines by default and the configuration can be altered in the StartSimulation.cmd script. The default configuration is depicted below:
 
 | Production Line | Ideal Cycle Time (in seconds) |
 |:---------------:|:-----------------------------:|

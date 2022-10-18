@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Station": {
+      "commandName": "Project",
+      "commandLineArgs": "station opc.tcp://station.munich.corp.contoso/ua/munich/ 200 6 yes"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "commandLineArgs": "station opc.tcp://station.munich.corp.contoso/ua/munich/ 200 6 yes"
+    }
+  }
+}

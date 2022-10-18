@@ -1,0 +1,54 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:Referable;1",
+    "@type": "Interface",
+    "displayName": "Referable",
+    "description": "An element that is referable by its idShort. This id is not globally unique. This id is unique within the name space of the element.",
+    "extends": ["dtmi:digitaltwins:aas:HasExtensions;1"],
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "idShort",
+            "description": "In case of identifiables this attribute is a short name of the element. In case of referable this id is an identifying string of the element within its name space.",
+            "comment": "Optional",
+            "schema": "string"
+        },
+        {
+            "@type": "Component",
+            "name": "displayName",
+            "displayName": "Display name",
+            "description": "Display name. Can be provided in several languages.",
+            "schema": "dtmi:digitaltwins:aas:LangStringSet;1"
+        },
+        {
+            "@type": "Property",
+            "name": "category",
+            "displayName": "Category",
+            "description": "The category is a value that gives further meta information w.r.t. to the class of the element. It affects the expected existence of attributes and the applicability of constraints.",
+            "writable": true,
+            "schema": "string"
+        },
+        {
+            "@type": "Component",
+            "name": "description",
+            "displayName": "Description",
+            "description": "Description or comments on the element. The description can be provided in several languages.",
+            "schema": "dtmi:digitaltwins:aas:LangStringSet;1"
+        },
+        {
+            "@type": "Property",
+            "name": "checksum",
+            "displayName": "Checksum",
+            "description": "Checksum to be used to determine if an Referable (including its aggregated child elements) has changed.The checksum is calculated by the user’s tool environment. The checksum has no semantic meaning for an Asset Administration Shell model and there is no requirement for Asset Administration Shell tools to manage the checksum.",
+            "writable": true,
+            "schema": "string"
+        },
+        {
+            "@type": "Component",
+            "name": "tags",
+            "schema": "dtmi:digitaltwins:aas:ext:Tags;1",
+            "comment": "Not part of the AAS meta model. Makes querying easier. See https://docs.microsoft.com/en-us/azure/digital-twins/how-to-use-tags"
+        }
+    ]
+}

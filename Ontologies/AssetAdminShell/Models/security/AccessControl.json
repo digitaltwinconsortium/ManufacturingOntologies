@@ -1,0 +1,74 @@
+{
+  "@context": "dtmi:dtdl:context;2",
+  "@id": "dtmi:digitaltwins:aas:AccessControl;1",
+  "@type": "Interface",
+  "displayName": "AccessControl",
+  "description": "Access Control defines the local access control policy administration point.",
+  "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "contents": [
+    {
+      "@type": "Relationship",
+      "name": "accessPermissionRule",
+      "displayName": "Access Permission Rule",
+      "description": "Access permission rules of the AAS describing the rights assigned to",
+      "target": "dtmi:digitaltwins:aas:AccessPermissionRule;1",
+      "writable": true
+    },
+    {
+      "@type": "Relationship",
+      "name": "selectableSubjectAttributes",
+      "displayName": "selectableSubjectAttributes",
+      "description": "authenticated subjects that are configured for the AAS. They are selectable by the access permission rules to assign permissions to the       subjects",
+      "target": "dtmi:digitaltwins:aas:Submodel;1",
+      "minMultiplicity": 0,
+      "maxMultiplicity": 1
+    },
+    {
+      "@type": "Relationship",
+      "name": "defaultSubjectAttributes",
+      "displayName": "defaultSubjectAttributes",
+      "comment": "mandatory",
+      "description": "Reference to a submodel defining the default subjects’ attributes for the AAS that can be used to describe access permission rules",
+      "target": "dtmi:digitaltwins:aas:Submodel;1",
+      "maxMultiplicity": 1
+    },
+    {
+      "@type": "Relationship",
+      "name": "selectablePermissions",
+      "displayName": "selectablePermissions",
+      "comment": "mandatory",
+      "description": "Reference to a submodel defining which permissions can be assigned to the subjects",
+      "target": "dtmi:digitaltwins:aas:Submodel;1",
+      "minMultiplicity": 0,
+      "maxMultiplicity": 1
+    },
+    {
+      "@type": "Relationship",
+      "name": "defaultPermissions",
+      "displayName": "defaultPermissions",
+      "comment": "mandatory",
+      "description": "Reference to a submodel defining which permissions can be assigned to the subjects",
+      "target": "dtmi:digitaltwins:aas:Submodel;1",
+      "minMultiplicity": 0,
+      "maxMultiplicity": 1
+    },
+    {
+      "@type": "Relationship",
+      "name": "selectableEnvironmentAttributes",
+      "displayName": "selectableEnvironmentAttributes",
+      "description": "Reference to a submodel defining which environment attributes can be accessed via the permission rules defined for the AAS, i.e. attributes that are not describing the asset itself.",
+      "target": "dtmi:digitaltwins:aas:Submodel;1",
+      "minMultiplicity": 0,
+      "maxMultiplicity": 1
+    },
+    {
+      "@type": "Relationship",
+      "name": "defaultEnvironmentAttributes",
+      "displayName": "defaultEnvironmentAttributes",
+      "description": " Reference to a submodel defining default environment attributes, i.e. attributes that are  not describing the asset itself.",
+      "target": "dtmi:digitaltwins:aas:Submodel;1",
+      "minMultiplicity": 0,
+      "maxMultiplicity": 1
+    }
+  ]
+}

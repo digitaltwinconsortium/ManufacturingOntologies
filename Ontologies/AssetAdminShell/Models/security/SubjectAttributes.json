@@ -1,0 +1,19 @@
+{
+  "@context": "dtmi:dtdl:context;2",
+  "@id": "dtmi:digitaltwins:aas:SubjectAttributes;1",
+  "@type": "Interface",
+  "displayName": "Subject Attributes",
+  "description": "A set of data elements that further classifies a specific subject",
+  "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "contents": [
+    {
+      "@type": "Relationship",
+      "name": "subjectAttribute",
+      "displayName": "Subject Attribute",
+      "comment": "mandatory",
+      "description": "A data element that further classifies a specific subject.",
+      "target": "dtmi:digitaltwins:aas:DataElement;1",
+      "writable": true
+    }
+  ]
+}

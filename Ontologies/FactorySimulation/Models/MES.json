@@ -1,0 +1,18 @@
+{
+  "@id": "dtmi:MES;1",
+  "@type": "Interface",
+  "contents": [
+     {
+      "@type": "Command",
+      "name": "Execute"
+    },
+    {
+      "@type": "Command",
+      "name": "Reset"
+    }
+  ],
+  "@context": [
+    "dtmi:dtdl:context;2"
+  ],
+  "displayName": "MES"
+}

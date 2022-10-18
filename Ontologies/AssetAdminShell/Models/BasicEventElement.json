@@ -1,0 +1,110 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:BasicEventElement;1",
+    "@type": "Interface",
+    "displayName": "Basic Event Element",
+    "description": "A basic event element.",
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "extends": [
+        "dtmi:digitaltwins:aas:EventElement;1"
+    ],
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "observed",
+            "displayName": "Observed",
+            "description": "Reference to the Referable, which defines the scope of the event. Can be AAS, Submodel or SubmodelElement. Reference to a referable, e.g. a data element or a submodel, that is being observed.",
+            "comment": "Mandatory",
+            "writable": true,
+            "maxMultiplicity": 1,
+            "target": "dtmi:digitaltwins:aas:Referable;1"
+        },
+        {
+            "@type": "Property",
+            "name": "direction",
+            "displayName": "Direction",
+            "description": "Direction of event",
+            "writable": true,
+            "schema": {
+                "@type": "Enum",
+                "valueSchema": "string",
+                "enumValues": [
+                    {
+                        "name": "Input",
+                        "enumValue": "input",
+                        "description": "Input direction"
+                    },
+                    {
+                        "name": "Output",
+                        "enumValue": "output",
+                        "description": "Output direction"
+                    }
+               ]
+            }
+        },
+        {
+            "@type": "Property",
+            "name": "state",
+            "displayName": "State",
+            "description": "State of the event",
+            "writable": true,
+            "schema": {
+                "@type": "Enum",
+                "valueSchema": "string",
+                "enumValues": [
+                    {
+                        "name": "On",
+                        "enumValue": "on",
+                        "description": "Event is on"
+                    },
+                    {
+                        "name": "Off",
+                        "enumValue": "off",
+                        "description": "Event is off"
+                    }
+                ]
+            }
+        },
+        {
+            "@type": "Property",
+            "name": "messageTopic",
+            "displayName": "Message topic",
+            "description": "Information for the outer message infrastructure for scheduling the event to the respective communication channel. ",
+            "schema": "string",
+            "writable": true
+        },
+        {
+            "@type": "Relationship",
+            "name": "messageBroker",
+            "displayName": "Message broker",
+            "description": "Information, which outer message infrastructure shall handle messages for the EventElement. Refers to a Submodel,SubmodelElementList, SubmodelElementCollection or Entity, which contains DataElements describing the proprietary specification for the message broker.Note: for different message infrastructure, e.g. OPC UA or MQTT or AMQP, this proprietary specification could be standardized by having respective Submodels.",
+            "target": "dtmi:digitaltwins:aas:Referable;1",
+            "writable": true,
+            "maxMultiplicity": 1
+        },
+        {
+            "@type": "Property",
+            "name": "lastUpdate",
+            "displayName": "Last updated at",
+            "description": "Timestamp in UTC, when the last event was received (input direction) or sent (output direction).",
+            "writable": true,
+            "schema": "dateTime"
+        },
+        {
+            "@type": "Property",
+            "name": "minInterval",
+            "displayName": "Minimum interval",
+            "description": "For input direction, reports on the maximum frequency, the software entity behind the respective Referable can handle input events. For output events, specifies the maximum frequency of outputting this event to an outer infrastructure. Might be not specified, that is, there is no minimum interval",
+            "writable": true,
+            "schema": "dateTime"
+        },
+        {
+            "@type": "Property",
+            "name": "maxInterval",
+            "displayName": "Maximum interval",
+            "description": "For input direction: not applicable. For output direction: maximum interval in time, the respective Referable shall send an update of the status of the event, even if no other trigger condition for the event was not met. Might be not specified, that is, there is no maximum interval.",
+            "writable": true,
+            "schema": "dateTime"
+        }
+    ]
+}

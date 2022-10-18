@@ -1,0 +1,19 @@
+{
+  "@context": "dtmi:dtdl:context;2",
+  "@id": "dtmi:digitaltwins:aas:Security;1",
+  "@type": "Interface",
+  "displayName": "Security",
+  "description": "Container for security relevant information of the AAS.",
+  "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "contents": [
+    {
+      "@type": "Relationship",
+      "name": "accessControlPolicyPoints",
+      "displayName": "Access Control Policy Points",
+      "description": "Access control policy points of the AAS.",
+      "target": "dtmi:digitaltwins:aas:AccessControlPolicyPoints;1",
+      "maxMultiplicity": 1,
+      "writable": true
+    }
+  ]
+}

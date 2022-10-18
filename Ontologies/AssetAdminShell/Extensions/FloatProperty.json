@@ -1,0 +1,19 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:ext:FloatProperty;1",
+    "@type": "Interface",
+    "displayName": "Float property",
+    "description": "Extension of AAS Property model for Float primitive schema of DTDL",
+    "comment": "Not part of the AAS meta model. Enables querying with primitive schemas for Properties",
+    "extends": ["dtmi:digitaltwins:aas:Property;1"],
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "floatValue",
+            "displayName": "Float value",
+            "description": "Value as float - An IEEE 4-byte floating point",
+            "schema": "float",
+            "writable": true
+        }
+    ]
+}

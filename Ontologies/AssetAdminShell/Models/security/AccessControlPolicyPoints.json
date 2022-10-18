@@ -1,0 +1,20 @@
+{
+  "@context": "dtmi:dtdl:context;2",
+  "@id": "dtmi:digitaltwins:aas:AccessControlPolicyPoints;1",
+  "@type": "Interface",
+  "displayName": "AccessControlPolicyPoints",
+  "description": "Container for access control policy points.",
+  "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "contents": [
+    {
+      "@type": "Relationship",
+      "name": "policyAdministrationPoint",
+      "displayName": "Policy administration Point",
+      "comment": "mandatory",
+      "description": "The access control administration policy point of the AAS.",
+      "target": "dtmi:digitaltwins:aas:AccessControl;1",
+      "writable": true,
+      "maxMultiplicity": 1
+    }
+  ]
+}

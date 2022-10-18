@@ -1,0 +1,38 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:SpecificAssetId;1",
+    "@type": "Interface",
+    "displayName": "Specific asset Id",
+    "extends": [
+        "dtmi:digitaltwins:aas:HasSemantics;1"
+    ],
+    "description": "A specific asset ID describes a generic supplementary identifying attribute of the asset. The specific asset ID is not necessarily globally unique.",
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "name",
+            "displayName": "Name",
+            "writable": true,
+            "schema": "string",
+            "description": "Name of the identifier"
+        },
+        {
+            "@type": "Property",
+            "name": "value",
+            "displayName": "Value",
+            "writable": true,
+            "schema": "string",
+            "description": "The value of the identifier with the corresponding name."
+        },
+        {
+            "@type": "Relationship",
+            "name": "externalSubjectId",
+            "displayName": "External subject Id",
+            "description": "The (external) subject the specific asset id belongs to or has meaning to",
+            "writable": true,
+            "maxMultiplicity": 1,
+            "target": "dtmi:digitaltwins:aas:Reference;1"
+        }
+    ]
+}

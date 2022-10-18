@@ -1,0 +1,39 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:DataSpecification;1",
+    "@type": "Interface",
+    "displayName": "Data specification",
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Component",
+            "name": "administration",
+            "displayName": "Administration",
+            "description": "Administrative information of an identifiable element.",
+            "schema": "dtmi:digitaltwins:aas:AdministrationInformation;1"
+        },
+        {
+            "@type": "Property",
+            "name": "id",
+            "displayName": "Id",
+            "description": "The globally unique identification of the element.",
+            "comment": "Mandatory",
+            "schema": "string",
+            "writable": true
+        },
+        {
+            "@type": "Relationship",
+            "name": "hasContent",
+            "writable": true,
+            "maxMultiplicity": 1,
+            "target": "dtmi:digitaltwins:aas:DataSpecificationContent;1"
+        },
+        {
+            "@type": "Component",
+            "name": "description",
+            "displayName": "Description",
+            "description": "Description or comments on the element. The description can be provided in several languages.",
+            "schema": "dtmi:digitaltwins:aas:LangStringSet;1"
+        }
+    ]
+}

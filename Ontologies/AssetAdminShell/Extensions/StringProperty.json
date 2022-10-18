@@ -1,0 +1,9 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:ext:StringProperty;1",
+    "@type": "Interface",
+    "displayName": "String property",
+    "description": "Extension of AAS Property model for String primitive schema of DTDL",
+    "comment": "Not part of the AAS meta model. Enables querying with primitive schemas for Properties",
+    "extends": ["dtmi:digitaltwins:aas:Property;1"]
+}

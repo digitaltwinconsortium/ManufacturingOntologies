@@ -1,0 +1,62 @@
+{
+  "@context": "dtmi:dtdl:context;2",
+  "@id": "dtmi:digitaltwins:aas:AssetInformation;1",
+  "@type": "Interface",
+  "displayName": "Asset information",
+  "description": "In AssetInformation identifying meta data of the asset that is represented by an AAS is defined. The asset may either represent an asset type or an asset instance.",
+  "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "contents": [
+    {
+      "@type": "Component",
+      "name": "assetKind",
+      "displayName": "Asset kind",
+      "description": "Denotes whether the Asset is of kind “Type” or “Instance”.",
+      "schema": "dtmi:digitaltwins:aas:AssetKind;1"
+    },
+    {
+      "@type": "Property",
+      "name": "globalAssetIdValue",
+      "displayName": "Global Asset Id value",
+      "description": "String serialized Global asset id value according to Spec 9.2.3 Serialization of Values of Type “Reference”",
+      "comment": "Not part of the AAS Spec. Use alternatively for 'globalAssetId'",
+      "schema": "string",
+      "writable": true
+    },
+    {
+      "@type": "Relationship",
+      "name": "globalAssetId",
+      "description": "Reference to either an Asset object or a global reference to the asset the AAS is representing.",
+      "writable": true,
+      "displayName": "Global Asset Id",
+      "maxMultiplicity": 1,
+      "target": "dtmi:digitaltwins:aas:Reference;1"
+    },
+    {
+      "@type": "Property",
+      "name": "specificAssetIdValues",
+      "displayName": "Specific asset Id values",
+      "description": "Comma separated list of specific asset id values. Name of specific asset id in parentheses. E.g (Serial number)123456798, (FID)SS928734",
+      "comment": "Not part of the AAS Spec. Use alternatively for 'specificAssetId'",
+      "schema": "string",
+      "writable": true
+    },
+    {
+      "@type": "Relationship",
+      "name": "specificAssetId",
+      "displayName": "specified by",
+      "description": "Additional domain specific specific, typically proprietary Identifier for the asset like e.g. serial number etc",
+      "writable": true,
+      "target": "dtmi:digitaltwins:aas:SpecificAssetId;1"
+    },
+    {
+      "@type": "Relationship",
+      "name": "defaultThumbnail",
+      "displayName": "Default thumbnail",
+      "description": "Thumbnail of the asset represented by the asset administration shell. Used as default.",
+      "writable": true,
+      "minMultiplicity": 0,
+      "maxMultiplicity": 1,
+      "target": "dtmi:digitaltwins:aas:Resource;1"
+    }
+  ]
+}

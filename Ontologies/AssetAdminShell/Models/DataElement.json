@@ -1,0 +1,9 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:DataElement;1",
+    "@type": "Interface",
+    "displayName": "Data element",
+    "description": "A data element is a submodel element that is not further composed out of other submodel elements. A data element is a submodel element that has a value. The type of value differs for different subtypes of data elements.",
+    "extends": ["dtmi:digitaltwins:aas:SubmodelElement;1"],
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02"
+}

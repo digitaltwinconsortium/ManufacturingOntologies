@@ -1,0 +1,42 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:td:GeneralInformation;1",
+    "@type": "Interface",
+    "displayName": "General Information",
+    "description": "General information, for example ordering and manufacturer information",
+    "comment": "According Industrie 4.0 specification at https://www.zvei.org/fileadmin/user_upload/Presse_und_Medien/Publikationen/2020/Dezember/Submodel_Templates_of_the_Asset_Administration_Shell/201117_I40_ZVEI_SG2_Submodel_Spec_ZVEI_Technical_Data_Version_1_1.pdf",
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "ManufacturerName",
+            "writable": true,
+            "description": "Legally valid designation of the natural or judicial body which is directly responsible for the design, production, packaging and labeling of a product in respect to its being brought into the market.",
+            "displayName": "Manufacturer Name",
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
+            "name": "ManufacturerProductDesignation",
+            "writable": true,
+            "description": "Product designation as given by the mnaufacturer. Short description of the product, product group or function (short text) in common language.",
+            "displayName": "Manufacturer Product Designation",
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
+            "name": "ManufacturerPartNumber",
+            "writable": true,
+            "description": "Unique product identifier of the manufacturer for the product type respective the type designation of the industrial equipment.",
+            "displayName": "Manufacturer Part Number",
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
+            "name": "ManufacturerOrderCode",
+            "writable": true,
+            "description": "Unique product identifier of the manufacturer sufficient to order the exact same product.",
+            "displayName": "Manufacturer Order Code",
+            "schema": "string"
+        }
+    ]
+}

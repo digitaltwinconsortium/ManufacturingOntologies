@@ -1,0 +1,9 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:isa95:ProcessCell;1",
+    "@type": "Interface",
+    "displayName": "Process cell",
+    "description": "Process cells and units are the lowest level of equipment typically scheduled by the Level 4 and Level 3 functions for batch manufacturing processes. ",
+    "comment": "According to ANSI/ISA-95.00.01-2010 (IEC 62264-1 Mod) Enterprise-Control System Integration − Part 1: Models and Terminology - Approved 13 May 2010",
+    "extends": ["dtmi:digitaltwins:isa95:WorkCenter;1"]
+  }

@@ -1,0 +1,41 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:Extension;1",
+    "@type": "Interface",
+    "displayName": "Extension",
+    "description": "Single extension of an element",
+    "extends": ["dtmi:digitaltwins:aas:HasSemantics;1"],
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "name",
+            "description": "An extension of the element.  Constraint AASd-077: The name of an extension within HasExtensions needs to be unique.",
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
+            "name": "valueType",
+            "description": "Type of the value of the extension.",
+            "schema": "string",
+            "writable": true
+        },
+        {
+            "@type": "Property",
+            "name": "value",
+            "description": "Value of the extension",
+            "displayName": "Value",
+            "schema": "string",
+            "writable": true
+        },
+        {
+            "@type": "Relationship",
+            "name": "refersTo",
+            "description": "Reference to an element the extension refers to.",
+            "displayName": "Refers to",
+            "comment": "Type ModelReference<Referable> according to specification",
+            "target": "dtmi:digitaltwins:aas:Referable;1",
+            "writable": true
+        }
+    ]
+}

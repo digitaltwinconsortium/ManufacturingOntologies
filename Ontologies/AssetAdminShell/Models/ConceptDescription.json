@@ -1,0 +1,22 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:ConceptDescription;1",
+    "@type": "Interface",
+    "displayName": "Concept Description",
+    "description": "The semantics of a property or other elements that may have a semantic description is defined by a concept description. The description of the concept should follow a standardized schema (realized as data specificationtemplate).",
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "extends": [
+        "dtmi:digitaltwins:aas:Identifiable;1",
+        "dtmi:digitaltwins:aas:HasDataSpecification;1"
+    ],
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "isCaseOf",
+            "displayName": "Is case of",
+            "description": "Reference to an external definition the concept is compatible to or was derived from.",
+            "writable": true,
+            "target": "dtmi:digitaltwins:aas:Reference;1"
+        }
+    ]
+}

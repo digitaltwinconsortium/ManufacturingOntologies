@@ -1,0 +1,27 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:Identifiable;1",
+    "@type": "Interface",
+    "displayName": "Identifiable",
+    "description": "An identifiable element is a referable with a globally unique identifier (Identifier). To reference an identifiable only the global id (identification/id) shall be used because the idShort is not unique for an identifiable. Identifiables may have administrative information like version etc",
+    "extends": ["dtmi:digitaltwins:aas:Referable;1"],
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Component",
+            "name": "administration",
+            "displayName": "Administration",
+            "description": "Administrative information of an identifiable element.",
+            "schema": "dtmi:digitaltwins:aas:AdministrationInformation;1"
+        },
+        {
+            "@type": "Property",
+            "name": "id",
+            "displayName": "Id",
+            "description": "The globally unique identification of the element.",
+            "comment": "Mandatory",
+            "schema": "string",
+            "writable": true
+        }
+    ]
+}

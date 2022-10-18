@@ -1,0 +1,40 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:Property;1",
+    "@type": "Interface",
+    "displayName": "Property",
+    "description": "A property is a data element that has a single value.",
+    "extends": [
+        "dtmi:digitaltwins:aas:DataElement;1"
+    ],
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "valueType",
+            "displayName": "Value type",
+            "description": "Data type of the value",
+            "writable": true,
+            "comment": "AAS type: DataTypeDefXsd - Mandatory",
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
+            "name": "value",
+            "displayName": "Value",
+            "description": "The value of the property instance.",
+            "writable": true,
+            "comment": "AAS type: ValueDataType",
+            "schema": "string"
+        },
+        {
+            "@type": "Relationship",
+            "name": "valueId",
+            "displayName": "Value Id",
+            "description": "Reference to the global unique id of a coded value.",
+            "comment": "AAS type: Reference",
+            "maxMultiplicity": 1,
+            "target": "dtmi:digitaltwins:aas:Reference;1"
+        }
+    ]
+}

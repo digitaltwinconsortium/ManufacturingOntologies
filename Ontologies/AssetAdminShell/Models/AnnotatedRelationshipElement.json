@@ -1,0 +1,21 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:AnnotatedRelationshipElement;1",
+    "@type": "Interface",
+    "displayName": "Annotated Relationship Element",
+    "description": "An annotated relationship element is a relationship element that can be annotated with additional data elements.",
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "extends": [
+        "dtmi:digitaltwins:aas:RelationshipElement;1"
+    ],
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "annotation",
+            "displayName": "Annotation",
+            "description": "A reference to a data element that represents an annotation that holds for the relationship between the two elements.",
+            "writable": true,
+            "target": "dtmi:digitaltwins:aas:DataElement;1"
+        }
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:Capability;1",
+    "@type": "Interface",
+    "displayName": "Capability",
+    "description": "A capability is the implementation-independent description of the potential of an asset to achieve a certain effect in the physical or virtual world. ",
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "extends": [
+        "dtmi:digitaltwins:aas:SubmodelElement;1"
+    ]
+}

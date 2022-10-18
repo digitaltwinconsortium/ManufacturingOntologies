@@ -1,0 +1,78 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:EventPayload;1",
+    "@type": "Interface",
+    "displayName": "Event payload",
+    "description": "Defines the necessary information of an event instance sent out or received",
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "source",
+            "description": "Reference to the source event element, including identification of AAS, Submodel, SubmodelElements.",
+            "target": "dtmi:digitaltwins:aas:Referable;1",
+            "maxMultiplicity": 1,
+            "writable": true
+        },
+        {
+            "@type": "Relationship",
+            "name": "sourceSemanticId",
+            "displayName": "Source semantic Id",
+            "description": "semanticId of the source event element, if available",
+            "target": "dtmi:digitaltwins:aas:Reference;1",
+            "maxMultiplicity": 1,
+            "writable": true
+        },
+        {
+            "@type": "Relationship",
+            "name": "observableReference",
+            "displayName": "Observable reference",
+            "description": "Reference to the referable, which defines the scope of the event. Can be AssetAdministrationShell, Submodel or SubmodelElement.",
+            "target": "dtmi:digitaltwins:aas:Referable;1",
+            "maxMultiplicity": 1,
+            "writable": true
+        },
+        {
+            "@type": "Relationship",
+            "name": "observableSemanticId",
+            "displayName": "Observable semantic Id",
+            "description": "semanticId of the referable which defines the scope of the event, if available. It is recommended to use a global reference",
+            "target": "dtmi:digitaltwins:aas:Reference;1",
+            "maxMultiplicity": 1,
+            "writable": true
+        },
+        {
+            "@type": "Property",
+            "name": "topic",
+            "displayName": "Topic",
+            "description": "Information for the outer message infrastructure for scheduling the event to the respective communication channel. ",
+            "schema": "string",
+            "writable": true
+        },
+        {
+            "@type": "Relationship",
+            "name": "subjectId",
+            "displayName": "Subject Id",
+            "description": "Subject, who/which initiated the creation.",
+            "target": "dtmi:digitaltwins:aas:Reference;1",
+            "maxMultiplicity": 1,
+            "writable": true
+        },
+        {
+            "@type": "Property",
+            "name": "timestamp",
+            "displayName": "Timestamp",
+            "description": "Timestamp in UTC, when this event was triggered.",
+            "schema": "dateTime",
+            "writable": true
+        },
+        {
+            "@type": "Property",
+            "name": "payload",
+            "displayName": "Payload",
+            "description": "Event specific payload. ",
+            "schema": "string",
+            "writable": true
+        }
+    ]
+}

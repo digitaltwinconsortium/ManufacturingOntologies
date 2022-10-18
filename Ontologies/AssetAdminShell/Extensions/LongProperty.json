@@ -1,0 +1,19 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:ext:LongProperty;1",
+    "@type": "Interface",
+    "displayName": "Long integer property",
+    "description": "Extension of AAS Property model for Long primitive schema of DTDL",
+    "comment": "Not part of the AAS meta model. Enables querying with primitive schemas for Properties",
+    "extends": ["dtmi:digitaltwins:aas:Property;1"],
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "longValue",
+            "displayName": "Long value",
+            "description": "Value as long - A signed 8-byte integer",
+            "schema": "long",
+            "writable": true
+        }
+    ]
+}

@@ -1,0 +1,18 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:ValueList;1",
+    "@type": "Interface",
+    "displayName": "Value List",
+    "description": "A set of value reference pairs.",
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "valueReferencePair",
+            "displayName": "Value Reference Pair",
+            "description": "A pair of a value together with its global unique ID.",
+            "writable": true,
+            "target": "dtmi:digitaltwins:aas:ValueReferencePair;1"
+        }
+    ]
+  }

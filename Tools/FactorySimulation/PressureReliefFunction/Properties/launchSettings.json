@@ -1,0 +1,22 @@
+{
+  "profiles": {
+    "PressureRelief": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ADX_INSTANCE_URL": "https://ontologies.eastus2.kusto.windows.net/",
+        "ADX_DB_NAME": "ontologies",
+        "AAD_TENANT_ID": "6e660ce4-d51a-4585-80c6-58035e212354",
+        "APPLICATION_ID": "b634c85c-29a7-4f17-b363-a3995f06051f",
+        "APPLICATION_KEY": "6Va7Q~8LKJ6asoGFGhdW8FJx5DuG-KKmiID6t",
+        "IOT_HUB_NAME": "ontologies",
+        "IOT_HUB_KEY": "mUgvs/teBImBHjYQU3R5wqKoB6NaQqisw2zM8g9+FGo=",
+        "UACOMMANDER_NAME": "uacommander.seattle.corp.contoso",
+        "UA_SERVER_ENDPOINT": "opc.tcp://assembly.seattle.corp.contoso/ua/seattle/",
+        "UA_SERVER_METHOD_ID": "ns=2;i=435",
+        "UA_SERVER_OBJECT_ID": "ns=2;i=424",
+        "UA_SERVER_APPLICATION_NAME": "assembly",
+        "UA_SERVER_LOCATION_NAME": "seattle"
+      }
+    }
+  }
+}

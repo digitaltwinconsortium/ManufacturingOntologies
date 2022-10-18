@@ -1,0 +1,1 @@
+# Sample UI for Generating Twin based on AAS Models

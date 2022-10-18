@@ -1,0 +1,228 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:DataSpecificationIEC61360;1",
+    "@type": "Interface",
+    "displayName": "DataSpecificationIEC61360",
+    "description": "Content of data specification template for concept descriptions conformant to IEC 61360. Although the IEC61360 attributes listed in this template are defined for properties and values and value lists only it is also possible to use the template for other definition",
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "extends": [
+        "dtmi:digitaltwins:aas:DataSpecificationContent;1"
+    ],
+    "contents": [
+        {
+            "@type": "Component",
+            "name": "preferredName",
+            "displayName": "Preferred Name",
+            "comment": "AAS type: LangStringSet",
+            "schema": "dtmi:digitaltwins:aas:LangStringSet;1"
+        },
+        {
+            "@type": "Component",
+            "name": "shortName",
+            "displayName": "Short name",
+            "comment": "AAS type: LangStringSet",
+            "schema": "dtmi:digitaltwins:aas:LangStringSet;1"
+        },
+        {
+            "@type": "Property",
+            "name": "unit",
+            "displayName": "Unit",
+            "writable": true,
+            "schema": "string"
+        },
+        {
+            "@type": "Relationship",
+            "name": "unitId",
+            "displayName": "Unit Id",
+            "description": "Unique unit id",
+            "writable": true,
+            "maxMultiplicity": 1,
+            "target": "dtmi:digitaltwins:aas:Reference;1"
+        },
+        {
+            "@type": "Property",
+            "name": "unitIdValue",
+            "displayName": "Unit Id value",
+            "description": "String serialized unit asset id value according to Spec 9.2.3 Serialization of Values of Type “Reference”",
+            "comment": "Not part of the AAS Spec. Use alternatively for 'unitId'",
+            "schema": "string",
+            "writable": true
+        },
+        {
+            "@type": "Property",
+            "name": "sourceOfDefinition",
+            "displayName": "Source Of Definition",
+            "writable": true,
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
+            "name": "symbol",
+            "displayName": "Symbol",
+            "writable": true,
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
+            "name": "dataType",
+            "displayName": "Data type",
+            "writable": true,
+            "comment": "AAS type: DataTypeIEC61360",
+            "schema": {
+                "@type": "Enum",
+                "valueSchema": "string",
+                "enumValues": [
+                    {
+                        "name": "Date",
+                        "enumValue": "DATE"
+                    },
+                    {
+                        "name": "String",
+                        "enumValue": "STRING"
+                    },
+                    {
+                        "name": "StringTranslatable",
+                        "displayName": "String translatable",
+                        "enumValue": "STRING_TRANSLATABLE"
+                    },
+                    {
+                        "name": "IntegerMeasure",
+                        "displayName": "Integer Measure",
+                        "enumValue": "INTEGER_MEASURE"
+                    },
+                    {
+                        "name": "IntegerCount",
+                        "displayName": "Integer Count",
+                        "enumValue": "INTEGER_COUNT"
+                    },
+                    {
+                        "name": "IntegerCurrency",
+                        "displayName": "Integer Currency",
+                        "enumValue": "INTEGER_CURRENCY"
+                    },
+                    {
+                        "name": "RealMeasure",
+                        "displayName": "Real Measure",
+                        "enumValue": "REAL_MEASURE"
+                    },
+                    {
+                        "name": "RealCount",
+                        "displayName": "Real Count",
+                        "enumValue": "REAL_COUNT"
+                    },
+                    {
+                        "name": "RealCurrency",
+                        "displayName": "Real Currency",
+                        "enumValue": "REAL_CURRENCY"
+                    },
+                    {
+                        "name": "Boolean",
+                        "enumValue": "BOOLEAN"
+                    },
+                    {
+                        "name": "IRI",
+                        "enumValue": "IRI"
+                    },
+                    {
+                        "name": "IRDI",
+                        "enumValue": "IRDI"
+                    },
+                    {
+                        "name": "Rational",
+                        "enumValue": "RATIONAL"
+                    },
+                    {
+                        "name": "RationalMeasure",
+                        "displayName": "Rational Measure",
+                        "enumValue": "RATIONAL_MEASURE"
+                    },
+                    {
+                        "name": "Time",
+                        "displayName": "Time",
+                        "enumValue": "TIME"
+                    },
+                    {
+                        "name": "Timestamp",
+                        "displayName": "Timestamp",
+                        "enumValue": "TIMESTAMP"
+                    },
+                    {
+                        "name": "HTML",
+                        "enumValue": "HTML"
+                    },
+                    {
+                        "name": "Blob",
+                        "enumValue": "BLOB"
+                    },
+                    {
+                        "name": "File",
+                        "enumValue": "FILE"
+                    }
+                ]
+            }
+        },
+        {
+            "@type": "Component",
+            "name": "definition",
+            "displayName": "Definition",
+            "description": "Definition in different languages",
+            "comment": "AAS type: LangStringSet",
+            "schema": "dtmi:digitaltwins:aas:LangStringSet;1"
+        },
+        {
+            "@type": "Property",
+            "name": "valueFormat",
+            "displayName": "Value Format",
+            "writable": true,
+            "schema": "string"
+        },
+        {
+            "@type": "Relationship",
+            "name": "valueList",
+            "displayName": "Value list",
+            "description": "List of allowed values",
+            "maxMultiplicity": 1,
+            "writable": true,
+            "target": "dtmi:digitaltwins:aas:ValueList;1"
+        },
+        {
+            "@type": "Property",
+            "name": "value",
+            "displayName": "Value",
+            "comment": "AAS type: String",
+            "writable": true,
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
+            "name": "levelType",
+            "displayName": "Level type",
+            "description": "Set of levels",
+            "comment": "AAS type: LevelType",
+            "writable": true,
+            "schema": {
+                "@type": "Enum",
+                "valueSchema": "string",
+                "displayName": "Level Type",
+                "enumValues": [
+                    {
+                        "name": "Min",
+                        "enumValue": "Min"
+                    },
+                    {
+                        "name": "Max",
+                        "enumValue": "Max"
+                    },
+                    {
+                        "name": "Nom",
+                        "enumValue": "Nom"
+                    },
+                    {
+                        "name": "Typ",
+                        "enumValue": "Typ"
+                    }
+                ]
+            }
+        }
+    ]
+}

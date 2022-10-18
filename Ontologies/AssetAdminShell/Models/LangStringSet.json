@@ -1,0 +1,29 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:LangStringSet;1",
+    "@type": "Interface",
+    "displayName": "Language String Set",
+    "description": "A set of strings, each annotated by the language of the string. The meaning of the string in each language shall be the same.",
+    "comment": "Defined as Data type in AAS metamodel and should be used as Component in Models like MultiLanguageProperty. According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "langString",
+            "description": "A set of strings, each annotated by the language of the string. The meaning of the stringin each language shall be the same.",
+            "schema": {
+                "@type": "Map",
+                "mapKey": {
+                    "name": "iso2Code",
+                    "description": "ISO 3166-1 alpha-2 codes are two-letter country codes defined in ISO 3166-1, part of the ISO 3166 standard",
+                    "schema": "string"
+                },
+                "mapValue": {
+                    "name": "langSpecString",
+                    "description": "A string in a specified language",
+                    "schema": "string"
+                }
+            },
+            "writable": true
+        }
+    ]
+}

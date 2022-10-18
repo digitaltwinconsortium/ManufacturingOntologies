@@ -1,0 +1,69 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:ReferenceElement;1",
+    "@type": "Interface",
+    "displayName": "Reference Element",
+    "description": "A reference element is a data element that defines a logical reference to another element within the same or another AAS or a reference to an external object or entity.",
+    "comment": "Since DTDLv2 doesn't support Components cascading, the complete contents of the Reference model is embedded in this model",
+    "extends": [
+        "dtmi:digitaltwins:aas:DataElement;1"
+    ],
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "referredElement",
+            "comment": "Optional. Can be used to link to a Referable inside the same DT graph",
+            "writable": true,
+            "minMultiplicity": 0,
+            "target": "dtmi:digitaltwins:aas:Referable;1"
+        },
+        {
+            "@type": "Component",
+            "name": "key1",
+            "description": "First key. Unique reference in its namespace.",
+            "schema": "dtmi:digitaltwins:aas:Key;1"
+        },
+        {
+            "@type": "Component",
+            "name": "key2",
+            "description": "Second key. Unique reference in its namespace.",
+            "schema": "dtmi:digitaltwins:aas:Key;1"
+        },
+        {
+            "@type": "Component",
+            "name": "key3",
+            "description": "Third key. Unique reference in its namespace.",
+            "schema": "dtmi:digitaltwins:aas:Key;1"
+        },
+        {
+            "@type": "Component",
+            "name": "key4",
+            "description": "Fourth key. Unique reference in its namespace.",
+            "schema": "dtmi:digitaltwins:aas:Key;1"
+        },
+        {
+            "@type": "Component",
+            "name": "key5",
+            "description": "Fifth key. Unique reference in its namespace.",
+            "schema": "dtmi:digitaltwins:aas:Key;1"
+        },
+        {
+            "@type": "Component",
+            "name": "key6",
+            "description": "Fifth key. Unique reference in its namespace.",
+            "schema": "dtmi:digitaltwins:aas:Key;1"
+        },
+        {
+            "@type": "Component",
+            "name": "key7",
+            "description": "Fifth key. Unique reference in its namespace.",
+            "schema": "dtmi:digitaltwins:aas:Key;1"
+        },
+        {
+            "@type": "Component",
+            "name": "key8",
+            "description": "Fifth key. Unique reference in its namespace.",
+            "schema": "dtmi:digitaltwins:aas:Key;1"
+        }
+    ]
+}

@@ -1,0 +1,37 @@
+{
+  "@context": "dtmi:dtdl:context;2",
+  "@id": "dtmi:digitaltwins:aas:AccessPermissionRule;1",
+  "@type": "Interface",
+  "displayName": "Access Permission Rule",
+  "description": "Table that defines access permissions per authenticated subject for a set of objects (referable elements).",
+  "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "contents": [
+    {
+      "@type": "Relationship",
+      "name": "targetSubjectAttributes",
+      "displayName": "Target Subject Attributes",
+      "description": "Target subject attributes that need to be fulfilled by the accessing subject to get the permissions defined by this rule.",
+      "target": "dtmi:digitaltwins:aas:SubjectAttributes;1",
+      "maxMultiplicity": 1,
+      "comment": "mandatory",
+      "writable": true
+    },
+    {
+      "@type": "Relationship",
+      "name": "permissionsPerObject",
+      "displayName": "Permissions Per Object",
+      "description": "Target subject attributes that need to be fulfilled by the accessing subject to get the permissions defined by this rule.",
+      "target": "dtmi:digitaltwins:aas:PermissionsPerObject;1",
+      "writable": true
+    },
+    {
+      "@type": "Relationship",
+      "name": "constraint",
+      "displayName": "Constraint",
+      "description": "Constraint that needs to be validated to true so that access permission rule holds.",
+      "target": "dtmi:digitaltwins:aas:Formula;1",
+      "writable": true,
+      "maxMultiplicity": 1
+    }
+  ]
+}

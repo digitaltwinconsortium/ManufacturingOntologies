@@ -1,0 +1,24 @@
+﻿@page "/technicaldata"
+
+<h1>Technical Data</h1>
+
+<p>&nbsp;</p>
+<h4>Generation Information</h4>
+
+ManufacturerName : <input @bind="mfgName" /> <br/>
+ManufacturerProductDesignation : <input  @bind="mfgProduct" /> <br/>
+ManufacturerPartNumber : <input  @bind="mfgPartNumber" /> <br/>
+ManufacturerOrderCode : <input  @bind="mfgOrderCode"  /> <br/>
+
+<button class="btn btn-primary" @onclick="CreateTwin">Create Twin</button>
+
+@code {
+    private string mfgName;
+    private string mfgProduct;
+    private string mfgPartNumber;
+    private string mfgOrderCode;
+    private void CreateTwin()
+    {
+        Console.WriteLine(mfgName);
+    }
+}

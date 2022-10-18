@@ -1,0 +1,35 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:Environment;1",
+    "@type": "Interface",
+    "displayName": "Environment",
+    "description": "Container for the sets of different identifiables. ",
+    "extends": ["dtmi:digitaltwins:aas:Reference;1"],
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "assetAdministrationShell",
+            "displayName": "contains shell",
+            "description": "Asset administration shell",
+            "target": "dtmi:digitaltwins:aas:AssetAdministrationShell;1",
+            "writable": true
+        },
+        {
+            "@type": "Relationship",
+            "name": "submodel",
+            "displayName": "contains submodel",
+            "description": "Submodel",
+            "target": "dtmi:digitaltwins:aas:Submodel;1",
+            "writable": true
+        },
+        {
+            "@type": "Relationship",
+            "name": "conceptDescription",
+            "displayName": "contains concept description",
+            "description": "Concept description",
+            "target": "dtmi:digitaltwins:aas:ConceptDescription;1",
+            "writable": true
+        }
+    ]
+}

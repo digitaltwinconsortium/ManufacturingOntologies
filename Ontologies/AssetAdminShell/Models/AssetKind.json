@@ -1,0 +1,32 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:AssetKind;1",
+    "@type": "Interface",
+    "displayName": "Asset kind",
+    "description": "Enumeration for denoting whether an element is a type or an instance. To be used as component in other interfaces",
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Property",
+            "name" : "assetKind",
+            "displayName": "asset kind",
+            "writable": true,
+            "schema": {
+                "@type": "Enum",
+                "valueSchema": "string",
+                "enumValues": [
+                    {
+                        "name": "Type",
+                        "enumValue": "Type",
+                        "description": "hardware or software element which specifies the common attributes shared by all instances of the type[SOURCE: IEC TR 62390:2005-01, 3.1.25]"
+                    },
+                    {
+                        "name": "Instance",
+                        "enumValue": "Instance",
+                        "description": "concrete, clearly identifiable component of a certain type"
+                    }
+                ]
+            }
+        }
+    ]
+}

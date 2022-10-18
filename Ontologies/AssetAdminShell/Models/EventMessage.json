@@ -1,0 +1,78 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:EventMessage;1",
+    "@type": "Interface",
+    "displayName": "Event Message",
+    "description": "Defines the necessary information of an event instance sent out or received",
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "source",
+            "displayName": "Source",
+            "description": "Reference to the source EventElement, including identification of AAS, Submodel, SubmodelElements.",
+            "writable": true,
+            "maxMultiplicity": 1,
+            "target": "dtmi:digitaltwins:aas:Reference;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "sourceSemanticId",
+            "displayName": "Source Semantic Id",
+            "description": "semanticId of the source EventElement, if available",
+            "writable": true,
+            "maxMultiplicity": 1,
+            "target": "dtmi:digitaltwins:aas:Reference;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "observableReference",
+            "displayName": "Observable Reference",
+            "description": "Reference to the Referable, which defines the scope of the event. Can be AAS, Submodel, SubmodelElementCollection or SubmodelElement.",
+            "writable": true,
+            "maxMultiplicity": 1,
+            "target": "dtmi:digitaltwins:aas:Reference;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "observableSemanticId",
+            "displayName": "Observable Semantic Id",
+            "description": "semanticId of the Referable, which defines the scope of the event, if available. See above",
+            "writable": true,
+            "maxMultiplicity": 1,
+            "target": "dtmi:digitaltwins:aas:Reference;1"
+        }, 
+        {
+            "@type": "Property",
+            "name": "topic",
+            "displayName": "Topic",
+            "description": "Information for the outer message infrastructure for scheduling the event to the respective communication channel.",
+            "writable": true,
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
+            "name": "subject",
+            "displayName": "Subject",
+            "description": "ABAC-Subject, who/ which initiated the creation",
+            "writable": true,
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
+            "name": "timestamp",
+            "displayName": "Timestamp",
+            "description": "Timestamp in UTC, when this event was triggered.",
+            "writable": true,
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
+            "name": "payload",
+            "displayName": "Payload",
+            "description": "Event specific payload. Detailed in annex.",
+            "writable": true,
+            "schema": "string"
+        }
+    ]
+}

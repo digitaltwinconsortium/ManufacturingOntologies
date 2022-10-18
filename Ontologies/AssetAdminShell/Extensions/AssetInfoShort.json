@@ -1,0 +1,56 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:ext:AssetInfoShort;1",
+    "@type": "Interface",
+    "displayName": "Asset information",
+    "description": "In AssetInformation identifying meta data of the asset that is represented by an AAS is defined. The asset may either represent an asset type or an asset instance.",
+    "comment": "Not part of the Platform Industrie 4.0 Asset Administration Shell Standard. Used as component to denormalize and optimize the DTDL model",
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "assetKind",
+            "displayName": "asset kind",
+            "writable": true,
+            "schema": {
+                "@type": "Enum",
+                "valueSchema": "string",
+                "enumValues": [
+                    {
+                        "name": "Type",
+                        "enumValue": "Type",
+                        "description": "hardware or software element which specifies the common attributes shared by all instances of the type[SOURCE: IEC TR 62390:2005-01, 3.1.25]"
+                    },
+                    {
+                        "name": "Instance",
+                        "enumValue": "Instance",
+                        "description": "concrete, clearly identifiable component of a certain type"
+                    }
+                ]
+            }
+        },
+        {
+            "@type": "Property",
+            "name": "globalAssetId",
+            "displayName": "Global Asset Id value",
+            "description": "String serialized Global asset id value according to Spec 9.2.3 Serialization of Values of Type “Reference”",
+            "schema": "string",
+            "writable": true
+        },
+        {
+            "@type": "Property",
+            "name": "specificAssetId",
+            "displayName": "Specific asset Id values",
+            "description": "Comma separated list of specific asset id values. Name of specific asset id in parentheses. E.g (Serial number)123456798, (FID)SS928734",
+            "schema": "string",
+            "writable": true
+        },
+        {
+            "@type": "Property",
+            "name": "defaultThumbnailpath",
+            "displayName": "Default thumbnail path",
+            "description": "Path and name of the resource (with file extension). The path can be absolute or relative.",
+            "schema": "string",
+            "writable": true
+        }
+    ]
+}

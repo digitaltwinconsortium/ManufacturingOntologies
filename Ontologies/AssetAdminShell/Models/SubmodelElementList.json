@@ -1,0 +1,194 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:SubmodelElementList;1",
+    "@type": "Interface",
+    "displayName": "Submodel Element List",
+    "description": "A submodel element list is an ordered list of submodel elements. The numbering starts with Zero (0).",
+    "extends": ["dtmi:digitaltwins:aas:SubmodelElement;1"],
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "orderRelevant",
+            "displayName": "Order Relevant",
+            "description": "Defines whether order in list is relevant. If orderRelevant = False then the list is representing a set or a bag. Default: True",
+            "schema": "boolean",
+            "writable": true
+        },
+        {
+            "@type": "Relationship",
+            "name": "value",
+            "displayName": "contains submodel element",
+            "description": "Submodel element contained in the list.",
+            "target": "dtmi:digitaltwins:aas:SubmodelElement;1",
+            "properties": [
+                {
+                    "@type": "Property",
+                    "name": "index",
+                    "displayName": "Index",
+                    "schema": "integer",
+                    "writable": true
+                }
+            ],
+            "writable": true
+        },
+        {
+            "@type": "Relationship",
+            "name": "semanticIdListElement",
+            "displayName": "Semantic Id of list elements",
+            "description": "Semantic ID the submodel elements contained in the list match to. It is recommended to use a global reference.",
+            "target": "dtmi:digitaltwins:aas:Reference;1",
+            "maxMultiplicity": 1,
+            "writable": true
+        },
+        {
+            "@type": "Property",
+            "name": "semanticIdListElementValue",
+            "displayName": "Semantic Id value of list elements",
+            "description": "String serialized semantic id value according to Spec 9.2.3 Serialization of Values of Type “Reference”",
+            "comment": "Not part of the AAS Spec. Use alternatively for 'semanticIdListElement'",
+            "schema": "string",
+            "writable": true
+        },
+        {
+            "@type": "Property",
+            "name": "typeValueListElement",
+            "description": "The submodel element type of the submodel elements contained in the list.",
+            "writable": true,
+            "schema": {
+                "@type": "Enum",
+                "valueSchema": "string",
+                "enumValues": [
+                    {
+                        "name": "AnnotatedRelationshipElement",
+                        "displayName": "Annotated Relationship Element",
+                        "description": "Annotated relationship element",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "AnnotatedRelationshipElement"
+                    },
+                    {
+                        "name": "BasicEventElement",
+                        "displayName": "Basic Event Element",
+                        "description": "Basic Event Element",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "BasicEventElement"
+                    },
+                    {
+                        "name": "Blob",
+                        "displayName": "Blob",
+                        "description": "Blob",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "Blob"
+                    },
+                    {
+                        "name": "Capability",
+                        "displayName": "Capability",
+                        "description": "Capability",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "Capability"
+                    },
+                    {
+                        "name": "DataElement",
+                        "displayName": "Data Element",
+                        "description": "Data element",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "DataElement"
+                    },
+                    {
+                        "name": "Entity",
+                        "displayName": "Entity",
+                        "description": "Entity",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "Entity"
+                    },
+                    {
+                        "name": "EventElement",
+                        "displayName": "Event Element",
+                        "description": "Event element",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "EventElement"
+                    },
+                    {
+                        "name": "File",
+                        "displayName": "File",
+                        "description": "File",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "File"
+                    },
+                    {
+                        "name": "MultiLanguageProperty",
+                        "displayName": "Multi Language Property",
+                        "description": "Property with a value that can be provided in multiple languages",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "MultiLanguageProperty"
+                    },
+                    {
+                        "name": "Operation",
+                        "displayName": "Operation",
+                        "description": "Operation",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "Operation"
+                    },
+                    {
+                        "name": "Property",
+                        "displayName": "Property",
+                        "description": "Property",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "Property"
+                    },
+                    {
+                        "name": "Range",
+                        "displayName": "Range",
+                        "description": "Range with min and max",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "Range"
+                    },
+                    {
+                        "name": "ReferenceElement",
+                        "displayName": "Reference Element",
+                        "description": "Reference",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "ReferenceElement"
+                    },
+                    {
+                        "name": "RelationshipElement",
+                        "displayName": "Relationship Element",
+                        "description": "Relationship",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "RelationshipElement"
+                    },
+                    {
+                        "name": "SubmodelElement",
+                        "displayName": "Submodel Element",
+                        "description": "Submodel element",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "SubmodelElement"
+                    },
+                    {
+                        "name": "SubmodelElementCollection",
+                        "displayName": "Submodel Element Collection",
+                        "description": "Struct of submodel elements",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "SubmodelElementCollection"
+                    },
+                    {
+                        "name": "SubmodelElementList",
+                        "displayName": "Submodel Element List",
+                        "description": "list of submodel elements",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "SubmodelElementList"
+                    }
+                ]
+            }
+        }, 
+        {
+            "@type": "Property",
+            "name": "valueTypeListElement",
+            "displayName": "Value type of element",
+            "description": "The value type of the submodel element contained in the list. ",
+            "comment": "Optional, AAS Type: DataTypeDefXsd",
+            "schema": "string",
+            "writable": true
+        }
+    ]
+}

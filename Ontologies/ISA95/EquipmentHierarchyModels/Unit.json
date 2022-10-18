@@ -1,0 +1,9 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:isa95:Unit;1",
+    "@type": "Interface",
+    "displayName": "Unit",
+    "description": "Units have well-defined processing capabilities and throughput capacities and these are used for Level 3 functions. T", 
+    "comment": "According to ANSI/ISA-95.00.01-2010 (IEC 62264-1 Mod) Enterprise-Control System Integration − Part 1: Models and Terminology - Approved 13 May 2010",
+    "extends": ["dtmi:digitaltwins:isa95:WorkUnit;1"]
+  }

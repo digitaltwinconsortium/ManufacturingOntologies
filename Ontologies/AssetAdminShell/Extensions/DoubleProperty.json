@@ -1,0 +1,19 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:ext:DoubleProperty;1",
+    "@type": "Interface",
+    "displayName": "Double property",
+    "description": "Extension of AAS Property model for Double primitive schema of DTDL",
+    "comment": "Not part of the AAS meta model. Enables querying with primitive schemas for Properties",
+    "extends": ["dtmi:digitaltwins:aas:Property;1"],
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "doubleValue",
+            "displayName": "Double value",
+            "description": "Value as double - An IEEE 8-byte floating point",
+            "schema": "double",
+            "writable": true
+        }
+    ]
+}

@@ -1,0 +1,19 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:ext:DateProperty;1",
+    "@type": "Interface",
+    "displayName": "Date property",
+    "description": "Extension of AAS Property model for Date primitive schema of DTDL",
+    "comment": "Not part of the AAS meta model. Enables querying with primitive schemas for Properties",
+    "extends": ["dtmi:digitaltwins:aas:Property;1"],
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "dateValue",
+            "displayName": "Date value",
+            "description": "Value as date - A full-date as defined in section 5.6 of RFC 3339",
+            "schema": "date",
+            "writable": true
+        }
+    ]
+}

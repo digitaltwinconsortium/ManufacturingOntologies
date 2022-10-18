@@ -1,0 +1,58 @@
+{
+  "@context": "dtmi:dtdl:context;2",
+  "@id": "dtmi:digitaltwins:aas:Permission;1",
+  "@type": "Interface",
+  "displayName": "Permission",
+  "description": "Description of a single permission.",
+  "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "contents": [
+    {
+      "@type": "Relationship",
+      "name": "permission",
+      "displayName": "Permission",
+      "comment": "mandatory",
+      "description": "Reference to a property that defines the semantics of the permission",
+      "target": "dtmi:digitaltwins:aas:Property;1",
+      "maxMultiplicity": 1,
+      "writable": true
+    },
+    {
+      "@type": "Property",
+      "name": "kindOfPermission",
+      "displayName": "kind of permission",
+      "comment": "mandatory",
+      "description": "Description of the kind of permission. Possible kind of permission also include the denial of the permission.",
+      "writable": true,
+      "schema": {
+        "@type": "Enum",
+        "valueSchema": "string",
+        "enumValues": [
+          {
+            "name": "Allow",
+            "displayName": "Allow",
+            "description": "Allow the permission given to the subject.",
+            "enumValue": "Allow"
+          },
+          {
+            "name": "Deny",
+            "displayName": "Deny",
+            "description": "Explicitly deny the permission given to the subject.",
+            "enumValue": "Deny"
+          },
+          {
+            "name": "NotApplicable",
+            "displayName": "Not applicable",
+            "description": "The permission is not applicable to the subject.",
+            "enumValue": "NotApplicable"
+          },
+          {
+            "name": "Undefined",
+            "displayName": "Deny",
+            "description": "Explicitly deny the permission given to the subject.",
+            "enumValue": "Undefined"
+          }
+        ]
+      }
+    }
+  ]
+}

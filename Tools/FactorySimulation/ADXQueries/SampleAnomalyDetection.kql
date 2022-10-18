@@ -1,0 +1,10 @@
+opcua_metadata_lkv
+| where Name contains "assembly"
+| where Name contains "seattle"
+| join kind=inner (opcua_telemetry
+    | where Name == "EnergyConsumption"
+    | where Timestamp > _startTime and Timestamp < _endTime
+) on DataSetWriterID
+| order by Timestamp desc
+| make-series num=avg(todouble(Value)) on Timestamp from _startTime to _endTime step 1s 
+| extend (anomalies, score, baseline) = series_decompose_anomalies(num, 0.5, -1, 'linefit')

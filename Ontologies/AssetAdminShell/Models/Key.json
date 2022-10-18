@@ -1,0 +1,201 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:Key;1",
+    "@type": "Interface",
+    "displayName": "Key",
+    "description": "A key is a reference to an element by its id",
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "type",
+            "displayName": "Type",
+            "description": "Denotes which kind of entity is referenced.  In case type = FragmentId the key represents a bookmark or a similar local identifier within its parent element as specified by the key that precedes this key. In all other cases the key references a model element of the same or of another AAS. The name of the model element is explicitly listed.",
+            "writable": true,
+            "schema": {
+                "@type": "Enum",
+                "valueSchema": "string",
+                "description": "Enumeration of different key value types within a key",
+                "comment": "AAS type: KeyTypes",
+                "enumValues": [
+                    {
+                        "name": "Referable",
+                        "displayName": "Referable",
+                        "description": " Referable is abstract, i.e. if a key uses “Referable” the reference may be an Asset Administration Shell, a Property etc.",
+                        "comment": "AAS Key type class: AasReferables",
+                        "enumValue": "Referable"
+                    },
+                    {
+                        "name": "FragmentReference",
+                        "displayName": "Fragment Reference",
+                        "description": "Bookmark or a similar local identifier of a subordinate part of a primary resource",
+                        "comment": "AAS Key type class: GenericFragmentKeys",
+                        "enumValue": "FragmentReference"
+                    },
+                    {
+                        "name": "GlobalReference",
+                        "displayName": "Global Reference",
+                        "description": "Global reference",
+                        "comment": "AAS Key type class: GenericGloballyIdentifiables",
+                        "enumValue": "GlobalReference"
+                    },
+                    {
+                        "name": "AssetAdministrationShell",
+                        "displayName": "Asset Administration Shell",
+                        "description": "Asset administration shell",
+                        "comment": "AAS Key type class: AasIdentifiables",
+                        "enumValue": "AssetAdministrationShell"
+                    },
+                    {
+                        "name": "ConceptDescription",
+                        "displayName": "Concept Description",
+                        "description": "Concept description",
+                        "comment": "AAS Key type class: AasIdentifiables",
+                        "enumValue": "ConceptDescription"
+                    },
+                    {
+                        "name": "Identifiable",
+                        "displayName": "Identifiable",
+                        "description": "Identifiable",
+                        "comment": "AAS Key type class: AasIdentifiables",
+                        "enumValue": "Identifiable"
+                    },
+                    {
+                        "name": "Submodel",
+                        "displayName": "Submodel",
+                        "description": "Submodel",
+                        "comment": "AAS Key type class: AasIdentifiables",
+                        "enumValue": "Submodel"
+                    },
+                    {
+                        "name": "AnnotatedRelationshipElement",
+                        "displayName": "Annotated Relationship Element",
+                        "description": "Annotated relationship element",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "AnnotatedRelationshipElement"
+                    },
+                    {
+                        "name": "BasicEventElement",
+                        "displayName": "Basic Event Element",
+                        "description": "Basic Event Element",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "BasicEventElement"
+                    },
+                    {
+                        "name": "Blob",
+                        "displayName": "Blob",
+                        "description": "Blob",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "Blob"
+                    },
+                    {
+                        "name": "Capability",
+                        "displayName": "Capability",
+                        "description": "Capability",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "Capability"
+                    },
+                    {
+                        "name": "DataElement",
+                        "displayName": "Data Element",
+                        "description": "Data element",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "DataElement"
+                    },
+                    {
+                        "name": "Entity",
+                        "displayName": "Entity",
+                        "description": "Entity",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "Entity"
+                    },
+                    {
+                        "name": "EventElement",
+                        "displayName": "Event Element",
+                        "description": "Event element",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "EventElement"
+                    },
+                    {
+                        "name": "File",
+                        "displayName": "File",
+                        "description": "File",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "File"
+                    },
+                    {
+                        "name": "MultiLanguageProperty",
+                        "displayName": "Multi Language Property",
+                        "description": "Property with a value that can be provided in multiple languages",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "MultiLanguageProperty"
+                    },
+                    {
+                        "name": "Operation",
+                        "displayName": "Operation",
+                        "description": "Operation",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "Operation"
+                    },
+                    {
+                        "name": "Property",
+                        "displayName": "Property",
+                        "description": "Property",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "Property"
+                    },
+                    {
+                        "name": "Range",
+                        "displayName": "Range",
+                        "description": "Range with min and max",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "Range"
+                    },
+                    {
+                        "name": "ReferenceElement",
+                        "displayName": "Reference Element",
+                        "description": "Reference",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "ReferenceElement"
+                    },
+                    {
+                        "name": "RelationshipElement",
+                        "displayName": "Relationship Element",
+                        "description": "Relationship",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "RelationshipElement"
+                    },
+                    {
+                        "name": "SubmodelElement",
+                        "displayName": "Submodel Element",
+                        "description": "Submodel element",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "SubmodelElement"
+                    },
+                    {
+                        "name": "SubmodelElementCollection",
+                        "displayName": "Submodel Element Collection",
+                        "description": "Struct of submodel elements",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "SubmodelElementCollection"
+                    },
+                    {
+                        "name": "SubmodelElementList",
+                        "displayName": "Submodel Element List",
+                        "description": "list of submodel elements",
+                        "comment": "AAS Key type class: AasSubmodelElements",
+                        "enumValue": "SubmodelElementList"
+                    }
+                ]
+            }
+        },
+        {
+            "@type": "Property",
+            "name": "value",
+            "displayName": "Value",
+            "description": "The key value, for example an IRDI if the idType = IRDI.",
+            "writable": true,
+            "schema": "string"
+        }
+    ]
+}

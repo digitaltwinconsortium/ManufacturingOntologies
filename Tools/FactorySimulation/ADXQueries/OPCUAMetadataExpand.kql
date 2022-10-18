@@ -1,0 +1,4 @@
+.create-or-alter function  OPCUAMetaDataExpand() {
+    opcua_raw
+    | project DataSetWriterId = tostring(payload.DataSetWriterId), Name = tostring(payload.MetaData.Name)
+}

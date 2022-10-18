@@ -1,0 +1,19 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:ext:BooleanProperty;1",
+    "@type": "Interface",
+    "displayName": "Boolean property",
+    "description": "Extension of AAS Property model for Boolean primitive schema of DTDL",
+    "comment": "Not part of the AAS meta model. Enables querying with primitive schemas for Properties",
+    "extends": ["dtmi:digitaltwins:aas:Property;1"],
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "booleanValue",
+            "displayName": "Boolean value",
+            "description": "Value as boolean",
+            "schema": "boolean",
+            "writable": true
+        }
+    ]
+}

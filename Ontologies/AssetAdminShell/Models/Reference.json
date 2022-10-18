@@ -1,0 +1,97 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:Reference;1",
+    "@type": "Interface",
+    "displayName": "Reference",
+    "description": "Reference to either a model element of the same or another AAs or to an external entity. A reference is an ordered list of keys, each key referencing an element. The complete list of keys may for example be concatenated to a path that then gives unique access to an element or entity.",
+    "comment": "Since DTDLv2 doesn't support arrays for properties, multiple key components, actually 8, are used here. According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "type",
+            "displayName": "Type",
+            "description": "Type of the reference. Denotes, whether reference is a global reference or a model reference.",
+            "schema": {
+                "@type": "Enum",
+                "valueSchema": "string",
+                "enumValues": [
+                    {
+                        "name": "GlobalReference",
+                        "enumValue": "GlobalReference",
+                        "description": "A global reference is a reference to an external entity."
+                    },
+                    {
+                        "name": "ModelReference",
+                        "enumValue": "ModelReference",
+                        "description": "A model reference is an ordered list of keys, each key referencing an element. The complete list of keys may for example be concatenated to a path that then gives unique access to an element"
+                    }
+                ]
+            }
+        },
+        {
+            "@type": "Relationship",
+            "name": "referredSemanticId",
+            "displayName": "Referred semantic Id",
+            "description": "SemanticId of the referenced model element (Reference/type=ModelReference). For global references there typically is no semantic ID. It is recommended to use a global reference",
+            "target": "dtmi:digitaltwins:aas:Reference;1",
+            "maxMultiplicity": 1,
+            "writable": true
+        },
+        {
+            "@type": "Relationship",
+            "name": "referredElement",
+            "comment": "Optional. Can be used to link to a Referable inside the same DT graph",
+            "writable": true,
+            "minMultiplicity": 0,
+            "target": "dtmi:digitaltwins:aas:Referable;1"
+        },
+        {
+            "@type": "Component",
+            "name": "key1",
+            "description": "First key. Unique reference in its namespace.",
+            "schema": "dtmi:digitaltwins:aas:Key;1"
+        },
+        {
+            "@type": "Component",
+            "name": "key2",
+            "description": "Second key. Unique reference in its namespace.",
+            "schema": "dtmi:digitaltwins:aas:Key;1"
+        },
+        {
+            "@type": "Component",
+            "name": "key3",
+            "description": "Third key. Unique reference in its namespace.",
+            "schema": "dtmi:digitaltwins:aas:Key;1"
+        },
+        {
+            "@type": "Component",
+            "name": "key4",
+            "description": "Fourth key. Unique reference in its namespace.",
+            "schema": "dtmi:digitaltwins:aas:Key;1"
+        },
+        {
+            "@type": "Component",
+            "name": "key5",
+            "description": "Fifth key. Unique reference in its namespace.",
+            "schema": "dtmi:digitaltwins:aas:Key;1"
+        },
+        {
+            "@type": "Component",
+            "name": "key6",
+            "description": "Fifth key. Unique reference in its namespace.",
+            "schema": "dtmi:digitaltwins:aas:Key;1"
+        },
+        {
+            "@type": "Component",
+            "name": "key7",
+            "description": "Fifth key. Unique reference in its namespace.",
+            "schema": "dtmi:digitaltwins:aas:Key;1"
+        },
+        {
+            "@type": "Component",
+            "name": "key8",
+            "description": "Fifth key. Unique reference in its namespace.",
+            "schema": "dtmi:digitaltwins:aas:Key;1"
+        }
+    ]
+  }

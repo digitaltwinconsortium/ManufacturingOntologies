@@ -1,0 +1,18 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:HasExtensions;1",
+    "@type": "Interface",
+    "displayName": "Has Extensions",
+    "description": "Element that can be extended by proprietary extensions. Abstract interface",
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "extensions",
+            "displayName": "extended by",
+            "writable": true,
+            "description": "An extension of the element.",
+            "target": "dtmi:digitaltwins:aas:Extension;1"
+        }
+    ]
+}

@@ -1,0 +1,27 @@
+{
+  "@context": "dtmi:dtdl:context;2",
+  "@id": "dtmi:digitaltwins:aas:Blob;1",
+  "@type": "Interface",
+  "displayName": "Blob",
+  "description": "Blob Data Element",
+  "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "extends": "dtmi:digitaltwins:aas:DataElement;1",
+  "contents": [
+    {
+      "@type": "Property",
+      "name": "value",
+      "displayName": "value",
+      "description": "Blob Type.",
+      "schema": "string",
+      "writable": true
+    },
+    {
+      "@type": "Property",
+      "name": "mimeType",
+      "displayName": "mimeType",
+      "description": "mimeType",
+      "schema": "string",
+      "writable": true
+    }
+  ]
+}

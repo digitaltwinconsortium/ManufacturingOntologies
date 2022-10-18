@@ -1,0 +1,26 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:AdministrationInformation;1",
+    "@type": "Interface",
+    "displayName": "Administration Information",
+    "description": "Administrative metainformation for an element like version information.",
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "version",
+            "writable": true,
+            "description": "Version of the element.",
+            "displayName": "Version",
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
+            "name": "revision",
+            "writable": true,
+            "description": "Revision of the element.",
+            "displayName": "Revision",
+            "schema": "string"
+        }
+    ]
+}

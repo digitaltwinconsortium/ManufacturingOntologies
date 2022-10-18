@@ -1,0 +1,36 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:ValueReferencePair;1",
+    "@type": "Interface",
+    "displayName": "Value Reference Pair",
+    "description": "A value reference pair within a value list. Each value has a global unique id defining its semantic",
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "value",
+            "displayName": "Value",
+            "description": "the value of the referenced concept definition of the value in valueId.",
+            "writable": true,
+            "schema": "string"
+        },
+        {
+            "@type": "Relationship",
+            "name": "valueId",
+            "displayName": "Value Id",
+            "description": "Global unique id of the value. ",
+            "maxMultiplicity": 1,
+            "writable": true,
+            "target": "dtmi:digitaltwins:aas:Reference;1"
+        },
+        {
+            "@type": "Property",
+            "name": "valueIdValue",
+            "displayName": "Value Id value",
+            "description": "String serialized value id value according to Spec 9.2.3 Serialization of Values of Type “Reference”",
+            "comment": "Not part of the AAS Spec. Use alternatively for 'valueId'",
+            "schema": "string",
+            "writable": true
+        }
+    ]
+  }

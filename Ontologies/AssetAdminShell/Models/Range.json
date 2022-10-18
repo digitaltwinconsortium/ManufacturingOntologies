@@ -1,0 +1,40 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:Range;1",
+    "@type": "Interface",
+    "displayName": "Range",
+    "description": "A range data element is a data element that defines a range with min and max.",
+    "extends": [
+        "dtmi:digitaltwins:aas:DataElement;1"
+    ],
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "valueType",
+            "displayName": "Value type",
+            "description": "Data type of the min und max",
+            "writable": true,
+            "comment": "AAS type: DataTypeDefXsd - Mandatory",
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
+            "name": "min",
+            "displayName": "Minimum",
+            "description": "The minimum value of the range",
+            "writable": true,
+            "comment": "AAS type: ValueDataType",
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
+            "name": "max",
+            "displayName": "Maximum",
+            "description": "The maximum value of the range",
+            "writable": true,
+            "comment": "AAS type: ValueDataType",
+            "schema": "string"
+        }
+    ]
+}

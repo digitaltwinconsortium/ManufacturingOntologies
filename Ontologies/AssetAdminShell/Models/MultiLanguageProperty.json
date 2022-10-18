@@ -1,0 +1,30 @@
+{
+  "@context": "dtmi:dtdl:context;2",
+  "@id": "dtmi:digitaltwins:aas:MultiLanguageProperty;1",
+  "@type": "Interface",
+  "displayName": "Multi language property",
+  "extends": [
+    "dtmi:digitaltwins:aas:DataElement;1"
+  ],
+  "comment": "A property is a data element that has a multi-language value",
+  "contents": [
+    {
+      "@type": "Component",
+      "name": "value",
+      "displayName": "Value",
+      "description": "The value of the property instance.",
+      "comment": "AAS type: LangStringSet",
+      "schema": "dtmi:digitaltwins:aas:LangStringSet;1"
+    },
+    {
+      "@type": "Relationship",
+      "name": "valueId",
+      "displayName": "Value Id",
+      "description": "Reference to the global unique id of a coded value.",
+      "comment": "AAS type: Reference",
+      "writable": true,
+      "maxMultiplicity": 1,
+      "target": "dtmi:digitaltwins:aas:Reference;1"
+    }
+  ]
+}

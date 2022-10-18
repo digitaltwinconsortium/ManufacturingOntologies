@@ -1,0 +1,156 @@
+{
+  "digitalTwinsFileInfo": {
+    "fileVersion": "1.0.0"
+  },
+  "digitalTwinsGraph": {
+    "digitalTwins": [
+      {
+        "$dtId": "Assembly",
+        "$etag": "W/\"b7530094-dbf2-412b-9464-24d4745d22be\"",
+        "OPCUAModelURL": "https://uacloudlibrary.opcfoundation.org/infomodel/download/1627266626",
+        "OPCUAEndpointURL": "opc.tcp://assembly.munich.corp.contoso/ua/munich/",
+        "$metadata": {
+          "$model": "dtmi:Station;1"
+        }
+      },
+      {
+        "$dtId": "Test",
+        "$etag": "W/\"b6027075-9de9-4238-973a-38f57511eab9\"",
+        "OPCUAModelURL": "https://uacloudlibrary.opcfoundation.org/infomodel/download/1627266626",
+        "OPCUAEndpointURL": "opc.tcp://test.munich.corp.contoso/ua/munich/",
+        "$metadata": {
+          "$model": "dtmi:Station;1"
+        }
+      },
+      {
+        "$dtId": "Packaging",
+        "$etag": "W/\"91d268e8-d9cb-43f3-9d05-84cfe3d083ba\"",
+        "OPCUAModelURL": "https://uacloudlibrary.opcfoundation.org/infomodel/download/1627266626",
+        "OPCUAEndpointURL": "opc.tcp://packaging.munich.corp.contoso/ua/munich/",
+        "$metadata": {
+          "$model": "dtmi:Station;1"
+        }
+      },
+      {
+        "$dtId": "MESMunich",
+        "$etag": "W/\"bb8e70ef-6e13-4ada-8449-905ba609ad09\"",
+        "$metadata": {
+          "$model": "dtmi:MES;1"
+        }
+      }
+    ],
+    "relationships": [
+      {
+        "$relationshipId": "7e802b53-6eb1-42f6-8f4d-110529c855a2",
+        "$sourceId": "Assembly",
+        "$targetId": "Test",
+        "$relationshipName": "Next",
+        "$etag": "W/\"e1eb075b-5fb6-43fd-bc0f-2aec14bdcba7\""
+      },
+      {
+        "$relationshipId": "47d74609-9916-4ec3-b263-8f1d039b8519",
+        "$sourceId": "Assembly",
+        "$targetId": "MESMunich",
+        "$relationshipName": "Parent",
+        "$etag": "W/\"123722ae-3ae3-4d8f-b4e2-28d3c0764774\""
+      },
+      {
+        "$relationshipId": "2a81093f-694a-4201-bb3c-a5b2d986e9a4",
+        "$sourceId": "Packaging",
+        "$targetId": "Test",
+        "$relationshipName": "Previous",
+        "$etag": "W/\"c7dc42fa-1712-4cf8-92c4-de97599607e0\""
+      },
+      {
+        "$relationshipId": "177c979f-742a-427c-9638-0c283722f277",
+        "$sourceId": "Packaging",
+        "$targetId": "MESMunich",
+        "$relationshipName": "Parent",
+        "$etag": "W/\"7a8affef-363f-4c8b-8f05-99b74ebb0788\""
+      },
+      {
+        "$relationshipId": "cb907a69-698a-4fc5-bf3c-6f719b6419f1",
+        "$sourceId": "Test",
+        "$targetId": "Assembly",
+        "$relationshipName": "Previous",
+        "$etag": "W/\"26515bd3-6dda-4731-9580-80aaedb997d2\""
+      },
+      {
+        "$relationshipId": "07445aee-e81b-460c-af39-ccaf566c4ed8",
+        "$sourceId": "Test",
+        "$targetId": "MESMunich",
+        "$relationshipName": "Parent",
+        "$etag": "W/\"6e40866d-c35e-4846-95fc-261b401b9227\""
+      },
+      {
+        "$relationshipId": "829a857a-bf96-4bd1-8c05-aeac2547f9af",
+        "$sourceId": "Test",
+        "$targetId": "Packaging",
+        "$relationshipName": "Next",
+        "$etag": "W/\"f4f2a5b3-c42a-4ec4-a975-1f4ef55932b7\""
+      }
+    ]
+  },
+  "digitalTwinsModels": [
+    {
+      "@id": "dtmi:MES;1",
+      "@type": "Interface",
+      "contents": [
+        {
+          "@type": "Command",
+          "name": "Execute"
+        },
+        {
+          "@type": "Command",
+          "name": "Reset"
+        }
+      ],
+      "@context": [
+        "dtmi:dtdl:context;2"
+      ],
+      "displayName": "MES"
+    },
+    {
+      "@id": "dtmi:Station;1",
+      "@type": "Interface",
+      "contents": [
+        {
+          "@type": "Relationship",
+          "name": "Parent",
+          "target": "dtmi:MES;1",
+          "comment": "Link to the Manufacturing Execution System controlling the station"
+        },
+        {
+          "@type": "Relationship",
+          "name": "Previous",
+          "target": "dtmi:Station;1",
+          "comment": "Link to the previous station in the production line, if available"
+        },
+        {
+          "@type": "Relationship",
+          "name": "Next",
+          "target": "dtmi:Station;1",
+          "comment": "Link to the next station in the production line, if available"
+        },
+        {
+          "@type": "Property",
+          "name": "OPCUAModelURL",
+          "schema": "string",
+          "comment": "UA Cloud Library download link to the associated OPC UA model, if available",
+          "writable": true
+        },
+        {
+          "@type": "Property",
+          "name": "OPCUAEndpointURL",
+          "schema": "string",
+          "comment": "OPC UA Endpoint URL on the shop floor to be used to connect to the physical machine from e.g. an IoT Edge gateway, if available",
+          "writable": true
+        }
+      ],
+      "@context": [
+        "dtmi:dtdl:context;2"
+      ],
+      "displayName": "Station"
+    }
+  ]
+}

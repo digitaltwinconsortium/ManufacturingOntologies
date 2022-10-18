@@ -1,0 +1,33 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:HasKind;1",
+    "@type": "Interface",
+    "displayName": "Has Kind",
+    "description": "An element with a kind is an element that can either represent a template or an instance.",
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "kind",
+            "displayName": "Kind",
+            "description": "Kind of the element: either type or instance",
+            "writable": true,
+            "schema": {
+                "@type": "Enum",
+                "valueSchema": "string",
+                "enumValues": [
+                    {
+                        "name": "Template",
+                        "enumValue": "Template",
+                        "description": "Software element which specifies the common attributes shared by all instances of the template."
+                    },
+                    {
+                        "name": "Instance",
+                        "enumValue": "Instance",
+                        "description": "Concrete, clearly identifiable component of a certain template."
+                    }
+                ]
+            }
+        }
+    ]
+}

@@ -1,0 +1,26 @@
+{
+  "@context": "dtmi:dtdl:context;2",
+  "@id": "dtmi:digitaltwins:aas:Resource;1",
+  "@type": "Interface",
+  "displayName": "Resource",
+  "description": "Resource represents an address to a file (a locator). The value is an URI that can represent an absolute or relative path.",
+  "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "contents": [
+    {
+      "@type": "Property",
+      "name": "path",
+      "displayName": "Path",
+      "description": "Path and name of the resource (with file extension). The path can be absolute or relative.",
+      "schema": "string",
+      "writable": true
+    },
+    {
+      "@type": "Property",
+      "name": "contentType",
+      "displayName": "Content type",
+      "description": "Content type of the content of the file. The content type states which file extensions the file can have.",
+      "schema": "string",
+      "writable": true
+    }
+  ]
+}

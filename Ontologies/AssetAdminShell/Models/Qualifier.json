@@ -1,0 +1,76 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:Qualifier;1",
+    "@type": "Interface",
+    "displayName": "Qualifier",
+    "description": "A qualifier is a type-value-pair that makes additional statements w.r.t. the value of the element.",
+    "extends": ["dtmi:digitaltwins:aas:HasSemantics;1"],
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "kind",
+            "displayName": "Kind",
+            "description": "The qualifier kind describes the kind of the qualifier that is applied to the element. Default: ConceptQualifier",
+            "writable": true,
+            "schema": {
+                "@type": "Enum",
+                "valueSchema": "string",
+                "enumValues": [
+                    {
+                        "name": "ValueQualifier",
+                        "enumValue": "ValueQualifier",
+                        "description": "qualifies the value of the element and can change during run-time Value qualifiers are only applicable to elements with kind=„Instance”"
+                    },
+                    {
+                        "name": "ConceptQualifier",
+                        "enumValue": "ConceptQualifier",
+                        "description": "qualifies the semantic definition the element is referring to (HasSemantics/semanticId)"
+                    },
+                    {
+                        "name": "TemplateQualifier",
+                        "enumValue": "TemplateQualifier",
+                        "description": "qualifies the elements within a specific submodel on concept level. Template qualifiers are only applicable to elements with kind=„Template”"
+                    }
+                ]
+            }
+        },
+        {
+            "@type": "Property",
+            "name": "type",
+            "displayName": "Qualifier type",
+            "description": "The qualifier type describes the type of the qualifier that is applied to the element.",
+            "comment": "AAS type: QualifierType - Mandatory",
+            "writable": true,
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
+            "name": "valueType",
+            "displayName": "Value type",
+            "description": "Data type of the qualifier value.",
+            "comment": "AAS type: DataTypeDefXsd - Mandatory",
+            "writable": true,
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
+            "name": "value",
+            "displayName": "Value",
+            "description": "The qualifier value is the value of the qualifier",
+            "comment": "AAS type: ValueDataType",
+            "writable": true,
+            "schema": "string"
+        },
+        {
+            "@type": "Relationship",
+            "name": "valueId",
+            "displayName": "Value Id",
+            "description": "Reference to the global unique id of a coded value.",
+            "comment": "AAS type: Reference",
+            "writable": true,
+            "maxMultiplicity": 1,
+            "target": "dtmi:digitaltwins:aas:Reference;1"
+        }
+    ]
+}

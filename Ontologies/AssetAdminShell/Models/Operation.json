@@ -1,0 +1,35 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:Operation;1",
+    "@type": "Interface",
+    "displayName": "Operation",
+    "description": "An operation is a submodel element with input and output variables",
+    "extends": ["dtmi:digitaltwins:aas:SubmodelElement;1"],
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "inputVariable",
+            "displayName": "Input variable",
+            "description": "Input parameter of the operation.",
+            "writable": true,
+            "target": "dtmi:digitaltwins:aas:OperationVariable;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "outputVariable",
+            "displayName": "Output variable",
+            "description": "Output parameter of the operation.",
+            "writable": true,
+            "target": "dtmi:digitaltwins:aas:OperationVariable;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "inoutputVariable",
+            "displayName": "Input and output variable",
+            "description": "Parameter that is input and output of the operation.",
+            "writable": true,
+            "target": "dtmi:digitaltwins:aas:OperationVariable;1"
+        }
+    ]
+}

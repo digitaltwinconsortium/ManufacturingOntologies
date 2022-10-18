@@ -1,0 +1,25 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:File;1",
+    "@type": "Interface",
+    "displayName": "File",
+    "description": "A File is a data element that represents an address to a file. The value is an URI that can represent an absolute or relative path.",
+    "extends": ["dtmi:digitaltwins:aas:DataElement;1"],
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Property",
+            "name" : "value",
+            "displayName": "Value",
+            "description": "Path and name of the referenced file (with file extension). The path can be absolute or relative.",
+            "writable": true,
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
+            "name": "contentType",
+            "description": "Content type of the content of the file.",
+            "schema": "string"
+        }
+    ]
+}

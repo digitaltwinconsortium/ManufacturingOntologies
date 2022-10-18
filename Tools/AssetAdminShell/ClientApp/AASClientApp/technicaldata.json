@@ -1,0 +1,11 @@
+{
+  "Asset": {
+    "Id" :  "NewAsset1"
+  },
+  "GeneralInformation": {
+    "ManufacturerName": "Jomit & Co",
+    "ManufacturerProductDesignation": "Space Elevators",
+    "ManufacturerPartNumber": "SE001",
+    "ManufacturerOrderCode": "J01"
+  }
+}

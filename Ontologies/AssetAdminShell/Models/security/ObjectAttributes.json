@@ -1,0 +1,18 @@
+{
+  "@context": "dtmi:dtdl:context;2",
+  "@id": "dtmi:digitaltwins:aas:ObjectAttributes;1",
+  "@type": "Interface",
+  "displayName": "Object Attributes",
+  "description": "A set of data elements that describe object attributes. These attributes need to refer to a data element within an existing submodel",
+  "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "contents": [
+    {
+      "@type": "Relationship",
+      "name": "objectAttribute",
+      "displayName": "Object Attribute",
+      "description": "Reference to a data element that further classifies an object.",
+      "target": "dtmi:digitaltwins:aas:DataElement;1",
+      "writable": true
+    }
+  ]
+}

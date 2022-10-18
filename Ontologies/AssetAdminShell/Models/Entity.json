@@ -1,0 +1,62 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:aas:Entity;1",
+    "@type": "Interface",
+    "displayName": "Entity",
+    "description": "An entity is a submodel element that is used to model entities",
+    "extends": ["dtmi:digitaltwins:aas:SubmodelElement;1"],
+    "comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "statement",
+            "displayName": "applicable statement",
+            "description": "Describes statements applicable to the entity by a set of submodel elements, typically with a qualified value.",
+            "writable": true,
+            "target": "dtmi:digitaltwins:aas:SubmodelElement;1"
+        },
+        {
+            "@type": "Property",
+            "name": "entityType",
+            "displayName": "Entity type",
+            "description": "Describes whether the entity is a comanaged entity or a self-managed entity.",
+            "writable": true,
+            "comment": "AAS type: EntityType - Mandatory",
+            "schema": {
+                "@type": "Enum",
+                "valueSchema": "string",
+                "enumValues": [
+                    {
+                        "name": "CoManagedEntity",
+                        "enumValue": "CoManagedEntity",
+                        "displayName": "Co managed entity",
+                        "description": "For co-managed entities there is no separate AAS. Co-managed entities need to be part of a self-managed entity."
+                    },
+                    {
+                        "name": "SelfManagedEntity",
+                        "enumValue": "SelfManagedEntity",
+                        "displayName": "self managed entity",
+                        "description": "Self-Managed Entities have their own AAS but can be part of the bill of material of a composite self-managed entity."
+                    }
+                ]
+            }
+        },
+        {
+            "@type": "Relationship",
+            "name": "globalAssetId",
+            "description": "Reference to the asset the entity is representing.",
+            "writable": true,
+            "displayName": "Global Asset Id",
+            "maxMultiplicity": 1,
+            "target": "dtmi:digitaltwins:aas:Reference;1"
+          },
+          {
+            "@type": "Relationship",
+            "name": "specificAssetId",
+            "displayName": "specified by",
+            "description": "Additional domain specific specific, typically proprietary Identifier for the asset like e.g. serial number etc",
+            "writable": true,
+            "target": "dtmi:digitaltwins:aas:SpecificAssetId;1"
+          }
+    ]
+}

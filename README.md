@@ -50,7 +50,7 @@ To install the production line simulation, you need a Windows PC or virtual mach
 
 * Download and install the latest .NET Core SDK (not just the Runtime!) from [here](https://dotnet.microsoft.com/en-us/download/dotnet).
 
-* Download and install Docker Desktop from [here](https://www.docker.com/products/docker-desktop), including the Windows Subsystem for Linux (WSL) integration. After installation and a required system restart, accept the license terms and install the WSL2 Linux kernel by following the instructions. Then verify that Docker Desktop is running in the Windows System Tray.
+* Download and install Docker Desktop from [here](https://www.docker.com/products/docker-desktop), including the Windows Subsystem for Linux (WSL) integration. After installation and a required system restart, accept the license terms and install the WSL2 Linux kernel by following the instructions. Then verify that Docker Desktop is running in the Windows System Tray and enable Kubernetes in Settings.
 
 * Browse to [here](https://github.com/digitaltwinconsortium/ManufacturingDTDLOntologies) and select Code -> Download Zip. Unzip the contents to a directory of your choice.
 

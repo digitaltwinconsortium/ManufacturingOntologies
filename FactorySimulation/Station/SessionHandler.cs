@@ -1,6 +1,7 @@
 ﻿
 namespace Mes.Simulation
 {
+    using global::Station.Simulation;
     using Opc.Ua;
     using Opc.Ua.Client;
     using System;

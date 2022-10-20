@@ -535,11 +535,6 @@ namespace Station.Simulation
 
         private static async Task ConsoleServer()
         {
-            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("StationName")))
-            {
-                throw new ArgumentException("You must specify the StationName environment variable!");
-            }
-
             if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("StationURI")))
             {
                 throw new ArgumentException("You must specify the StationURI environment variable!");
@@ -558,7 +553,7 @@ namespace Station.Simulation
             ApplicationInstance.MessageDlg = new ApplicationMessageDlg();
             ApplicationInstance application = new ApplicationInstance();
 
-            string stationName = Environment.GetEnvironmentVariable("StationName").ToLowerInvariant();
+            string stationName = Environment.GetEnvironmentVariable("StationType").ToLowerInvariant();
             Uri stationUri = new Uri(Environment.GetEnvironmentVariable("StationURI"));
             string stationPath = stationUri.AbsolutePath.TrimStart('/').ToLowerInvariant();
 

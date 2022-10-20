@@ -63,9 +63,9 @@ Echo Removing containers...
 FOR /f "tokens=*" %%i IN ('docker ps -a -q') DO docker rm %%i
 
 Echo Removing networks...
-docker network rm munich.corp.contoso 
-docker network rm capetown.corp.contoso 
-docker network rm mumbai.corp.contoso 
-docker network rm seattle.corp.contoso 
-docker network rm beijing.corp.contoso 
-docker network rm rio.corp.contoso 
+docker network rm munich.corp.contoso
+docker network rm capetown.corp.contoso
+docker network rm mumbai.corp.contoso
+docker network rm seattle.corp.contoso
+docker network rm beijing.corp.contoso
+docker network rm rio.corp.contoso

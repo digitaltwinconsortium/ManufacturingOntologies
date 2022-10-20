@@ -61,39 +61,38 @@ namespace Station.Simulation
 
         public static ulong CycleTime { get; set; }
 
-        public static void Main(string[] args)
+        public static void Main()
         {
-            if (args.Length != 5)
-            {
-                throw new ArgumentException("You must specify a station name, and base address, power consumption (in [kW]). cycle time default (in [s]) and if alerts should be generated (yes/no) as command line arguments!");
-            }
-
             try
             {
-                if (args[0] == "MES")
+                if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("StationType")))
                 {
-                    MES(args);
+                    throw new ArgumentException("You must specify the StationType environment variable!");
+                }
+
+                if (Environment.GetEnvironmentVariable("StationType") == "MES")
+                {
+                    MES();
                 }
                 else
                 {
-                    Task t = ConsoleServer(args);
+                    Task t = ConsoleServer();
                     t.Wait();
                 }
             }
             catch (Exception ex)
             {
-                Utils.Trace("ServiceResultException:" + ex.Message);
-                Utils.Trace("Exception: {0}", ex.Message);
+                Trace("Exception: " + ex.Message);
             }
         }
 
-        private static void MES(string[] args)
+        private static void MES()
         {
             try
             {
-                if (args.Length != 2)
+                if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ProductionLineName")))
                 {
-                    throw new ArgumentException("You must specify a production line name as command line argument!");
+                    throw new ArgumentException("You must specify the ProductionLineName environment variable!");
                 }
 
                 ApplicationInstance.MessageDlg = new ApplicationMessageDlg();
@@ -104,7 +103,7 @@ namespace Station.Simulation
 
                 // replace the certificate subject name in the configuration
                 string configFilePath = Path.Combine(Directory.GetCurrentDirectory(), application.ConfigSectionName + ".Config.xml");
-                string configFileContent = File.ReadAllText(configFilePath).Replace("UndefinedMESName", "MES." + args[1]);
+                string configFileContent = File.ReadAllText(configFilePath).Replace("UndefinedMESName", "MES." + Environment.GetEnvironmentVariable("ProductionLineName"));
                 File.WriteAllText(configFilePath, configFileContent);
 
                 // load the application configuration
@@ -115,7 +114,7 @@ namespace Station.Simulation
 
                 // replace the production line name in the list of endpoints to connect to.
                 string endpointsFilePath = Path.Combine(Directory.GetCurrentDirectory(), application.ConfigSectionName + ".Endpoints.xml");
-                string endpointsFileContent = File.ReadAllText(endpointsFilePath).Replace("munich", args[1]);
+                string endpointsFileContent = File.ReadAllText(endpointsFilePath).Replace("munich", Environment.GetEnvironmentVariable("ProductionLineName"));
                 File.WriteAllText(endpointsFilePath, endpointsFileContent);
 
                 // load list of endpoints to connect to
@@ -209,7 +208,7 @@ namespace Station.Simulation
 
                     // when the assembly station is done and the test station is ready
                     // move the serial number (the product) to the test station and call
-                    // the method execute for the test station to start working, and 
+                    // the method execute for the test station to start working, and
                     // the reset method for the assembly to go in the ready state
                     if ((m_doneAssembly) && (m_statusTest == StationStatus.Ready))
                     {
@@ -223,7 +222,7 @@ namespace Station.Simulation
 
                     // when the test station is done and the packaging station is ready
                     // move the serial number (the product) to the packaging station and call
-                    // the method execute for the packaging station to start working, and 
+                    // the method execute for the packaging station to start working, and
                     // the reset method for the test to go in the ready state
                     if ((m_doneTest) && (m_statusPackaging == StationStatus.Ready))
                     {
@@ -272,10 +271,10 @@ namespace Station.Simulation
                     // Set monitored item attributes
                     // StartNodeId = NodeId to be monitored
                     // AttributeId = which attribute of the node to monitor (in this case the value)
-                    // MonitoringMode = When sampling is enabled, the Server samples the item. 
-                    // In addition, each sample is evaluated to determine if 
-                    // a Notification should be generated. If so, the 
-                    // Notification is queued. If reporting is enabled, 
+                    // MonitoringMode = When sampling is enabled, the Server samples the item.
+                    // In addition, each sample is evaluated to determine if
+                    // a Notification should be generated. If so, the
+                    // Notification is queued. If reporting is enabled,
                     // the queue is made available to the Subscription for transfer
                     monitoredItem.StartNodeId = nodeId;
                     monitoredItem.AttributeId = Attributes.Value;
@@ -534,15 +533,35 @@ namespace Station.Simulation
             Utils.Trace(format, args);
         }
 
-        private static async Task ConsoleServer(string[] args)
+        private static async Task ConsoleServer()
         {
+            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("StationName")))
+            {
+                throw new ArgumentException("You must specify the StationName environment variable!");
+            }
+
+            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("StationURI")))
+            {
+                throw new ArgumentException("You must specify the StationURI environment variable!");
+            }
+
+            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("PowerConsumption")))
+            {
+                throw new ArgumentException("You must specify the PowerConsumption environment variable!");
+            }
+
+            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CycleTime")))
+            {
+                throw new ArgumentException("You must specify the CycleTime environment variable!");
+            }
+
             ApplicationInstance.MessageDlg = new ApplicationMessageDlg();
             ApplicationInstance application = new ApplicationInstance();
 
-            string stationName = args[0].ToLowerInvariant();
-            Uri stationUri = new Uri(args[1]);
+            string stationName = Environment.GetEnvironmentVariable("StationName").ToLowerInvariant();
+            Uri stationUri = new Uri(Environment.GetEnvironmentVariable("StationURI"));
             string stationPath = stationUri.AbsolutePath.TrimStart('/').ToLowerInvariant();
-            
+
             application.ApplicationName = stationUri.DnsSafeHost.ToLowerInvariant();
             application.ConfigSectionName = "Opc.Ua.Station";
             application.ApplicationType = ApplicationType.Server;
@@ -566,8 +585,8 @@ namespace Station.Simulation
             config.ServerConfiguration.BaseAddresses[0] = stationUri.ToString();
 
             // calculate our power consumption in [kW] and cycle time in [s]
-            PowerConsumption = ulong.Parse(args[2], NumberStyles.Integer);
-            CycleTime = ulong.Parse(args[3], NumberStyles.Integer);
+            PowerConsumption = ulong.Parse(Environment.GetEnvironmentVariable("PowerConsumption"), NumberStyles.Integer);
+            CycleTime = ulong.Parse(Environment.GetEnvironmentVariable("CycleTime"), NumberStyles.Integer);
 
             // print out our configuration
             Console.WriteLine("OPC UA Server Configuration:");

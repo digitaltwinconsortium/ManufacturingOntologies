@@ -56,7 +56,9 @@ To install the production line simulation, you need a Windows PC or virtual mach
 
 * Edit the settings.json file for each publisher directory located in the Config directory. Replace [myiothub] with the name of your IoT Hub and replace [publisherkey] with the primary key of the 6 IoT Hub publisher devices you have created earlier. This data can be accessed by clicking on the names of the devices in the Azure Portal.
 
-* Run the StartSimulation.cmd script from the OnPremAssets folder in a cmd prompt window. This will run the simulation. A total of 8 production lines will be started, each with 3 stations each (assembly, test and packaging) as well as an MES per line and an UA Cloud Publisher instance per factory location. There are 6 locations in total: Munich, Capetown, Mumbai, Seattle, Beijing and Rio. Check the Azure Portal to verify that OPC UA telemetry is flowing to the cloud.
+* Run the StartSimulation.cmd script from the OnPremAssets folder in a cmd prompt window. This will run the simulation. A total of 8 production lines will be started, each with 3 stations each (assembly, test and packaging) as well as an MES per line and a UA Cloud Publisher instance per factory location. There are 6 locations in total: Munich, Capetown, Mumbai, Seattle, Beijing and Rio. Then check the your IoT Hub in the Azure Portal to verify that OPC UA telemetry is flowing to the cloud.
+
+Please note: If you update your Docker Desktop runtime environment, you will need to stop and restart the simulation!
 
 ### Next Steps
 
@@ -75,8 +77,6 @@ Also, if you want to test a "digital feedback loop", i.e. triggering a command o
 * UA_SERVER_METHOD_ID
 * UA_SERVER_OBJECT_ID
 * UA_SERVER_DNS_NAME
-
-Please note: If you update your Docker Desktop runtime environment, you will need to stop and restart the simulation!
 
 ### Overall Equipment Effectiveness (OEE) Calculation
 

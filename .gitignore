@@ -3,46 +3,17 @@
 ################################################################################
 
 /.vs
-/FactorySimulation/BuildOutput
-/FactorySimulation/.vs/FactorySimulation
-/FactorySimulation/MES/bin/Release/netcoreapp3.1
-/FactorySimulation/MES/obj
-/FactorySimulation/Station/bin/Release/netcoreapp3.1
-/FactorySimulation/Station/obj
-/FactorySimulation/Station/bin/Debug
-/FactorySimulation/MES/bin/Debug/netcoreapp3.1
-/FactorySimulation/PressureRelief/.vs/PressureRelief
-/FactorySimulation/PressureRelief/obj
-/FactorySimulation/PressureRelief/bin/Debug/net6.0
-/FactorySimulation/PressureRelief/bin/Debug/netcoreapp3.1
-/FactorySimulation/PressureRelief/Properties/launchSettings.json
-/FactorySimulation/PressureRelief/Properties/PublishProfiles
-/FactorySimulation/PressureRelief/Properties/ServiceDependencies/pressurereleaf - Zip Deploy
-/FactorySimulation/PressureRelief/Properties/serviceDependencies.pressurereleaf - Zip Deploy.json
-/FactorySimulation/PressureRelief/Properties/serviceDependencies.pressurereleaf - Zip Deploy.json.user
-/FactorySimulation/PressureRelief/bin/Release/netcoreapp3.1
-/FactorySimulation/PressureRelief/PressureRelief.csproj.user
-/PressureRelief/.vs/PressureRelief
-/PressureRelief/bin
-/PressureRelief/obj
-/PressureRelief/Properties/PublishProfiles
-/PressureRelief/Properties/launchSettings.json
-/PressureRelief/Properties/ServiceDependencies/pressurereleaf - Zip Deploy
-/PressureRelief/Properties/serviceDependencies.pressurereleaf - Zip Deploy.json.user
-/PressureRelief/Properties/serviceDependencies.pressurereleaf - Zip Deploy.json
-/PressureRelief/Properties/serviceDependencies.local.json.user
-/PressureRelief/Properties/serviceDependencies.local.json
-/PressureRelief/Properties/serviceDependencies.json
-/PressureRelief/PressureRelief.csproj.user
-/FactorySimulation/.vs/ProjectEvaluation
-/PressureRelief/.vs/ProjectEvaluation
-/FactorySimulation/Station/.vs/Station
+/Tools/FactorySimulation/OnPremAssets/.vs
+/Tools/FactorySimulation/OnPremAssets/Station/.vs
+/Tools/FactorySimulation/OnPremAssets/Station/bin/Debug/net6.0
+/Tools/FactorySimulation/OnPremAssets/Station/obj/Container
+/Tools/FactorySimulation/OnPremAssets/Station/obj/Debug/net6.0
+/Tools/FactorySimulation/OnPremAssets/Station/obj/Release/net6.0
+/Tools/FactorySimulation/OnPremAssets/Station/obj
 /Tools/FactorySimulation/PressureReliefFunction/.vs
 /Tools/FactorySimulation/PressureReliefFunction/bin
+/Tools/FactorySimulation/PressureReliefFunction/obj/Debug
+/Tools/FactorySimulation/PressureReliefFunction/obj/Release
 /Tools/FactorySimulation/PressureReliefFunction/obj
-/Tools/FactorySimulation/OnPremAssets/Station/obj
-/Tools/FactorySimulation/OnPremAssets/Station/bin/Debug/net6.0
-/Tools/FactorySimulation/OnPremAssets/Station/.vs
-/Tools/FactorySimulation/OnPremAssets/.vs
-/Tools/AssetAdminShell/aasontologyanalyzer/.vscode
 /Tools/AssetAdminShell/blazorsampleapp/.vscode
+/Tools/AssetAdminShell/aasontologyanalyzer/.vscode

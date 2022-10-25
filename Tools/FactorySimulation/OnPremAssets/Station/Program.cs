@@ -82,7 +82,7 @@ namespace Station.Simulation
             }
             catch (Exception ex)
             {
-                Utils.Trace("Exception: " + ex.Message);
+                Console.WriteLine("Exception: " + ex.Message);
             }
         }
 
@@ -147,7 +147,7 @@ namespace Station.Simulation
                     }
                     catch (Exception ex)
                     {
-                        Utils.Trace("Exception connecting to assembly line: {0}, retry!", ex.Message);
+                        Console.WriteLine("Exception connecting to assembly line: {0}, retry!", ex.Message);
                     }
 
                     if (DateTime.UtcNow > retryTimeout)
@@ -175,7 +175,7 @@ namespace Station.Simulation
                 // MESLogic method is executed periodically, with period c_updateRate
                 RestartTimer(c_updateRate);
 
-                Utils.Trace("MES started. Press Ctrl-C to exit.");
+                Console.WriteLine("MES started. Press Ctrl-C to exit.");
 
                 m_quitEvent = new ManualResetEvent(false);
                 try
@@ -195,7 +195,7 @@ namespace Station.Simulation
             }
             catch (Exception ex)
             {
-                Utils.Trace("Critical Exception: {0}, MES exiting!", ex.Message);
+                Console.WriteLine("Critical Exception: {0}, MES exiting!", ex.Message);
             }
         }
 
@@ -212,7 +212,7 @@ namespace Station.Simulation
                     // the reset method for the assembly to go in the ready state
                     if ((m_doneAssembly) && (m_statusTest == StationStatus.Ready))
                     {
-                        Utils.Trace("#{0} Assembly --> Test", m_serialNumber[c_Assembly]);
+                        Console.WriteLine("#{0} Assembly --> Test", m_serialNumber[c_Assembly]);
                         m_serialNumber[c_Test] = m_serialNumber[c_Assembly];
                         m_sessionTest.Session.Call(m_station.RootMethodNode, m_station.ExecuteMethodNode, m_serialNumber[c_Test]);
                         m_sessionAssembly.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
@@ -226,7 +226,7 @@ namespace Station.Simulation
                     // the reset method for the test to go in the ready state
                     if ((m_doneTest) && (m_statusPackaging == StationStatus.Ready))
                     {
-                        Utils.Trace("#{0} Test --> Packaging", m_serialNumber[c_Test]);
+                        Console.WriteLine("#{0} Test --> Packaging", m_serialNumber[c_Test]);
                         m_serialNumber[c_Packaging] = m_serialNumber[c_Test];
                         m_sessionPackaging.Session.Call(m_station.RootMethodNode, m_station.ExecuteMethodNode, m_serialNumber[c_Packaging]);
                         m_sessionTest.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
@@ -237,14 +237,14 @@ namespace Station.Simulation
                     if (m_lastActivity + TimeSpan.FromMilliseconds(c_connectTimeout) < DateTime.UtcNow)
                     {
                         // recover from network / communication outages and restart assembly line
-                        Utils.Trace("MES activity timeout - restart the MES controller.");
+                        Console.WriteLine("MES activity timeout - restart the MES controller.");
                         m_quitEvent.Set();
                     }
                 }
             }
             catch (Exception ex)
             {
-                Utils.Trace("MES logic exception: {0}!", ex.Message);
+                Console.WriteLine("MES logic exception: {0}!", ex.Message);
             }
             finally
             {
@@ -292,12 +292,12 @@ namespace Station.Simulation
                 }
                 else
                 {
-                    Utils.Trace("Error: Can not create monitored item!");
+                    Console.WriteLine("Error: Can not create monitored item!");
                 }
             }
             else
             {
-                Utils.Trace("Argument error: Session is null!");
+                Console.WriteLine("Argument error: Session is null!");
             }
 
             return false;
@@ -312,7 +312,7 @@ namespace Station.Simulation
 
                 m_serialNumber[c_Assembly]++;
 
-                Utils.Trace("<<Assembly line reset!>>");
+                Console.WriteLine("<<Assembly line reset!>>");
 
                 // reset assembly line
                 m_sessionAssembly.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
@@ -324,7 +324,7 @@ namespace Station.Simulation
                 m_statusTest = (StationStatus)m_sessionTest.Session.ReadValue(m_station.StatusNode).Value;
                 m_statusPackaging = (StationStatus)m_sessionPackaging.Session.ReadValue(m_station.StatusNode).Value;
 
-                Utils.Trace("#{0} Assemble ", m_serialNumber[c_Assembly]);
+                Console.WriteLine("#{0} Assemble ", m_serialNumber[c_Assembly]);
                 // start assembly
                 m_sessionAssembly.Session.Call(m_station.RootMethodNode, m_station.ExecuteMethodNode, m_serialNumber[c_Assembly]);
 
@@ -344,7 +344,7 @@ namespace Station.Simulation
                     MonitoredItemNotification change = e.NotificationValue as MonitoredItemNotification;
                     m_statusAssembly = (StationStatus)change.Value.Value;
 
-                    Utils.Trace("-AssemblyStation: {0}", m_statusAssembly);
+                    Console.WriteLine("-AssemblyStation: {0}", m_statusAssembly);
 
                     // now check what the status is
                     switch (m_statusAssembly)
@@ -354,7 +354,7 @@ namespace Station.Simulation
                             {
                                 // build the next product by calling execute with new serial number
                                 m_serialNumber[c_Assembly]++;
-                                Utils.Trace("#{0} Assemble ", m_serialNumber[c_Assembly]);
+                                Console.WriteLine("#{0} Assemble ", m_serialNumber[c_Assembly]);
                                 m_sessionAssembly.Session.Call(m_station.RootMethodNode, m_station.ExecuteMethodNode, m_serialNumber[c_Assembly]);
                             }
                             break;
@@ -369,7 +369,7 @@ namespace Station.Simulation
 
                         case StationStatus.Discarded:
                             // product was automatically discarded by the station, reset
-                            Utils.Trace("#{0} Discarded in Assembly", m_serialNumber[c_Assembly]);
+                            Console.WriteLine("#{0} Discarded in Assembly", m_serialNumber[c_Assembly]);
                             m_sessionAssembly.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
                             break;
 
@@ -377,23 +377,23 @@ namespace Station.Simulation
                             Task.Run(async () =>
                             {
                                 // station is at fault state, wait some time to simulate manual intervention before reseting
-                                Utils.Trace("<<AssemblyStation: Fault>>");
+                                Console.WriteLine("<<AssemblyStation: Fault>>");
                                 await Task.Delay(c_waitTime);
-                                Utils.Trace("<<AssemblyStation: Restart from Fault>>");
+                                Console.WriteLine("<<AssemblyStation: Restart from Fault>>");
 
                                 m_sessionAssembly.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
                             });
                             break;
 
                         default:
-                            Utils.Trace("Argument error: Invalid station status type received!");
+                            Console.WriteLine("Argument error: Invalid station status type received!");
                             break;
                     }
                 }
             }
             catch (Exception exception)
             {
-                Utils.Trace("Exception: Error processing monitored item notification: " + exception.Message);
+                Console.WriteLine("Exception: Error processing monitored item notification: " + exception.Message);
             }
         }
 
@@ -407,7 +407,7 @@ namespace Station.Simulation
                     MonitoredItemNotification change = e.NotificationValue as MonitoredItemNotification;
                     m_statusTest = (StationStatus)change.Value.Value;
 
-                    Utils.Trace("--TestStation: {0}", m_statusTest);
+                    Console.WriteLine("--TestStation: {0}", m_statusTest);
 
                     switch (m_statusTest)
                     {
@@ -420,12 +420,12 @@ namespace Station.Simulation
                             break;
 
                         case StationStatus.Done:
-                            Utils.Trace("#{0} Tested, Passed", m_serialNumber[c_Test]);
+                            Console.WriteLine("#{0} Tested, Passed", m_serialNumber[c_Test]);
                             m_doneTest = true;
                             break;
 
                         case StationStatus.Discarded:
-                            Utils.Trace("#{0} Tested, not Passed, Discarded", m_serialNumber[c_Test]);
+                            Console.WriteLine("#{0} Tested, not Passed, Discarded", m_serialNumber[c_Test]);
                             m_sessionTest.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
                             break;
 
@@ -434,9 +434,9 @@ namespace Station.Simulation
                                 m_faultTest = true;
                                 Task.Run(async () =>
                                 {
-                                    Utils.Trace("<<TestStation: Fault>>");
+                                    Console.WriteLine("<<TestStation: Fault>>");
                                     await Task.Delay(c_waitTime);
-                                    Utils.Trace("<<TestStation: Restart from Fault>>");
+                                    Console.WriteLine("<<TestStation: Restart from Fault>>");
 
                                     m_faultTest = false;
                                     m_sessionTest.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
@@ -446,7 +446,7 @@ namespace Station.Simulation
 
                         default:
                             {
-                                Utils.Trace("Argument error: Invalid station status type received!");
+                                Console.WriteLine("Argument error: Invalid station status type received!");
                                 return;
                             }
                     }
@@ -454,7 +454,7 @@ namespace Station.Simulation
             }
             catch (Exception exception)
             {
-                Utils.Trace("Exception: Error processing monitored item notification: " + exception.Message);
+                Console.WriteLine("Exception: Error processing monitored item notification: " + exception.Message);
             }
         }
 
@@ -467,7 +467,7 @@ namespace Station.Simulation
                     MonitoredItemNotification change = e.NotificationValue as MonitoredItemNotification;
                     m_statusPackaging = (StationStatus)change.Value.Value;
 
-                    Utils.Trace("---PackagingStation: {0}", m_statusPackaging);
+                    Console.WriteLine("---PackagingStation: {0}", m_statusPackaging);
 
                     switch (m_statusPackaging)
                     {
@@ -480,13 +480,13 @@ namespace Station.Simulation
                             break;
 
                         case StationStatus.Done:
-                            Utils.Trace("#{0} Packaged", m_serialNumber[c_Packaging]);
+                            Console.WriteLine("#{0} Packaged", m_serialNumber[c_Packaging]);
                             // last station (packaging) is done, reset so the next product can be built
                             m_sessionPackaging.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
                             break;
 
                         case StationStatus.Discarded:
-                            Utils.Trace("#{0} Discarded in Packaging", m_serialNumber[c_Packaging]);
+                            Console.WriteLine("#{0} Discarded in Packaging", m_serialNumber[c_Packaging]);
                             m_sessionPackaging.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
                             break;
 
@@ -495,9 +495,9 @@ namespace Station.Simulation
                                 m_faultPackaging = true;
                                 Task.Run(async () =>
                                 {
-                                    Utils.Trace("<<PackagingStation: Fault>>");
+                                    Console.WriteLine("<<PackagingStation: Fault>>");
                                     await Task.Delay(c_waitTime);
-                                    Utils.Trace("<<PackagingStation: Restart from Fault>>");
+                                    Console.WriteLine("<<PackagingStation: Restart from Fault>>");
 
                                     m_faultPackaging = false;
                                     m_sessionPackaging.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
@@ -506,14 +506,14 @@ namespace Station.Simulation
                             break;
 
                         default:
-                            Utils.Trace("Argument error: Invalid station status type received!");
+                            Console.WriteLine("Argument error: Invalid station status type received!");
                             break;
                     }
                 }
             }
             catch (Exception exception)
             {
-                Utils.Trace("Exception: Error processing monitored item notification: " + exception.Message);
+                Console.WriteLine("Exception: Error processing monitored item notification: " + exception.Message);
             }
         }
 
@@ -584,7 +584,6 @@ namespace Station.Simulation
             Console.WriteLine("Application URI: " + config.ApplicationUri);
             Console.WriteLine("Power consumption: " + PowerConsumption.ToString() + "kW");
             Console.WriteLine("Cycle time: " + CycleTime.ToString() + "s");
-            Console.WriteLine();
 
             // check the application certificate.
             await application.CheckApplicationInstanceCertificate(false, 0);

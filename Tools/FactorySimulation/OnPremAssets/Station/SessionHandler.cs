@@ -40,7 +40,7 @@ namespace Mes.Simulation
             }
             else
             {
-                Utils.Trace("Can not create session!");
+                Console.WriteLine("Can not create session!");
                 return false;
             }
 
@@ -59,7 +59,7 @@ namespace Mes.Simulation
             m_reconnectHandler.Dispose();
             m_reconnectHandler = null;
 
-            Utils.Trace(String.Format("--- RECONNECTED --- {0}", Session.Endpoint.EndpointUrl));
+            Console.WriteLine(String.Format("--- RECONNECTED --- {0}", Session.Endpoint.EndpointUrl));
         }
 
         private void StandardClient_KeepAlive(Session sender, KeepAliveEventArgs e)
@@ -74,7 +74,7 @@ namespace Mes.Simulation
 
                 if (!ServiceResult.IsGood(e.Status))
                 {
-                    Utils.Trace(String.Format(
+                    Console.WriteLine(String.Format(
                         "Status: {0} Outstanding requests: {1} Defunct requests: {2}",
                         e.Status,
                         sender.OutstandingRequestCount,
@@ -83,7 +83,7 @@ namespace Mes.Simulation
                     if (e.Status.StatusCode == StatusCodes.BadNoCommunication &&
                         m_reconnectHandler == null)
                     {
-                        Utils.Trace("--- RECONNECTING --- {0}", sender.Endpoint.EndpointUrl);
+                        Console.WriteLine("--- RECONNECTING --- {0}", sender.Endpoint.EndpointUrl);
                         m_reconnectHandler = new SessionReconnectHandler();
                         m_reconnectHandler.BeginReconnect(sender, c_reconnectPeriod, Client_ReconnectComplete);
                     }

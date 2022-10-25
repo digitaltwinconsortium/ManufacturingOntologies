@@ -42,7 +42,7 @@ The digital twin graph for the simulated production line is depicted below (take
 
 ### Installation Instructions
 
-To install the production line simulation, you need a Windows PC or virtual machine with at least 8GB of memory. Then follow these steps:
+To install the production line simulation, you need a Windows PC or virtual machine with at least 16GB of memory as you will be deploying 30 Docker Containers. Then follow these steps:
 
 * Use an existing Azure subscription you have admin access to or get a free Azure subscription from [here](https://azure.microsoft.com/en-us/free).
 

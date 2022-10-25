@@ -8,7 +8,7 @@
   <ApplicationUri>urn:localhost:Station</ApplicationUri>
   <ProductUri>http://contoso.com/UA/Station</ProductUri>
   <ApplicationType>Server_0</ApplicationType>
-  
+
 
   <SecurityConfiguration>
 
@@ -16,7 +16,7 @@
     <ApplicationCertificate>
       <StoreType>X509Store</StoreType>
       <StorePath>CurrentUser\UA_MachineDefault</StorePath>
-      <SubjectName>station.munich.corp.contoso</SubjectName>
+      <SubjectName>UndefinedStationName</SubjectName>
     </ApplicationCertificate>
 
     <!-- Where the issuer certificate are stored (certificate authorities) -->

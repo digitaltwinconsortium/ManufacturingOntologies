@@ -7,7 +7,7 @@
   "BrokerMessageTopic": "devices/publisher.munich.corp.contoso/messages/events/",
   "BrokerMetadataTopic": "devices/publisher.munich.corp.contoso/messages/events/",
   "SendUAMetadata": true,
-  "MetadataSendInterval": 10,
+  "MetadataSendInterval": 30,
   "BrokerCommandTopic": "$iothub/methods/POST/#",
   "BrokerResponseTopic": "$iothub/methods/res",
   "BrokerMessageSize": 262144,

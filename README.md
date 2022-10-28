@@ -16,11 +16,11 @@ The ISA95 standard is described [here](https://en.wikipedia.org/wiki/ANSI/ISA-95
 
 The IEC 63278 Asset Administration Shell is described [here](https://www.plattform-i40.de/IP/Redaktion/EN/Standardartikel/specification-administrationshell.html).
 
-## Solution Architecture
+## Overall Solution Architecture
 
 <img src="Docs/architecture.png" alt="architecture" width="900" />
 
-## Production Line Simulation
+## IEC 62541 OPC UA Production Line Simulation
 
 This repository also contains a production line simulation made up of several Stations, leveraging the machine information model described above, as well as a simple Manufacturing Execution System (MES). Both the Stations and the MES are containerized for easy deployment.
 

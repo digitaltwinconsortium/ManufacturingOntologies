@@ -1,44 +1,61 @@
 # Manufacturing Ontologies
 
+## Introduction
+
+An Ontology defines the language used to describe a system. In the manufacturing domain, these systems can represent a factory or plant but also enterprise applications or supply chains. There are several established ontologies in the manufacturing domain. Most of them have long been standardized. In this repository, we have focused on two of these ontologies, namely ISA95 to describe a factory ontology and IEC 63278 Asset Administration Shell to describe a manufacturing supply chain. Furthermore, we have included a factory simulation and an end-to-end solution architecture for you to try out the ontologies, leveraging IEC 62541 OPC UA and the Microsoft Azure Cloud.
+
 ## Digital Twin Definition Language
 
-These ontologoes leverage the Digital Twin Definition Language (DTDL), which is specified [here](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md).
+The ontologies defined in this repository are described by leveraging the Digital Twin Definition Language (DTDL), which is specified [here](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md).
 
-### Production Line Layout
+## ISA95
 
-A typical production line is organized into a number of inter-connected stations that a product being manufactured has to pass through. The production line layout for this ontology is as follows (MES stands for Manufacturing Execution System):
+The ISA95 standard is described [here](https://en.wikipedia.org/wiki/ANSI/ISA-95).
 
-![Line](Docs/line.png)
+## IEC 63278 Asset Administration Shell (AAS)
 
-### Model Relationships
+The IEC 63278 Asset Administration Shell is described [here](https://www.plattform-i40.de/IP/Redaktion/EN/Standardartikel/specification-administrationshell.html).
 
-The relationships between the models used in this ontology are described via the following diagram (taken from the [Azure Digital Twins Explorer](https://explorer.digitaltwins.azure.net/) tool):
+## Solution Architecture
 
-<img src="Docs/modelrelationships.png" alt="relationships" width="300" />
-
-### Machine Information Model
-
-The underlying machine information model is based on OPC UA and can be used for Overall Equipment Effectiveness (OEE) calculation. It is defined [here](https://github.com/digitaltwinconsortium/ManufacturingDTDLOntologies/blob/main/FactorySimulation/Station/Station.NodeSet2.xml) and is also available in the UA Cloud Library [here](https://uacloudlibrary.opcfoundation.org/).
-
-### Automotive Digital Twin Graph
-
-The digital twin graph for an automotive production line is depicted below (taken from the [Azure Digital Twins Explorer](https://explorer.digitaltwins.azure.net/) tool):
-
-![twingraph](Docs/twingraph.png)
+<img src="Docs/architecture.png" alt="architecture" width="900" />
 
 ## Production Line Simulation
 
 This repository also contains a production line simulation made up of several Stations, leveraging the machine information model described above, as well as a simple Manufacturing Execution System (MES). Both the Stations and the MES are containerized for easy deployment.
 
-### Simulation Digital Twin Graph
+### Overall Equipment Effectiveness (OEE) Calculation
 
-The digital twin graph for the simulated production line is depicted below (taken from the [Azure Digital Twins Explorer](https://explorer.digitaltwins.azure.net/) tool):
+OEE is a common metric in production environments, see the reference calculation [here](https://www.oee.com/calculating-oee). In the simulation, OEE is calculated on a continuous basis and the MES is continuously running, i.e. there are no planned stoppages in the production. This can be changed by introducing shift times and starting and stopping the MES at the beginning and at the end of a shift. The shift times can also be imported into ADX via one-click ingestion (for example in Excel format) and the OEE calculation functions updated with this data, see [here](https://docs.microsoft.com/en-us/azure/data-explorer/ingest-data-one-click).
 
-<img src="Docs/FactorySimulationTwin.png" alt="relationships" width="300" />
+### Default Simulation Configuration
 
-### Architecture
+The simulation is configured to include 8 production lines by default and the configuration can be altered in the StartSimulation.cmd script. The default configuration is depicted below:
 
-<img src="Docs/architecture.png" alt="architecture" width="900" />
+| Production Line | Ideal Cycle Time (in seconds) |
+|:---------------:|:-----------------------------:|
+| Munich | 6 |
+| Capetown | 8 |
+| Mumbai | 11 |
+| Seattle |	6 |
+| Beijing 1	| 9 |
+| Beijing 2	| 8 |
+| Beijing 3	| 4 |
+| Rio |	10 |
+
+### OPC UA Node IDs of Station OPC UA Server
+
+The following OPC UA Node IDs are used in the Station OPC UA Server for telemetry to the cloud
+* i=379 - manufactured product serial number
+* i=385 - number of manufactured products
+* i=391 - number of discarded products
+* i=398 - running time
+* i=399 - faulty time
+* i=400 - status (0=station ready to do work, 1=work in progress, 2=work done and good part manufactured, 3=work done and scrap manufactured, 4=station in fault state)
+* i=406 - energy consumption
+* i=412 - ideal cycle time
+* i=418 - actual cycle time
+* i=434 - pressure
 
 ### Installation Instructions
 
@@ -81,39 +98,6 @@ Also, if you want to test a "digital feedback loop", i.e. triggering a command o
 * UA_SERVER_METHOD_ID
 * UA_SERVER_OBJECT_ID
 * UA_SERVER_DNS_NAME
-
-### Overall Equipment Effectiveness (OEE) Calculation
-
-OEE is a common metric in production environments, see the reference calculation [here](https://www.oee.com/calculating-oee). In the simulation, OEE is calculated on a continous basis and the MES is continously running, i.e. there are no planned stopages in the production. This can be changed by introducing shift times and starting and stopping the MES at the beginning and at the end of a shift. The shift times can also be imported into ADX via one-click ingestion (for example in Excel format) and the OEE calculation functions updated with this data, see [here](https://docs.microsoft.com/en-us/azure/data-explorer/ingest-data-one-click).
-
-### Default Simulation Configuration
-
-The simulation is configured to include 8 production lines by default and the configuration can be altered in the StartSimulation.cmd script. The default configuration is depicted below:
-
-| Production Line | Ideal Cycle Time (in seconds) |
-|:---------------:|:-----------------------------:|
-| Munich | 6 |
-| Capetown | 8 |
-| Mumbai | 11 |
-| Seattle |	6 |
-| Beijing 1	| 9 |
-| Beijing 2	| 8 |
-| Beijing 3	| 4 |
-| Rio |	10 |
-
-### OPC UA Node IDs of Station OPC UA Server
-
-The following OPC UA Node IDs are used in the Station OPC UA Server for telemetry to the cloud
-* i=379 - manufactured product serial number
-* i=385 - number of manufactured products
-* i=391 - number of discarded products
-* i=398 - running time
-* i=399 - faulty time
-* i=400 - status (0=station ready to do work, 1=work in progress, 2=work done and good part manufactured, 3=work done and scrap manufactured, 4=station in fault state)
-* i=406 - energy consumption
-* i=412 - ideal cycle time
-* i=418 - actual cycle time
-* i=434 - pressure
 
 ## License
 

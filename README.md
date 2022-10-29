@@ -26,7 +26,7 @@ This repository also contains a production line simulation made up of several St
 
 ### UA Cloud Twin
 
-The simulation makes use of the UA Cloud Twin Docker container also available from the Digital Twin Consortium [here](https://github.com/digitaltwinconsortium/UA-CloudTwin). It automatically detetcs OPC UA assets from the OPC UA telemetry messages sent to the cloud and registers ISA95-compatible digital twins in Azure Digital Twins service for you.
+The simulation makes use of the UA Cloud Twin also available from the Digital Twin Consortium [here](https://github.com/digitaltwinconsortium/UA-CloudTwin). It automatically detects OPC UA assets from the OPC UA telemetry messages sent to the cloud and registers ISA95-compatible digital twins in Azure Digital Twins service for you.
 
 ### Default Simulation Configuration
 

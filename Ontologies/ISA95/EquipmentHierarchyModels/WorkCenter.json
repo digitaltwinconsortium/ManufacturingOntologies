@@ -6,14 +6,47 @@
     "description": "Work centers are elements of the equipment hierarchy under an area. The term work center may be used when the specific type of the equipment element is not significant for the purpose of the discussion.",
     "comment": "According to ANSI/ISA-95.00.01-2010 (IEC 62264-1 Mod) Enterprise-Control System Integration − Part 1: Models and Terminology - Approved 13 May 2010",
     "extends": ["dtmi:digitaltwins:isa95:HierarchyScope;1", "dtmi:digitaltwins:isa95:SiteAsset;1"],
-    "contents": [
-      {
-        "@type": "Relationship",
-        "name": "workUnit",
-        "description": "Reference to a contained work unit of the work center",
-        "displayName": "contains Work unit",
-        "comment": "Not part of the ISA-95 Standard. Just to make the graph easier to handle",
-        "target": "dtmi:digitaltwins:isa95:WorkUnit;1"
-      }
-    ]
-  }
+  "contents": [
+    {
+      "@type": "Relationship",
+      "name": "workUnit",
+      "description": "Reference to a contained work unit of the work center",
+      "displayName": "contains Work unit",
+      "comment": "Not part of the ISA-95 Standard. Just to make the graph easier to handle",
+      "target": "dtmi:digitaltwins:isa95:WorkUnit;1"
+    },
+    {
+      "@type": "Relationship",
+      "name": "Previous",
+      "target": "dtmi:digitaltwins:isa95:WorkCenter;1",
+      "comment": "Link to the previous work center in the production line, if available"
+    },
+    {
+      "@type": "Relationship",
+      "name": "Next",
+      "target": "dtmi:digitaltwins:isa95:WorkCenter;1",
+      "comment": "Link to the next work center in the production line, if available"
+    },
+    {
+      "@type": "Property",
+      "name": "OPCUAModelURL",
+      "schema": "string",
+      "comment": "UA Cloud Library download link to the associated OPC UA model, if available",
+      "writable": true
+    },
+    {
+      "@type": "Property",
+      "name": "OPCUAApplicationURI",
+      "schema": "string",
+      "comment": "OPC UA Application URI of the OPC UA server, if available",
+      "writable": true
+    },
+    {
+      "@type": "Property",
+      "name": "OPCUAEndpointURL",
+      "schema": "string",
+      "comment": "OPC UA Endpoint URL on the shop floor to be used to connect to the work center from e.g. an IoT Edge gateway, if available",
+      "writable": true
+    }
+  ]
+}

@@ -24,9 +24,9 @@ The IEC 63278 Asset Administration Shell is described [here](https://www.plattfo
 
 This repository also contains a production line simulation made up of several Stations, leveraging the machine information model described above, as well as a simple Manufacturing Execution System (MES). Both the Stations and the MES are containerized for easy deployment.
 
-### Overall Equipment Effectiveness (OEE) Calculation
+### UA Cloud Twin
 
-OEE is a common metric in production environments, see the reference calculation [here](https://www.oee.com/calculating-oee). In the simulation, OEE is calculated on a continuous basis and the MES is continuously running, i.e. there are no planned stoppages in the production. This can be changed by introducing shift times and starting and stopping the MES at the beginning and at the end of a shift. The shift times can also be imported into ADX via one-click ingestion (for example in Excel format) and the OEE calculation functions updated with this data, see [here](https://docs.microsoft.com/en-us/azure/data-explorer/ingest-data-one-click).
+The simulation makes use of the UA Cloud Twin Docker container also available from the Digital Twin Consortium [here](https://github.com/digitaltwinconsortium/UA-CloudTwin). It automatically detetcs OPC UA assets from the OPC UA telemetry messages sent to the cloud and registers ISA95-compatible digital twins in Azure Digital Twins service for you.
 
 ### Default Simulation Configuration
 

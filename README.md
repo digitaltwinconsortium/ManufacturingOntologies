@@ -28,6 +28,18 @@ This repository also contains a production line simulation made up of several St
 
 The simulation makes use of the UA Cloud Twin also available from the Digital Twin Consortium [here](https://github.com/digitaltwinconsortium/UA-CloudTwin). It automatically detects OPC UA assets from the OPC UA telemetry messages sent to the cloud and registers ISA95-compatible digital twins in Azure Digital Twins service for you.
 
+#### Mapping OPC UA Servers to the ISA95 Hierarchy Model
+
+UA Cloud Twin takes the combination of the OPC UA Application URI and the OPC UA Namespace URIs discovered in the OPC UA telemetry stream and creates ISA95 Work Center assets for each one.
+
+#### Mapping OPC UA PubSub Publishers to the ISA95 Hierarchy Model
+
+UA Cloud Twin takes the OPC UA Publisher ID and creates ISA95 Area assets for each one.
+
+#### Mapping OPC UA PubSub Datasets to the ISA95 Hierarchy Model
+
+UA Cloud Twin takes each OPC UA Field discovered in the received Dataset metadata and creates an ISA95 Work Unit asset for each.
+
 ### Default Simulation Configuration
 
 The simulation is configured to include 8 production lines by default and the configuration can be altered in the StartSimulation.cmd script. The default configuration is depicted below:

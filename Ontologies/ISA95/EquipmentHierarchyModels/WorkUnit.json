@@ -8,11 +8,19 @@
   "extends": [ "dtmi:digitaltwins:isa95:HierarchyScope;1", "dtmi:digitaltwins:isa95:SiteAsset;1" ],
   "contents": [
     {
-      "@type": "Property",
-      "name": "OPCUANamespaceURI",
-      "schema": "string",
-      "comment": "OPC UA Namespace URI of the OPC UA server, if available",
-      "writable": true
+      "@type": "Telemetry",
+      "name": "DisplayName",
+      "schema": "string"
+    },
+    {
+      "@type": "Telemetry",
+      "name": "UANodeId",
+      "schema": "string"
+    },
+    {
+      "@type": "Telemetry",
+      "name": "UANodeValue",
+      "schema": "string"
     }
   ]
 }

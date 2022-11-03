@@ -9,17 +9,17 @@
   "contents": [
     {
       "@type": "Telemetry",
-      "name": "DisplayName",
+      "name": "OPCUADisplayName",
       "schema": "string"
     },
     {
       "@type": "Telemetry",
-      "name": "UANodeId",
+      "name": "OPCUANodeId",
       "schema": "string"
     },
     {
       "@type": "Telemetry",
-      "name": "UANodeValue",
+      "name": "OPCUANodeValue",
       "schema": "string"
     }
   ]

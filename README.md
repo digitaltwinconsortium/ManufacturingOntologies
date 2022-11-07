@@ -69,9 +69,14 @@ The following OPC UA Node IDs are used in the Station OPC UA Server for telemetr
 * i=418 - actual cycle time
 * i=434 - pressure
 
-### Installation Instructions
+### Automatic Installation of Production Line Simulation and Cloud Services
 
-To install the production line simulation, you need a Windows PC or virtual machine with at least *16GB of memory* as you will be deploying 30 Docker Containers. You will also need an Azure subscription you have admin access to or get a free Azure subscription from [here](https://azure.microsoft.com/en-us/free).
+Simply click on the button below:
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Fazure-quickstart-templates%2Fmaster%2Fquickstarts%2Fmicrosoft.storage%2Fstorage-account-create%2Fazuredeploy.json)
+
+### Manual Installation Instructions
+
+To install the production line simulation and cloud services manually, you need a Windows PC or virtual machine with at least *16GB of memory* as you will be deploying 30 Docker Containers. You will also need an Azure subscription you have admin access to or get a free Azure subscription from [here](https://azure.microsoft.com/en-us/free).
 
 Follow these steps:
 

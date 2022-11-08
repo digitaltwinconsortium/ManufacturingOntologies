@@ -17,27 +17,6 @@
         "description": "Location for all resources."
       }
     },
-    "sku": {
-      "type": "string",
-      "defaultValue": "F1",
-      "metadata": {
-        "description": "The SKU of App Service Plan."
-      }
-    },
-    "linuxFxVersion": {
-      "type": "string",
-      "defaultValue": "DOTNETCORE|3.0",
-      "metadata": {
-        "description": "The Runtime stack of current web app"
-      }
-    },
-    "repoUrl": {
-      "type": "string",
-      "defaultValue": "https://digitaltwinconsortium/ua-cloudtwin:main",
-      "metadata": {
-        "description": "Optional Git Repo URL"
-      }
-    },
     "adminUsername": {
       "type": "string",
       "metadata": {
@@ -49,139 +28,6 @@
       "minLength": 12,
       "metadata": {
         "description": "Password for the Virtual Machine."
-      }
-    },
-    "dnsLabelPrefix": {
-      "type": "string",
-      "defaultValue": "ontologies",
-      "metadata": {
-        "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
-      }
-    },
-    "publicIpName": {
-      "type": "string",
-      "defaultValue": "myPublicIP",
-      "metadata": {
-        "description": "Name for the Public IP used to access the Virtual Machine."
-      }
-    },
-    "publicIPAllocationMethod": {
-      "type": "string",
-      "defaultValue": "Dynamic",
-      "allowedValues": [
-        "Dynamic",
-        "Static"
-      ],
-      "metadata": {
-        "description": "Allocation method for the Public IP used to access the Virtual Machine."
-      }
-    },
-    "publicIpSku": {
-      "type": "string",
-      "defaultValue": "Basic",
-      "allowedValues": [
-        "Basic",
-        "Standard"
-      ],
-      "metadata": {
-        "description": "SKU for the Public IP used to access the Virtual Machine."
-      }
-    },
-    "OSVersion": {
-      "type": "string",
-      "defaultValue": "2022-datacenter-azure-edition-core",
-      "allowedValues": [
-        "2008-R2-SP1",
-        "2008-R2-SP1-smalldisk",
-        "2012-Datacenter",
-        "2012-datacenter-gensecond",
-        "2012-Datacenter-smalldisk",
-        "2012-datacenter-smalldisk-g2",
-        "2012-Datacenter-zhcn",
-        "2012-datacenter-zhcn-g2",
-        "2012-R2-Datacenter",
-        "2012-r2-datacenter-gensecond",
-        "2012-R2-Datacenter-smalldisk",
-        "2012-r2-datacenter-smalldisk-g2",
-        "2012-R2-Datacenter-zhcn",
-        "2012-r2-datacenter-zhcn-g2",
-        "2016-Datacenter",
-        "2016-datacenter-gensecond",
-        "2016-datacenter-gs",
-        "2016-Datacenter-Server-Core",
-        "2016-datacenter-server-core-g2",
-        "2016-Datacenter-Server-Core-smalldisk",
-        "2016-datacenter-server-core-smalldisk-g2",
-        "2016-Datacenter-smalldisk",
-        "2016-datacenter-smalldisk-g2",
-        "2016-Datacenter-with-Containers",
-        "2016-datacenter-with-containers-g2",
-        "2016-datacenter-with-containers-gs",
-        "2016-Datacenter-zhcn",
-        "2016-datacenter-zhcn-g2",
-        "2019-Datacenter",
-        "2019-Datacenter-Core",
-        "2019-datacenter-core-g2",
-        "2019-Datacenter-Core-smalldisk",
-        "2019-datacenter-core-smalldisk-g2",
-        "2019-Datacenter-Core-with-Containers",
-        "2019-datacenter-core-with-containers-g2",
-        "2019-Datacenter-Core-with-Containers-smalldisk",
-        "2019-datacenter-core-with-containers-smalldisk-g2",
-        "2019-datacenter-gensecond",
-        "2019-datacenter-gs",
-        "2019-Datacenter-smalldisk",
-        "2019-datacenter-smalldisk-g2",
-        "2019-Datacenter-with-Containers",
-        "2019-datacenter-with-containers-g2",
-        "2019-datacenter-with-containers-gs",
-        "2019-Datacenter-with-Containers-smalldisk",
-        "2019-datacenter-with-containers-smalldisk-g2",
-        "2019-Datacenter-zhcn",
-        "2019-datacenter-zhcn-g2",
-        "2022-datacenter",
-        "2022-datacenter-azure-edition",
-        "2022-datacenter-azure-edition-core",
-        "2022-datacenter-azure-edition-core-smalldisk",
-        "2022-datacenter-azure-edition-smalldisk",
-        "2022-datacenter-core",
-        "2022-datacenter-core-g2",
-        "2022-datacenter-core-smalldisk",
-        "2022-datacenter-core-smalldisk-g2",
-        "2022-datacenter-g2",
-        "2022-datacenter-smalldisk",
-        "2022-datacenter-smalldisk-g2"
-      ],
-      "metadata": {
-        "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version."
-      }
-    },
-    "vmSize": {
-      "type": "string",
-      "defaultValue": "Standard_D2s_v5",
-      "metadata": {
-        "description": "Size of the virtual machine."
-      }
-    },
-    "vmName": {
-      "type": "string",
-      "defaultValue": "ontologies",
-      "metadata": {
-        "description": "Name of the virtual machine."
-      }
-    },
-    "clusters_kustocluster_name": {
-      "type": "string",
-      "defaultValue": "ontologies",
-      "metadata": {
-        "description": "Name of the cluster to create"
-      }
-    },
-    "databases_kustodb_name": {
-      "type": "string",
-      "defaultValue": "ontologies",
-      "metadata": {
-        "description": "Name of the database to create"
       }
     }
   },
@@ -231,11 +77,24 @@
       "name": "[variables('appServicePlanPortalName')]",
       "location": "[parameters('location')]",
       "sku": {
-        "name": "[parameters('sku')]"
+        "name": "P2v2",
+        "tier": "PremiumV2",
+        "size": "P2v2",
+        "family": "Pv2",
+        "capacity": 1
       },
       "kind": "linux",
       "properties": {
-        "reserved": true
+        "perSiteScaling": false,
+        "elasticScaleEnabled": false,
+        "maximumElasticWorkerCount": 1,
+        "isSpot": false,
+        "reserved": true,
+        "isXenon": false,
+        "hyperV": false,
+        "targetWorkerCount": 0,
+        "targetWorkerSizeId": 0,
+        "zoneRedundant": false
       }
     },
     {
@@ -247,9 +106,15 @@
         "httpsOnly": true,
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanPortalName'))]",
         "siteConfig": {
-          "linuxFxVersion": "[parameters('linuxFxVersion')]",
+          "numberOfWorkers": 1,
+          "linuxFxVersion": "DOCKER|ghcr.io/digitaltwinconsortium/ua-cloudtwin:main",
           "minTlsVersion": "1.2",
-          "ftpsState": "FtpsOnly"
+          "ftpsState": "FtpsOnly",
+          "acrUseManagedIdentityCreds": false,
+          "alwaysOn": true,
+          "http20Enabled": false,
+          "functionAppScaleLimit": 0,
+          "minimumElasticInstanceCount": 0
         }
       },
       "identity": {
@@ -259,20 +124,7 @@
         "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanPortalName'))]"
       ]
     },
-    {
-      "condition": "[contains(parameters('repoUrl'), 'http')]",
-      "type": "Microsoft.Web/sites/sourcecontrols",
-      "apiVersion": "2021-02-01",
-      "name": "[format('{0}/{1}', parameters('ResourcesName'), 'web')]",
-      "properties": {
-        "repoUrl": "[parameters('repoUrl')]",
-        "branch": "main",
-        "isManualIntegration": true
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Web/sites', parameters('ResourcesName'))]"
-      ]
-    },
+
     {
       "type": "Microsoft.Devices/IotHubs",
       "apiVersion": "2021-07-01",
@@ -393,15 +245,15 @@
     {
       "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2020-11-01",
-      "name": "[parameters('publicIpName')]",
+      "name": "[parameters('ResourcesName')]",
       "location": "[parameters('location')]",
       "sku": {
-        "name": "[parameters('publicIpSku')]"
+        "name": "Basic"
       },
       "properties": {
-        "publicIPAllocationMethod": "[parameters('publicIPAllocationMethod')]",
+        "publicIPAllocationMethod": "Dynamic",
         "dnsSettings": {
-          "domainNameLabel": "[parameters('dnsLabelPrefix')]"
+          "domainNameLabel": "[parameters('ResourcesName')]"
         }
       }
     },
@@ -467,7 +319,7 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpName'))]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('ResourcesName'))]"
               },
               "subnet": {
                 "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
@@ -477,7 +329,7 @@
         ]
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpName'))]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', parameters('ResourcesName'))]",
         "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
       ]
     },
@@ -488,18 +340,18 @@
       "location": "[parameters('location')]",
       "properties": {
         "hardwareProfile": {
-          "vmSize": "[parameters('vmSize')]"
+          "vmSize": "Standard_D4s_v3"
         },
         "osProfile": {
-          "computerName": "[parameters('vmName')]",
+          "computerName": "[parameters('ResourcesName')]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "MicrosoftWindowsServer",
-            "offer": "WindowsServer",
-            "sku": "[parameters('OSVersion')]",
+            "publisher": "MicrosoftWindowsDesktop",
+            "offer": "Windows-10",
+            "sku": "20h2-pro-g2",
             "version": "latest"
           },
           "osDisk": {
@@ -573,12 +425,12 @@
       }
     },
     {
-      "name": "[concat(parameters('ResourcesName'), '/', parameters('databases_kustodb_name'))]",
+      "name": "[concat(parameters('ResourcesName'), '/', parameters('ResourcesName'))]",
       "type": "Microsoft.Kusto/clusters/databases",
       "apiVersion": "2021-01-01",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters', parameters('clusters_kustocluster_name'))]"
+        "[resourceId('Microsoft.Kusto/clusters', parameters('ResourcesName'))]"
       ],
       "properties": {
         "softDeletePeriodInDays": 365,
@@ -610,7 +462,7 @@
   "outputs": {
     "hostname": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpName'))).dnsSettings.fqdn]"
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', parameters('ResourcesName'))).dnsSettings.fqdn]"
     }
   }
 }

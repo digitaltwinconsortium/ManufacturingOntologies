@@ -71,7 +71,7 @@ The following OPC UA Node IDs are used in the Station OPC UA Server for telemetr
 
 ### Automatic Installation of Production Line Simulation and Cloud Services
 
-Simply click on the button below:
+Simply click on the button below, it will deploy all required resources (on Microsoft Azure):
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdigitaltwinconsortium%2FManufacturingOntologies%2Fmain%2FDeployment%2Farm.json)
 

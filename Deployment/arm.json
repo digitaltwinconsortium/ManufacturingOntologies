@@ -342,13 +342,8 @@
         "enablePurge": false,
         "enableDoubleEncryption": false,
         "engineType": "V3",
-        "acceptedAudiences": [],
-        "restrictOutboundNetworkAccess": "Disabled",
-        "allowedFqdnList": [],
         "publicNetworkAccess": "Enabled",
-        "allowedIpRangeList": [],
-        "enableAutoStop": true,
-        "publicIPType": "IPv4"
+        "enableAutoStop": true
       }
     },
     {

@@ -341,9 +341,7 @@
         "enableStreamingIngest": true,
         "enablePurge": false,
         "enableDoubleEncryption": false,
-        "engineType": "V3",
-        "publicNetworkAccess": "Enabled",
-        "enableAutoStop": true
+        "engineType": "V3"
       }
     },
     {

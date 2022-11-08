@@ -35,28 +35,9 @@
       "apiVersion": "2020-10-31",
       "name": "[parameters('ResourcesName')]",
       "location": "[resourceGroup().location]",
-      "tags": {
-        "tagName1": "tagValue1",
-        "tagName2": "tagValue2"
-      },
-      "identity": {
-        "type": "string"
-      },
       "properties": {
-        "privateEndpointConnections": [
-          {
-            "properties": {
-              "groupIds": [ "string" ],
-              "privateEndpoint": {},
-              "privateLinkServiceConnectionState": {
-                "actionsRequired": "string",
-                "description": "string",
-                "status": "string"
-              }
-            }
-          }
-        ],
-        "publicNetworkAccess": "string"
+        "privateEndpointConnections": [],
+        "publicNetworkAccess": "Enabled"
       }
     },
     {
@@ -126,86 +107,26 @@
         "capacity": 2,
         "name": "S1"
       },
-      "etag": "string",
       "identity": {
-        "type": "SystemAssigned",
-        "userAssignedIdentities": {}
+        "type": "None"
       },
       "properties": {
-        "allowedFqdnList": [ "string" ],
-        "authorizationPolicies": [
-          {
-            "keyName": "string",
-            "primaryKey": "string",
-            "rights": "RegistryWrite, ServiceConnect, DeviceConnect",
-            "secondaryKey": "string"
+        "ipFilterRules": [],
+        "eventHubEndpoints": {
+          "events": {
+            "retentionTimeInDays": 1,
+            "partitionCount": 4
           }
-        ],
-        "cloudToDevice": {
-          "defaultTtlAsIso8601": "string",
-          "feedback": {
-            "lockDurationAsIso8601": "string",
-            "maxDeliveryCount": 1,
-            "ttlAsIso8601": "string"
-          },
-          "maxDeliveryCount": 1
         },
-        "comments": "string",
-        "disableDeviceSAS": false,
-        "disableLocalAuth": false,
-        "disableModuleSAS": false,
-        "enableDataResidency": "bool",
-        "enableFileUploadNotifications": true,
-        "eventHubEndpoints": {},
-        "features": "None",
-        "ipFilterRules": [
-          {
-            "action": "Accept",
-            "filterName": "string",
-            "ipMask": "string"
-          }
-        ],
-        "messagingEndpoints": {},
-        "minTlsVersion": "string",
-        "networkRuleSets": {
-          "applyToBuiltInEventHubEndpoint": false,
-          "defaultAction": "Allow",
-          "ipRules": [
-            {
-              "action": "Allow",
-              "filterName": "string",
-              "ipMask": "string"
-            }
-          ]
-        },
-        "privateEndpointConnections": [
-          {
-            "properties": {
-              "privateEndpoint": {},
-              "privateLinkServiceConnectionState": {
-                "actionsRequired": "string",
-                "description": "string",
-                "status": "Disconnected"
-              }
-            }
-          }
-        ],
-        "publicNetworkAccess": "Enabled",
-        "restrictOutboundNetworkAccess": false,
         "routing": {
           "endpoints": {
-            "eventHubs": [],
             "serviceBusQueues": [],
             "serviceBusTopics": [],
-            "storageContainers": []
+            "eventHubs": [],
+            "storageContainers": [],
+            "cosmosDBSqlCollections": []
           },
-          "enrichments": [
-            {
-              "endpointNames": [ "string" ],
-              "key": "string",
-              "value": "string"
-            }
-          ],
+          "routes": [],
           "fallbackRoute": {
             "name": "$fallback",
             "source": "DeviceMessages",
@@ -214,10 +135,35 @@
               "events"
             ],
             "isEnabled": true
-          },
-          "routes": []
+          }
         },
-        "storageEndpoints": {}
+        "storageEndpoints": {
+          "$default": {
+            "sasTtlAsIso8601": "PT1H",
+            "connectionString": "",
+            "containerName": ""
+          }
+        },
+        "messagingEndpoints": {
+          "fileNotifications": {
+            "lockDurationAsIso8601": "PT1M",
+            "ttlAsIso8601": "PT1H",
+            "maxDeliveryCount": 10
+          }
+        },
+        "enableFileUploadNotifications": false,
+        "cloudToDevice": {
+          "maxDeliveryCount": 10,
+          "defaultTtlAsIso8601": "PT1H",
+          "feedback": {
+            "lockDurationAsIso8601": "PT1M",
+            "ttlAsIso8601": "PT1H",
+            "maxDeliveryCount": 10
+          }
+        },
+        "features": "None",
+        "disableLocalAuth": false,
+        "allowedFqdnList": []
       }
     },
     {

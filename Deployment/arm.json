@@ -370,7 +370,8 @@
       "kind": "IotHub",
       "properties": {
         "iotHubResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('ResourcesName'), '/providers/Microsoft.Devices/IotHubs/', parameters('ResourcesName'))]",
-        "consumerGroup": "$default",
+        "consumerGroup": "$Default",
+        "mappingRuleName": "opcua_mapping",
         "dataFormat": "MULTIJSON",
         "eventSystemProperties": [],
         "sharedAccessPolicyName": "iothubowner",

@@ -116,6 +116,8 @@ Follow these steps:
 
 Please note: If you update your Docker Desktop runtime environment, you will need to stop and restart the simulation!
 
+### Next Steps
+
 If you want to test a "digital feedback loop", i.e. triggering a command on one of the OPC UA servers in the simulation from the cloud, based on a time-series reaching a certain threshold (the simulated pressure), then configure and run the StartUACloudCommander.bat file and deploy the PressureRelief Azure Function in your Azure subscription and create an application registration for your ADX instance as described [here](https://docs.microsoft.com/en-us/azure/data-explorer/provision-azure-ad-app). You also need to define the following environment variables in the Azure portal for the Function:
 * ADX_INSTANCE_URL
 * ADX_DB_NAME

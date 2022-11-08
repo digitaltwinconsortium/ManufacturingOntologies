@@ -85,7 +85,7 @@ Once the deployment is complete in the Azure Portal, please follow these steps t
 
 4. On the VM, run the StartSimulation.cmd script from the OnPremAssets folder in a cmd prompt window. This will run the simulation. A total of 8 production lines will be started, each with 3 stations each (assembly, test and packaging) as well as an MES per line and a UA Cloud Publisher instance per factory location. There are 6 locations in total: Munich, Capetown, Mumbai, Seattle, Beijing and Rio. Then check your IoT Hub in the Azure Portal to verify that OPC UA telemetry is flowing to the cloud.
 
-5. Under Access Control -> Role Assignments of your Azure Digital Twin service instance in the Azure Portal, add a new Role Assignment of type "Azire Digital Twins Data Owner", assign it's access to "Managed Identity" and under "Select Users", select your previously deployed Azure Web App service instance.
+5. Under Access Control -> Role Assignments of your Azure Digital Twin service instance in the Azure Portal, add a new Role Assignment of type "Azure Digital Twins Data Owner", assign it's access to "Managed Identity" and under "Select Users", select your previously deployed Azure Web App service instance.
 
 6. Open the URL of the deployed Azure Web App service in a browser and fill in the two fields under Setup and click Connect. The Azure Event Hub connection string can be read for Azure IoT Hub under "Built-in Endpoints"->"Event Hub-compatible endpoint" in the Azure Portal.
 
@@ -108,7 +108,7 @@ Follow these steps:
 
 5. Deploy an Azure Digital Twins service and check the "Assign Azure Digital Twins Data Owner role" checkbox during deployment.
 
-6. Deploy an Azure Web App service and select "Docker Container" for the Publish setting, "Linux" for the Operating System setting and then under the Docker tab, select "Single Container" for the options setting, "Private Registry" for the Image Source setting, "https://ghcr.io/" for the Server URL setting and finally "digitaltwinconsortium/ua-cloudtwin:main" for the Image and tag setting. Once deployed, enable the System assigned Identity and under Access Control -> Role Assignments of your Azure Digital Twin service instance, add a new Role Assignment of type "Azire Digital Twins Data Owner", assign it's access to "Managed Identity" and under "Select Users", select your previously deployed Azure Web App service instance.
+6. Deploy an Azure Web App service and select "Docker Container" for the Publish setting, "Linux" for the Operating System setting and then under the Docker tab, select "Single Container" for the options setting, "Private Registry" for the Image Source setting, "https://ghcr.io/" for the Server URL setting and finally "digitaltwinconsortium/ua-cloudtwin:main" for the Image and tag setting. Once deployed, enable the System assigned Identity and under Access Control -> Role Assignments of your Azure Digital Twin service instance, add a new Role Assignment of type "Azure Digital Twins Data Owner", assign it's access to "Managed Identity" and under "Select Users", select your previously deployed Azure Web App service instance.
 
 7. Open the URL of your Azure Web App service in a browser and fill in the two fields under Setup and click Connect. The Azure Event Hub connection string can be read for Azure IoT Hub under "Built-in Endpoints"->"Event Hub-compatible endpoint" in the Azure Portal.
 

@@ -357,27 +357,6 @@
         "hotCachePeriodInDays": 31
       },
       "kind": "ReadWrite"
-    },
-    {
-      "type": "Microsoft.Kusto/Clusters/Databases/DataConnections",
-      "apiVersion": "2021-01-01",
-      "name": "[concat(parameters('ResourcesName'), '/', parameters('ResourcesName'), '/iothub')]",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Kusto/Clusters/Databases', parameters('ResourcesName'), parameters('ResourcesName'))]",
-        "[resourceId('Microsoft.Kusto/Clusters', parameters('ResourcesName'))]"
-      ],
-      "kind": "IotHub",
-      "properties": {
-        "iotHubResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('ResourcesName'), '/providers/Microsoft.Devices/IotHubs/', parameters('ResourcesName'))]",
-        "consumerGroup": "$Default",
-        "mappingRuleName": "opcua_mapping",
-        "dataFormat": "MULTIJSON",
-        "eventSystemProperties": [],
-        "sharedAccessPolicyName": "iothubowner",
-        "databaseRouting": "Single",
-        "kind": "IotHub"
-      }
     }
   ],
   "outputs": {

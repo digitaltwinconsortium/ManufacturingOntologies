@@ -28,6 +28,8 @@ This repository also contains a production line simulation made up of several St
 
 The simulation makes use of the UA Cloud Twin also available from the Digital Twin Consortium [here](https://github.com/digitaltwinconsortium/UA-CloudTwin). It automatically detects OPC UA assets from the OPC UA telemetry messages sent to the cloud and registers ISA95-compatible digital twins in Azure Digital Twins service for you.
 
+<img src="Docs/twingraph.png" alt="twingraph" width="900" />
+
 #### Mapping OPC UA Servers to the ISA95 Hierarchy Model
 
 UA Cloud Twin takes the combination of the OPC UA Application URI and the OPC UA Namespace URIs discovered in the OPC UA telemetry stream and creates ISA95 Work Center assets for each one.

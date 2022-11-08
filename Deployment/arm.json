@@ -2,17 +2,17 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "webAppName": {
+    "ResourcesName": {
       "type": "string",
-      "defaultValue": "[format('webApp-{0}', uniqueString(resourceGroup().id))]",
+      "defaultValue": "ontologies",
       "minLength": 2,
       "metadata": {
-        "description": "Web app name."
+        "description": "Name of resources to be deployed."
       }
     },
     "location": {
       "type": "string",
-      "defaultValue": "[resourceGroup().location]",
+      "defaultValue": "East US 2",
       "metadata": {
         "description": "Location for all resources."
       }
@@ -33,7 +33,7 @@
     },
     "repoUrl": {
       "type": "string",
-      "defaultValue": " ",
+      "defaultValue": "https://digitaltwinconsortium/ua-cloudtwin:main",
       "metadata": {
         "description": "Optional Git Repo URL"
       }
@@ -53,7 +53,7 @@
     },
     "dnsLabelPrefix": {
       "type": "string",
-      "defaultValue": "[toLower(format('{0}-{1}', parameters('vmName'), uniqueString(resourceGroup().id, parameters('vmName'))))]",
+      "defaultValue": "ontologies",
       "metadata": {
         "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
       }
@@ -165,28 +165,28 @@
     },
     "vmName": {
       "type": "string",
-      "defaultValue": "simple-vm",
+      "defaultValue": "ontologies",
       "metadata": {
         "description": "Name of the virtual machine."
       }
     },
     "clusters_kustocluster_name": {
       "type": "string",
-      "defaultValue": "[concat('kusto', uniqueString(resourceGroup().id))]",
+      "defaultValue": "ontologies",
       "metadata": {
         "description": "Name of the cluster to create"
       }
     },
     "databases_kustodb_name": {
       "type": "string",
-      "defaultValue": "kustodb",
+      "defaultValue": "ontologies",
       "metadata": {
         "description": "Name of the database to create"
       }
     }
   },
   "variables": {
-    "appServicePlanPortalName": "[format('AppServicePlan-{0}', parameters('webAppName'))]",
+    "appServicePlanPortalName": "[parameters('ResourcesName')]",
     "storageAccountName": "[format('bootdiags{0}', uniqueString(resourceGroup().id))]",
     "nicName": "myVMNic",
     "addressPrefix": "10.0.0.0/16",
@@ -198,9 +198,9 @@
   "resources": [
     {
       "type": "Microsoft.DigitalTwins/digitalTwinsInstances",
-      "apiVersion": "2022-05-31",
-      "name": "string",
-      "location": "string",
+      "apiVersion": "2020-10-31",
+      "name": "[parameters('ResourcesName')]",
+      "location": "[parameters('location')]",
       "tags": {
         "tagName1": "tagValue1",
         "tagName2": "tagValue2"
@@ -241,7 +241,7 @@
     {
       "type": "Microsoft.Web/sites",
       "apiVersion": "2021-02-01",
-      "name": "[parameters('webAppName')]",
+      "name": "[parameters('ResourcesName')]",
       "location": "[parameters('location')]",
       "properties": {
         "httpsOnly": true,
@@ -263,32 +263,32 @@
       "condition": "[contains(parameters('repoUrl'), 'http')]",
       "type": "Microsoft.Web/sites/sourcecontrols",
       "apiVersion": "2021-02-01",
-      "name": "[format('{0}/{1}', parameters('webAppName'), 'web')]",
+      "name": "[format('{0}/{1}', parameters('ResourcesName'), 'web')]",
       "properties": {
         "repoUrl": "[parameters('repoUrl')]",
-        "branch": "master",
+        "branch": "main",
         "isManualIntegration": true
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
+        "[resourceId('Microsoft.Web/sites', parameters('ResourcesName'))]"
       ]
     },
     {
       "type": "Microsoft.Devices/IotHubs",
-      "apiVersion": "2021-07-02",
-      "name": "string",
-      "location": "string",
+      "apiVersion": "2021-07-01",
+      "name": "[parameters('ResourcesName')]",
+      "location": "[parameters('location')]",
       "tags": {
         "tagName1": "tagValue1",
         "tagName2": "tagValue2"
       },
       "sku": {
-        "capacity": "int",
-        "name": "string"
+        "capacity": 2,
+        "name": "S1"
       },
       "etag": "string",
       "identity": {
-        "type": "string",
+        "type": "SystemAssigned",
         "userAssignedIdentities": {}
       },
       "properties": {
@@ -297,7 +297,7 @@
           {
             "keyName": "string",
             "primaryKey": "string",
-            "rights": "string",
+            "rights": "RegistryWrite, ServiceConnect, DeviceConnect",
             "secondaryKey": "string"
           }
         ],
@@ -305,22 +305,22 @@
           "defaultTtlAsIso8601": "string",
           "feedback": {
             "lockDurationAsIso8601": "string",
-            "maxDeliveryCount": "int",
+            "maxDeliveryCount": 1,
             "ttlAsIso8601": "string"
           },
-          "maxDeliveryCount": "int"
+          "maxDeliveryCount": 1
         },
         "comments": "string",
-        "disableDeviceSAS": "bool",
-        "disableLocalAuth": "bool",
-        "disableModuleSAS": "bool",
+        "disableDeviceSAS": false,
+        "disableLocalAuth": false,
+        "disableModuleSAS": false,
         "enableDataResidency": "bool",
-        "enableFileUploadNotifications": "bool",
+        "enableFileUploadNotifications": true,
         "eventHubEndpoints": {},
-        "features": "string",
+        "features": "None",
         "ipFilterRules": [
           {
-            "action": "string",
+            "action": "Accept",
             "filterName": "string",
             "ipMask": "string"
           }
@@ -328,8 +328,8 @@
         "messagingEndpoints": {},
         "minTlsVersion": "string",
         "networkRuleSets": {
-          "applyToBuiltInEventHubEndpoint": "bool",
-          "defaultAction": "string",
+          "applyToBuiltInEventHubEndpoint": false,
+          "defaultAction": "Allow",
           "ipRules": [
             {
               "action": "Allow",
@@ -345,79 +345,19 @@
               "privateLinkServiceConnectionState": {
                 "actionsRequired": "string",
                 "description": "string",
-                "status": "string"
+                "status": "Disconnected"
               }
             }
           }
         ],
-        "publicNetworkAccess": "string",
-        "restrictOutboundNetworkAccess": "bool",
+        "publicNetworkAccess": "Enabled",
+        "restrictOutboundNetworkAccess": false,
         "routing": {
           "endpoints": {
-            "eventHubs": [
-              {
-                "authenticationType": "string",
-                "connectionString": "string",
-                "endpointUri": "string",
-                "entityPath": "string",
-                "id": "string",
-                "identity": {
-                  "userAssignedIdentity": "string"
-                },
-                "name": "string",
-                "resourceGroup": "string",
-                "subscriptionId": "string"
-              }
-            ],
-            "serviceBusQueues": [
-              {
-                "authenticationType": "string",
-                "connectionString": "string",
-                "endpointUri": "string",
-                "entityPath": "string",
-                "id": "string",
-                "identity": {
-                  "userAssignedIdentity": "string"
-                },
-                "name": "string",
-                "resourceGroup": "string",
-                "subscriptionId": "string"
-              }
-            ],
-            "serviceBusTopics": [
-              {
-                "authenticationType": "string",
-                "connectionString": "string",
-                "endpointUri": "string",
-                "entityPath": "string",
-                "id": "string",
-                "identity": {
-                  "userAssignedIdentity": "string"
-                },
-                "name": "string",
-                "resourceGroup": "string",
-                "subscriptionId": "string"
-              }
-            ],
-            "storageContainers": [
-              {
-                "authenticationType": "string",
-                "batchFrequencyInSeconds": "int",
-                "connectionString": "string",
-                "containerName": "string",
-                "encoding": "string",
-                "endpointUri": "string",
-                "fileNameFormat": "string",
-                "id": "string",
-                "identity": {
-                  "userAssignedIdentity": "string"
-                },
-                "maxChunkSizeInBytes": "int",
-                "name": "string",
-                "resourceGroup": "string",
-                "subscriptionId": "string"
-              }
-            ]
+            "eventHubs": [],
+            "serviceBusQueues": [],
+            "serviceBusTopics": [],
+            "storageContainers": []
           },
           "enrichments": [
             {
@@ -427,21 +367,15 @@
             }
           ],
           "fallbackRoute": {
-            "condition": "string",
-            "endpointNames": [ "string" ],
-            "isEnabled": "bool",
-            "name": "string",
-            "source": "string"
+            "name": "$fallback",
+            "source": "DeviceMessages",
+            "condition": "true",
+            "endpointNames": [
+              "events"
+            ],
+            "isEnabled": true
           },
-          "routes": [
-            {
-              "condition": "string",
-              "endpointNames": [ "string" ],
-              "isEnabled": "bool",
-              "name": "string",
-              "source": "string"
-            }
-          ]
+          "routes": []
         },
         "storageEndpoints": {}
       }
@@ -449,7 +383,7 @@
     {
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2021-04-01",
-      "name": "[variables('storageAccountName')]",
+      "name": "[parameters('ResourcesName')]",
       "location": "[parameters('location')]",
       "sku": {
         "name": "Standard_LRS"
@@ -458,7 +392,7 @@
     },
     {
       "type": "Microsoft.Network/publicIPAddresses",
-      "apiVersion": "2021-02-01",
+      "apiVersion": "2020-11-01",
       "name": "[parameters('publicIpName')]",
       "location": "[parameters('location')]",
       "sku": {
@@ -473,7 +407,7 @@
     },
     {
       "type": "Microsoft.Network/networkSecurityGroups",
-      "apiVersion": "2021-02-01",
+      "apiVersion": "2020-11-01",
       "name": "[variables('networkSecurityGroupName')]",
       "location": "[parameters('location')]",
       "properties": {
@@ -496,8 +430,8 @@
     },
     {
       "type": "Microsoft.Network/virtualNetworks",
-      "apiVersion": "2021-02-01",
-      "name": "[variables('virtualNetworkName')]",
+      "apiVersion": "2020-11-01",
+      "name": "[parameters('ResourcesName')]",
       "location": "[parameters('location')]",
       "properties": {
         "addressSpace": {
@@ -507,7 +441,7 @@
         },
         "subnets": [
           {
-            "name": "[variables('subnetName')]",
+            "name": "[parameters('ResourcesName')]",
             "properties": {
               "addressPrefix": "[variables('subnetPrefix')]",
               "networkSecurityGroup": {
@@ -523,8 +457,8 @@
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "2021-02-01",
-      "name": "[variables('nicName')]",
+      "apiVersion": "2020-11-01",
+      "name": "[parameters('ResourcesName')]",
       "location": "[parameters('location')]",
       "properties": {
         "ipConfigurations": [
@@ -550,7 +484,7 @@
     {
       "type": "Microsoft.Compute/virtualMachines",
       "apiVersion": "2021-03-01",
-      "name": "[parameters('vmName')]",
+      "name": "[parameters('ResourcesName')]",
       "location": "[parameters('location')]",
       "properties": {
         "hardwareProfile": {
@@ -602,14 +536,14 @@
       ]
     },
     {
-      "name": "[parameters('clusters_kustocluster_name')]",
+      "name": "[parameters('ResourcesName')]",
       "type": "Microsoft.Kusto/clusters",
       "sku": {
-        "name": "Standard_E8ads_v5",
+        "name": "Standard_E8a_v4",
         "tier": "Standard",
         "capacity": 2
       },
-      "apiVersion": "2020-09-18",
+      "apiVersion": "2021-01-01",
       "location": "[parameters('location')]",
       "tags": {
         "Created By": "GitHub quickstart template"
@@ -639,9 +573,9 @@
       }
     },
     {
-      "name": "[concat(parameters('clusters_kustocluster_name'), '/', parameters('databases_kustodb_name'))]",
+      "name": "[concat(parameters('ResourcesName'), '/', parameters('databases_kustodb_name'))]",
       "type": "Microsoft.Kusto/clusters/databases",
-      "apiVersion": "2020-09-18",
+      "apiVersion": "2021-01-01",
       "location": "[parameters('location')]",
       "dependsOn": [
         "[resourceId('Microsoft.Kusto/clusters', parameters('clusters_kustocluster_name'))]"
@@ -649,6 +583,27 @@
       "properties": {
         "softDeletePeriodInDays": 365,
         "hotCachePeriodInDays": 31
+      },
+      "kind": "ReadWrite"
+    },
+    {
+      "type": "Microsoft.Kusto/Clusters/Databases/DataConnections",
+      "apiVersion": "2021-01-01",
+      "name": "[concat(parameters('ResourcesName'), '/', parameters('ResourcesName'), '/iothub')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Kusto/Clusters/Databases', parameters('ResourcesName'), parameters('ResourcesName'))]",
+        "[resourceId('Microsoft.Kusto/Clusters', parameters('ResourcesName'))]"
+      ],
+      "kind": "IotHub",
+      "properties": {
+        "iotHubResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('ResourcesName'), '/providers/Microsoft.Devices/IotHubs/', parameters('ResourcesName'))]",
+        "consumerGroup": "$default",
+        "dataFormat": "MULTIJSON",
+        "eventSystemProperties": [],
+        "sharedAccessPolicyName": "iothubowner",
+        "databaseRouting": "Single",
+        "kind": "IotHub"
       }
     }
   ],

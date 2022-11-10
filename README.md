@@ -144,7 +144,7 @@ Once you are ready to connect your own production line, simply delete the VM thr
 
 In this case, UA Cloud Publisher stores its configuration and log files locally on the Edge PC under c:/publisher on Windows or /publisher on Linux.
 
-Then, open a browser on the Edge PC and navigate to http://localhost. You are now connected to the UA Cloud Publisher's interactive UI. Select the Configuration menu item and enter the following information, replacing [myiothub] with the name of your IoT Hub and replacing [publisherkey] with the primary key of a new publisher device you will have to create in your IoT Hub through the Azure Portal and select Update:
+Then, open a browser on the Edge PC and navigate to http://localhost. You are now connected to the UA Cloud Publisher's interactive UI. Select the Configuration menu item and enter the following information, replacing [myiothub] with the name of your IoT Hub and replacing [publisherkey] with the primary key of a new publisher device you will have to create in your IoT Hub through the Azure Portal. Then click Update:
   
 `BrokerClientName: publisher`
 

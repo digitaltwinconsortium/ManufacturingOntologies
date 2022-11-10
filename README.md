@@ -134,7 +134,7 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 * UA_SERVER_OBJECT_ID
 * UA_SERVER_DNS_NAME
 
-### Replacing the Production Line Simulation with a real Production Line
+### Replacing the Production Line Simulation with a Real Production Line
 
 Once you are ready to connect your own production line, simply delete the VM through the Azure Portal or, if you are running the simulation on a local PC, call the StopSimulation.cmd script. Then follow these instructions to connect your own production line:
 
@@ -192,7 +192,9 @@ Then, open a browser on the Edge PC and navigate to http://localhost. You are no
 
 `AutoLoadPersistedNodes: true`
 
-Next, we will configure the OPC UA data nodes from your machines (or connectivity adapter software). To do so, select the OPC UA Server Connect menu item, enter the OPC UA server URL and click Connect. You can now browse the OPC UA Server you want to send telemetry data from. If you have found the OPC UA node you want, right click it and select publish. That's it! You can check what is currently being published by selecting the Publishes Nodes menu item. You can also see diagnostics information from UA Cloud Publisher on the Diagnostics menu item.
+Next, we will configure the OPC UA data nodes from your machines (or connectivity adapter software). To do so, select the OPC UA Server Connect menu item, enter the OPC UA server URL and click Connect. You can now browse the OPC UA Server you want to send telemetry data from. If you have found the OPC UA node you want, right click it and select publish.
+
+That's it! You can check what is currently being published by selecting the Publishes Nodes menu item. You can also see diagnostics information from UA Cloud Publisher on the Diagnostics menu item.
 
 ## License
 

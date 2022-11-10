@@ -134,6 +134,66 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 * UA_SERVER_OBJECT_ID
 * UA_SERVER_DNS_NAME
 
+### Replacing the Production Line Simulation with a real Production Line
+
+Once you are ready to connect your own production line, simply delete the VM through the Azure Portal or, if you are running the simulation on a local PC, call the StopSimulation.cmd script. Then follow these instructions to connect your own production line:
+
+1. Run UA Cloud Publisher on a Docker-enabled edge gateway PC (on Windows, for Linux, remove the "c:" bits) with the following command. The PC needs Internet access (via port 8883) and needs to be able to connect to your OPC UA-enabled machiens in your production line:
+
+`docker run -itd -v c:/publisher/logs:/app/logs -v c:/publisher/settings:/app/settings -p 80:80 ghcr.io/barnstee/ua-cloudpublisher:main`
+
+In this case, UA Cloud Publisher stores its configuration and log files locally on the Edge PC under c:/publisher on Windows or /publisher on Linux.
+
+Then, open a browser on the Edge PC and navigate to http://localhost. You are now connected to the UA Cloud Publisher's interactive UI. Select the Configuration menu item and enter the following information, replacing [myiothub] with the name of your IoT Hub and replacing [publisherkey] with the primary key of a new publisher device you will have to create in your IoT Hub through the Azure Portal and select Update:
+  
+`BrokerClientName: publisher`
+
+`BrokerUrl: [myiothub].azure-devices.net`
+
+`BrokerPort: 8883`
+
+`BrokerUsername: [myiothub].azure-devices.net/publisher/?api-version=2018-06-30`
+
+`BrokerPassword: [publisherkey]`
+
+`BrokerMessageTopic: devices/publisher/messages/events/`
+
+`BrokerMetadataTopic: devices/publisher/messages/events/`
+
+`SendUAMetadata: true`
+
+`MetadataSendInterval: 30`
+
+`BrokerCommandTopic: $iothub/methods/POST/#`
+
+`BrokerResponseTopic: $iothub/methods/res`
+
+`BrokerMessageSize: 262144`
+
+`CreateBrokerSASToken: true`
+
+`UseTLS: true`
+
+`PublisherName: publisher`
+
+`InternalQueueCapacity: 1000`
+
+`DefaultSendIntervalSeconds: 1`
+
+`DiagnosticsLoggingInterval: 30`
+
+`DefaultOpcSamplingInterval: 500`
+
+`DefaultOpcPublishingInterval: 1000`
+
+`UAStackTraceMask: 645`
+
+`ReversiblePubSubEncoding: false`
+
+`AutoLoadPersistedNodes: true`
+
+Next, we will configure the OPC UA data nodes from your machines (or connectivity adapter software). To do so, select the OPC UA Server Connect menu item, enter the OPC UA server URL and click Connect. You can now browse the OPC UA Server you want to send telemetry data from. If you have found the OPC UA node you want, right click it and select publish. That's it! You can check what is currently being published by selecting the Publishes Nodes menu item. You can also see diagnostics information from UA Cloud Publisher on the Diagnostics menu item.
+
 ## License
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a>

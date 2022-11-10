@@ -168,7 +168,7 @@ Then, open a browser on the Edge PC and navigate to http://localhost. You are no
     ReversiblePubSubEncoding: false  
     AutoLoadPersistedNodes: true  
 
-Next, we will configure the OPC UA data nodes from your machines (or connectivity adapter software). To do so, select the OPC UA Server Connect menu item, enter the OPC UA server URL and click Connect. You can now browse the OPC UA Server you want to send telemetry data from. If you have found the OPC UA node you want, right click it and select publish.
+Next, we will configure the OPC UA data nodes from your machines (or connectivity adapter software). To do so, select the OPC UA Server Connect menu item, enter the OPC UA server IP address and port and click Connect. You can now browse the OPC UA Server you want to send telemetry data from. If you have found the OPC UA node you want, right click it and select publish.
 
 That's it! You can check what is currently being published by selecting the Publishes Nodes menu item. You can also see diagnostics information from UA Cloud Publisher on the Diagnostics menu item.
 

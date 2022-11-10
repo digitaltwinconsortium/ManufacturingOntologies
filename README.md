@@ -144,51 +144,29 @@ In this case, UA Cloud Publisher stores its configuration and log files locally 
 
 Then, open a browser on the Edge PC and navigate to http://localhost. You are now connected to the UA Cloud Publisher's interactive UI. Select the Configuration menu item and enter the following information, replacing [myiothub] with the name of your IoT Hub and replacing [publisherkey] with the primary key of a new device called "publisher" you will have to create in your IoT Hub through the Azure Portal. Then click Update:
   
-`BrokerClientName: publisher`
-
-`BrokerUrl: [myiothub].azure-devices.net`
-
-`BrokerPort: 8883`
-
-`BrokerUsername: [myiothub].azure-devices.net/publisher/?api-version=2018-06-30`
-
-`BrokerPassword: [publisherkey]`
-
-`BrokerMessageTopic: devices/publisher/messages/events/`
-
-`BrokerMetadataTopic: devices/publisher/messages/events/`
-
-`SendUAMetadata: true`
-
-`MetadataSendInterval: 30`
-
-`BrokerCommandTopic: $iothub/methods/POST/#`
-
-`BrokerResponseTopic: $iothub/methods/res`
-
-`BrokerMessageSize: 262144`
-
-`CreateBrokerSASToken: true`
-
-`UseTLS: true`
-
-`PublisherName: publisher`
-
-`InternalQueueCapacity: 1000`
-
-`DefaultSendIntervalSeconds: 1`
-
-`DiagnosticsLoggingInterval: 30`
-
-`DefaultOpcSamplingInterval: 500`
-
-`DefaultOpcPublishingInterval: 1000`
-
-`UAStackTraceMask: 645`
-
-`ReversiblePubSubEncoding: false`
-
-`AutoLoadPersistedNodes: true`
+    BrokerClientName: publisher  
+    BrokerUrl: [myiothub].azure-devices.net  
+    BrokerPort: 8883  
+    BrokerUsername: [myiothub].azure-devices.net/publisher/?api-version=2018-06-30  
+    BrokerPassword: [publisherkey]  
+    BrokerMessageTopic: devices/publisher/messages/events/  
+    BrokerMetadataTopic: devices/publisher/messages/events/  
+    SendUAMetadata: true  
+    MetadataSendInterval: 30  
+    BrokerCommandTopic: $iothub/methods/POST/#  
+    BrokerResponseTopic: $iothub/methods/res  
+    BrokerMessageSize: 262144  
+    CreateBrokerSASToken: true  
+    UseTLS: true  
+    PublisherName: publisher  
+    InternalQueueCapacity: 1000  
+    DefaultSendIntervalSeconds: 1  
+    DiagnosticsLoggingInterval: 30  
+    DefaultOpcSamplingInterval: 500  
+    DefaultOpcPublishingInterval: 1000  
+    UAStackTraceMask: 645  
+    ReversiblePubSubEncoding: false  
+    AutoLoadPersistedNodes: true  
 
 Next, we will configure the OPC UA data nodes from your machines (or connectivity adapter software). To do so, select the OPC UA Server Connect menu item, enter the OPC UA server URL and click Connect. You can now browse the OPC UA Server you want to send telemetry data from. If you have found the OPC UA node you want, right click it and select publish.
 

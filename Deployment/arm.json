@@ -357,6 +357,81 @@
         "hotCachePeriodInDays": 31
       },
       "kind": "ReadWrite"
+    },
+    {
+      "type": "Microsoft.EventHub/namespaces",
+      "apiVersion": "2017-04-01",
+      "name": "[parameters('ResourcesName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard",
+        "tier": "Standard",
+        "capacity": 1
+      },
+      "properties": {
+        "isAutoInflateEnabled": true,
+        "maximumThroughputUnits": 16
+      }
+    },
+    {
+      "type": "Microsoft.EventHub/namespaces/eventhubs",
+      "apiVersion": "2017-04-01",
+      "name": "[concat(parameters('ResourcesName'), '/adthistory')]",
+      "properties": {
+        "messageRetentionInDays": 1,
+        "partitionCount": 1
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.EventHub/namespaces', parameters('ResourcesName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.EventHub/namespaces/eventhubs",
+      "apiVersion": "2017-04-01",
+      "name": "[concat(parameters('ResourcesName'), '/commands')]",
+      "properties": {
+        "messageRetentionInDays": 1,
+        "partitionCount": 1
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.EventHub/namespaces', parameters('ResourcesName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.EventHub/namespaces/eventhubs",
+      "apiVersion": "2017-04-01",
+      "name": "[concat(parameters('ResourcesName'), '/response')]",
+      "properties": {
+        "messageRetentionInDays": 1,
+        "partitionCount": 1
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.EventHub/namespaces', parameters('ResourcesName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.EventHub/namespaces/eventhubs",
+      "apiVersion": "2017-04-01",
+      "name": "[concat(parameters('ResourcesName'), '/data')]",
+      "properties": {
+        "messageRetentionInDays": 1,
+        "partitionCount": 1
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.EventHub/namespaces', parameters('ResourcesName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.EventHub/namespaces/eventhubs",
+      "apiVersion": "2017-04-01",
+      "name": "[concat(parameters('ResourcesName'), '/metadata')]",
+      "properties": {
+        "messageRetentionInDays": 1,
+        "partitionCount": 1
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.EventHub/namespaces', parameters('ResourcesName'))]"
+      ]
     }
   ],
   "outputs": {

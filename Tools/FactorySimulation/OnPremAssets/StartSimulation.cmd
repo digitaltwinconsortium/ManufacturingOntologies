@@ -120,6 +120,18 @@ docker run -itd -p 8084:80 -v "c:/docker/Shared/CertificateStores/UA Application
 docker run -itd -p 8085:80 -v "c:/docker/Shared/CertificateStores/UA Applications/certs":/app/pki/trusted/certs -v c:/docker/Logs/publisher.beijing.corp.contoso:/app/logs -v c:/docker/Config/publisher.beijing.corp.contoso:/app/settings --name publisher.beijing.corp.contoso -h publisher.beijing.corp.contoso --network beijing.corp.contoso --restart always ghcr.io/barnstee/ua-cloudpublisher:main
 docker run -itd -p 8086:80 -v "c:/docker/Shared/CertificateStores/UA Applications/certs":/app/pki/trusted/certs -v c:/docker/Logs/publisher.rio.corp.contoso:/app/logs -v c:/docker/Config/publisher.rio.corp.contoso:/app/settings --name publisher.rio.corp.contoso -h publisher.rio.corp.contoso --network rio.corp.contoso --restart always ghcr.io/barnstee/ua-cloudpublisher:main
 
+Echo Configuring UA Cloud Twin...
+SET "resourcename=!name!"
+SET "resourcename=!resourcename:sb:=!"
+SET "resourcename=!resourcename:/=!"
+SET "resourcename=!resourcename:.servicebus.windows.net=!"
+
+ECHO Launching UA Cloud Twin...
+start "" "http://!resourcename!.azurewebsites.net/Setup?endpoint=!connectionstring!&instanceUrl=https://!resourcename!.api.<region>.digitaltwins.azure.net"
+Echo Please click "Apply" on the UA Cloud Twin website that was just opened, then
+PAUSE
+
+Echo All done!
 EXIT /B 0
 
 

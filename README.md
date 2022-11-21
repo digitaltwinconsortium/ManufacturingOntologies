@@ -24,7 +24,7 @@ IEC 62541 Open Platform Communications Unified Architecture (OPC UA) is describe
 
 <img src="Docs/architecture.png" alt="architecture" width="900" />
 
-## IEC 62541 OPC UA Production Line Simulation
+## Production Line Simulation
 
 This repository also contains a production line simulation made up of several Stations, leveraging the machine information model described above, as well as a simple Manufacturing Execution System (MES). Both the Stations and the MES are containerized for easy deployment.
 
@@ -85,27 +85,9 @@ Once the deployment is complete in the Azure Portal, please follow these steps t
 
 1. Login to the deployed VM using the credentials you provided during deployment and download and install Docker Desktop from [here](https://www.docker.com/products/docker-desktop), including the Windows Subsystem for Linux (WSL) integration. After installation and a required system restart, accept the license terms and install the WSL2 Linux kernel by following the instructions. Then verify that Docker Desktop is running in the Windows System Tray and enable Kubernetes in Settings.
 
-2. On the VM, browse to [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies) and select Code -> Download Zip. Unzip the contents to a directory of your choice. Navigate to the OnPremAssets directory of the Zip you just downloaded and run the StartSimulation.cmd script from the OnPremAssets folder in a cmd prompt by supplying the primary key connection string of your Event Hubs namespace as a parameter. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey".
+2. On the VM, browse to [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies) and select Code -> Download Zip. Unzip the contents to a directory of your choice. Navigate to the OnPremAssets directory of the Zip you just downloaded and run the StartSimulation.cmd script from the OnPremAssets folder in a cmd prompt by supplying the primary key connection string of your Event Hubs namespace and the Azure region you picked during deployment as parameters. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey".
 
 3. Under Access Control -> Role Assignments of your Azure Digital Twin service instance in the Azure Portal, add a new Role Assignment of type "Azure Digital Twins Data Owner", assign it's access to "Managed Identity" and under "Select Users", select your previously deployed Azure Web App service instance.
-
-### Manual Installation Instructions
-
-To install the production line simulation and cloud services manually, you need a Windows PC or virtual machine with at least *16GB of memory* as you will be deploying 30 Docker Containers. You will also need an Azure subscription you have admin access to or get a free Azure subscription from [here](https://azure.microsoft.com/en-us/free).
-
-Follow these steps:
-
-1. Deploy a standard SKU Event Hubs namespace and create 5 Event Hubs in it, call them "data", "metadata", "commands", "response" and "adthistory".
-
-2. Download and install Docker Desktop from [here](https://www.docker.com/products/docker-desktop), including the Windows Subsystem for Linux (WSL) integration. After installation and a required system restart, accept the license terms and install the WSL2 Linux kernel by following the instructions. Then verify that Docker Desktop is running in the Windows System Tray and enable Kubernetes in Settings.
-
-3. On the VM, browse to [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies) and select Code -> Download Zip. Unzip the contents to a directory of your choice. Navigate to the OnPremAssets directory of the Zip you just downloaded and run the StartSimulation.cmd script from the OnPremAssets folder in a cmd prompt by supplying the primary key connection string of your Event Hubs namespace as a parameter. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey".
-
-4. Deploy an Azure Digital Twins service and check the "Assign Azure Digital Twins Data Owner role" checkbox during deployment.
-
-5. Deploy an Azure Web App service and select "Docker Container" for the Publish setting, "Linux" for the Operating System setting and then under the Docker tab, select "Single Container" for the options setting, "Private Registry" for the Image Source setting, "https://ghcr.io/" for the Server URL setting and finally "digitaltwinconsortium/ua-cloudtwin:main" for the Image and tag setting. Once deployed, enable the System assigned Identity and under Access Control -> Role Assignments of your Azure Digital Twin service instance, add a new Role Assignment of type "Azure Digital Twins Data Owner", assign it's access to "Managed Identity" and under "Select Users", select your previously deployed Azure Web App service instance.
-
-6. Open the URL of your Azure Web App service in a browser and fill in the two fields under Settings and click Apply. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey".
 
 Please note: If you update your Docker Desktop runtime environment, you will need to stop and restart the simulation!
 

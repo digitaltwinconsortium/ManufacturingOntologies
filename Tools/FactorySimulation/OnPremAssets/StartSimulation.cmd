@@ -30,6 +30,7 @@ Xcopy /E /I /Y .\Config C:\docker\Config
 Echo Configuring Publisher config files...
 SET "connectionstring=%1=%2;%3=%4;%5=%6="
 SET "name=%2"
+SET "region=%7"
 
 C:
 CD "C:\docker\Config\publisher.beijing.corp.contoso\"
@@ -127,7 +128,7 @@ SET "resourcename=!resourcename:/=!"
 SET "resourcename=!resourcename:.servicebus.windows.net=!"
 
 ECHO Launching UA Cloud Twin...
-start "" "http://!resourcename!.azurewebsites.net/Setup?endpoint=!connectionstring!&instanceUrl=https://!resourcename!.api.<region>.digitaltwins.azure.net"
+start "" "http://!resourcename!.azurewebsites.net/Setup?endpoint=!connectionstring!&instanceUrl=https://!resourcename!.api.!region!.digitaltwins.azure.net"
 Echo Please click "Apply" on the UA Cloud Twin website that was just opened, then
 PAUSE
 

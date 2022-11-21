@@ -1,5 +1,18 @@
 
-@Echo off
+@ECHO OFF
+SETLOCAL EnableDelayedExpansion
+
+if "%~1"=="" goto :InvalidArgument
+IF NOT %1==Endpoint goto :InvalidArgument
+IF NOT %3==SharedAccessKeyName goto :InvalidArgument
+IF NOT %4==RootManageSharedAccessKey goto :InvalidArgument
+IF NOT %5==SharedAccessKey goto :InvalidArgument
+goto :DockerCheck
+
+:InvalidArgument
+ECHO Argument error:
+ECHO Input parameter must be of the form Endpoint=sb://[eventhubnamespace].servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=[key]
+EXIT /B 1
 
 :DockerCheck
 where /q docker.exe
@@ -7,13 +20,41 @@ if errorlevel 1 goto :NeedDocker
 goto :Build
 
 :NeedDocker
-Echo Factory simulation needs Docker from e.g.
-Echo https://www.docker.com/products/docker-desktop
+Echo Factory simulation needs Docker Desktop from e.g. https://www.docker.com/products/docker-desktop
 exit /b 1
 
 :Build
 Echo Copying Publisher config files...
 Xcopy /E /I /Y .\Config C:\docker\Config
+
+Echo Configuring Publisher config files...
+SET "connectionstring=%1=%2;%3=%4;%5=%6="
+SET "name=%2"
+
+C:
+CD "C:\docker\Config\publisher.beijing.corp.contoso\"
+CALL :ReplaceEventHubName
+CALL :ReplaceEventHubKey
+
+CD "C:\docker\Config\publisher.capetown.corp.contoso\"
+CALL :ReplaceEventHubName
+CALL :ReplaceEventHubKey
+
+CD "C:\docker\Config\publisher.mumbai.corp.contoso\"
+CALL :ReplaceEventHubName
+CALL :ReplaceEventHubKey
+
+CD "C:\docker\Config\publisher.munich.corp.contoso\"
+CALL :ReplaceEventHubName
+CALL :ReplaceEventHubKey
+
+CD "C:\docker\Config\publisher.rio.corp.contoso\"
+CALL :ReplaceEventHubName
+CALL :ReplaceEventHubKey
+
+CD "C:\docker\Config\publisher.seattle.corp.contoso\"
+CALL :ReplaceEventHubName
+CALL :ReplaceEventHubKey
 
 Echo Creating Docker networks...
 docker network create -d bridge -o com.docker.network.bridge.enable_icc=true munich.corp.contoso
@@ -78,3 +119,36 @@ docker run -itd -p 8083:80 -v "c:/docker/Shared/CertificateStores/UA Application
 docker run -itd -p 8084:80 -v "c:/docker/Shared/CertificateStores/UA Applications/certs":/app/pki/trusted/certs -v c:/docker/Logs/publisher.seattle.corp.contoso:/app/logs -v c:/docker/Config/publisher.seattle.corp.contoso:/app/settings --name publisher.seattle.corp.contoso -h publisher.seattle.corp.contoso --network seattle.corp.contoso --restart always ghcr.io/barnstee/ua-cloudpublisher:main
 docker run -itd -p 8085:80 -v "c:/docker/Shared/CertificateStores/UA Applications/certs":/app/pki/trusted/certs -v c:/docker/Logs/publisher.beijing.corp.contoso:/app/logs -v c:/docker/Config/publisher.beijing.corp.contoso:/app/settings --name publisher.beijing.corp.contoso -h publisher.beijing.corp.contoso --network beijing.corp.contoso --restart always ghcr.io/barnstee/ua-cloudpublisher:main
 docker run -itd -p 8086:80 -v "c:/docker/Shared/CertificateStores/UA Applications/certs":/app/pki/trusted/certs -v c:/docker/Logs/publisher.rio.corp.contoso:/app/logs -v c:/docker/Config/publisher.rio.corp.contoso:/app/settings --name publisher.rio.corp.contoso -h publisher.rio.corp.contoso --network rio.corp.contoso --restart always ghcr.io/barnstee/ua-cloudpublisher:main
+
+EXIT /B 0
+
+
+:ReplaceEventHubName
+SET "original=[myeventhubsnamespace].servicebus.windows.net"
+SET "replacement=!name!"
+SET "replacement=!replacement:sb:=!"
+SET "replacement=!replacement:/=!"
+(
+FOR /F "tokens=* delims=" %%a IN (settings.json) DO (
+ SET "line=%%a"
+ SET "line=!line:%original%=%replacement%!"
+ ECHO !line!
+)
+) > output.json
+DEL settings.json
+RENAME output.json settings.json
+EXIT /B 0
+
+:ReplaceEventHubKey
+SET "original=[myeventhubsnamespaceprimarykeyconnectionstring]"
+SET "replacement=!connectionstring!"
+(
+FOR /F "tokens=* delims=" %%a IN (settings.json) DO (
+ SET "line=%%a"
+ SET "line=!line:%original%=%replacement%!"
+ ECHO !line!
+)
+) > output.json
+DEL settings.json
+RENAME output.json settings.json
+EXIT /B 0

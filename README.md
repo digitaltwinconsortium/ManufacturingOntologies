@@ -8,13 +8,17 @@ An ontology defines the language used to describe a system. In the manufacturing
 
 The ontologies defined in this repository are described by leveraging the Digital Twin Definition Language (DTDL), which is specified [here](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md).
 
-## ISA95
+## International Society of Automation 95 (ISA95)
 
 The ISA95 standard is described [here](https://en.wikipedia.org/wiki/ANSI/ISA-95).
 
 ## IEC 63278 Asset Administration Shell (AAS)
 
 The IEC 63278 Asset Administration Shell is described [here](https://www.plattform-i40.de/IP/Redaktion/EN/Standardartikel/specification-administrationshell.html).
+
+## IEC 62541 Open Platform Communications Unified Architecture (OPC UA)
+
+IEC 62541 Open Platform Communications Unified Architecture (OPC UA) is described [here](https://opcfoundation.org). 
 
 ## Overall Solution Architecture
 
@@ -44,7 +48,7 @@ UA Cloud Twin takes each OPC UA Field discovered in the received Dataset metadat
 
 ### Default Simulation Configuration
 
-The simulation is configured to include 8 production lines by default and the configuration can be altered in the StartSimulation.cmd script. The default configuration is depicted below:
+The simulation is configured to include 8 production lines. The default configuration is depicted below:
 
 | Production Line | Ideal Cycle Time (in seconds) |
 |:---------------:|:-----------------------------:|
@@ -79,19 +83,11 @@ Simply click on the button below, it will deploy all required resources (on Micr
 
 Once the deployment is complete in the Azure Portal, please follow these steps to configure the production line simulation:
 
-1. In the deployed IoT Hub, create 6 devices and call them publisher.munich.corp.contoso, publisher.capetown.corp.contoso, publisher.mumbai.corp.contoso, publisher.seattle.corp.contoso, publisher.beijing.corp.contoso and publisher.rio.corp.contoso.
+1. Login to the deployed VM using the credentials you provided during deployment and download and install Docker Desktop from [here](https://www.docker.com/products/docker-desktop), including the Windows Subsystem for Linux (WSL) integration. After installation and a required system restart, accept the license terms and install the WSL2 Linux kernel by following the instructions. Then verify that Docker Desktop is running in the Windows System Tray and enable Kubernetes in Settings.
 
-2. Login to the deployed VM using the credentials you provided during deployment and download and install Docker Desktop from [here](https://www.docker.com/products/docker-desktop), including the Windows Subsystem for Linux (WSL) integration. After installation and a required system restart, accept the license terms and install the WSL2 Linux kernel by following the instructions. Then verify that Docker Desktop is running in the Windows System Tray and enable Kubernetes in Settings.
+2. On the VM, browse to [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies) and select Code -> Download Zip. Unzip the contents to a directory of your choice. Navigate to the OnPremAssets directory of the Zip you just downloaded and run the StartSimulation.cmd script from the OnPremAssets folder in a cmd prompt by supplying the primary key connection string of your Event Hubs namespace as a parameter. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey".
 
-3. On the VM, browse to [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies) and select Code -> Download Zip. Unzip the contents to a directory of your choice. Navigate to the OnPremAssets directory of the Zip you just downloaded and edit the settings.json file for each publisher directory located in the Config directory. Replace [myiothub] with the name of your IoT Hub and replace [publisherkey] with the primary key of the 6 IoT Hub publisher devices you have created earlier. This data can be accessed by clicking on the names of the devices in the Azure Portal.
-
-4. On the VM, run the StartSimulation.cmd script from the OnPremAssets folder in a cmd prompt window. This will run the simulation. A total of 8 production lines will be started, each with 3 stations each (assembly, test and packaging) as well as an MES per line and a UA Cloud Publisher instance per factory location. There are 6 locations in total: Munich, Capetown, Mumbai, Seattle, Beijing and Rio. Then check your IoT Hub in the Azure Portal to verify that OPC UA telemetry is flowing to the cloud.
-
-5. Under Access Control -> Role Assignments of your Azure Digital Twin service instance in the Azure Portal, add a new Role Assignment of type "Azure Digital Twins Data Owner", assign it's access to "Managed Identity" and under "Select Users", select your previously deployed Azure Web App service instance.
-
-6. Open the URL of the deployed Azure Web App service in a browser and fill in the two fields under Settings and click Apply. The Azure Event Hub connection string can be read for Azure IoT Hub under "Built-in Endpoints"->"Event Hub-compatible endpoint" in the Azure Portal.
-
-7. Set up the [Data History](https://learn.microsoft.com/en-us/azure/digital-twins/concepts-data-history) feature in the Azure Digital Twins service to historize your contextualized OPC UA data to Azure Data Explorer deployed in this solution. You can find the wizard to set this up in the Azure Digital Twins service configuration in the Azure portal. 
+3. Under Access Control -> Role Assignments of your Azure Digital Twin service instance in the Azure Portal, add a new Role Assignment of type "Azure Digital Twins Data Owner", assign it's access to "Managed Identity" and under "Select Users", select your previously deployed Azure Web App service instance.
 
 ### Manual Installation Instructions
 
@@ -99,21 +95,17 @@ To install the production line simulation and cloud services manually, you need 
 
 Follow these steps:
 
-1. Deploy an S1 Azure IoT Hub with *2 scale units* into your Azure subscription. Once deployed, create 6 devices and call them publisher.munich.corp.contoso, publisher.capetown.corp.contoso, publisher.mumbai.corp.contoso, publisher.seattle.corp.contoso, publisher.beijing.corp.contoso and publisher.rio.corp.contoso.
+1. Deploy a standard SKU Event Hubs namespace and create 5 Event Hubs in it, call them "data", "metadata", "commands", "response" and "adthistory".
 
 2. Download and install Docker Desktop from [here](https://www.docker.com/products/docker-desktop), including the Windows Subsystem for Linux (WSL) integration. After installation and a required system restart, accept the license terms and install the WSL2 Linux kernel by following the instructions. Then verify that Docker Desktop is running in the Windows System Tray and enable Kubernetes in Settings.
 
-3. Browse to [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies) and select Code -> Download Zip. Unzip the contents to a directory of your choice. Navigate to the OnPremAssets directory of the Zip you just downloaded and edit the settings.json file for each publisher directory located in the Config directory. Replace [myiothub] with the name of your IoT Hub and replace [publisherkey] with the primary key of the 6 IoT Hub publisher devices you have created earlier. This data can be accessed by clicking on the names of the devices in the Azure Portal.
+3. On the VM, browse to [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies) and select Code -> Download Zip. Unzip the contents to a directory of your choice. Navigate to the OnPremAssets directory of the Zip you just downloaded and run the StartSimulation.cmd script from the OnPremAssets folder in a cmd prompt by supplying the primary key connection string of your Event Hubs namespace as a parameter. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey".
 
-4. Run the StartSimulation.cmd script from the OnPremAssets folder in a cmd prompt window. This will run the simulation. A total of 8 production lines will be started, each with 3 stations each (assembly, test and packaging) as well as an MES per line and a UA Cloud Publisher instance per factory location. There are 6 locations in total: Munich, Capetown, Mumbai, Seattle, Beijing and Rio. Then check your IoT Hub in the Azure Portal to verify that OPC UA telemetry is flowing to the cloud.
+4. Deploy an Azure Digital Twins service and check the "Assign Azure Digital Twins Data Owner role" checkbox during deployment.
 
-5. Deploy an Azure Digital Twins service and check the "Assign Azure Digital Twins Data Owner role" checkbox during deployment.
+5. Deploy an Azure Web App service and select "Docker Container" for the Publish setting, "Linux" for the Operating System setting and then under the Docker tab, select "Single Container" for the options setting, "Private Registry" for the Image Source setting, "https://ghcr.io/" for the Server URL setting and finally "digitaltwinconsortium/ua-cloudtwin:main" for the Image and tag setting. Once deployed, enable the System assigned Identity and under Access Control -> Role Assignments of your Azure Digital Twin service instance, add a new Role Assignment of type "Azure Digital Twins Data Owner", assign it's access to "Managed Identity" and under "Select Users", select your previously deployed Azure Web App service instance.
 
-6. Deploy an Azure Web App service and select "Docker Container" for the Publish setting, "Linux" for the Operating System setting and then under the Docker tab, select "Single Container" for the options setting, "Private Registry" for the Image Source setting, "https://ghcr.io/" for the Server URL setting and finally "digitaltwinconsortium/ua-cloudtwin:main" for the Image and tag setting. Once deployed, enable the System assigned Identity and under Access Control -> Role Assignments of your Azure Digital Twin service instance, add a new Role Assignment of type "Azure Digital Twins Data Owner", assign it's access to "Managed Identity" and under "Select Users", select your previously deployed Azure Web App service instance.
-
-7. Open the URL of your Azure Web App service in a browser and fill in the two fields under Settings and click Apply. The Azure Event Hub connection string can be read for Azure IoT Hub under "Built-in Endpoints"->"Event Hub-compatible endpoint" in the Azure Portal.
-
-8. Set up the [Data History](https://learn.microsoft.com/en-us/azure/digital-twins/concepts-data-history) feature in the Azure Digital Twins service to historize your contextualized OPC UA data to Azure Data Explorer deployed in this solution. You can find the wizard to set this up in the Azure Digital Twins service configuration in the Azure portal. 
+6. Open the URL of your Azure Web App service in a browser and fill in the two fields under Settings and click Apply. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey".
 
 Please note: If you update your Docker Desktop runtime environment, you will need to stop and restart the simulation!
 
@@ -123,8 +115,10 @@ If you want to add a 3D viewer to the simulation, you can follow the steps to co
 
 <img src="Docs/3dviewer.png" alt="3dviewer" width="900" />
 
+If you want to calculate OEE, add no-code dashboards or make predictions about the production, set up the [Data History](https://learn.microsoft.com/en-us/azure/digital-twins/concepts-data-history) feature in the Azure Digital Twins service to historize your contextualized OPC UA data to Azure Data Explorer deployed in this solution. You can find the wizard to set this up in the Azure Digital Twins service configuration in the Azure portal. 
 
 If you want to test a "digital feedback loop", i.e. triggering a command on one of the OPC UA servers in the simulation from the cloud, based on a time-series reaching a certain threshold (the simulated pressure), then configure and run the StartUACloudCommander.bat file and deploy the PressureRelief Azure Function in your Azure subscription and create an application registration for your ADX instance as described [here](https://docs.microsoft.com/en-us/azure/data-explorer/provision-azure-ad-app). You also need to define the following environment variables in the Azure portal for the Function:
+
 * ADX_INSTANCE_URL
 * ADX_DB_NAME
 * AAD_TENANT_ID
@@ -146,23 +140,23 @@ Once you are ready to connect your own production line, simply delete the VM thr
 
 In this case, UA Cloud Publisher stores its configuration and log files locally on the Edge PC under c:/publisher on Windows or /publisher on Linux.
 
-Then, open a browser on the Edge PC and navigate to http://localhost. You are now connected to the UA Cloud Publisher's interactive UI. Select the Configuration menu item and enter the following information, replacing [myiothub] with the name of your IoT Hub and replacing [publisherkey] with the primary key of a new device called "publisher" you will have to create in your IoT Hub through the Azure Portal. Then click Update:
+Then, open a browser on the Edge PC and navigate to http://localhost. You are now connected to the UA Cloud Publisher's interactive UI. Select the Configuration menu item and enter the following information, replacing [myeventhubsnamespace] with the name of your Event Hubs namespace and replacing [myeventhubsnamespaceprimarykeyconnectionstring] with the primary key connection string of your Event Hubs namespace. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey". Then click Update:
   
-    BrokerClientName: publisher  
-    BrokerUrl: [myiothub].azure-devices.net  
-    BrokerPort: 8883  
-    BrokerUsername: [myiothub].azure-devices.net/publisher/?api-version=2018-06-30  
-    BrokerPassword: [publisherkey]  
-    BrokerMessageTopic: devices/publisher/messages/events/  
-    BrokerMetadataTopic: devices/publisher/messages/events/  
+    BrokerClientName: UACloudPublisher  
+    BrokerUrl: [myeventhubsnamespace].servicebus.windows.net
+    BrokerPort: 9093  
+    BrokerUsername: $ConnectionString  
+    BrokerPassword: [myeventhubsnamespaceprimarykeyconnectionstring]  
+    BrokerMessageTopic: data  
+    BrokerMetadataTopic: metadata  
     SendUAMetadata: true  
     MetadataSendInterval: 30  
-    BrokerCommandTopic: $iothub/methods/POST/#  
-    BrokerResponseTopic: $iothub/methods/res  
+    BrokerCommandTopic: commands  
+    BrokerResponseTopic: response  
     BrokerMessageSize: 262144  
-    CreateBrokerSASToken: true  
-    UseTLS: true  
-    PublisherName: publisher  
+    CreateBrokerSASToken: false  
+    UseTLS: false  
+    PublisherName: UACloudPublisher  
     InternalQueueCapacity: 1000  
     DefaultSendIntervalSeconds: 1  
     DiagnosticsLoggingInterval: 30  

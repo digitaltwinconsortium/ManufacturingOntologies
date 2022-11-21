@@ -75,13 +75,13 @@ The following OPC UA Node IDs are used in the Station OPC UA Server for telemetr
 * i=418 - actual cycle time
 * i=434 - pressure
 
-### Automatic Installation of Production Line Simulation and Cloud Services
+### Installation of Production Line Simulation and Cloud Services
 
-Simply click on the button below, it will deploy all required resources (on Microsoft Azure):
+Clicking on the button below will deploy all required resources (on Microsoft Azure):
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdigitaltwinconsortium%2FManufacturingOntologies%2Fmain%2FDeployment%2Farm.json)
 
-Once the deployment is complete in the Azure Portal, please follow these steps to configure the production line simulation:
+Once the deployment is complete, please follow these steps to configure the production line simulation:
 
 1. Login to the deployed VM using the credentials you provided during deployment and download and install Docker Desktop from [here](https://www.docker.com/products/docker-desktop), including the Windows Subsystem for Linux (WSL) integration. After installation and a required system restart, accept the license terms and install the WSL2 Linux kernel by following the instructions. Then verify that Docker Desktop is running in the Windows System Tray and enable Kubernetes in Settings.
 

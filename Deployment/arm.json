@@ -87,10 +87,14 @@
         }
       },
       "identity": {
-        "type": "SystemAssigned"
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('ResourcesName'))]": {}
+        }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Web/serverfarms', parameters('ResourcesName'))]"
+        "[resourceId('Microsoft.Web/serverfarms', parameters('ResourcesName'))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('ResourcesName'))]"
       ]
     },
     {

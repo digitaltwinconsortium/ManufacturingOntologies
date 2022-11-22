@@ -255,7 +255,7 @@
       "name": "[parameters('ResourcesName')]",
       "type": "Microsoft.Kusto/clusters",
       "sku": {
-        "name": "Standard_E8a_v4",
+        "name": "Standard_D11_v2",
         "tier": "Standard",
         "capacity": 2
       },

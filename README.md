@@ -93,7 +93,7 @@ Once the deployment is complete, login to the deployed VM using the credentials 
 
 * The azure region needs to be specified as a DNS acronym as listed [here](https://learn.microsoft.com/en-us/azure/automation/how-to/automation-region-dns-records#dns-records-per-region), i.e. for Azure region East US 2 you would pass in eus2 as parameter.
 
-Please note: If you update your Docker Desktop runtime environment, you will need to stop and restart the simulation!
+Please note: If you restart Docker Desktop, you will need to stop and then restart the simulation, too!
 
 ### Next Steps
 

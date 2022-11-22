@@ -88,12 +88,12 @@
           "minimumElasticInstanceCount": 0
         }
       },
-      "identity": {
-        "type": "UserAssigned",
-        "userAssignedIdentities": {
+     // "identity": {
+     //   "type": "UserAssigned",
+      //  "userAssignedIdentities": {
       //    "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('ResourcesName'))]": {}
-        }
-      },
+      //  }
+     // },
       "dependsOn": [
         "[resourceId('Microsoft.Web/serverfarms', parameters('ResourcesName'))]"
         //"[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('ResourcesName'))]"

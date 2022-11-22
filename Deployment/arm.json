@@ -91,7 +91,7 @@
       "identity": {
         "type": "UserAssigned",
         "userAssignedIdentities": {
-          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('ResourcesName'))]": {}
+      //    "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('ResourcesName'))]": {}
         }
       },
       "dependsOn": [

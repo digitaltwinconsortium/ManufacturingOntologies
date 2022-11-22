@@ -95,8 +95,8 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Web/serverfarms', parameters('ResourcesName'))]",
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('ResourcesName'))]"
+        "[resourceId('Microsoft.Web/serverfarms', parameters('ResourcesName'))]"
+        //"[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('ResourcesName'))]"
       ]
     },
     {

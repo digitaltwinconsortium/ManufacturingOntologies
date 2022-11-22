@@ -369,7 +369,7 @@
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2022-04-01",
-      "name": "[parameters('ResourcesName')]",
+      "name": "[guid(resourceGroup().id)]",
       "dependsOn": [
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('ResourcesName'))]"
       ],

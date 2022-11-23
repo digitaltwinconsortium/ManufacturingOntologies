@@ -72,8 +72,8 @@
       "name": "[parameters('ResourcesName')]",
       "location": "[resourceGroup().location]",
       "properties": {
-        //   "AZURE_CLIENT_ID": "[reference(parameters('ResourcesName')).outputs.appId]",
-        //   "AZURE_TENANT_ID": "[subscription().tenantId]",
+        "AZURE_CLIENT_ID": "[reference(parameters('ResourcesName')).outputs.appId]",
+        "AZURE_TENANT_ID": "[subscription().tenantId]",
         "httpsOnly": true,
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('ResourcesName'))]",
         "siteConfig": {

@@ -115,7 +115,7 @@
     {
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2021-04-01",
-      "name": "[concat(parameters('ResourcesName'), '-Storage')]",
+      "name": "[concat(parameters('ResourcesName'), 'storage')]",
       "location": "[resourceGroup().location]",
       "sku": {
         "name": "Standard_LRS"
@@ -133,7 +133,7 @@
       "properties": {
         "publicIPAllocationMethod": "Dynamic",
         "dnsSettings": {
-          "domainNameLabel": "[concat(parameters('ResourcesName'), '-Domain')]"
+          "domainNameLabel": "[concat(parameters('ResourcesName'), 'domain')]"
         }
       }
     },
@@ -255,13 +255,13 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": true,
-            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', concat(parameters('ResourcesName'), '-Storage'))).primaryEndpoints.blob]"
+            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', concat(parameters('ResourcesName'), 'storage'))).primaryEndpoints.blob]"
           }
         }
       },
       "dependsOn": [
         "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('ResourcesName'), '-IF'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts', concat(parameters('ResourcesName'), '-Storage'))]"
+        "[resourceId('Microsoft.Storage/storageAccounts', concat(parameters('ResourcesName'), 'storage'))]"
       ]
     },
     {

@@ -102,7 +102,7 @@
           "location": "[resourceGroup().location]",
           "name": "appsettings",
           "properties": {
-            "AZURE_CLIENT_ID": "[reference(concat(parameters('ResourcesName'), '-Identity')).outputs.appId]",
+            "AZURE_CLIENT_ID": "[reference(concat(parameters('ResourcesName'), '-Identity')).clientId]",
             "AZURE_TENANT_ID": "[subscription().tenantId]"
           },
           "type": "config",
@@ -223,7 +223,7 @@
           "vmSize": "Standard_D4s_v3"
         },
         "osProfile": {
-          "computerName": "[concat(parameters('ResourcesName'), '-Windows')]",
+          "computerName": "[parameters('ResourcesName')]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
@@ -265,7 +265,7 @@
       ]
     },
     {
-      "name": "[concat(parameters('ResourcesName'), '-ADX')]",
+      "name": "[concat(parameters('ResourcesName'), 'ADX')]",
       "type": "Microsoft.Kusto/clusters",
       "sku": {
         "name": "Standard_D11_v2",
@@ -291,12 +291,12 @@
       }
     },
     {
-      "name": "[concat(concat(parameters('ResourcesName'), '-ADX'), '/', concat(parameters('ResourcesName'), '-DB'))]",
+      "name": "[concat(concat(parameters('ResourcesName'), 'ADX'), '/', concat(parameters('ResourcesName'), '-DB'))]",
       "type": "Microsoft.Kusto/clusters/databases",
       "apiVersion": "2021-01-01",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters', concat(parameters('ResourcesName'), '-ADX'))]"
+        "[resourceId('Microsoft.Kusto/clusters', concat(parameters('ResourcesName'), 'ADX'))]"
       ],
       "properties": {
         "softDeletePeriodInDays": 365,
@@ -322,7 +322,7 @@
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
       "apiVersion": "2017-04-01",
-      "name": "[concat(parameters('ResourcesName'), '/adthistory')]",
+      "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/adthistory')]",
       "properties": {
         "messageRetentionInDays": 1,
         "partitionCount": 1
@@ -334,7 +334,7 @@
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
       "apiVersion": "2017-04-01",
-      "name": "[concat(parameters('ResourcesName'), '/commands')]",
+      "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/commands')]",
       "properties": {
         "messageRetentionInDays": 1,
         "partitionCount": 1
@@ -346,7 +346,7 @@
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
       "apiVersion": "2017-04-01",
-      "name": "[concat(parameters('ResourcesName'), '/response')]",
+      "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/response')]",
       "properties": {
         "messageRetentionInDays": 1,
         "partitionCount": 1
@@ -358,7 +358,7 @@
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
       "apiVersion": "2017-04-01",
-      "name": "[concat(parameters('ResourcesName'), '/data')]",
+      "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/data')]",
       "properties": {
         "messageRetentionInDays": 1,
         "partitionCount": 1
@@ -370,7 +370,7 @@
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
       "apiVersion": "2017-04-01",
-      "name": "[concat(parameters('ResourcesName'), '/metadata')]",
+      "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/metadata')]",
       "properties": {
         "messageRetentionInDays": 1,
         "partitionCount": 1

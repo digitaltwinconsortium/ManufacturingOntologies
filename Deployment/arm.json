@@ -394,7 +394,7 @@
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2022-04-01",
-      "name": "[guid(resourceGroup().id)]",
+      "name": "[guid(variables('dataOwnerRoleDefinitionId'), resourceGroup().id)]",
       "dependsOn": [
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity'))]"
       ],
@@ -407,7 +407,7 @@
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2022-04-01",
-      "name": "[guid(resourceGroup().id)]",
+      "name": "[guid(variables('appReadWriteRoleDefinitionId'), resourceGroup().id)]",
       "dependsOn": [
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity'))]"
       ],

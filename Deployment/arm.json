@@ -438,15 +438,10 @@
       ],
       "properties": {
         "forceUpdateTag": "[parameters('utcValue')]",
-        "AzCliVersion": "2.0.80",
+        "AzCliVersion": "2.40.0",
         "timeout": "PT30M",
         "arguments": "[variables('cliArg')]",
-        "scriptContent": "
-
-          appInfo=$(az ad app create --display-name $1 --identifier-uris \"$2\" --reply-urls \"$3\")
-          echo $appInfo > $AZ_SCRIPTS_OUTPUT_PATH
-
-        ",
+        "scriptContent": "appInfo=$(az ad app create --display-name $1 --identifier-uris \"$2\" --reply-urls \"$3\"); echo $appInfo > $AZ_SCRIPTS_OUTPUT_PATH",
         "cleanupPreference": "Always",
         "retentionInterval": "P1D"
       }

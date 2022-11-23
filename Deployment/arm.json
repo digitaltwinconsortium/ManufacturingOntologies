@@ -22,6 +22,10 @@
       "metadata": {
         "description": "Password for the Virtual Machine."
       }
+    },
+    "utcValue": {
+      "type": "string",
+      "defaultValue": "[utcNow()]"
     }
   },
   "variables": {
@@ -434,7 +438,7 @@
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity'))]"
       ],
       "properties": {
-        "forceUpdateTag": "[utcNow()]",
+        "forceUpdateTag": "[parameters('utcValue')]",
         "AzCliVersion": "2.0.80",
         "timeout": "PT30M",
         "arguments": "[variables('cliArg')]",

@@ -30,10 +30,8 @@
   },
   "variables": {
     "cliResourceName": "AzCLIAppRegDeploymentScript",
-    "appServicePlanName": "[concat(concat(parameters('ResourcesName'), '-AppService'))]",
-    "aadAppUri": "[concat('https://', concat(parameters('ResourcesName'), '-WebApp'), '.azurewebsites.net')]",
     "aadAppRedirectUri": "[concat('https://', concat(parameters('ResourcesName'), '-WebApp'), '.azurewebsites.net/signin-oidc')]",
-    "cliArg": "[concat(concat(parameters('ResourcesName'), '-WebApp'), ' ', variables('aadAppUri'), ' ', variables('aadAppRedirectUri'))]",
+    "cliArg": "[concat(concat(parameters('ResourcesName'), '-WebApp'), ' ', variables('aadAppRedirectUri'))]",
     "addressPrefix": "10.0.0.0/16",
     "subnetPrefix": "10.0.0.0/24",
     "dataOwnerRoleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'bcd981a7-7f74-457b-83e1-cceb9e632ffe')]",
@@ -441,7 +439,7 @@
         "AzCliVersion": "2.40.0",
         "timeout": "PT30M",
         "arguments": "[variables('cliArg')]",
-        "scriptContent": "appInfo=$(az ad app create --display-name $1 --identifier-uris \"$2\" --reply-urls \"$3\"); echo $appInfo > $AZ_SCRIPTS_OUTPUT_PATH",
+        "scriptContent": "$appInfo=$(az ad app create --display-name \"$1\" --enable-id-token-issuance \"true\" --public-client-redirect-uris \"$2\"); echo $appInfo > $AZ_SCRIPTS_OUTPUT_PATH",
         "cleanupPreference": "Always",
         "retentionInterval": "P1D"
       }

@@ -22,6 +22,18 @@
       "metadata": {
         "description": "Password for the Virtual Machine."
       }
+    },
+    "webApplicationSettings": {
+      "type": "object",
+      "value": {
+        "appSettings": {
+          "stickySettings": [ "" ],
+          "prod": {
+            "AZURE_CLIENT_ID": "[reference(parameters('ResourcesName')).outputs.appId]",
+            "AZURE_TENANT_ID": "[subscription().tenantId]"
+          }
+        }
+      }
     }
   },
   "variables": {
@@ -72,8 +84,6 @@
       "name": "[parameters('ResourcesName')]",
       "location": "[resourceGroup().location]",
       "properties": {
-        "AZURE_CLIENT_ID": "[reference(parameters('ResourcesName')).outputs.appId]",
-        "AZURE_TENANT_ID": "[subscription().tenantId]",
         "httpsOnly": true,
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('ResourcesName'))]",
         "siteConfig": {
@@ -88,15 +98,27 @@
           "minimumElasticInstanceCount": 0
         }
       },
-       "identity": {
-         "type": "UserAssigned",
+      "identity": {
+        "type": "UserAssigned",
         "userAssignedIdentities": {
           "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('ResourcesName'))]": {}
         }
-       },
+      },
       "dependsOn": [
         "[resourceId('Microsoft.Web/serverfarms', parameters('ResourcesName'))]",
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('ResourcesName'))]"
+      ],
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "location": "[resourceGroup().location]",
+          "name": "appsettings",
+          "properties": "[parameters('webApplicationSettings').appSettings.prod]",
+          "type": "config",
+          "dependsOn": [
+            "[concat('Microsoft.Web/sites/', parameters('ResourcesName'))]"
+          ]
+        }
       ]
     },
     {

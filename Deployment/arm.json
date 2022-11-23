@@ -24,16 +24,7 @@
       }
     },
     "webApplicationSettings": {
-      "type": "object",
-      "value": {
-        "appSettings": {
-          "stickySettings": [ "" ],
-          "prod": {
-            "AZURE_CLIENT_ID": "[reference(parameters('ResourcesName')).outputs.appId]",
-            "AZURE_TENANT_ID": "[subscription().tenantId]"
-          }
-        }
-      }
+      "type": "object"
     }
   },
   "variables": {

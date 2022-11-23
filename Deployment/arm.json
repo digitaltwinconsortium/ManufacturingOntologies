@@ -381,7 +381,7 @@
     },
     {
       "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-      "name": "[parameters('ResourcesName')]",
+      "name": "[concat(parameters('ResourcesName'), '-Identity')]",
       "apiVersion": "2018-11-30",
       "location": "[resourceGroup().location]"
     },

@@ -439,8 +439,8 @@
         "AzCliVersion": "2.40.0",
         "timeout": "PT30M",
         "arguments": "[variables('cliArg')]",
-        "scriptContent": "$appInfo=$(az ad app create --display-name \"$1\" --enable-id-token-issuance \"true\" --public-client-redirect-uris \"$2\"); echo $appInfo > $AZ_SCRIPTS_OUTPUT_PATH",
-        "cleanupPreference": "Always",
+        "scriptContent": "appInfo=$(az ad app create --display-name \"$1\" --enable-id-token-issuance \"true\" --public-client-redirect-uris \"$2\")\necho $appInfo > $AZ_SCRIPTS_OUTPUT_PATH",
+        "cleanupPreference": "OnSuccess",
         "retentionInterval": "P1D"
       }
     }

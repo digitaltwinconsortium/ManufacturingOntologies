@@ -22,9 +22,6 @@
       "metadata": {
         "description": "Password for the Virtual Machine."
       }
-    },
-    "webApplicationSettings": {
-      "type": "object"
     }
   },
   "variables": {
@@ -104,7 +101,10 @@
           "apiVersion": "2015-08-01",
           "location": "[resourceGroup().location]",
           "name": "appsettings",
-          "properties": "[parameters('webApplicationSettings').appSettings.prod]",
+          "properties": {
+            "AZURE_CLIENT_ID": "[reference(parameters('ResourcesName')).outputs.appId]",
+            "AZURE_TENANT_ID": "[subscription().tenantId]"
+          },
           "type": "config",
           "dependsOn": [
             "[concat('Microsoft.Web/sites/', parameters('ResourcesName'))]"

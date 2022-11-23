@@ -13,14 +13,14 @@
     "adminUsername": {
       "type": "string",
       "metadata": {
-        "description": "Username for the Virtual Machine."
+        "description": "Username for the Virtual Machine and UA Cloud Twin."
       }
     },
     "adminPassword": {
       "type": "secureString",
       "minLength": 12,
       "metadata": {
-        "description": "Password for the Virtual Machine."
+        "description": "Password for the Virtual Machine and UA Cloud Twin."
       }
     },
     "utcValue": {
@@ -29,13 +29,9 @@
     }
   },
   "variables": {
-    "cliResourceName": "AzCLIAppRegDeploymentScript",
-    "aadAppRedirectUri": "[concat('https://', concat(parameters('ResourcesName'), '-WebApp'), '.azurewebsites.net/signin-oidc')]",
-    "cliArg": "[concat(concat(parameters('ResourcesName'), '-WebApp'), ' ', variables('aadAppRedirectUri'))]",
     "addressPrefix": "10.0.0.0/16",
     "subnetPrefix": "10.0.0.0/24",
     "dataOwnerRoleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'bcd981a7-7f74-457b-83e1-cceb9e632ffe')]",
-    "ownerRoleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')]"
   },
   "resources": [
     {
@@ -101,8 +97,7 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Web/serverfarms', concat(parameters('ResourcesName'), '-AppService'))]",
-        "[resourceId('Microsoft.Resources/deploymentScripts', variables('cliResourceName'))]"
+        "[resourceId('Microsoft.Web/serverfarms', concat(parameters('ResourcesName'), '-AppService'))]"
       ],
       "resources": [
         {
@@ -110,8 +105,8 @@
           "location": "[resourceGroup().location]",
           "name": "appsettings",
           "properties": {
-            "AZURE_CLIENT_ID": "[reference(variables('cliResourceName')).outputs.appId]",
-            "AZURE_TENANT_ID": "[subscription().tenantId]"
+            "ADMIN_USERNAME": "[parameters('adminUsername')]",
+            "ADMIN_PASSWORD": "[parameters('adminPassword')]"
           },
           "type": "config",
           "dependsOn": [
@@ -404,44 +399,6 @@
         "roleDefinitionId": "[variables('dataOwnerRoleDefinitionId')]",
         "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity')), '2018-11-30').principalId]",
         "principalType": "ServicePrincipal"
-      }
-    },
-    {
-      "type": "Microsoft.Authorization/roleAssignments",
-      "apiVersion": "2022-04-01",
-      "name": "[guid(variables('ownerRoleDefinitionId'), resourceGroup().id)]",
-      "dependsOn": [
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity'))]"
-      ],
-      "properties": {
-        "roleDefinitionId": "[variables('ownerRoleDefinitionId')]",
-        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity')), '2018-11-30').principalId]",
-        "principalType": "ServicePrincipal"
-      }
-    },
-    {
-      "type": "Microsoft.Resources/deploymentScripts",
-      "apiVersion": "2020-10-01",
-      "name": "[variables('cliResourceName')]",
-      "location": "[resourceGroup().location]",
-      "kind": "AzureCLI",
-      "identity": {
-        "type": "UserAssigned",
-        "userAssignedIdentities": {
-          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity'))]": {}
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity'))]"
-      ],
-      "properties": {
-        "forceUpdateTag": "[parameters('utcValue')]",
-        "AzCliVersion": "2.40.0",
-        "timeout": "PT30M",
-        "arguments": "[variables('cliArg')]",
-        "scriptContent": "appInfo=$(az ad app create --display-name \"$1\" --enable-id-token-issuance \"true\" --public-client-redirect-uris \"$2\")\necho $appInfo > $AZ_SCRIPTS_OUTPUT_PATH",
-        "cleanupPreference": "OnSuccess",
-        "retentionInterval": "P1D"
       }
     }
   ],

@@ -33,7 +33,7 @@
     {
       "type": "Microsoft.DigitalTwins/digitalTwinsInstances",
       "apiVersion": "2020-10-31",
-      "name": "[parameters('ResourcesName')]",
+      "name": "[concat(parameters('ResourcesName'), '-ADT')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "privateEndpointConnections": [],
@@ -43,7 +43,7 @@
     {
       "type": "Microsoft.Web/serverfarms",
       "apiVersion": "2021-02-01",
-      "name": "[parameters('ResourcesName')]",
+      "name": "[concat(parameters('ResourcesName'), '-AppService')]",
       "location": "[resourceGroup().location]",
       "sku": {
         "name": "P2v2",
@@ -69,11 +69,11 @@
     {
       "type": "Microsoft.Web/sites",
       "apiVersion": "2021-02-01",
-      "name": "[parameters('ResourcesName')]",
+      "name": "[concat(parameters('ResourcesName'), '-WebApp')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "httpsOnly": true,
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('ResourcesName'))]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', concat(parameters('ResourcesName'), '-AppService'))]",
         "siteConfig": {
           "numberOfWorkers": 1,
           "linuxFxVersion": "DOCKER|ghcr.io/digitaltwinconsortium/ua-cloudtwin:main",
@@ -89,12 +89,12 @@
       "identity": {
         "type": "UserAssigned",
         "userAssignedIdentities": {
-          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('ResourcesName'))]": {}
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity'))]": {}
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Web/serverfarms', parameters('ResourcesName'))]",
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('ResourcesName'))]"
+        "[resourceId('Microsoft.Web/serverfarms', concat(parameters('ResourcesName'), '-AppService'))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity'))]"
       ],
       "resources": [
         {
@@ -102,12 +102,12 @@
           "location": "[resourceGroup().location]",
           "name": "appsettings",
           "properties": {
-            "AZURE_CLIENT_ID": "[reference(parameters('ResourcesName')).outputs.appId]",
+            "AZURE_CLIENT_ID": "[reference(concat(parameters('ResourcesName'), '-Identity')).outputs.appId]",
             "AZURE_TENANT_ID": "[subscription().tenantId]"
           },
           "type": "config",
           "dependsOn": [
-            "[concat('Microsoft.Web/sites/', parameters('ResourcesName'))]"
+            "[concat('Microsoft.Web/sites/', concat(parameters('ResourcesName'), '-WebApp'))]"
           ]
         }
       ]
@@ -115,7 +115,7 @@
     {
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2021-04-01",
-      "name": "[parameters('ResourcesName')]",
+      "name": "[concat(parameters('ResourcesName'), '-Storage')]",
       "location": "[resourceGroup().location]",
       "sku": {
         "name": "Standard_LRS"
@@ -125,7 +125,7 @@
     {
       "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2020-11-01",
-      "name": "[parameters('ResourcesName')]",
+      "name": "[concat(parameters('ResourcesName'), '-IPAddress')]",
       "location": "[resourceGroup().location]",
       "sku": {
         "name": "Basic"
@@ -133,14 +133,14 @@
       "properties": {
         "publicIPAllocationMethod": "Dynamic",
         "dnsSettings": {
-          "domainNameLabel": "[parameters('ResourcesName')]"
+          "domainNameLabel": "[concat(parameters('ResourcesName'), '-Domain')]"
         }
       }
     },
     {
       "type": "Microsoft.Network/networkSecurityGroups",
       "apiVersion": "2020-11-01",
-      "name": "[parameters('ResourcesName')]",
+      "name": "[concat(parameters('ResourcesName'), '-NSG')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "securityRules": [
@@ -163,7 +163,7 @@
     {
       "type": "Microsoft.Network/virtualNetworks",
       "apiVersion": "2020-11-01",
-      "name": "[parameters('ResourcesName')]",
+      "name": "[concat(parameters('ResourcesName'), '-Network')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "addressSpace": {
@@ -173,24 +173,24 @@
         },
         "subnets": [
           {
-            "name": "[parameters('ResourcesName')]",
+            "name": "[concat(parameters('ResourcesName'), '-Subnet')]",
             "properties": {
               "addressPrefix": "[variables('subnetPrefix')]",
               "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('ResourcesName'))]"
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(parameters('ResourcesName'), '-NSG'))]"
               }
             }
           }
         ]
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('ResourcesName'))]"
+        "[resourceId('Microsoft.Network/networkSecurityGroups', concat(parameters('ResourcesName'), '-NSG'))]"
       ]
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2020-11-01",
-      "name": "[parameters('ResourcesName')]",
+      "name": "[concat(parameters('ResourcesName'), '-IF')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "ipConfigurations": [
@@ -199,31 +199,31 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('ResourcesName'))]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('ResourcesName'), '-IPAddress'))]"
               },
               "subnet": {
-                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('ResourcesName'), parameters('ResourcesName'))]"
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(parameters('ResourcesName'), '-Network'), concat(parameters('ResourcesName'), '-Subnet'))]"
               }
             }
           }
         ]
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/publicIPAddresses', parameters('ResourcesName'))]",
-        "[resourceId('Microsoft.Network/virtualNetworks', parameters('ResourcesName'))]"
+        "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('ResourcesName'), '-IPAddress'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', concat(parameters('ResourcesName'), '-Network'))]"
       ]
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
       "apiVersion": "2021-03-01",
-      "name": "[parameters('ResourcesName')]",
+      "name": "[concat(parameters('ResourcesName'), '-VM')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "hardwareProfile": {
           "vmSize": "Standard_D4s_v3"
         },
         "osProfile": {
-          "computerName": "[parameters('ResourcesName')]",
+          "computerName": "[concat(parameters('ResourcesName'), '-Windows')]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
@@ -248,24 +248,24 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('ResourcesName'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('ResourcesName'), '-IF'))]"
             }
           ]
         },
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": true,
-            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', parameters('ResourcesName'))).primaryEndpoints.blob]"
+            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', concat(parameters('ResourcesName'), '-Storage'))).primaryEndpoints.blob]"
           }
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/networkInterfaces', parameters('ResourcesName'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts', parameters('ResourcesName'))]"
+        "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('ResourcesName'), '-IF'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', concat(parameters('ResourcesName'), '-Storage'))]"
       ]
     },
     {
-      "name": "[parameters('ResourcesName')]",
+      "name": "[concat(parameters('ResourcesName'), '-ADX')]",
       "type": "Microsoft.Kusto/clusters",
       "sku": {
         "name": "Standard_D11_v2",
@@ -291,12 +291,12 @@
       }
     },
     {
-      "name": "[concat(parameters('ResourcesName'), '/', parameters('ResourcesName'))]",
+      "name": "[concat(concat(parameters('ResourcesName'), '-ADX'), '/', concat(parameters('ResourcesName'), '-DB'))]",
       "type": "Microsoft.Kusto/clusters/databases",
       "apiVersion": "2021-01-01",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters', parameters('ResourcesName'))]"
+        "[resourceId('Microsoft.Kusto/clusters', concat(parameters('ResourcesName'), '-ADX'))]"
       ],
       "properties": {
         "softDeletePeriodInDays": 365,
@@ -307,7 +307,7 @@
     {
       "type": "Microsoft.EventHub/namespaces",
       "apiVersion": "2017-04-01",
-      "name": "[parameters('ResourcesName')]",
+      "name": "[concat(parameters('ResourcesName'), '-EventHubs')]",
       "location": "[resourceGroup().location]",
       "sku": {
         "name": "Standard",
@@ -328,7 +328,7 @@
         "partitionCount": 1
       },
       "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces', parameters('ResourcesName'))]"
+        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('ResourcesName'), '-EventHubs'))]"
       ]
     },
     {
@@ -340,7 +340,7 @@
         "partitionCount": 1
       },
       "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces', parameters('ResourcesName'))]"
+        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('ResourcesName'), '-EventHubs'))]"
       ]
     },
     {
@@ -352,7 +352,7 @@
         "partitionCount": 1
       },
       "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces', parameters('ResourcesName'))]"
+        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('ResourcesName'), '-EventHubs'))]"
       ]
     },
     {
@@ -364,7 +364,7 @@
         "partitionCount": 1
       },
       "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces', parameters('ResourcesName'))]"
+        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('ResourcesName'), '-EventHubs'))]"
       ]
     },
     {
@@ -376,7 +376,7 @@
         "partitionCount": 1
       },
       "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces', parameters('ResourcesName'))]"
+        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('ResourcesName'), '-EventHubs'))]"
       ]
     },
     {
@@ -390,11 +390,11 @@
       "apiVersion": "2022-04-01",
       "name": "[guid(resourceGroup().id)]",
       "dependsOn": [
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('ResourcesName'))]"
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity'))]"
       ],
       "properties": {
         "roleDefinitionId": "[variables('dataOwnerRoleDefinitionId')]",
-        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('ResourcesName')), '2018-11-30').principalId]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity')), '2018-11-30').principalId]",
         "principalType": "ServicePrincipal"
       }
     }
@@ -402,7 +402,7 @@
   "outputs": {
     "hostname": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', parameters('ResourcesName'))).dnsSettings.fqdn]"
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('ResourcesName'), '-IPAddress'))).dnsSettings.fqdn]"
     }
   }
 }

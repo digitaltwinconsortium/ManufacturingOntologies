@@ -83,6 +83,7 @@ Clicking on the button below will deploy all required resources (on Microsoft Az
 
 You can also visualize the resources that will get deployed by clicking the button below:
 
+<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fdigitaltwinconsortium%2FManufacturingOntologies%2Fmain%2FDeployment%2Farm.json" data-linktype="external"><img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true" alt="Visualize" data-linktype="external"></a>
 <a href="http://armviz.io/#/?load=https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/arm.json" target="_blank"><img src="http://armviz.io/visualizebutton.png"/></a>
 
 Once the deployment is complete, login to the deployed VM using the credentials you provided during deployment and download and install Docker Desktop from [here](https://www.docker.com/products/docker-desktop), including the Windows Subsystem for Linux (WSL) integration. After installation and a required system restart, accept the license terms and install the WSL2 Linux kernel by following the instructions. Then verify that Docker Desktop is running in the Windows System Tray.

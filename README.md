@@ -85,13 +85,9 @@ Once the deployment is complete, login to the deployed VM using the credentials 
 
 ### Running the Production Line Simulation
 
-* On the deployed VM, browse to [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies) and select Code -> Download Zip and then unzip the contents to a directory of your choice.
+On the deployed VM, browse to [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies) and select Code -> Download Zip and then unzip the contents to a directory of your choice. then navigate to the OnPremAssets directory of the unzipped content and run the StartSimulation.cmd script from the OnPremAssets folder in a console window by supplying the primary key connection string of your Event Hubs namespace and the Azure region you picked during deployment as parameters. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey". The azure region needs to be specified as a DNS acronym as listed [here](https://learn.microsoft.com/en-us/azure/automation/how-to/automation-region-dns-records#dns-records-per-region), e.g. for Azure region East US 2 you would pass in eus2 as parameter:
 
-* Navigate to the OnPremAssets directory of the unzipped content and run the StartSimulation.cmd script from the OnPremAssets folder in a console window by supplying the primary key connection string of your Event Hubs namespace and the Azure region you picked during deployment as parameters.
-
-* The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey".
-
-* The azure region needs to be specified as a DNS acronym as listed [here](https://learn.microsoft.com/en-us/azure/automation/how-to/automation-region-dns-records#dns-records-per-region), i.e. for Azure region East US 2 you would pass in eus2 as parameter.
+    StartSimulation Endpoint=sb://ontologies.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=abcdefgh= eus2
 
 Please note: If you restart Docker Desktop, you will need to stop and then restart the simulation, too!
 

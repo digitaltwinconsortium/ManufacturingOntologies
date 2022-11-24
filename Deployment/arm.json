@@ -22,16 +22,12 @@
       "metadata": {
         "description": "Password for the Virtual Machine and UA Cloud Twin."
       }
-    },
-    "utcValue": {
-      "type": "string",
-      "defaultValue": "[utcNow()]"
     }
   },
   "variables": {
     "addressPrefix": "10.0.0.0/16",
     "subnetPrefix": "10.0.0.0/24",
-    "dataOwnerRoleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'bcd981a7-7f74-457b-83e1-cceb9e632ffe')]",
+    "dataOwnerRoleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'bcd981a7-7f74-457b-83e1-cceb9e632ffe')]"
   },
   "resources": [
     {

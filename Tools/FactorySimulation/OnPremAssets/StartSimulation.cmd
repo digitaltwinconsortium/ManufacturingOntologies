@@ -125,10 +125,10 @@ Echo Configuring UA Cloud Twin...
 SET "resourcename=!name!"
 SET "resourcename=!resourcename:sb:=!"
 SET "resourcename=!resourcename:/=!"
-SET "resourcename=!resourcename:.servicebus.windows.net=!"
+SET "resourcename=!resourcename:-EventHubs.servicebus.windows.net=!"
 
 ECHO Launching UA Cloud Twin...
-start "" "http://!resourcename!.azurewebsites.net/Setup?endpoint=!connectionstring!&instanceUrl=https://!resourcename!.api.!region!.digitaltwins.azure.net"
+start "" "http://!resourcename!-WebApp.azurewebsites.net/Setup?endpoint=!connectionstring!&instanceUrl=https://!resourcename!-ADT.api.!region!.digitaltwins.azure.net"
 Echo Please click "Apply" on the UA Cloud Twin website that was just opened, then
 PAUSE
 

@@ -102,7 +102,9 @@
           "name": "appsettings",
           "properties": {
             "ADMIN_USERNAME": "[parameters('adminUsername')]",
-            "ADMIN_PASSWORD": "[parameters('adminPassword')]"
+            "ADMIN_PASSWORD": "[parameters('adminPassword')]",
+            "AZURE_CLIENT_ID": "[reference(concat(parameters('ResourcesName'), '-Identity')).clientId]",
+            "AZURE_TENANT_ID": "[subscription().tenantId]"
           },
           "type": "config",
           "dependsOn": [

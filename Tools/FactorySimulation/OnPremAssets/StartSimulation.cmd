@@ -11,7 +11,7 @@ goto :DockerCheck
 
 :InvalidArgument
 ECHO Argument error:
-ECHO Input parameter must be of the form Endpoint=sb://[eventhubnamespace].servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=[key]
+ECHO Input parameter must be of the form Endpoint=sb://[eventhubnamespace].servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=[key] [ADTRegion]
 EXIT /B 1
 
 :DockerCheck

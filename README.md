@@ -114,12 +114,15 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 * AAD_TENANT_ID
 * APPLICATION_KEY
 * APPLICATION_ID
-* EVENT_HUBS_NAME
-* EVENT_HUBS_KEY
-* UACOMMANDER_NAME
+* BROKERNAME
+* USERNAME
+* PASSWORD
+* TOPIC
+* RESPONSE_TOPIC
 * UA_SERVER_ENDPOINT
 * UA_SERVER_METHOD_ID
 * UA_SERVER_OBJECT_ID
+* UA_SERVER_APPLICATION_NAME
 * UA_SERVER_DNS_NAME
 
 ### Replacing the Production Line Simulation with a Real Production Line

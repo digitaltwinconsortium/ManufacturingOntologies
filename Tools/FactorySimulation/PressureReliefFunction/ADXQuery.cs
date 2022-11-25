@@ -1,14 +1,14 @@
 
 namespace PressureRelief
 {
+    using Azure.Messaging.EventHubs;
+    using Azure.Messaging.EventHubs.Producer;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json.Linq;
     using System;
     using System.Net.Http;
-    using System.Security.Cryptography;
     using System.Text;
-    using System.Web;
 
     public class ADXQuery
     {
@@ -20,8 +20,8 @@ namespace PressureRelief
             string adxInstanceURL = Environment.GetEnvironmentVariable("ADX_INSTANCE_URL");
             string adxDatabaseName = Environment.GetEnvironmentVariable("ADX_DB_NAME");
             string tenantId = Environment.GetEnvironmentVariable("AAD_TENANT_ID");
-            string iotHubName = Environment.GetEnvironmentVariable("IOT_HUB_NAME");
-            string iotHubKey = Environment.GetEnvironmentVariable("IOT_HUB_KEY");
+            string eventHubName = Environment.GetEnvironmentVariable("EVENT_HUBS_NAME");
+            string eventHubsKey = Environment.GetEnvironmentVariable("EVENT_HUBS_KEY");
             string uaCommanderName = Environment.GetEnvironmentVariable("UACOMMANDER_NAME");
             string uaServerEndpoint = Environment.GetEnvironmentVariable("UA_SERVER_ENDPOINT");
             string uaServerMethodID = Environment.GetEnvironmentVariable("UA_SERVER_METHOD_ID");
@@ -65,31 +65,26 @@ namespace PressureRelief
                 {
                     log.LogWarning("High pressure detected!");
 
-                    // generate SAS token
-                    TimeSpan sinceEpoch = DateTime.UtcNow - new DateTime(1970, 1, 1);
-                    int weekInSeconds = 60 * 60 * 24 * 7;
-                    string expiry = Convert.ToString((int)sinceEpoch.TotalSeconds + weekInSeconds);
-                    string stringToSign = HttpUtility.UrlEncode(iotHubName + ".azure-devices.net") + "\n" + expiry;
-                    HMACSHA256 hmac = new HMACSHA256(Convert.FromBase64String(iotHubKey));
-                    string signature = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(stringToSign)));
-                    string sasToken = "SharedAccessSignature sr=" + HttpUtility.UrlEncode(iotHubName + ".azure-devices.net")
-                                    + "&sig=" + HttpUtility.UrlEncode(signature)
-                                    + "&se=" + expiry
-                                    + "&skn=iothubowner";
+                    // call OPC UA method on UA Server via UACommander via Event Hubs
+                     string payloadString = "{ \"Endpoint\": \"" + uaServerEndpoint + "\", \"MethodNodeId\": \"" + uaServerMethodID + "\", \"ParentNodeId\": \"" + uaServerObjectID + "\", \"Arguments\": null }";
 
-                    // call OPC UA method on UA Server via UACommander via IoT Hub REST endpoint
-                    webClient.DefaultRequestHeaders.Remove("Authorization");
-                    webClient.DefaultRequestHeaders.Add("Authorization", sasToken);
-                    string url = "https://" + iotHubName + ".azure-devices.net/twins/" + uaCommanderName + "/methods?api-version=2018-06-30";
-                    string payloadString = "{ \"Endpoint\": \"" + uaServerEndpoint + "\", \"MethodNodeId\": \"" + uaServerMethodID + "\", \"ParentNodeId\": \"" + uaServerObjectID + "\", \"Arguments\": null }";
-                    responseMessage = webClient.Send(new HttpRequestMessage(HttpMethod.Post, url) {
-                        Content = new StringContent("{ \"methodName\":\"Command\", \"responseTimeoutInSeconds\":\"200\", \"payload\":" + payloadString + " }", Encoding.UTF8, "application/json")
-                    });
+                    // Create a producer client that you can use to send events to an event hub
+                    EventHubProducerClient producerClient = new(eventHubsKey, eventHubName);
+                    using EventDataBatch eventBatch = producerClient.CreateBatchAsync().GetAwaiter().GetResult();
 
-                    response = responseMessage.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                    if (response.Contains("\"status\":200"))
+                    if (!eventBatch.TryAdd(new EventData(Encoding.UTF8.GetBytes(payloadString))))
                     {
-                        log.LogInformation("Pressure release valve opened.");
+                        log.LogError($"Event is too large for the batch and cannot be sent.");
+                    }
+
+                    try
+                    {
+                        producerClient.SendAsync(eventBatch).GetAwaiter().GetResult();
+                        log.LogInformation($"A batch of events has been published.");
+                    }
+                    finally
+                    {
+                        producerClient.DisposeAsync().GetAwaiter().GetResult();
                     }
                 }
 

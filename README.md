@@ -115,6 +115,7 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 * APPLICATION_KEY
 * APPLICATION_ID
 * BROKERNAME
+* CLIENTNAME
 * USERNAME
 * PASSWORD
 * TOPIC

@@ -68,7 +68,6 @@ namespace PressureRelief
                     var config = new ProducerConfig
                     {
                         BootstrapServers = Environment.GetEnvironmentVariable("BROKERNAME") + ":9093",
-                        RequestTimeoutMs = 20000,
                         MessageTimeoutMs = 10000,
                         SecurityProtocol = SecurityProtocol.SaslSsl,
                         SaslMechanism = SaslMechanism.Plain,
@@ -79,7 +78,7 @@ namespace PressureRelief
 
                     var conf = new ConsumerConfig
                     {
-                        GroupId = "consumer-group",
+                        GroupId = Environment.GetEnvironmentVariable("CLIENTNAME"),
                         BootstrapServers = Environment.GetEnvironmentVariable("BROKERNAME") + ":9093",
                         AutoOffsetReset = AutoOffsetReset.Earliest,
                         SecurityProtocol = SecurityProtocol.SaslSsl,
@@ -89,10 +88,7 @@ namespace PressureRelief
                     };
                     IConsumer<Ignore, byte[]> consumer = new ConsumerBuilder<Ignore, byte[]>(conf).Build();
 
-                    consumer.Subscribe(new List<string>() {
-                        Environment.GetEnvironmentVariable("RESPONSE_TOPIC"),
-                        Environment.GetEnvironmentVariable("TOPIC")
-                    });
+                    consumer.Subscribe(Environment.GetEnvironmentVariable("RESPONSE_TOPIC"));
 
                     Message<Null, string> message = new()
                     {

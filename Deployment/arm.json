@@ -335,7 +335,31 @@
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
       "apiVersion": "2017-04-01",
-      "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/commands')]",
+      "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/uacommander.command')]",
+      "properties": {
+        "messageRetentionInDays": 1,
+        "partitionCount": 1
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('ResourcesName'), '-EventHubs'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.EventHub/namespaces/eventhubs",
+      "apiVersion": "2017-04-01",
+      "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/uacommander.read')]",
+      "properties": {
+        "messageRetentionInDays": 1,
+        "partitionCount": 1
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('ResourcesName'), '-EventHubs'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.EventHub/namespaces/eventhubs",
+      "apiVersion": "2017-04-01",
+      "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/uacommander.write')]",
       "properties": {
         "messageRetentionInDays": 1,
         "partitionCount": 1

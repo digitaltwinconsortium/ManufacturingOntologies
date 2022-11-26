@@ -326,7 +326,7 @@
       "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/adthistory')]",
       "properties": {
         "messageRetentionInDays": 1,
-        "partitionCount": 2
+        "partitionCount": 1
       },
       "dependsOn": [
         "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('ResourcesName'), '-EventHubs'))]"
@@ -338,7 +338,7 @@
       "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/commands')]",
       "properties": {
         "messageRetentionInDays": 1,
-        "partitionCount": 12
+        "partitionCount": 1
       },
       "dependsOn": [
         "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('ResourcesName'), '-EventHubs'))]"
@@ -350,7 +350,7 @@
       "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/response')]",
       "properties": {
         "messageRetentionInDays": 1,
-        "partitionCount": 12
+        "partitionCount": 1
       },
       "dependsOn": [
         "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('ResourcesName'), '-EventHubs'))]"
@@ -362,7 +362,7 @@
       "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/data')]",
       "properties": {
         "messageRetentionInDays": 1,
-        "partitionCount": 2
+        "partitionCount": 1
       },
       "dependsOn": [
         "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('ResourcesName'), '-EventHubs'))]"
@@ -374,7 +374,7 @@
       "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/metadata')]",
       "properties": {
         "messageRetentionInDays": 1,
-        "partitionCount": 2
+        "partitionCount": 1
       },
       "dependsOn": [
         "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('ResourcesName'), '-EventHubs'))]"

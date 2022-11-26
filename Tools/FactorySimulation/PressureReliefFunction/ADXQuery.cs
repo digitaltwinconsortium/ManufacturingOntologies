@@ -101,8 +101,8 @@ namespace PressureRelief
 
                     log.LogInformation($"Sent command {payloadString} to UA Cloud Commander.");
 
-                    // wait for a response for 30 seconds
-                    ConsumeResult<Ignore, byte[]> result = consumer.Consume(30 * 1000);
+                    // wait for a response for 15 seconds
+                    ConsumeResult<Ignore, byte[]> result = consumer.Consume(15 * 1000);
                     if (result != null)
                     {
                         string response = Encoding.UTF8.GetString(result.Message.Value);

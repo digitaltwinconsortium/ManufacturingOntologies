@@ -5,27 +5,29 @@ namespace PressureRelief
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
     using System;
-    using System.Collections.Generic;
+    using System.Net.Http;
     using System.Text;
 
     public class ADXQuery
     {
         [FunctionName("ADXQuery")]
-        public void Run([TimerTrigger("*/15 * * * * *")]TimerInfo myTimer, ILogger log)
+        public void Run([TimerTrigger("*/30 * * * * *")]TimerInfo myTimer, ILogger log)
         {
+            HttpClient webClient = new HttpClient();
+            IProducer<Null, string> producer = null;
+            IConsumer<Ignore, byte[]> consumer = null;
+
             try
             {
+                string applicationClientId = Environment.GetEnvironmentVariable("APPLICATION_ID");
+                string applicationKey = Environment.GetEnvironmentVariable("APPLICATION_KEY");
+                string adxInstanceURL = Environment.GetEnvironmentVariable("ADX_INSTANCE_URL");
+                string adxDatabaseName = Environment.GetEnvironmentVariable("ADX_DB_NAME");
+                string tenantId = Environment.GetEnvironmentVariable("AAD_TENANT_ID");
+                string uaServerApplicationName = Environment.GetEnvironmentVariable("UA_SERVER_APPLICATION_NAME");
+                string uaServerLocationName = Environment.GetEnvironmentVariable("UA_SERVER_LOCATION_NAME");
+
                 // TODO: Fix the ADX query
-                //HttpClient webClient = new HttpClient();
-
-                //string applicationClientId = Environment.GetEnvironmentVariable("APPLICATION_ID");
-                //string applicationKey = Environment.GetEnvironmentVariable("APPLICATION_KEY");
-                //string adxInstanceURL = Environment.GetEnvironmentVariable("ADX_INSTANCE_URL");
-                //string adxDatabaseName = Environment.GetEnvironmentVariable("ADX_DB_NAME");
-                //string tenantId = Environment.GetEnvironmentVariable("AAD_TENANT_ID");
-                //string uaServerApplicationName = Environment.GetEnvironmentVariable("UA_SERVER_APPLICATION_NAME");
-                //string uaServerLocationName = Environment.GetEnvironmentVariable("UA_SERVER_LOCATION_NAME");
-
                 //// acquire OAuth2 token via AAD REST endpoint
                 //webClient.DefaultRequestHeaders.Add("Accept", "application/json");
                 //string content = $"grant_type=client_credentials&resource={adxInstanceURL}&client_id={applicationClientId}&client_secret={applicationKey}";
@@ -74,7 +76,7 @@ namespace PressureRelief
                         SaslUsername = Environment.GetEnvironmentVariable("USERNAME"),
                         SaslPassword = Environment.GetEnvironmentVariable("PASSWORD"),
                     };
-                    IProducer<Null, string> producer = new ProducerBuilder<Null, string>(config).Build();
+                    producer = new ProducerBuilder<Null, string>(config).Build();
 
                     var conf = new ConsumerConfig
                     {
@@ -86,7 +88,7 @@ namespace PressureRelief
                         SaslUsername = Environment.GetEnvironmentVariable("USERNAME"),
                         SaslPassword = Environment.GetEnvironmentVariable("PASSWORD")
                     };
-                    IConsumer<Ignore, byte[]> consumer = new ConsumerBuilder<Ignore, byte[]>(conf).Build();
+                    consumer = new ConsumerBuilder<Ignore, byte[]>(conf).Build();
 
                     consumer.Subscribe(Environment.GetEnvironmentVariable("RESPONSE_TOPIC"));
 
@@ -104,19 +106,25 @@ namespace PressureRelief
                     if (result != null)
                     {
                         string response = Encoding.UTF8.GetString(result.Message.Value);
-                        log.LogInformation($"Received response {response} from UA Cloud Commander.");
+                        log.LogInformation($"Received response {response} from UA Cloud Commander on partition {result.Partition.Value}.");
                     }
                     else
                     {
                         log.LogError("Timeout waiting for response from UA Cloud Commander");
                     }
-                }
 
-                // TODO: webClient.Dispose();
+                    consumer.Unsubscribe();
+                }
             }
             catch (Exception ex)
             {
                 log.LogError(new EventId(), ex, ex.Message);
+            }
+            finally
+            {
+                producer.Dispose();
+                consumer.Dispose();
+                webClient.Dispose();
             }
         }
     }

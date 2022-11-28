@@ -104,7 +104,13 @@
             "ADMIN_USERNAME": "[parameters('adminUsername')]",
             "ADMIN_PASSWORD": "[parameters('adminPassword')]",
             "AZURE_CLIENT_ID": "[reference(concat(parameters('ResourcesName'), '-Identity')).clientId]",
-            "AZURE_TENANT_ID": "[subscription().tenantId]"
+            "AZURE_TENANT_ID": "[subscription().tenantId]",
+            "CLIENT_NAME": "uacloudtwin.corp.contoso",
+            "BROKER_NAME": "[concat(parameters('ResourcesName'), '-EventHubs.servicebus.windows.net')]",
+            "BROKER_PORT": "9093",
+            "BROKER_USERNAME": "$ConnectionString",
+            "TOPIC": "data",
+            "METADATA_TOPIC": "metadata"
           },
           "type": "config",
           "dependsOn": [

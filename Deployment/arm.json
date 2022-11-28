@@ -341,7 +341,7 @@
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
       "apiVersion": "2017-04-01",
-      "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/commander.command')]",
+      "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/commander.corp.contoso.command')]",
       "properties": {
         "messageRetentionInDays": 1,
         "partitionCount": 1
@@ -353,31 +353,7 @@
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
       "apiVersion": "2017-04-01",
-      "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/commander.read')]",
-      "properties": {
-        "messageRetentionInDays": 1,
-        "partitionCount": 1
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('ResourcesName'), '-EventHubs'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.EventHub/namespaces/eventhubs",
-      "apiVersion": "2017-04-01",
-      "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/commander.write')]",
-      "properties": {
-        "messageRetentionInDays": 1,
-        "partitionCount": 1
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('ResourcesName'), '-EventHubs'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.EventHub/namespaces/eventhubs",
-      "apiVersion": "2017-04-01",
-      "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/commander.response')]",
+      "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/commander.corp.contoso.response')]",
       "properties": {
         "messageRetentionInDays": 1,
         "partitionCount": 1

@@ -117,8 +117,8 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 * BROKERNAME - the name of your event hubs namespace, e.g. ontologies-eventhubs.servicebus.windows.net
 * USERNAME - set to "$ConnectionString"
 * PASSWORD - the primary key connection string of your event hubs namespace
-* TOPIC - set to "commander.command"
-* RESPONSE_TOPIC - set to "commander.reponse"
+* TOPIC - set to "commander.corp.contoso.command"
+* RESPONSE_TOPIC - set to "commander.corp.contoso.reponse"
 * UA_SERVER_ENDPOINT - set to "opc.tcp://assembly.seattle.corp.contoso/ua/seattle/" to open the pressure relief valve of the Seattle assembly machine
 * UA_SERVER_METHOD_ID - set to "ns=2;i=435"
 * UA_SERVER_OBJECT_ID - set to "ns=2;i=424"
@@ -135,21 +135,21 @@ In this case, UA Cloud Publisher stores its configuration and log files locally 
 
 Then, open a browser on the Edge PC and navigate to http://localhost. You are now connected to the UA Cloud Publisher's interactive UI. Select the Configuration menu item and enter the following information, replacing [myeventhubsnamespace] with the name of your Event Hubs namespace and replacing [myeventhubsnamespaceprimarykeyconnectionstring] with the primary key connection string of your Event Hubs namespace. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey". Then click Update:
   
-    BrokerClientName: UACloudPublisher  
-    BrokerUrl: [myeventhubsnamespace].servicebus.windows.net
+    BrokerClientName: "UACloudPublisher"  
+    BrokerUrl: "[myeventhubsnamespace].servicebus.windows.net"
     BrokerPort: 9093  
-    BrokerUsername: $ConnectionString  
-    BrokerPassword: [myeventhubsnamespaceprimarykeyconnectionstring]  
-    BrokerMessageTopic: data  
-    BrokerMetadataTopic: metadata  
+    BrokerUsername: "$ConnectionString"  
+    BrokerPassword: "[myeventhubsnamespaceprimarykeyconnectionstring]"  
+    BrokerMessageTopic: "data"
+    BrokerMetadataTopic: "metadata"  
     SendUAMetadata: true  
-    MetadataSendInterval: 30  
-    BrokerCommandTopic: commands  
-    BrokerResponseTopic: response  
+    MetadataSendInterval: 43200  
+    BrokerCommandTopic: ""
+    BrokerResponseTopic: ""  
     BrokerMessageSize: 262144  
     CreateBrokerSASToken: false  
     UseTLS: false  
-    PublisherName: UACloudPublisher  
+    PublisherName: "UACloudPublisher"  
     InternalQueueCapacity: 1000  
     DefaultSendIntervalSeconds: 1  
     DiagnosticsLoggingInterval: 30  

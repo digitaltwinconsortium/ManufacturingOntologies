@@ -107,24 +107,23 @@ If you want to add a 3D viewer to the simulation, you can follow the steps to co
 
 If you want to calculate OEE, add no-code dashboards or make predictions about the production, set up the [Data History](https://learn.microsoft.com/en-us/azure/digital-twins/concepts-data-history) feature in the Azure Digital Twins service to historize your contextualized OPC UA data to Azure Data Explorer deployed in this solution. You can find the wizard to set this up in the Azure Digital Twins service configuration in the Azure portal. 
 
-If you want to test a "digital feedback loop", i.e. triggering a command on one of the OPC UA servers in the simulation from the cloud, based on a time-series reaching a certain threshold (the simulated pressure), then configure and run the StartUACloudCommander.bat file by providing the two environment variables (ENTER_EVENT_HUBS_HOSTNAME_HERE and ENTER_EVENT_HUBS_CONNECTION_STRING_HERE) and deploy the PressureRelief Azure Function in your Azure subscription and create an application registration for your ADX instance as described [here](https://docs.microsoft.com/en-us/azure/data-explorer/provision-azure-ad-app). You also need to define the following environment variables in the Azure portal for the Function:
+If you want to test a "digital feedback loop", i.e. triggering a command on one of the OPC UA servers in the simulation from the cloud, based on a time-series reaching a certain threshold (the simulated pressure), then configure and run the StartUACloudCommander.bat file by providing the two environment variables (ENTER_EVENT_HUBS_HOSTNAME_HERE and ENTER_EVENT_HUBS_CONNECTION_STRING_HERE) in the batch file and deploy the PressureRelief Azure Function in your Azure subscription and create an application registration for your ADX instance as described [here](https://docs.microsoft.com/en-us/azure/data-explorer/provision-azure-ad-app). You also need to define the following environment variables in the Azure portal for the Function:
 
-* ADX_INSTANCE_URL
-* ADX_DB_NAME
-* AAD_TENANT_ID
-* APPLICATION_KEY
-* APPLICATION_ID
-* BROKERNAME
-* CLIENTNAME
-* USERNAME
-* PASSWORD
-* TOPIC
-* RESPONSE_TOPIC
-* UA_SERVER_ENDPOINT
-* UA_SERVER_METHOD_ID
-* UA_SERVER_OBJECT_ID
-* UA_SERVER_APPLICATION_NAME
-* UA_SERVER_DNS_NAME
+* ADX_INSTANCE_URL - the endpoint of your ADX cluster, e.g. https://ontologies.eastus2.kusto.windows.net/
+* ADX_DB_NAME - the name of your ADX database
+* AAD_TENANT_ID - the GUID of your AAD tenant of your Azure subscription
+* APPLICATION_KEY - the secret you created during pressure relief function app registration
+* APPLICATION_ID - the GUID assigned to the pressure relief function during app registration
+* BROKERNAME - the name of your event hubs namespace, e.g. ontologies-eventhubs.servicebus.windows.net
+* USERNAME - set to "$ConnectionString"
+* PASSWORD - the primary key connection string of your event hubs namespace
+* TOPIC - set to "commander.command"
+* RESPONSE_TOPIC - set to "commander.reponse"
+* UA_SERVER_ENDPOINT - set to "opc.tcp://assembly.seattle.corp.contoso/ua/seattle/" to open the pressure relief valve of the Seattle assembly machine
+* UA_SERVER_METHOD_ID - set to "ns=2;i=435"
+* UA_SERVER_OBJECT_ID - set to "ns=2;i=424"
+* UA_SERVER_APPLICATION_NAME - set to "assembly"
+* UA_SERVER_DNS_NAME - set to "seattle"
 
 ### Replacing the Production Line Simulation with a Real Production Line
 

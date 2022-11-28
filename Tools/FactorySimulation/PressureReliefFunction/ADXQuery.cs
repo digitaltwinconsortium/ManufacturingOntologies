@@ -4,6 +4,7 @@ namespace PressureRelief
     using Confluent.Kafka;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
+    using Newtonsoft.Json;
     using System;
     using System.Net.Http;
     using System.Text;
@@ -11,7 +12,7 @@ namespace PressureRelief
     public class ADXQuery
     {
         [FunctionName("ADXQuery")]
-        public void Run([TimerTrigger("*/30 * * * * *")]TimerInfo myTimer, ILogger log)
+        public void Run([TimerTrigger("*/15 * * * * *")]TimerInfo myTimer, ILogger log)
         {
             HttpClient webClient = new HttpClient();
             IProducer<Null, string> producer = null;
@@ -61,10 +62,14 @@ namespace PressureRelief
                     log.LogWarning("High pressure detected!");
 
                     // call OPC UA method on UA Server via UACommander via Event Hubs
-                    string uaServerEndpoint = Environment.GetEnvironmentVariable("UA_SERVER_ENDPOINT");
-                    string uaServerMethodID = Environment.GetEnvironmentVariable("UA_SERVER_METHOD_ID");
-                    string uaServerObjectID = Environment.GetEnvironmentVariable("UA_SERVER_OBJECT_ID");
-                    string payloadString = "{ \"Endpoint\": \"" + uaServerEndpoint + "\", \"MethodNodeId\": \"" + uaServerMethodID + "\", \"ParentNodeId\": \"" + uaServerObjectID + "\", \"Arguments\": null }";
+                    RequestModel request = new()
+                    {
+                        TimeStamp = DateTime.UtcNow,
+                        CorrelationId = Guid.NewGuid(),
+                        Endpoint = Environment.GetEnvironmentVariable("UA_SERVER_ENDPOINT"),
+                        MethodNodeId = Environment.GetEnvironmentVariable("UA_SERVER_METHOD_ID"),
+                        ParentNodeId = Environment.GetEnvironmentVariable("UA_SERVER_OBJECT_ID")
+                    };
 
                     // create Kafka client
                     var config = new ProducerConfig
@@ -80,7 +85,7 @@ namespace PressureRelief
 
                     var conf = new ConsumerConfig
                     {
-                        GroupId = Environment.GetEnvironmentVariable("CLIENTNAME"),
+                        GroupId = Guid.NewGuid().ToString(),
                         BootstrapServers = Environment.GetEnvironmentVariable("BROKERNAME") + ":9093",
                         AutoOffsetReset = AutoOffsetReset.Earliest,
                         SecurityProtocol = SecurityProtocol.SaslSsl,
@@ -95,22 +100,48 @@ namespace PressureRelief
                     Message<Null, string> message = new()
                     {
                         Headers = new Headers() { { "Content-Type", Encoding.UTF8.GetBytes("application/json") } },
-                        Value = payloadString
+                        Value = JsonConvert.SerializeObject(request)
                     };
                     producer.ProduceAsync(Environment.GetEnvironmentVariable("TOPIC"), message).GetAwaiter().GetResult();
 
-                    log.LogInformation($"Sent command {payloadString} to UA Cloud Commander.");
+                    log.LogInformation($"Sent command {JsonConvert.SerializeObject(request)} to UA Cloud Commander.");
 
-                    // wait for a response for 15 seconds
-                    ConsumeResult<Ignore, byte[]> result = consumer.Consume(15 * 1000);
-                    if (result != null)
+                    // wait for up to 15 seconds for the response
+                    while (true)
                     {
-                        string response = Encoding.UTF8.GetString(result.Message.Value);
-                        log.LogInformation($"Received response {response} from UA Cloud Commander on partition {result.Partition.Value}.");
-                    }
-                    else
-                    {
-                        log.LogError("Timeout waiting for response from UA Cloud Commander");
+                        ConsumeResult<Ignore, byte[]> result = consumer.Consume(15 * 1000);
+                        if (result != null)
+                        {
+                            ResponseModel response = null;
+                            try
+                            {
+                                response = JsonConvert.DeserializeObject<ResponseModel>(Encoding.UTF8.GetString(result.Message.Value));
+                            }
+                            catch (Exception)
+                            {
+                                // ignore message
+                                continue;
+                            }
+
+                            if (response.CorrelationId == request.CorrelationId)
+                            {
+                                if (response.Success)
+                                {
+                                    log.LogInformation("Command successfully sent!");
+                                }
+                                else
+                                {
+                                    log.LogError($"Response received but result is failure: {response.Status}.");
+                                }
+
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            log.LogError("Timeout waiting for response from UA Cloud Commander");
+                            break;
+                        }
                     }
 
                     consumer.Unsubscribe();

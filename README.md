@@ -36,7 +36,7 @@ The simulation makes use of the UA Cloud Twin also available from the Digital Tw
 
 #### Mapping OPC UA Servers to the ISA95 Hierarchy Model
 
-UA Cloud Twin takes the combination of the OPC UA Application URI and the OPC UA Namespace URIs discovered in the OPC UA telemetry stream and creates ISA95 Work Center assets for each one.
+UA Cloud Twin takes the combination of the OPC UA Application URI and the OPC UA Namespace URIs discovered in the OPC UA telemetry stream (specifically, in the OPC UA PubSub metadata messages) and creates ISA95 Work Center assets for each one. UA Cloud Publisher sends the OPC UA PubSub metadata messages to a seperate broker topic to make sure all metadata can be read by UA Cloud Twin before the processing of the telemetry messags starts.
 
 #### Mapping OPC UA PubSub Publishers to the ISA95 Hierarchy Model
 

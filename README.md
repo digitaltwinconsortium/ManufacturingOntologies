@@ -75,6 +75,22 @@ The following OPC UA Node IDs are used in the Station OPC UA Server for telemetr
 * i=418 - actual cycle time
 * i=434 - pressure
 
+### Preparing for the Installation of the Production Line Simulation
+
+The production line simulation runs on an on-prem, single-node Kubernetes cluster, provided by Docker Desktop ontop of a Windows Virtual Machine. The Kubernetes cluster is managed from the cloud via Azure Arc. Azure Arc requires a key pair (public and private) to operate. Create the required key pair via the [Azure Cloud Shell](https://shell.azure.com)'s `ssh-keygen` command:
+
+    ssh-keygen -t rsa -b 4096
+
+Note: The first time you start the Azure Cloud Shell, you will be prompted to setup Azure Storage. Simply click on Create Storage.
+
+Note: By default, the public and private key files are created in the ~/.ssh directory. Running the ssh-keygen command will overwrite any SSH key pair with the same name already existing in the given location.
+
+Then, display the public key and copy everything past `ssh-rsa ` up to and including `==`. You will need it later when deploying the Azure resources:
+
+    more ~/.ssh/id_rsa.pub
+
+Note: If you need to access the keys at a later date, you can simply click on the Azure Cloud Shell icon in the top-right-hand corner of the Azure Portal to open the Azure Chould Shell again.
+
 ### Installation of Production Line Simulation and Cloud Services
 
 Clicking on the button below will **deploy** all required resources (on Microsoft Azure):

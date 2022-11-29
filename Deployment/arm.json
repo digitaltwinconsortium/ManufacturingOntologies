@@ -23,7 +23,7 @@
         "description": "Password for the Virtual Machine and UA Cloud Twin."
       }
     },
-    "publicKeyCertificate": {
+    "arcPublicKey": {
       "type": "string",
       "minLength": 12,
       "metadata": {
@@ -56,7 +56,7 @@
         "type": "SystemAssigned"
       },
       "properties": {
-        "agentPublicKeyCertificate": "[parameters('publicKeyCertificate')]"
+        "agentPublicKeyCertificate": "[parameters('arcPublicKey')]"
       }
     },
     {

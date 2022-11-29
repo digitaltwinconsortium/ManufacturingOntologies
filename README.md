@@ -137,7 +137,7 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 
 #### Onboarding the On-Prem Kubernetes Cluster for Management via Azure Arc in the Cloud
 
-To onboard your on-prem Kubernetes cluster, you first need to install the [Azure CLI](https://aka.ms/installazurecliwindows) on the Windows VM. Once installation complates, open a Command Prompt Window and login to Azure via:
+To onboard your on-prem Kubernetes cluster, you first need to install the [Azure CLI](https://aka.ms/installazurecliwindows) on the Windows VM. Once installation completes, open a Command Prompt Window and login to Azure via:
 
     az login
 

@@ -115,7 +115,7 @@
             "BROKER_PASSWORD": "[listkeys(resourceId('Microsoft.EventHub/namespaces/authorizationRules', concat(parameters('ResourcesName'), '-EventHubs'), 'RootManageSharedAccessKey'), '2015-08-01').primaryConnectionString]",
             "TOPIC": "data",
             "METADATA_TOPIC": "metadata",
-            "ADT_HOSTNAME": "resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('ResourcesName'), '-ADT')).hostName]"
+            "ADT_HOSTNAME": "[reference(concat(parameters('ResourcesName'), '-ADT')).hostName]"
           },
           "type": "config",
           "dependsOn": [

@@ -95,8 +95,7 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Web/serverfarms', concat(parameters('ResourcesName'), '-AppService'))]",
-        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('ResourcesName'), '-EventHubs', '/data'))]",
-        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('ResourcesName'), '-EventHubs', '/metadata'))]",
+        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('ResourcesName'), '-EventHubs'))]",
         "[resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('ResourcesName'), '-ADT'))]"
       ],
       "resources": [
@@ -105,18 +104,18 @@
           "location": "[resourceGroup().location]",
           "name": "appsettings",
           "properties": {
-            "ADMIN_USERNAME": "[parameters('adminUsername')]",
             "ADMIN_PASSWORD": "[parameters('adminPassword')]",
+            "ADMIN_USERNAME": "[parameters('adminUsername')]",
+            "ADT_HOSTNAME": "[reference(concat(parameters('ResourcesName'), '-ADT')).hostName]",
             "AZURE_CLIENT_ID": "[reference(concat(parameters('ResourcesName'), '-Identity')).clientId]",
             "AZURE_TENANT_ID": "[subscription().tenantId]",
-            "CLIENT_NAME": "uacloudtwin.corp.contoso",
             "BROKER_NAME": "[concat(parameters('ResourcesName'), '-EventHubs.servicebus.windows.net')]",
+            "BROKER_PASSWORD": "[listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString]",
             "BROKER_PORT": "9093",
             "BROKER_USERNAME": "$ConnectionString",
-            "BROKER_PASSWORD": "[listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString]",
-            "TOPIC": "data",
+            "CLIENT_NAME": "uacloudtwin.corp.contoso",
             "METADATA_TOPIC": "metadata",
-            "ADT_HOSTNAME": "[reference(concat(parameters('ResourcesName'), '-ADT')).hostName]"
+            "TOPIC": "data"
           },
           "type": "config",
           "dependsOn": [

@@ -22,13 +22,6 @@
       "metadata": {
         "description": "Password for the Virtual Machine and UA Cloud Twin."
       }
-    },
-    "arcPublicKey": {
-      "type": "string",
-      "minLength": 12,
-      "metadata": {
-        "description": "Public Key for on-prem Azure Arc-enabled Kubernetes."
-      }
     }
   },
   "variables": {
@@ -45,18 +38,6 @@
       "properties": {
         "privateEndpointConnections": [],
         "publicNetworkAccess": "Enabled"
-      }
-    },
-    {
-      "type": "Microsoft.Kubernetes/connectedClusters",
-      "apiVersion": "2021-10-01",
-      "name": "[concat(parameters('ResourcesName'), '-Arc')]",
-      "location": "[resourceGroup().location]",
-      "identity": {
-        "type": "SystemAssigned"
-      },
-      "properties": {
-        "agentPublicKeyCertificate": "[parameters('arcPublicKey')]"
       }
     },
     {

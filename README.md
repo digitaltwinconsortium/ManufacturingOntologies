@@ -81,7 +81,7 @@ The production line simulation runs on an on-prem, single-node Kubernetes cluste
 
     ssh-keygen -t rsa -b 4096
 
-Note: The first time you start the Azure Cloud Shell, you will be prompted to setup Azure Storage. Simply click on Create Storage.
+Note: The first time you start the Azure Cloud Shell, you will be prompted to setup Azure Storage. Simply click on Create storage.
 
 Note: By default, the public and private key files are created in the ~/.ssh directory. Running the ssh-keygen command will overwrite any SSH key pair with the same name already existing in the given location.
 

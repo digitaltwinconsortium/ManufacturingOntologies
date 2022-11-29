@@ -27,7 +27,8 @@
   "variables": {
     "addressPrefix": "10.0.0.0/16",
     "subnetPrefix": "10.0.0.0/24",
-    "dataOwnerRoleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'bcd981a7-7f74-457b-83e1-cceb9e632ffe')]"
+    "dataOwnerRoleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'bcd981a7-7f74-457b-83e1-cceb9e632ffe')]",
+    "authRuleResourceId": "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', concat(parameters('ResourcesName'), '-EventHubs'), 'RootManageSharedAccessKey')]"
   },
   "resources": [
     {
@@ -112,7 +113,7 @@
             "BROKER_NAME": "[concat(parameters('ResourcesName'), '-EventHubs.servicebus.windows.net')]",
             "BROKER_PORT": "9093",
             "BROKER_USERNAME": "$ConnectionString",
-            "BROKER_PASSWORD": "[listkeys(resourceId('Microsoft.EventHub/namespaces/authorizationRules', concat(parameters('ResourcesName'), '-EventHubs'), 'RootManageSharedAccessKey'), '2015-08-01').primaryConnectionString]",
+            "BROKER_PASSWORD": "[listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString]",
             "TOPIC": "data",
             "METADATA_TOPIC": "metadata",
             "ADT_HOSTNAME": "[reference(concat(parameters('ResourcesName'), '-ADT')).hostName]"

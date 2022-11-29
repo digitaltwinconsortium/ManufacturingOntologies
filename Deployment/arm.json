@@ -93,7 +93,10 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Web/serverfarms', concat(parameters('ResourcesName'), '-AppService'))]"
+        "[resourceId('Microsoft.Web/serverfarms', concat(parameters('ResourcesName'), '-AppService'))]",
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('ResourcesName'), '-EventHubs', '/data'))]",
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('ResourcesName'), '-EventHubs', '/metadata'))]",
+        "[resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('ResourcesName'), '-ADT'))]"
       ],
       "resources": [
         {
@@ -109,8 +112,10 @@
             "BROKER_NAME": "[concat(parameters('ResourcesName'), '-EventHubs.servicebus.windows.net')]",
             "BROKER_PORT": "9093",
             "BROKER_USERNAME": "$ConnectionString",
+            "BROKER_PASSWORD": "[listkeys(resourceId('Microsoft.EventHub/namespaces/authorizationRules', concat(parameters('ResourcesName'), '-EventHubs'), 'RootManageSharedAccessKey'), '2015-08-01').primaryConnectionString]",
             "TOPIC": "data",
-            "METADATA_TOPIC": "metadata"
+            "METADATA_TOPIC": "metadata",
+            "ADT_HOSTNAME": "resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('ResourcesName'), '-ADT')).hostName]"
           },
           "type": "config",
           "dependsOn": [
@@ -405,11 +410,5 @@
         "principalType": "ServicePrincipal"
       }
     }
-  ],
-  "outputs": {
-    "hostname": {
-      "type": "string",
-      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('ResourcesName'), '-IPAddress'))).dnsSettings.fqdn]"
-    }
-  }
+  ]
 }

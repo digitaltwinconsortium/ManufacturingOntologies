@@ -44,7 +44,7 @@
 - apiVersion: v1
   kind: Service
   metadata:
-    name: uacloudpublisher-service
+    name: ua-cloudpublisher-service
     namespace: ua-cloudpublisher-namespace
   spec:
     type: LoadBalancer

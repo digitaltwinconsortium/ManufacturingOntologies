@@ -149,7 +149,13 @@ Once the command completes, in the Azure Portal, click on the newly created Azur
 
 #### Deploying UA Cloud Publisher on the On-Prem Kubernetes Cluster via Azure Arc and GitOps
 
-TODO
+Prerequisit: The Kubernetes cluster has been onboarded via Azure Arc (see previous paragraph).
+
+We provided a deployment YAML file for UA Cloud Publisher in the Deployment folder of this repo. Open it and replace [yourstorageaccountname] with the name and [key] with the key from the Azure Storage that was deployed in this solution. You can access this information in the Azure Portal in your Azure Storage page under Access keys -> key1 -> Connection string.
+
+Then, open the Azure Arc page in the Azure Portal and select GitOps -> Create -> Flux version 1. In the fly-out, provide names for the configuration and the instance. For namespace, enter `ua-cloudpublisher`. For Operator scope, select Cluster. For Repository URL enter `https://github.com/digitaltwinconsortium/ManufacturingOntologies` and for Respository type, select Public. Finally, click Add.
+
+Now click on Workloads in the Azure Arc page and wait for the UA Cloud Publisher to be deployed on your cluster.
 
 #### Replacing the Production Line Simulation with a Real Production Line
 

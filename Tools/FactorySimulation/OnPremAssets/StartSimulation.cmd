@@ -11,7 +11,7 @@ goto :DockerCheck
 
 :InvalidArgument
 ECHO Argument error:
-ECHO Input parameter must be of the form Endpoint=sb://[eventhubnamespace].servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=[key] [ADTRegion]
+ECHO Input parameter must be of the form Endpoint=sb://[eventhubnamespace].servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=[key]
 EXIT /B 1
 
 :DockerCheck
@@ -30,7 +30,6 @@ Xcopy /E /I /Y .\Config C:\docker\Config
 Echo Configuring Publisher config files...
 SET "connectionstring=%1=%2;%3=%4;%5=%6="
 SET "name=%2"
-SET "region=%7"
 
 C:
 CD "C:\docker\Config\publisher.beijing.corp.contoso\"

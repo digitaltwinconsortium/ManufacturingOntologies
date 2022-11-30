@@ -95,9 +95,7 @@ On the deployed VM, download this repo from [here](https://github.com/digitaltwi
 
     StartSimulation Endpoint=sb://ontologies.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=abcdefgh= eus2
 
-Please note: The StartSimulation script will launch UA Cloud Twin as its last step. Please log in with the credentials you provided during the deployment and click Apply to apply the UA Cloud Twin configuration.
-
-Please note: If you restart Docker Desktop at any time, you will need to stop and then restart the simulation, too!
+Note: If you restart Docker Desktop at any time, you will need to stop and then restart the simulation, too!
 
 ### Next Steps
 

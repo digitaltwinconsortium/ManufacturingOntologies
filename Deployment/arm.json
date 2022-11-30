@@ -106,7 +106,7 @@
           "properties": {
             "ADMIN_PASSWORD": "[parameters('adminPassword')]",
             "ADMIN_USERNAME": "[parameters('adminUsername')]",
-            "ADT_HOSTNAME": "[reference(concat(parameters('ResourcesName'), '-ADT')).hostName]",
+            "ADT_HOSTNAME": "[concat('https://', reference(concat(parameters('ResourcesName'), '-ADT')).hostName)]",
             "AZURE_CLIENT_ID": "[reference(concat(parameters('ResourcesName'), '-Identity')).clientId]",
             "AZURE_TENANT_ID": "[subscription().tenantId]",
             "BROKER_NAME": "[concat(parameters('ResourcesName'), '-EventHubs.servicebus.windows.net')]",

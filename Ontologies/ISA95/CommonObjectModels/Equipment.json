@@ -101,6 +101,15 @@
             "displayName": "Spatial definition",
             "description": "Spatially defines the equipment as a zero-dimensional point, one dimensional line, or two dimensional shape or three dimensional solid.",
             "schema": "dtmi:digitaltwins:isa95:SpatialDefinition;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "implementedBy",
+            "displayName": "Implemented by",
+            "description": "This equipment as role in a process segment is implemented by the physical asset.",
+            "comment": "For Equipment asset mapping",
+            "target": "dtmi:digitaltwins:isa95:PhysicalAsset;1",
+            "maxMultiplicity": 1
         }
     ]
 }

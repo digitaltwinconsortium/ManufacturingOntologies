@@ -1,9 +1,0 @@
-{
-  "@context": "dtmi:dtdl:context;2",
-  "@id": "dtmi:digitaltwins:isa95:WorkUnit;1",
-  "@type": "Interface",
-  "displayName": "Work unit",
-  "description": "A work unit is any element of the equipment hierarchy under a work center. Work units are the lowest form of elements in an equipment hierarchy that are typically scheduled by Level 3 functions.",
-  "comment": "According to ANSI/ISA-95.00.01-2010 (IEC 62264-1 Mod) Enterprise-Control System Integration − Part 1: Models and Terminology - Approved 13 May 2010",
-  "extends": ["dtmi:digitaltwins:isa95:HierarchyScope;1", "dtmi:digitaltwins:isa95:SiteAsset;1"]
-}

@@ -157,7 +157,7 @@ Then, open the Azure Arc page in the Azure Portal and select GitOps -> Create ->
 
 Now click on Workloads in the Azure Arc page and wait for the UA Cloud Publisher to be deployed on your cluster.
 
-In this scenario, Ua Cloud Publisher will store it settings in the cloud in your Azure Storage account. Once deployment completes, open the UA Cloud Publisher UI via https://localhost on your on-premises Windows VM and configure its settings.
+In this scenario, UA Cloud Publisher will store it settings in the cloud in your Azure Storage account. Once deployment completes, open the UA Cloud Publisher UI via https://localhost on your on-premises Windows VM and configure its settings.
 
 #### Replacing the Production Line Simulation with a Real Production Line
 

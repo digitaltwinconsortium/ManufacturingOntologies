@@ -153,6 +153,8 @@ Prerequisit: The Kubernetes cluster has been onboarded via Azure Arc (see previo
 
 We provided a deployment YAML file for UA Cloud Publisher in the Deployment folder of this repo. Clone this GitHub repo, open the YAML file in your cloned repo and replace [yourstorageaccountname] with the name and [key] with the key from the Azure Storage that was deployed in this solution. You can access this information in the Azure Portal in your Azure Storage page under Access keys -> key1 -> Connection string.
 
+In this scenario, Ua Cloud Publisher will store it settings in the cloud in your Azure Storage account. Once deployment completes, open the UA Cloud Publisher UI via https://localhost on your on-premises Windows VM and configure its settings.
+
 Then, open the Azure Arc page in the Azure Portal and select GitOps -> Create -> Flux version 1. In the fly-out, provide names for the configuration and the instance. For namespace, enter `ua-cloudpublisher`. For Operator scope, select Cluster. For Repository URL enter the URL to your cloned repo and for Respository type, select Public. Finally, click Add.
 
 Now click on Workloads in the Azure Arc page and wait for the UA Cloud Publisher to be deployed on your cluster.

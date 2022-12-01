@@ -133,9 +133,9 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 * UA_SERVER_APPLICATION_NAME - set to "assembly"
 * UA_SERVER_DNS_NAME - set to "seattle"
 
-#### Onboarding the On-Prem Kubernetes Cluster for Management via Azure Arc in the Cloud
+#### Onboarding the On-Premises Kubernetes Cluster for Management via Azure Arc in the Cloud
 
-To onboard your on-prem Kubernetes cluster, you first need to install the [Azure CLI](https://aka.ms/installazurecliwindows) on the Windows VM. Once installation completes, open a Command Prompt Window and login to Azure via:
+To onboard your on-premises Kubernetes cluster, you first need to install the [Azure CLI](https://aka.ms/installazurecliwindows) on the Windows VM. Once installation completes, open a Command Prompt Window and login to Azure via:
 
     az login
 
@@ -147,7 +147,7 @@ Then, onboard your cluster via:
 
 Once the command completes, in the Azure Portal, click on the newly created Azure Arc instance and select Configuration. Open a PowerShell window and follow the instructions to create a beaker token to access the configuration. You can display the bearer token by typing echo $TOKEN in PowerShell.
 
-#### Deploying UA Cloud Publisher on the On-Prem Kubernetes Cluster via Azure Arc, GitOps and Flux
+#### Deploying UA Cloud Publisher on the On-Premises Kubernetes Cluster via Azure Arc, GitOps and Flux
 
 Prerequisit: The Kubernetes cluster has been onboarded via Azure Arc (see previous paragraph).
 

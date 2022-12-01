@@ -145,7 +145,7 @@ Then, onboard your cluster via:
 
     az connectedk8s connect -g <yourResourceGroupName> -n <theNameYouWantToGiveYourKubernetesClusterInAzure>
 
-Once the command completes, in the Azure Portal, click on the newly created Azure Arc instance and select Configuration. Open a PowerShell window and follow the instructions to create a beaker token to access the configuration. You can display the bearer token by typing echo $TOKEN in PowerShell.
+Once the command completes, in the Azure Portal, click on the newly created Azure Arc instance and select Configuration. Open a PowerShell window and follow the instructions to create a bearer token to access the configuration. You can display the bearer token by typing echo $TOKEN in PowerShell.
 
 #### Deploying UA Cloud Publisher on the On-Premises Kubernetes Cluster via Azure Arc, GitOps and Flux
 

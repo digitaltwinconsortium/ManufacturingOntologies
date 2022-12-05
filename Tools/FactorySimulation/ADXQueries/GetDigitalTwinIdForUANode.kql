@@ -1,0 +1,10 @@
+.create-or-alter function  GetDigitalTwinIdForUANode(stationName:string,location:string,displayName:string) {
+let dtId = toscalar(adt_dh_ontdemo_ADT_eastus2
+| where TimeStamp between (todatetime(now() - datetime(01:00:00)) .. now())
+| where Key == 'equipmentID'
+| where Value has stationName
+| where Value  has location
+| where Value has displayName
+| project Id);
+print dtId
+}

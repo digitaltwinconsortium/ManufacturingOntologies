@@ -588,6 +588,10 @@ namespace Station.Simulation
             // check the application certificate.
             await application.CheckApplicationInstanceCertificate(false, 0);
 
+            // create OPC UA cert validator
+            application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
+            application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(OPCUAClientCertificateValidationCallback);
+
             // start the server.
             await application.Start(new FactoryStationServer());
 
@@ -602,6 +606,17 @@ namespace Station.Simulation
                 // wait forever if there is no console
                 Thread.Sleep(Timeout.Infinite);
             }
+        }
+
+        private static void OPCUAClientCertificateValidationCallback(CertificateValidator sender, CertificateValidationEventArgs e)
+        {
+#if DEBUG
+            // always trust the OPC UA client certificate ind debug mode
+            if (e.Error.StatusCode == StatusCodes.BadCertificateUntrusted)
+            {
+                e.Accept = true;
+            }
+#endif
         }
     }
 }

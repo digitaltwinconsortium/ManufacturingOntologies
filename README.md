@@ -111,7 +111,7 @@ If you want to add a 3D viewer to the simulation, you can follow the steps to co
 
 #### Calculating OEE
 
-If you want to calculate OEE, add no-code dashboards or make predictions about the production, set up the [Data History](https://learn.microsoft.com/en-us/azure/digital-twins/concepts-data-history) feature in the Azure Digital Twins service to historize your contextualized OPC UA data to Azure Data Explorer deployed in this solution. You can find the wizard to set this up in the Azure Digital Twins service configuration in the Azure portal. 
+If you want to calculate OEE, add no-code dashboards or make predictions about the production, set up the [Data History](https://learn.microsoft.com/en-us/azure/digital-twins/concepts-data-history) feature in the Azure Digital Twins service to historize your contextualized OPC UA data to Azure Data Explorer deployed in this solution. You can find the wizard to set this up in the Azure Digital Twins service configuration in the Azure portal. There are a number of sample queries in the ADXQueries folder in this repo to get you started.
 
 #### Enabling the Digital Feedback Loop with UA Cloud Commander and the Pressure Relief Azure Function
 

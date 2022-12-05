@@ -1,9 +1,8 @@
-opcua_metadata_lkv
-| where Name contains "assembly"
-| where Name contains "seattle"
-| join kind=inner (opcua_telemetry
-    | where Name == "Status"
-    | where Timestamp > _startTime and Timestamp < _endTime
-) on DataSetWriterID
-| extend status = toint(Value)
-| project Timestamp, status
+let k = adt_dh_ontdemo_ADT_eastus2
+| where TimeStamp > _startTime and TimeStamp < _endTime
+| where Id == toscalar(GetDigitalTwinIdForUANode("assembly", "munich", "ProductSerialNumber"));
+k
+| where isnotnull(SourceTimeStamp)
+| join k on $left.TimeStamp == $right.TimeStamp
+| where Key1 == "OPCUADisplayName"
+| project SourceTimeStamp, OPCUANodeValue = Value, OPCUADisplayName = Value1

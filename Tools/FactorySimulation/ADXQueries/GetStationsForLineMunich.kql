@@ -1,5 +1,0 @@
-.create-or-alter function ADTQuery {
-let ADTendpoint = "https://ontologies.api.eus2.digitaltwins.azure.net";
-let ADTquery = "SELECT source.$dtId as tid FROM DIGITALTWINS source JOIN target RELATED source.Parent WHERE target.$dtId = 'MESMunich'";
-evaluate azure_digital_twins_query_request(ADTendpoint, ADTquery)
-}

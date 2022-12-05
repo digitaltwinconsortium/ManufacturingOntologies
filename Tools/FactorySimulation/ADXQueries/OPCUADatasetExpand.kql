@@ -1,8 +1,0 @@
-.create-or-alter function  OPCUADatasetExpand() {
-    opcua_intermediate
-    | mv-apply Payload on (
-        extend key = tostring(bag_keys(Payload)[0])
-        | extend p = Payload[key]
-        | project Name = key, Value = todynamic(p.Value)
-    )
-}

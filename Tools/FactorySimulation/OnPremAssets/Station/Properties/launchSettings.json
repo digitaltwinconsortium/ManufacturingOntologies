@@ -1,12 +1,16 @@
 {
   "profiles": {
     "Station": {
-      "commandName": "Project",
-      "commandLineArgs": "station opc.tcp://station.munich.corp.contoso/ua/munich/ 200 6 yes"
+      "commandName": "Project"
     },
     "Docker": {
       "commandName": "Docker",
-      "commandLineArgs": "station opc.tcp://station.munich.corp.contoso/ua/munich/ 200 6 yes"
+      "environmentVariables": {
+        "StationType": "assembly",
+        "StationURI": "opc.tcp://station.munich.corp.contoso/ua/munich/",
+        "PowerConsumption": "200",
+        "CycleTime": "6"
+      }
     }
   }
 }

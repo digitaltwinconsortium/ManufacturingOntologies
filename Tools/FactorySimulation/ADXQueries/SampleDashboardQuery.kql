@@ -5,4 +5,4 @@ k
 | where isnotnull(SourceTimeStamp)
 | join k on $left.TimeStamp == $right.TimeStamp
 | where Key1 == "OPCUADisplayName"
-| project SourceTimeStamp, OPCUANodeValue = Value, OPCUADisplayName = Value1
+| project SourceTimeStamp, OPCUANodeValue = toint(Value), OPCUADisplayName = Value1

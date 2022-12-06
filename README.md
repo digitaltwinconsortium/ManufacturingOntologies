@@ -119,6 +119,7 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 
 * ADX_INSTANCE_URL - the endpoint of your ADX cluster, e.g. https://ontologies.eastus2.kusto.windows.net/
 * ADX_DB_NAME - the name of your ADX database
+* ADX_TABLE_NAME - the name of your ADX table
 * AAD_TENANT_ID - the GUID of your AAD tenant of your Azure subscription
 * APPLICATION_KEY - the secret you created during pressure relief function app registration
 * APPLICATION_ID - the GUID assigned to the pressure relief function during app registration

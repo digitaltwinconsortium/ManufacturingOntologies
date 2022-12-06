@@ -1,12 +1,12 @@
 let horizon = (_endTime - _startTime) / 2;
-let dt = 1m;
-let k = adt_dh_ontdemo_ADT_eastus2
+let dt = 5m;
+let intermediateTable = adt_dh_ontdemo_ADT_eastus2
 | where TimeStamp between (_startTime .. _endTime)
 | where Id == toscalar(GetDigitalTwinIdForUANode("assembly", "munich", "NumberOfManufacturedProducts"));
-k
+intermediateTable
 | where isnotnull(SourceTimeStamp)
-| join k on $left.TimeStamp == $right.TimeStamp
+| join intermediateTable on $left.TimeStamp == $right.TimeStamp
 | where Key1 == "OPCUADisplayName"
-| order by Timestamp desc
-| make-series actual=avg(toint(Value)) on Timestamp from _startTime to _endTime + horizon step dt
+| order by TimeStamp desc
+| make-series actual=avg(toint(Value)) on TimeStamp from _startTime to _endTime + horizon step dt
 | extend forecast = series_decompose_forecast(actual, toint(horizon/dt))

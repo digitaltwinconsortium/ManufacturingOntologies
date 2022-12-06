@@ -1,8 +1,8 @@
-let k = adt_dh_ontdemo_ADT_eastus2
+let intermediateTable = adt_dh_ontdemo_ADT_eastus2
 | where TimeStamp > _startTime and TimeStamp < _endTime
 | where Id == toscalar(GetDigitalTwinIdForUANode("assembly", "munich", "ProductSerialNumber"));
-k
+intermediateTable
 | where isnotnull(SourceTimeStamp)
-| join k on $left.TimeStamp == $right.TimeStamp
+| join intermediateTable on $left.TimeStamp == $right.TimeStamp
 | where Key1 == "OPCUADisplayName"
 | project SourceTimeStamp, OPCUANodeValue = toint(Value), OPCUADisplayName = Value1

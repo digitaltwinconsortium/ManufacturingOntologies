@@ -156,13 +156,13 @@ Open the Azure Arc page in the Azure Portal and select Workloads -> Add.
 
 Copy the UA Cloud Publisher Flux deployment YAML file contents from [here](https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/uacloudpublisher.yaml) into the YAML editor and replace [yourstorageaccountname] with the name and [key] with the key from the Azure Storage that was deployed in this solution. You can access this information in the Azure Portal in your Azure Storage page under Access keys -> key1 -> Connection string. Finally, click Add.
 
-In this scenario, UA Cloud Publisher will store it settings in the cloud in your Azure Storage account. Once deployment completes, open the UA Cloud Publisher UI via https://localhost on your on-premises Windows VM and configure its settings.
+In this scenario, UA Cloud Publisher will store it settings in the cloud in your Azure Storage account. Once deployment completes, open the UA Cloud Publisher UI via https://localhost on your on-premises Windows VM and configure its settings (see next section below).
 
 #### Replacing the Production Line Simulation with a Real Production Line
 
-Once you are ready to connect your own production line, simply delete the VM through the Azure Portal or, if you are running the simulation on a local PC, call the StopSimulation.cmd script. Then run UA Cloud Publisher on a Docker-enabled edge gateway PC (on Windows, for Linux, remove the "c:" bits) with the following command. The PC needs Internet access (via port 8883) and needs to be able to connect to your OPC UA-enabled machiens in your production line:
+Once you are ready to connect your own production line, simply delete the VM through the Azure Portal or, if you are running the simulation on a local PC, call the StopSimulation.cmd script. Then run UA Cloud Publisher on a Docker-enabled edge gateway PC (on Windows, for Linux, remove the "c:" bits) with the following command. The PC needs Internet access (via port 9093) and needs to be able to connect to your OPC UA-enabled machiens in your production line:
 
-    docker run -itd -v c:/publisher/logs:/app/logs -v c:/publisher/settings:/app/settings -p 80:80 ghcr.io/barnstee/ua-cloudpublisher:main
+    docker run -itd -e USE_KAFKA="1" -v c:/publisher/logs:/app/logs -v c:/publisher/settings:/app/settings -p 80:80 ghcr.io/barnstee/ua-cloudpublisher:main
 
 In this case, UA Cloud Publisher stores its configuration and log files locally on the Edge PC under c:/publisher on Windows or /publisher on Linux.
 

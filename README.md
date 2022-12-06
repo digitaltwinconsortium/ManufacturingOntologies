@@ -148,15 +148,13 @@ Then, onboard your cluster via:
 
 Once the command completes, in the Azure Portal, click on the newly created Azure Arc instance and select Configuration. Open a PowerShell window and follow the instructions to create a bearer token to access the configuration. You can display the bearer token by typing echo $TOKEN in PowerShell.
 
-#### Deploying UA Cloud Publisher on the On-Premises Kubernetes Cluster via Azure Arc, GitOps and Flux
+#### Deploying UA Cloud Publisher on the On-Premises Kubernetes Cluster via Azure Arc and Flux
 
 Prerequisit: The Kubernetes cluster has been onboarded via Azure Arc (see previous paragraph).
 
-We provided a deployment YAML file for UA Cloud Publisher in the Deployment folder of this repo. Clone this GitHub repo, open the YAML file in your cloned repo and replace [yourstorageaccountname] with the name and [key] with the key from the Azure Storage that was deployed in this solution. You can access this information in the Azure Portal in your Azure Storage page under Access keys -> key1 -> Connection string.
+Open the Azure Arc page in the Azure Portal and select Workloads -> Add.
 
-Then, open the Azure Arc page in the Azure Portal and select GitOps -> Create -> Flux version 1. In the fly-out, provide names for the configuration and the instance. For namespace, enter `ua-cloudpublisher`. For Operator scope, select Cluster. For Repository URL enter the URL to your cloned repo and for Respository type, select Public. Finally, click Add.
-
-Now click on Workloads in the Azure Arc page and wait for the UA Cloud Publisher to be deployed on your cluster.
+Copy the UA Cloud Publisher Flux deployment YAML file contents from [here](https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/uacloudpublisher.yaml) into the YAML editor and replace [yourstorageaccountname] with the name and [key] with the key from the Azure Storage that was deployed in this solution. You can access this information in the Azure Portal in your Azure Storage page under Access keys -> key1 -> Connection string. Finally, click Add.
 
 In this scenario, UA Cloud Publisher will store it settings in the cloud in your Azure Storage account. Once deployment completes, open the UA Cloud Publisher UI via https://localhost on your on-premises Windows VM and configure its settings.
 

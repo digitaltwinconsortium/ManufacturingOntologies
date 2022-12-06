@@ -8,16 +8,16 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A2784944-F23E-4528-B46F-4D258835BABA}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\..\Deployment\arm.json = ..\..\..\..\Deployment\arm.json
+		..\..\ADXQueries\AnomalyDetection.kql = ..\..\ADXQueries\AnomalyDetection.kql
 		..\..\ADXQueries\CalculateAvgEnergyConsumption.kql = ..\..\ADXQueries\CalculateAvgEnergyConsumption.kql
 		..\..\ADXQueries\CalculateOEEForStation.kql = ..\..\ADXQueries\CalculateOEEForStation.kql
 		..\..\ADXQueries\CalculateOEEForLine.kql = ..\..\ADXQueries\CalculateOEEForLine.kql
 		..\..\..\..\.github\workflows\docker-publish.yml = ..\..\..\..\.github\workflows\docker-publish.yml
+		..\..\ADXQueries\DashboardQuery.kql = ..\..\ADXQueries\DashboardQuery.kql
 		..\..\ADXQueries\ForecastingProduction.kql = ..\..\ADXQueries\ForecastingProduction.kql
 		..\..\ADXQueries\GetDigitalTwinIdForUANode.kql = ..\..\ADXQueries\GetDigitalTwinIdForUANode.kql
 		..\..\..\..\LICENSE = ..\..\..\..\LICENSE
 		..\..\..\..\README.md = ..\..\..\..\README.md
-		..\..\ADXQueries\SampleAnomalyDetection.kql = ..\..\ADXQueries\SampleAnomalyDetection.kql
-		..\..\ADXQueries\SampleDashboardQuery.kql = ..\..\ADXQueries\SampleDashboardQuery.kql
 		..\StartSimulation.cmd = ..\StartSimulation.cmd
 		..\StopSimulation.cmd = ..\StopSimulation.cmd
 	EndProjectSection

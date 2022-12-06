@@ -1,6 +1,6 @@
 let intermediateTable = adt_dh_ontdemo_ADT_eastus2
 | where TimeStamp > _startTime and TimeStamp < _endTime
-| where Id == toscalar(GetDigitalTwinIdForUANode("assembly", "munich", "ProductSerialNumber"));
+| where Id == toscalar(GetDigitalTwinIdForUANode("assembly", "munich", "Status"));
 intermediateTable
 | where isnotnull(SourceTimeStamp)
 | join intermediateTable on $left.TimeStamp == $right.TimeStamp

@@ -7,9 +7,7 @@ let k = adt_dh_ontdemo_ADT_eastus2
 let averageEnergyConsumption = toscalar(
 k
 | where isnotnull(SourceTimeStamp)
-| join k on $left.TimeStamp == $right.TimeStamp
-| where Key1 == "OPCUADisplayName"
 | extend energy = todouble(Value)
 | summarize avg(energy));
-print averageEnergyConsumption
+averageEnergyConsumption
 }

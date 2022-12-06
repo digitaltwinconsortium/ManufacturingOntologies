@@ -18,29 +18,21 @@ let faultyTimeTable = adt_dh_ontdemo_ADT_eastus2
 let numProdEnd = toscalar(
 numProdTable
 | where isnotnull(SourceTimeStamp)
-| join numProdTable on $left.TimeStamp == $right.TimeStamp
-| where Key1 == "OPCUADisplayName"
 | extend numProd = toint(Value)
 | summarize max(numProd));
 let numProdStart = toscalar(
 numProdTable
 | where isnotnull(SourceTimeStamp)
-| join numProdTable on $left.TimeStamp == $right.TimeStamp
-| where Key1 == "OPCUADisplayName"
 | extend numProd = toint(Value)
 | summarize min(numProd));
 let numScrapEnd = toscalar(
 numScrapTable
 | where isnotnull(SourceTimeStamp)
-| join numScrapTable on $left.TimeStamp == $right.TimeStamp
-| where Key1 == "OPCUADisplayName"
 | extend numDisc = toint(Value)
 | summarize max(numDisc));
 let numScrapStart = toscalar(
 numScrapTable
 | where isnotnull(SourceTimeStamp)
-| join numScrapTable on $left.TimeStamp == $right.TimeStamp
-| where Key1 == "OPCUADisplayName"
 | extend numDisc = toint(Value)
 | summarize min(numDisc));
 let numProdShift = numProdEnd - numProdStart;
@@ -48,15 +40,11 @@ let numScrapShift = numScrapEnd - numScrapStart;
 let actualCycleTime = toscalar(
 cycleTimeTable
 | where isnotnull(SourceTimeStamp)
-| join cycleTimeTable on $left.TimeStamp == $right.TimeStamp
-| where Key1 == "OPCUADisplayName"
 | extend cycleTime = toint(Value)
 | summarize avg(cycleTime));
 let faultyTimeShift = toscalar(
 faultyTimeTable
 | where isnotnull(SourceTimeStamp)
-| join faultyTimeTable on $left.TimeStamp == $right.TimeStamp
-| where Key1 == "OPCUADisplayName"
 | extend faultyTime = toint(Value)
 | summarize sum(faultyTime));
 let availability = todouble(idealRunningTime - faultyTimeShift) / todouble(idealRunningTime);

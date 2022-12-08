@@ -20,6 +20,7 @@ The IEC 63278 Asset Administration Shell is another ontology leveraged by this s
 
 This solution leverages IEC 62541 Open Platform Communications Unified Architecture (OPC UA) for all Operational Technology (OT) data. This standard is described [here](https://opcfoundation.org). 
 
+
 ## Reference Solution Architecture
 
 This repository also contains a reference solution leveraging the ontologies described above with an implementation on Microsoft Azure. Other implementations can be easily added by implementing the open interface IDigitalTwin within the UA Cloud Twin application.
@@ -48,6 +49,7 @@ Here are the data flow steps:
     1. The UA Cloud Twin also automatically updates the state of digital twins based on the data changes in their corresponding OPC UA nodes. 
 1. Updates to digital twins in Azure Digital Twins are automatically historized to an Azure Data Explorer cluster via the data history feature. Data history generates time series data, which can be used for analytics, such as [OEE (Overall Equipment Effectiveness)](https://www.oee.com) calculation and predictive maintenance scenarios.
 
+
 ## UA Cloud Twin
 
 The simulation makes use of the UA Cloud Twin also available from the Digital Twin Consortium [here](https://github.com/digitaltwinconsortium/UA-CloudTwin). It automatically detects OPC UA assets from the OPC UA telemetry messages sent to the cloud and registers ISA95-compatible digital twins in Azure Digital Twins service for you.
@@ -65,6 +67,7 @@ UA Cloud Twin takes the OPC UA Publisher ID and creates ISA95 Area assets for ea
 #### Mapping OPC UA PubSub Datasets to the ISA95 Hierarchy Model
 
 UA Cloud Twin takes each OPC UA Field discovered in the received Dataset metadata and creates an ISA95 Work Unit asset for each.
+
 
 ## Production Line Simulation
 
@@ -99,6 +102,7 @@ The following OPC UA Node IDs are used in the Station OPC UA Server for telemetr
 * i=418 - actual cycle time
 * i=434 - pressure
 
+
 ## Installation of Production Line Simulation and Cloud Services
 
 Clicking on the button below will **deploy** all required resources (on Microsoft Azure):
@@ -120,6 +124,7 @@ Once the deployment is complete, follow these steps to finish configuring the si
 
 <img src="Docs/Kubernetes.png" alt="Kubernetes" width="900" />
 
+
 ## Running the Production Line Simulation
 
 On the deployed VM, download this repo from [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/archive/refs/heads/main.zip) and extract to a directory of your choice. Then navigate to the OnPremAssets directory of the unzipped content and run the **StartSimulation** command from the OnPremAssets folder in a command prompt by supplying the primary key connection string of your Event Hubs namespace. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey":
@@ -135,6 +140,7 @@ You can use [Azure Digital Twins Explorer](https://learn.microsoft.com/en-us/azu
 To access Azure Digital Twins Explorer, first make sure you have the [Azure Digital Twins Data Owner role](how-to-set-up-instance-portal.md#assign-the-role-using-azure-identity-management-iam) on your Azure Digital Twins instance. Then [open the explorer](quickstart-azure-digital-twins-explorer.md#open-instance-in-azure-digital-twins-explorer).
 
 You can also set up [data history](https://learn.microsoft.com/en-us/azure/digital-twins/concepts-data-history) in your Azure Digital Twins instance to historize your contextualized OPC UA data to the Azure Data Explorer that was deployed in this solution. You can navigate to the [Azure Digital Twins service configuration](https://learn.microsoft.com/en-us/azure/digital-twins/how-to-use-data-history?tabs=portal#set-up-data-history-connection) in the Azure portal and follow the wizard to set this up.
+
 
 ## Next Steps
 
@@ -192,6 +198,7 @@ Open the Azure Arc page in the Azure Portal and select Workloads -> Add.
 Copy the UA Cloud Publisher Flux deployment YAML file contents from [here](https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/uacloudpublisher.yaml) into the YAML editor and replace [yourstorageaccountname] with the name and [key] with the key from the Azure Storage that was deployed in this solution. You can access this information in the Azure Portal in your Azure Storage page under Access keys -> key1 -> Connection string. Finally, click Add.
 
 In this scenario, UA Cloud Publisher will store it settings in the cloud in your Azure Storage account. Once deployment completes, open the UA Cloud Publisher UI via https://localhost on your on-premises Windows VM and configure its settings (see next section below).
+
 
 ## Replacing the Production Line Simulation with a Real Production Line
 

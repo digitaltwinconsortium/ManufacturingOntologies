@@ -166,7 +166,7 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 * UA_SERVER_APPLICATION_NAME - set to "assembly"
 * UA_SERVER_DNS_NAME - set to "seattle"
 
-### Onboarding the On-Premises Kubernetes Cluster for Management via Azure Arc in the Cloud
+### Onboarding the Kubernetes Instance for Management via Azure Arc
 
 To onboard your on-premises Kubernetes cluster, you first need to install the [Azure CLI](https://aka.ms/installazurecliwindows) on the Windows VM. Once installation completes, open a Command Prompt Window and login to Azure via:
 

@@ -32,7 +32,7 @@ Here are the components involved in this solution:
 | --- | --- |
 | Industrial Assets | A set of simulated OPC-UA enabled production lines hosted in Docker containers |
 | [UA Cloud Publisher](https://github.com/barnstee/ua-cloudpublisher) | This edge application converts OPC UA Client/Server requests into OPC UA PubSub cloud messages. It's hosted in a Docker container. |
-| [Azure Event Hubs](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-about) | The cloud message broker that receives OPC UA PubSub messages from edge gateways and stores them until they're retrieved by subscribers like the UA Cloud Twin. Separately, it's also used to forward data history events emitted from the ADT instance to the ADX cluster. |
+| [Azure Event Hubs](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-about) | The cloud message broker that receives OPC UA PubSub messages from edge gateways and stores them until they're retrieved by subscribers like the UA Cloud Twin. Separately, it's also used to forward data history events emitted from the Azure Digital Twins instance to the Azure Data Explorer instance. |
 | [UA Cloud Twin](https://github.com/digitaltwinconsortium/UA-CloudTwin) | This cloud application converts OPC UA PubSub cloud messages into digital twin updates. It also creates digital twins automatically by processing the cloud messages. Twins are instantiated from models in ISA95-compatible DTDL ontology. It's hosted in a Docker container. |
 | [Azure Digital Twins](https://learn.microsoft.com/en-us/azure/digital-twins/overview) | The platform that enables the creation of a digital representation of real-world assets, places, business processes, and people. |
 | [Azure Data Explorer](https://learn.microsoft.com/en-us/azure/synapse-analytics/data-explorer/data-explorer-overview) | The time series database and front-end dashboard service for advanced cloud analytics, including built-in anomaly detection and predictions. |
@@ -65,7 +65,7 @@ UA Cloud Twin takes each OPC UA Field discovered in the received Dataset metadat
 
 ## Production Line Simulation
 
-This repository also contains a production line simulation made up of several Stations, leveraging the machine information model described above, as well as a simple Manufacturing Execution System (MES). Both the Stations and the MES are containerized for easy deployment.
+This repository also contains a production line simulation made up of several Stations, leveraging an OPC UA information model, as well as a simple Manufacturing Execution System (MES). Both the Stations and the MES are containerized for easy deployment.
 
 ### Default Simulation Configuration
 
@@ -96,7 +96,7 @@ The following OPC UA Node IDs are used in the Station OPC UA Server for telemetr
 * i=418 - actual cycle time
 * i=434 - pressure
 
-### Installation of Production Line Simulation and Cloud Services
+## Installation of Production Line Simulation and Cloud Services
 
 Clicking on the button below will **deploy** all required resources (on Microsoft Azure):
 
@@ -117,7 +117,7 @@ Once the deployment is complete, follow these steps to finish configuring the si
 
 <img src="Docs/Kubernetes.png" alt="Kubernetes" width="900" />
 
-### Running the Production Line Simulation
+## Running the Production Line Simulation
 
 On the deployed VM, download this repo from [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/archive/refs/heads/main.zip) and extract to a directory of your choice. Then navigate to the OnPremAssets directory of the unzipped content and run the **StartSimulation** command from the OnPremAssets folder in a command prompt by supplying the primary key connection string of your Event Hubs namespace. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey":
 
@@ -126,7 +126,7 @@ On the deployed VM, download this repo from [here](https://github.com/digitaltwi
 >[!NOTE]
 >If you restart Docker Desktop at any time, you'll need to stop and then restart the simulation, too.
 
-### View results
+## View results
 
 You can use [Azure Digital Twins Explorer](https://learn.microsoft.com/en-us/azure/digital-twins/concepts-azure-digital-twins-explorer) to monitor twin property updates and add more relationships to the digital twins that are created. For example, you might want to add *Next* and *Previous* relationships between machines on each production line to add more context to your solution.
 

@@ -125,7 +125,7 @@ On the deployed VM, download this repo from [here](https://github.com/digitaltwi
 
 :exclamation: If you restart Docker Desktop at any time, you'll need to stop and then restart the simulation, too!
 
-## View results
+## View Results
 
 You can use [Azure Digital Twins Explorer](https://learn.microsoft.com/en-us/azure/digital-twins/concepts-azure-digital-twins-explorer) to monitor twin property updates and add more relationships to the digital twins that are created. For example, you might want to add *Next* and *Previous* relationships between machines on each production line to add more context to your solution.
 
@@ -143,7 +143,7 @@ If you want to add a 3D viewer to the simulation, you can follow the steps to co
 
 ### Condition Monitoring, Calculating OEE, Detecting Anomalies and Making Predictions
 
-You can also visit the [Azure Data Explorer documentation]https://learn.microsoft.com/en-us/azure/synapse-analytics/data-explorer/data-explorer-overview) to learn how to create no-code dashboards for condition monitoring, yield or maintenance predictions, or anomaly detection. There are a number of sample queries in the ADXQueries folder in this repo to get you started.
+You can also visit the [Azure Data Explorer documentation](https://learn.microsoft.com/en-us/azure/synapse-analytics/data-explorer/data-explorer-overview) to learn how to create no-code dashboards for condition monitoring, yield or maintenance predictions, or anomaly detection. There are a number of sample queries in the ADXQueries folder in this repo to get you started.
 
 ### Enabling the Digital Feedback Loop with UA Cloud Commander and the Pressure Relief Azure Function
 

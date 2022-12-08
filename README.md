@@ -123,7 +123,7 @@ On the deployed VM, download this repo from [here](https://github.com/digitaltwi
 
     StartSimulation Endpoint=sb://ontologies.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=abcdefgh=
 
-    NOTE: If you restart Docker Desktop at any time, you'll need to stop and then restart the simulation, too!
+==NOTE: If you restart Docker Desktop at any time, you'll need to stop and then restart the simulation, too!==
 
 ## View results
 

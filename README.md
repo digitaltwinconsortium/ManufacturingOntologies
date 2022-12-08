@@ -4,21 +4,21 @@
 
 An ontology defines the language used to describe a system. In the manufacturing domain, these systems can represent a factory or plant but also enterprise applications or supply chains. There are several established ontologies in the manufacturing domain. Most of them have long been standardized. In this repository, we have focused on two of these ontologies, namely ISA95 to describe a factory ontology and IEC 63278 Asset Administration Shell to describe a manufacturing supply chain. Furthermore, we have included a factory simulation and an end-to-end solution architecture for you to try out the ontologies, leveraging IEC 62541 OPC UA and the Microsoft Azure Cloud.
 
-## Digital Twin Definition Language
+### Digital Twin Definition Language
 
 The ontologies defined in this repository are described by leveraging the Digital Twin Definition Language (DTDL), which is specified [here](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md).
 
-## International Society of Automation 95 (ISA95)
+### International Society of Automation 95 (ISA95)
 
-The ISA95 standard is described [here](https://en.wikipedia.org/wiki/ANSI/ISA-95).
+ISA95 is one of the ontologies leveraged by this solution. It is a standard and described [here](https://en.wikipedia.org/wiki/ANSI/ISA-95).
 
-## IEC 63278 Asset Administration Shell (AAS)
+### IEC 63278 Asset Administration Shell (AAS)
 
-The IEC 63278 Asset Administration Shell is described [here](https://www.plattform-i40.de/IP/Redaktion/EN/Standardartikel/specification-administrationshell.html).
+The IEC 63278 Asset Administration Shell is another ontology leveraged by this solution. This standard is described [here](https://www.plattform-i40.de/IP/Redaktion/EN/Standardartikel/specification-administrationshell.html).
 
-## IEC 62541 Open Platform Communications Unified Architecture (OPC UA)
+### IEC 62541 Open Platform Communications Unified Architecture (OPC UA)
 
-IEC 62541 Open Platform Communications Unified Architecture (OPC UA) is described [here](https://opcfoundation.org). 
+This solution leverages IEC 62541 Open Platform Communications Unified Architecture (OPC UA) for all Operational Technology (OT) data. This standard is described [here](https://opcfoundation.org). 
 
 ## Reference Solution Architecture
 

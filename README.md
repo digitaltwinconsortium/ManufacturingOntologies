@@ -20,15 +20,32 @@ The IEC 63278 Asset Administration Shell is described [here](https://www.plattfo
 
 IEC 62541 Open Platform Communications Unified Architecture (OPC UA) is described [here](https://opcfoundation.org). 
 
-## Overall Solution Architecture
+## Reference Solution Architecture
+
+This repository also contains a reference solution leveraging the ontologies described above with an implementation on Microsoft Azure. Other implementations can be easily added by implementing the open interface IDigitalTwin within the UA Cloud Twin application.
 
 <img src="Docs/architecture.png" alt="architecture" width="900" />
 
-## Production Line Simulation
+Here are the components involved in this solution:
 
-This repository also contains a production line simulation made up of several Stations, leveraging the machine information model described above, as well as a simple Manufacturing Execution System (MES). Both the Stations and the MES are containerized for easy deployment.
+| Component | Description |
+| --- | --- |
+| Industrial Assets | A set of simulated OPC-UA enabled production lines hosted in Docker containers |
+| [UA Cloud Publisher](https://github.com/barnstee/ua-cloudpublisher) | This edge application converts OPC UA Client/Server requests into OPC UA PubSub cloud messages. It's hosted in a Docker container. |
+| [Azure Event Hubs](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-about) | The cloud message broker that receives OPC UA PubSub messages from edge gateways and stores them until they're retrieved by subscribers like the UA Cloud Twin. Separately, it's also used to forward data history events emitted from the ADT instance to the ADX cluster. |
+| [UA Cloud Twin](https://github.com/digitaltwinconsortium/UA-CloudTwin) | This cloud application converts OPC UA PubSub cloud messages into digital twin updates. It also creates digital twins automatically by processing the cloud messages. Twins are instantiated from models in ISA95-compatible DTDL ontology. It's hosted in a Docker container. |
+| [Azure Digital Twins](https://learn.microsoft.com/en-us/azure/digital-twins/overview) | The platform that enables the creation of a digital representation of real-world assets, places, business processes, and people. |
+| [Azure Data Explorer](https://learn.microsoft.com/en-us/azure/synapse-analytics/data-explorer/data-explorer-overview) | The time series database and front-end dashboard service for advanced cloud analytics, including built-in anomaly detection and predictions. |
 
-### UA Cloud Twin
+Here are the data flow steps:
+
+1. The UA Cloud Publisher reads OPC UA data from each simulated factory, and forwards it via OPC UA PubSub to Azure Event Hubs. 
+1. The UA Cloud Twin reads and processes the OPC UA data from Azure Event Hubs, and forwards it to an Azure Digital Twins instance. 
+    1. The UA Cloud Twin also automatically creates digital twins in Azure Digital Twins in response, mapping each OPC UA element (publishers, servers, namespaces, and nodes) to a separate digital twin.
+    1. The UA Cloud Twin also automatically updates the state of digital twins based on the data changes in their corresponding OPC UA nodes. 
+1. Updates to digital twins in Azure Digital Twins are automatically historized to an Azure Data Explorer cluster via the data history feature. Data history generates time series data, which can be used for analytics, such as [OEE (Overall Equipment Effectiveness)](https://www.oee.com) calculation and predictive maintenance scenarios.
+
+## UA Cloud Twin
 
 The simulation makes use of the UA Cloud Twin also available from the Digital Twin Consortium [here](https://github.com/digitaltwinconsortium/UA-CloudTwin). It automatically detects OPC UA assets from the OPC UA telemetry messages sent to the cloud and registers ISA95-compatible digital twins in Azure Digital Twins service for you.
 
@@ -45,6 +62,10 @@ UA Cloud Twin takes the OPC UA Publisher ID and creates ISA95 Area assets for ea
 #### Mapping OPC UA PubSub Datasets to the ISA95 Hierarchy Model
 
 UA Cloud Twin takes each OPC UA Field discovered in the received Dataset metadata and creates an ISA95 Work Unit asset for each.
+
+## Production Line Simulation
+
+This repository also contains a production line simulation made up of several Stations, leveraging the machine information model described above, as well as a simple Manufacturing Execution System (MES). Both the Stations and the MES are containerized for easy deployment.
 
 ### Default Simulation Configuration
 
@@ -85,7 +106,14 @@ You can also **visualize** the resources that will get deployed by clicking the 
 
 <a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fdigitaltwinconsortium%2FManufacturingOntologies%2Fmain%2FDeployment%2Farm.json" data-linktype="external"><img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true" alt="Visualize" data-linktype="external"></a>
 
-Once the deployment is complete, log in to the deployed Windows VM via Remote Desktop (Connect -> Download RDP file in the Azure Portal), using the credentials you provided during deployment and download and **install Docker Desktop** from [here](https://www.docker.com/products/docker-desktop), including the Windows Subsystem for Linux (WSL) integration. After installation and a required system restart, accept the license terms and install the WSL2 Linux kernel by following the instructions. Then restart one more time, verify that Docker Desktop is running in the Windows System Tray and enable Kubernetes under Settings -> Kubernetes -> Enable Kubernetes -> Apply & restart.
+Once the deployment is complete, follow these steps to finish configuring the simulation.
+
+1. Connect to the deployed Windows VM with an RDP (remote desktop) connection. You can download the RDP file in the [Azure portal](https://portal.azure.com) page for the VM, under the **Connect** options. Sign in using the credentials you provided during deployment.
+1. Inside the VM, navigate in a browser to the [Docker Desktop page](https://www.docker.com/products/docker-desktop). Download and install the Docker Desktop, including the Windows Subsystem for Linux (WSL) integration. 
+1. After installation, the VM will need to restart. Log back in after the restart. 
+1. Follow the instructions in the VM to accept the Docker Desktop license terms and install the WSL Linux kernel. 
+1. Restart the VM one more time and log back in after the restart.
+1. In the VM, verify that Docker Desktop is running in the Windows System Tray. Enable Kubernetes under **Settings**, **Kubernetes**, **Enable Kubernetes**, and **Apply & restart**.
 
 <img src="Docs/Kubernetes.png" alt="Kubernetes" width="900" />
 
@@ -95,25 +123,30 @@ On the deployed VM, download this repo from [here](https://github.com/digitaltwi
 
     StartSimulation Endpoint=sb://ontologies.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=abcdefgh=
 
-Note: If you restart Docker Desktop at any time, you will need to stop and then restart the simulation, too!
+>[!NOTE]
+>If you restart Docker Desktop at any time, you'll need to stop and then restart the simulation, too.
 
-### Next Steps
+### View results
 
-#### Using Azure Digital Twins Explorer
+You can use [Azure Digital Twins Explorer](https://learn.microsoft.com/en-us/azure/digital-twins/concepts-azure-digital-twins-explorer) to monitor twin property updates and add more relationships to the digital twins that are created. For example, you might want to add *Next* and *Previous* relationships between machines on each production line to add more context to your solution.
 
-If you want to view the digital twins graph automatically created in the Azure Digital Twins service, assign yourself the Azure Digital Twins Data Owner role in the Azure Portal and open the Azure Digital Twins Explorer directly from the Azure Digital Twins overview page.
+To access Azure Digital Twins Explorer, first make sure you have the [Azure Digital Twins Data Owner role](how-to-set-up-instance-portal.md#assign-the-role-using-azure-identity-management-iam) on your Azure Digital Twins instance. Then [open the explorer](quickstart-azure-digital-twins-explorer.md#open-instance-in-azure-digital-twins-explorer).
 
-#### Using 3D Scenes Studio
+You can also set up [data history](https://learn.microsoft.com/en-us/azure/digital-twins/concepts-data-history) in your Azure Digital Twins instance to historize your contextualized OPC UA data to the Azure Data Explorer that was deployed in this solution. You can navigate to the [Azure Digital Twins service configuration](https://learn.microsoft.com/en-us/azure/digital-twins/how-to-use-data-history?tabs=portal#set-up-data-history-connection) in the Azure portal and follow the wizard to set this up.
+
+## Next Steps
+
+### Using 3D Scenes Studio
 
 If you want to add a 3D viewer to the simulation, you can follow the steps to configure the 3D Scenes Studio outlined [here](https://learn.microsoft.com/en-us/azure/digital-twins/how-to-use-3d-scenes-studio) and map the 3D robot model from [here](https://cardboardresources.blob.core.windows.net/public/RobotArms.glb) to the digital twins automatically generated by the UA Cloud Twin:
 
 <img src="Docs/3dviewer.png" alt="3dviewer" width="900" />
 
-#### Calculating OEE
+### Condition Monitoring, Calculating OEE, Detecting Anomalies and Making Predictions
 
-If you want to calculate OEE, add no-code dashboards or make predictions about the production, set up the [Data History](https://learn.microsoft.com/en-us/azure/digital-twins/concepts-data-history) feature in the Azure Digital Twins service to historize your contextualized OPC UA data to Azure Data Explorer deployed in this solution. You can find the wizard to set this up in the Azure Digital Twins service configuration in the Azure portal. There are a number of sample queries in the ADXQueries folder in this repo to get you started.
+You can also visit the [Azure Data Explorer documentation]https://learn.microsoft.com/en-us/azure/synapse-analytics/data-explorer/data-explorer-overview) to learn how to create no-code dashboards for condition monitoring, yield or maintenance predictions, or anomaly detection. There are a number of sample queries in the ADXQueries folder in this repo to get you started.
 
-#### Enabling the Digital Feedback Loop with UA Cloud Commander and the Pressure Relief Azure Function
+### Enabling the Digital Feedback Loop with UA Cloud Commander and the Pressure Relief Azure Function
 
 If you want to test a "digital feedback loop", i.e. triggering a command on one of the OPC UA servers in the simulation from the cloud, based on a time-series reaching a certain threshold (the simulated pressure), then configure and run the StartUACloudCommander.bat file by providing the two environment variables (ENTER_EVENT_HUBS_HOSTNAME_HERE in the form "yourname-eventhubs.servicebus.windows.net" and ENTER_EVENT_HUBS_CONNECTION_STRING_HERE in the form "Endpoint=sb://yourname-eventhubs.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=abcdefgh=") in the batch file and deploy the PressureRelief Azure Function in your Azure subscription and create an application registration for your ADX instance as described [here](https://docs.microsoft.com/en-us/azure/data-explorer/provision-azure-ad-app). You also need to define the following environment variables in the Azure portal for the Function:
 
@@ -134,7 +167,7 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 * UA_SERVER_APPLICATION_NAME - set to "assembly"
 * UA_SERVER_DNS_NAME - set to "seattle"
 
-#### Onboarding the On-Premises Kubernetes Cluster for Management via Azure Arc in the Cloud
+### Onboarding the On-Premises Kubernetes Cluster for Management via Azure Arc in the Cloud
 
 To onboard your on-premises Kubernetes cluster, you first need to install the [Azure CLI](https://aka.ms/installazurecliwindows) on the Windows VM. Once installation completes, open a Command Prompt Window and login to Azure via:
 
@@ -148,7 +181,7 @@ Then, onboard your cluster via:
 
 Once the command completes, in the Azure Portal, click on the newly created Azure Arc instance and select Configuration. Open a PowerShell window and follow the instructions to create a bearer token to access the configuration. You can display the bearer token by typing echo $TOKEN in PowerShell.
 
-#### Deploying UA Cloud Publisher on the On-Premises Kubernetes Cluster via Azure Arc and Flux
+### Deploying UA Cloud Publisher on the On-Premises Kubernetes Cluster via Azure Arc and Flux
 
 Prerequisit: The Kubernetes cluster has been onboarded via Azure Arc (see previous paragraph).
 
@@ -158,7 +191,7 @@ Copy the UA Cloud Publisher Flux deployment YAML file contents from [here](https
 
 In this scenario, UA Cloud Publisher will store it settings in the cloud in your Azure Storage account. Once deployment completes, open the UA Cloud Publisher UI via https://localhost on your on-premises Windows VM and configure its settings (see next section below).
 
-#### Replacing the Production Line Simulation with a Real Production Line
+## Replacing the Production Line Simulation with a Real Production Line
 
 Once you are ready to connect your own production line, simply delete the VM through the Azure Portal or, if you are running the simulation on a local PC, call the StopSimulation.cmd script. Then run UA Cloud Publisher on a Docker-enabled edge gateway PC (on Windows, for Linux, remove the "c:" bits) with the following command. The PC needs Internet access (via port 9093) and needs to be able to connect to your OPC UA-enabled machiens in your production line:
 

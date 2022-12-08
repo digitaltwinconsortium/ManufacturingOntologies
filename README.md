@@ -180,7 +180,7 @@ Then, onboard your cluster via:
 
 Once the command completes, in the Azure Portal, click on the newly created Azure Arc instance and select Configuration. Open a PowerShell window and follow the instructions to create a bearer token to access the configuration. You can display the bearer token by typing echo $TOKEN in PowerShell.
 
-### Deploying UA Cloud Publisher on the On-Premises Kubernetes Cluster via Azure Arc and Flux
+### Deploying UA Cloud Publisher on Kubernetes via Azure Arc and Flux
 
 Prerequisit: The Kubernetes cluster has been onboarded via Azure Arc (see previous paragraph).
 
@@ -224,9 +224,9 @@ Then, open a browser on the Edge PC and navigate to http://localhost. You are no
     ReversiblePubSubEncoding: false  
     AutoLoadPersistedNodes: true  
 
-Next, we will configure the OPC UA data nodes from your machines (or connectivity adapter software). To do so, select the OPC UA Server Connect menu item, enter the OPC UA server IP address and port and click Connect. You can now browse the OPC UA Server you want to send telemetry data from. If you have found the OPC UA node you want, right click it and select publish.
+Next, configure the OPC UA data nodes from your machines (or connectivity adapter software). To do so, select the OPC UA Server Connect menu item, enter the OPC UA server IP address and port and click Connect. You can now browse the OPC UA Server you want to send telemetry data from. If you have found the OPC UA node you want, right click it and select publish.
 
-That's it! You can check what is currently being published by selecting the Publishes Nodes menu item. You can also see diagnostics information from UA Cloud Publisher on the Diagnostics menu item.
+That's it! You can check what is currently being published by selecting the Publishes Nodes tab. You can also see diagnostics information from UA Cloud Publisher on the Diagnostics tab.
 
 ## License
 

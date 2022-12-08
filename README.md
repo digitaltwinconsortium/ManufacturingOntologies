@@ -23,7 +23,7 @@ This solution leverages IEC 62541 Open Platform Communications Unified Architect
 
 ## Reference Solution Architecture
 
-This repository also contains a reference solution leveraging the ontologies described above with an implementation on Microsoft Azure. Other implementations can be easily added by implementing the open interface IDigitalTwin within the UA Cloud Twin application.
+This repository contains a reference solution leveraging the ontologies described above with an implementation on Microsoft Azure. Other implementations can be easily added by implementing the open interface IDigitalTwin within the UA Cloud Twin application.
 
 <img src="Docs/architecture.png" alt="architecture" width="900" />
 
@@ -71,7 +71,7 @@ UA Cloud Twin takes each OPC UA Field discovered in the received Dataset metadat
 
 ## Production Line Simulation
 
-This repository also contains a production line simulation made up of several Stations, leveraging an OPC UA information model, as well as a simple Manufacturing Execution System (MES). Both the Stations and the MES are containerized for easy deployment.
+The solution leverages a production line simulation made up of several Stations, leveraging an OPC UA information model, as well as a simple Manufacturing Execution System (MES). Both the Stations and the MES are containerized for easy deployment.
 
 ### Default Simulation Configuration
 

@@ -1,0 +1,46 @@
+{
+    "SchemaVersion": "1.1",
+    "Version": "1.0",
+    "DeployOptions": {
+        "ControlPlane": false,
+        "Headless": false,
+        "JoinCluster": false,
+        "NetworkPlugin": "flannel",
+        "SingleMachineCluster": true,
+        "TimeoutSeconds": 900,
+        "NodeType": "Linux",
+        "ServerTLSBootstrap": true
+    },
+    "EndUser": {
+        "AcceptEula": false,
+        "AcceptOptionalTelemetry": false
+    },
+    "LinuxVm": {
+        "CpuCount": 4,
+        "MemoryInMB": 4096,
+        "DataSizeinGB": 20,
+        "Ip4Address": "192.168.1.171"
+    },
+    "Network": {
+        "VSwitch": {
+            "Name": "",
+            "Type": "",
+            "AdapterName": ""
+        },
+        "ControlPlaneEndpointIp": "192.168.1.191",
+        "Ip4GatewayAddress": "192.168.1.1",
+        "Ip4PrefixLength": 24,
+        "ServiceIPRangeSize": 0,
+        "ServiceIPRangeStart": "192.168.1.151",
+        "ServiceIPRangeEnd": "192.168.1.170",
+        "DnsServers": [
+            "192.168.1.1"
+        ],
+        "InternetDisabled": false,
+        "Proxy": {
+            "Http": "",
+            "Https": "",
+            "No": ""
+        }
+    }
+}

@@ -1,0 +1,97 @@
+{
+    "$id": "https://microsoft.com/aide-userconfig.schema.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "AKS edge Remote Deployment Configuration",
+    "type": "object",
+    "properties": {
+        "SchemaVersion": {
+            "type": "string",
+            "default": "1.0",
+            "description": "Version of the schema/format of the json"
+        },
+        "Version": {
+            "type": "string",
+            "default": "1.0",
+            "description": "Version of the json instance"
+        },
+        "AksEdgeProduct": {
+            "enum": [
+                "AKS Edge Essentials - K8s (Public Preview)",
+                "AKS Edge Essentials - K3s (Public Preview)"
+            ],
+            "description": "Product name"
+        },
+        "AksEdgeProductUrl": {
+            "type": "string",
+            "description": "Product URL for download"
+        },
+        "Azure": {
+            "type": "object",
+            "properties": {
+                "ClusterName": {
+                    "type": "string",
+                    "description": "Cluster name to be used when connecting to Azure Arc-enabled Kubernetes"
+                },
+                "Location": {
+                    "type": "string",
+                    "description": "Azure Location for creating the resource group"
+                },
+                "ResourceGroupName": {
+                    "type": "string",
+                    "description": "Resource group name to be used for Azure Arc-enabled Server/Kubernetes"
+                },
+                "SubscriptionId": {
+                    "type": "GUID",
+                    "description": "SubscriptionId to be used for Azure Arc-enabled Server/Kubernetes"
+                },
+                "TenantId": {
+                    "type": "GUID",
+                    "description": "TenantId to be used for Azure Arc-enabled Server/Kubernetes"
+                },
+                "SubscriptionName": {
+                    "type": "string",
+                    "description": "Subscription Name to be used for creating serviceprincipal"
+                },
+                "ServicePrincipalName": {
+                    "type": "string",
+                    "description": "ServicePrincipalName to be used for creating service principal to onboard Arc-enabled Server/Kubernetes"
+                },
+                "Auth": {
+                    "type": "object",
+                    "propertires": {
+                        "ServicePrincipalId": {
+                            "type": "string",
+                            "description": "ServicePrincipalId for ServicePrincipalName to onboard Arc-enabled Server/Kubernetes"
+                        },
+                        "Password": {
+                            "type": "string",
+                            "description": "Password corresponding to ServicePrincipalId to onboard Arc-enabled Server/Kubernetes"
+                        }
+                    }
+                }
+            }
+        },
+        "InstallOptions": {
+            "type": "object",
+            "properties": {
+                "InstallPath": {
+                    "type": "string",
+                    "description": "Path to install AksEdge software"
+                },
+                "VhdxPath": {
+                    "type": "string",
+                    "description": "Path to create/store AksEdge VM Vhdx files"
+                }
+            }
+        },
+        "AksEdgeConfigFile": {
+            "type": "string",
+            "description": "file path for the AKS Edge Deployment Configuration. If AksEdgeConfig object is defined, it supercedes the specification."
+        },
+        "AksEdgeConfig": {
+            "type": "object",
+            "$ref": "file:aksedge-dcschema.json",
+            "description": "Embedded AKS Edge Deployment Configuration Object."
+        }
+    }
+}

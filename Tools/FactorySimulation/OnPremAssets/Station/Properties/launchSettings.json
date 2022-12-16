@@ -9,7 +9,9 @@
         "StationType": "assembly",
         "StationURI": "opc.tcp://station.munich.corp.contoso/ua/munich/",
         "PowerConsumption": "200",
-        "CycleTime": "6"
+        "CycleTime": "6",
+        "STORAGE_CONTAINER_NAME": "ontologies",
+        "STORAGE_CONNECTION_STRING": "DefaultEndpointsProtocol=https;AccountName=ontologies;AccountKey=abcdef=;EndpointSuffix=core.windows.net"
       }
     }
   }

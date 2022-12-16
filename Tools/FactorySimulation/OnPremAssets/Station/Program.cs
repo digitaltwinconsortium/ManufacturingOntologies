@@ -57,6 +57,8 @@ namespace Station.Simulation
 
         private static Timer m_timer = null;
 
+        private static AzureFileStorage _storage = new AzureFileStorage();
+
         public static double PowerConsumption { get; set; }
 
         public static ulong CycleTime { get; set; }
@@ -95,6 +97,8 @@ namespace Station.Simulation
                     throw new ArgumentException("You must specify the ProductionLineName environment variable!");
                 }
 
+                LoadCertFromCloud();
+
                 ApplicationInstance.MessageDlg = new ApplicationMessageDlg();
                 ApplicationInstance application = new ApplicationInstance();
                 application.ApplicationName = "Manufacturing Execution System";
@@ -110,7 +114,15 @@ namespace Station.Simulation
                 ApplicationConfiguration appConfiguration = application.LoadApplicationConfiguration(false).Result;
 
                 // check the application certificate
-                application.CheckApplicationInstanceCertificate(false, 0).Wait();
+                bool certOK = application.CheckApplicationInstanceCertificate(false, 0).GetAwaiter().GetResult();
+                if (!certOK)
+                {
+                    throw new Exception("Application instance certificate invalid!");
+                }
+                else
+                {
+                    StoreCertInCloud();
+                }
 
                 // replace the production line name in the list of endpoints to connect to.
                 string endpointsFilePath = Path.Combine(Directory.GetCurrentDirectory(), application.ConfigSectionName + ".Endpoints.xml");
@@ -152,7 +164,7 @@ namespace Station.Simulation
 
                     if (DateTime.UtcNow > retryTimeout)
                     {
-                        throw new Exception(String.Format("Failed to connect to assembly line for {0} seconds!", c_connectTimeout / 1000));
+                        throw new Exception(string.Format("Failed to connect to assembly line for {0} seconds!", c_connectTimeout / 1000));
                     }
                 }
                 while (!(m_sessionAssembly.SessionConnected && m_sessionTest.SessionConnected && m_sessionPackaging.SessionConnected));
@@ -196,6 +208,75 @@ namespace Station.Simulation
             catch (Exception ex)
             {
                 Console.WriteLine("Critical Exception: {0}, MES exiting!", ex.Message);
+            }
+        }
+
+        private static void StoreCertInCloud()
+        {
+            // store app cert
+            foreach (string filePath in Directory.EnumerateFiles(Path.Combine(Directory.GetCurrentDirectory(), "pki", "own", "certs"), "*.der"))
+            {
+                _storage.StoreFileAsync(filePath, File.ReadAllBytesAsync(filePath).GetAwaiter().GetResult()).GetAwaiter().GetResult();
+            }
+
+            // store private key
+            foreach (string filePath in Directory.EnumerateFiles(Path.Combine(Directory.GetCurrentDirectory(), "pki", "own", "private"), "*.pfx"))
+            {
+                _storage.StoreFileAsync(filePath, File.ReadAllBytesAsync(filePath).GetAwaiter().GetResult()).GetAwaiter().GetResult();
+            }
+        }
+
+        private static void LoadCertFromCloud()
+        {
+            try
+            {
+                // load app cert from storage
+                string certFilePath = _storage.FindFileAsync(Path.Combine(Directory.GetCurrentDirectory(), "pki", "own", "certs"), ".der").GetAwaiter().GetResult();
+                byte[] certFile = _storage.LoadFileAsync(certFilePath).GetAwaiter().GetResult();
+                if (certFile == null)
+                {
+                    Console.WriteLine("Cloud not load cert file, creating a new one. This means the new cert needs to be trusted by all OPC UA servers we connect to!");
+                }
+                else
+                {
+                    if (!Path.IsPathRooted(certFilePath))
+                    {
+                        certFilePath = Path.DirectorySeparatorChar.ToString() + certFilePath;
+                    }
+
+                    if (!Directory.Exists(Path.GetDirectoryName(certFilePath)))
+                    {
+                        Directory.CreateDirectory(Path.GetDirectoryName(certFilePath));
+                    }
+
+                    File.WriteAllBytes(certFilePath, certFile);
+                }
+
+                // load app private key from storage
+                string keyFilePath = _storage.FindFileAsync(Path.Combine(Directory.GetCurrentDirectory(), "pki", "own", "private"), ".pfx").GetAwaiter().GetResult();
+                byte[] keyFile = _storage.LoadFileAsync(keyFilePath).GetAwaiter().GetResult();
+                if (keyFile == null)
+                {
+                   Console.WriteLine("Cloud not load key file, creating a new one. This means the new cert generated from the key needs to be trusted by all OPC UA servers we connect to!");
+                }
+                else
+                {
+                    if (!Path.IsPathRooted(keyFilePath))
+                    {
+                        keyFilePath = Path.DirectorySeparatorChar.ToString() + keyFilePath;
+                    }
+
+                    if (!Directory.Exists(Path.GetDirectoryName(keyFilePath)))
+                    {
+                        Directory.CreateDirectory(Path.GetDirectoryName(keyFilePath));
+                    }
+
+                    File.WriteAllBytes(keyFilePath, keyFile);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Cloud not load cert or private key files, creating a new ones. This means the new cert needs to be trusted by all OPC UA servers we connect to!: " + ex.Message);
             }
         }
 
@@ -544,6 +625,8 @@ namespace Station.Simulation
                 throw new ArgumentException("You must specify the CycleTime environment variable!");
             }
 
+            LoadCertFromCloud();
+
             ApplicationInstance.MessageDlg = new ApplicationMessageDlg();
             ApplicationInstance application = new ApplicationInstance();
 
@@ -585,8 +668,20 @@ namespace Station.Simulation
             Console.WriteLine("Power consumption: " + PowerConsumption.ToString() + "kW");
             Console.WriteLine("Cycle time: " + CycleTime.ToString() + "s");
 
-            // check the application certificate.
-            await application.CheckApplicationInstanceCertificate(false, 0);
+            // load the application configuration
+            ApplicationConfiguration appConfiguration = application.LoadApplicationConfiguration(false).Result;
+
+            // check the application certificate
+            bool certOK = await application.CheckApplicationInstanceCertificate(false, 0).ConfigureAwait(false);
+            if (!certOK)
+            {
+                throw new Exception("Application instance certificate invalid!");
+            }
+            else
+            {
+                StoreCertInCloud();
+            }
+
 #if DEBUG
             // create OPC UA cert validator
             application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();

@@ -3,8 +3,8 @@ namespace Station.Simulation
 {
     using Azure.Storage.Blobs;
     using Azure.Storage.Blobs.Models;
-    using Microsoft.Extensions.Logging;
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
@@ -42,6 +42,38 @@ namespace Station.Simulation
                 }
 
                 return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                return null;
+            }
+        }
+
+        public async Task<string[]> FindFilesAsync(string path, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                List<string> files = new List<string>();
+
+                if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("STORAGE_CONNECTION_STRING")))
+                {
+                    // open blob storage
+                    BlobContainerClient container = new BlobContainerClient(Environment.GetEnvironmentVariable("STORAGE_CONNECTION_STRING"), _blobContainerName);
+                    await container.CreateIfNotExistsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+
+                    var resultSegment = container.GetBlobsAsync();
+                    await foreach (BlobItem blobItem in resultSegment.ConfigureAwait(false))
+                    {
+                        files.Add(blobItem.Name);
+                    }
+
+                    return files.ToArray();
+                }
+                else
+                {
+                    return null;
+                }
             }
             catch (Exception ex)
             {

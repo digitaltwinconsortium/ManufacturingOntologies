@@ -19,3 +19,5 @@
 /Tools/AssetAdminShell/aasontologyanalyzer/.vscode
 /Tools/FactorySimulation/OnPremAssets/Station/bin/Release/net6.0
 /Tools/FactorySimulation/OnPremAssets/Station/pki
+/Tools/FactorySimulation/OnPremAssets/Station/app/pki/own
+/Tools/FactorySimulation/OnPremAssets/Station/app/pki/trusted/certs

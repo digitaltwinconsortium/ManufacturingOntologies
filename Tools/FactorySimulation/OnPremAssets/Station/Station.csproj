@@ -14,6 +14,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="pki\**" />
+    <EmbeddedResource Remove="pki\**" />
+    <None Remove="pki\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Opc.Ua.MES.Config.xml" />
     <None Remove="Opc.Ua.MES.Endpoints.xml" />
     <None Remove="Opc.Ua.Station.Config.xml" />

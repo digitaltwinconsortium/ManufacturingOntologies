@@ -97,13 +97,13 @@ namespace Station.Simulation
                     throw new ArgumentException("You must specify the ProductionLineName environment variable!");
                 }
 
-                LoadCertFromCloud();
-
                 ApplicationInstance.MessageDlg = new ApplicationMessageDlg();
                 ApplicationInstance application = new ApplicationInstance();
                 application.ApplicationName = "Manufacturing Execution System";
                 application.ApplicationType = ApplicationType.Client;
                 application.ConfigSectionName = "Opc.Ua.MES";
+
+                LoadCertFromCloud("MES." + Environment.GetEnvironmentVariable("ProductionLineName"));
 
                 // replace the certificate subject name in the configuration
                 string configFilePath = Path.Combine(Directory.GetCurrentDirectory(), application.ConfigSectionName + ".Config.xml");
@@ -121,7 +121,7 @@ namespace Station.Simulation
                 }
                 else
                 {
-                    StoreCertInCloud();
+                    StoreCertsInCloud();
                 }
 
                 // create OPC UA cert validator
@@ -215,27 +215,33 @@ namespace Station.Simulation
             }
         }
 
-        private static void StoreCertInCloud()
+        private static void StoreCertsInCloud()
         {
-            // store app cert
+            // store app certs
             foreach (string filePath in Directory.EnumerateFiles(Path.Combine(Directory.GetCurrentDirectory(), "pki", "own", "certs"), "*.der"))
             {
                 _storage.StoreFileAsync(filePath, File.ReadAllBytesAsync(filePath).GetAwaiter().GetResult()).GetAwaiter().GetResult();
             }
 
-            // store private key
+            // store private keys
             foreach (string filePath in Directory.EnumerateFiles(Path.Combine(Directory.GetCurrentDirectory(), "pki", "own", "private"), "*.pfx"))
+            {
+                _storage.StoreFileAsync(filePath, File.ReadAllBytesAsync(filePath).GetAwaiter().GetResult()).GetAwaiter().GetResult();
+            }
+
+            // store trusted certs
+            foreach (string filePath in Directory.EnumerateFiles(Path.Combine(Directory.GetCurrentDirectory(), "pki", "trusted", "certs"), "*.der"))
             {
                 _storage.StoreFileAsync(filePath, File.ReadAllBytesAsync(filePath).GetAwaiter().GetResult()).GetAwaiter().GetResult();
             }
         }
 
-        private static void LoadCertFromCloud()
+        private static void LoadCertFromCloud(string appName)
         {
             try
             {
                 // load app cert from storage
-                string certFilePath = _storage.FindFileAsync(Path.Combine(Directory.GetCurrentDirectory(), "pki", "own", "certs"), ".der").GetAwaiter().GetResult();
+                string certFilePath = _storage.FindFileAsync(Path.Combine(Directory.GetCurrentDirectory(), "pki", "own", "certs"), appName).GetAwaiter().GetResult();
                 byte[] certFile = _storage.LoadFileAsync(certFilePath).GetAwaiter().GetResult();
                 if (certFile == null)
                 {
@@ -257,7 +263,7 @@ namespace Station.Simulation
                 }
 
                 // load app private key from storage
-                string keyFilePath = _storage.FindFileAsync(Path.Combine(Directory.GetCurrentDirectory(), "pki", "own", "private"), ".pfx").GetAwaiter().GetResult();
+                string keyFilePath = _storage.FindFileAsync(Path.Combine(Directory.GetCurrentDirectory(), "pki", "own", "private"), appName).GetAwaiter().GetResult();
                 byte[] keyFile = _storage.LoadFileAsync(keyFilePath).GetAwaiter().GetResult();
                 if (keyFile == null)
                 {
@@ -276,6 +282,31 @@ namespace Station.Simulation
                     }
 
                     File.WriteAllBytes(keyFilePath, keyFile);
+                }
+
+                // load trusted certs
+                string[] trsutedcertFilePath = _storage.FindFilesAsync(Path.Combine(Directory.GetCurrentDirectory(), "pki", "trusted", "certs")).GetAwaiter().GetResult();
+                foreach (string filePath in trsutedcertFilePath)
+                {
+                    byte[] trustedcertFile = _storage.LoadFileAsync(filePath).GetAwaiter().GetResult();
+                    if (trustedcertFile == null)
+                    {
+                        Console.WriteLine("Cloud not trusted cert file " + filePath);
+                    }
+                    else
+                    {
+                        if (!Path.IsPathRooted(filePath))
+                        {
+                            keyFilePath = Path.DirectorySeparatorChar.ToString() + filePath;
+                        }
+
+                        if (!Directory.Exists(Path.GetDirectoryName(filePath)))
+                        {
+                            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                        }
+
+                        File.WriteAllBytes(filePath, trustedcertFile);
+                    }
                 }
             }
             catch (Exception ex)
@@ -629,8 +660,6 @@ namespace Station.Simulation
                 throw new ArgumentException("You must specify the CycleTime environment variable!");
             }
 
-            LoadCertFromCloud();
-
             ApplicationInstance.MessageDlg = new ApplicationMessageDlg();
             ApplicationInstance application = new ApplicationInstance();
 
@@ -641,6 +670,8 @@ namespace Station.Simulation
             application.ApplicationName = stationUri.DnsSafeHost.ToLowerInvariant();
             application.ConfigSectionName = "Opc.Ua.Station";
             application.ApplicationType = ApplicationType.Server;
+
+            LoadCertFromCloud(application.ApplicationName);
 
             // replace the certificate subject name in the configuration
             string configFilePath = Path.Combine(Directory.GetCurrentDirectory(), application.ConfigSectionName + ".Config.xml");
@@ -683,7 +714,7 @@ namespace Station.Simulation
             }
             else
             {
-                StoreCertInCloud();
+                StoreCertsInCloud();
             }
 
 #if DEBUG

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: ua-cloudpublisher-namespace
+  name: munich
 spec:
   finalizers:
   - kubernetes
@@ -9,44 +9,40 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ua-cloudpublisher
-  namespace: ua-cloudpublisher-namespace
+  name: mes
+  namespace: munich
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ua-cloudpublisher
+      app: mes
   template:
     metadata:
       labels:
-        app: ua-cloudpublisher
+        app: mes
     spec:
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
-      - name: ua-cloudpublisher
-        image: ghcr.io/barnstee/ua-cloudpublisher:main
+      - name: mes
+        image: ghcr.io/digitaltwinconsortium/manufacturingontologies:main
         env:
-        - name: USE_KAFKA
-          value: "1"
-        - name: STORAGE_TYPE
-          value: "Azure"
+        - name: StationType
+          value: "MES"
+        - name: ProductionLineName
+          value: "munich"
         - name: STORAGE_CONNECTION_STRING
           value: "DefaultEndpointsProtocol=https;AccountName=[yourstorageaccountname];AccountKey=[key];EndpointSuffix=core.windows.net"
         - name: STORAGE_CONTAINER_NAME
-          value: "ua-cloudpublisher-namespace"
-        ports:
-        - containerPort: 80
+          value: "munich"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: ua-cloudpublisher-service
-  namespace: ua-cloudpublisher-namespace
+  name: mes
+  namespace: munich
 spec:
-  type: LoadBalancer
   ports:
-  - targetPort: 80
-    port: 80
+  - port: 8080
   selector:
-    app: ua-cloudpublisher
+    app: mes

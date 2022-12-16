@@ -7,11 +7,11 @@
       "commandName": "Docker",
       "environmentVariables": {
         "StationType": "assembly",
-        "StationURI": "opc.tcp://station.munich.corp.contoso/ua/munich/",
+        "StationURI": "opc.tcp://station.munich/",
         "PowerConsumption": "200",
         "CycleTime": "6",
         "STORAGE_CONTAINER_NAME": "ontologies",
-        "STORAGE_CONNECTION_STRING": "DefaultEndpointsProtocol=https;AccountName=ontologies;AccountKey=abcdef=;EndpointSuffix=core.windows.net"
+        "STORAGE_CONNECTION_STRING": "DefaultEndpointsProtocol=https;AccountName=[yourstorageaccountname];AccountKey=[key];EndpointSuffix=core.windows.net"
       }
     }
   }

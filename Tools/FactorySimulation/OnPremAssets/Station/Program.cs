@@ -124,6 +124,10 @@ namespace Station.Simulation
                     StoreCertInCloud();
                 }
 
+                // create OPC UA cert validator
+                application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
+                application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(OPCUAClientCertificateValidationCallback);
+
                 // replace the production line name in the list of endpoints to connect to.
                 string endpointsFilePath = Path.Combine(Directory.GetCurrentDirectory(), application.ConfigSectionName + ".Endpoints.xml");
                 string endpointsFileContent = File.ReadAllText(endpointsFilePath).Replace("munich", Environment.GetEnvironmentVariable("ProductionLineName"));

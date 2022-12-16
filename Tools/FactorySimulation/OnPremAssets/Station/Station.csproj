@@ -14,8 +14,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="app\**" />
     <Compile Remove="pki\**" />
+    <EmbeddedResource Remove="app\**" />
     <EmbeddedResource Remove="pki\**" />
+    <None Remove="app\**" />
     <None Remove="pki\**" />
   </ItemGroup>
 

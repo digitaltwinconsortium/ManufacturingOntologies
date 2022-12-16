@@ -245,7 +245,7 @@ namespace Station.Simulation
                 byte[] certFile = _storage.LoadFileAsync(certFilePath).GetAwaiter().GetResult();
                 if (certFile == null)
                 {
-                    Console.WriteLine("Cloud not load cert file, creating a new one. This means the new cert needs to be trusted by all OPC UA servers we connect to!");
+                    Console.WriteLine("Could not load cert file, creating a new one. This means the new cert needs to be trusted by all OPC UA servers we connect to!");
                 }
                 else
                 {
@@ -267,7 +267,7 @@ namespace Station.Simulation
                 byte[] keyFile = _storage.LoadFileAsync(keyFilePath).GetAwaiter().GetResult();
                 if (keyFile == null)
                 {
-                   Console.WriteLine("Cloud not load key file, creating a new one. This means the new cert generated from the key needs to be trusted by all OPC UA servers we connect to!");
+                   Console.WriteLine("Could not load key file, creating a new one. This means the new cert generated from the key needs to be trusted by all OPC UA servers we connect to!");
                 }
                 else
                 {
@@ -291,21 +291,23 @@ namespace Station.Simulation
                     byte[] trustedcertFile = _storage.LoadFileAsync(filePath).GetAwaiter().GetResult();
                     if (trustedcertFile == null)
                     {
-                        Console.WriteLine("Cloud not trusted cert file " + filePath);
+                        Console.WriteLine("Could not load trusted cert file " + filePath);
                     }
                     else
                     {
-                        if (!Path.IsPathRooted(filePath))
+                        string localFilePath = filePath;
+
+                        if (!Path.IsPathRooted(localFilePath))
                         {
-                            keyFilePath = Path.DirectorySeparatorChar.ToString() + filePath;
+                            localFilePath = Path.DirectorySeparatorChar.ToString() + localFilePath;
                         }
 
-                        if (!Directory.Exists(Path.GetDirectoryName(filePath)))
+                        if (!Directory.Exists(Path.GetDirectoryName(localFilePath)))
                         {
-                            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                            Directory.CreateDirectory(Path.GetDirectoryName(localFilePath));
                         }
 
-                        File.WriteAllBytes(filePath, trustedcertFile);
+                        File.WriteAllBytes(localFilePath, trustedcertFile);
                     }
                 }
             }

@@ -285,29 +285,32 @@ namespace Station.Simulation
                 }
 
                 // load trusted certs
-                string[] trsutedcertFilePath = _storage.FindFilesAsync(Path.Combine(Directory.GetCurrentDirectory(), "pki", "trusted", "certs")).GetAwaiter().GetResult();
-                foreach (string filePath in trsutedcertFilePath)
+                string[] trustedcertFilePath = _storage.FindFilesAsync(Path.Combine(Directory.GetCurrentDirectory(), "pki", "trusted", "certs")).GetAwaiter().GetResult();
+                if (trustedcertFilePath != null)
                 {
-                    byte[] trustedcertFile = _storage.LoadFileAsync(filePath).GetAwaiter().GetResult();
-                    if (trustedcertFile == null)
+                    foreach (string filePath in trustedcertFilePath)
                     {
-                        Console.WriteLine("Could not load trusted cert file " + filePath);
-                    }
-                    else
-                    {
-                        string localFilePath = filePath;
-
-                        if (!Path.IsPathRooted(localFilePath))
+                        byte[] trustedcertFile = _storage.LoadFileAsync(filePath).GetAwaiter().GetResult();
+                        if (trustedcertFile == null)
                         {
-                            localFilePath = Path.DirectorySeparatorChar.ToString() + localFilePath;
+                            Console.WriteLine("Could not load trusted cert file " + filePath);
                         }
-
-                        if (!Directory.Exists(Path.GetDirectoryName(localFilePath)))
+                        else
                         {
-                            Directory.CreateDirectory(Path.GetDirectoryName(localFilePath));
-                        }
+                            string localFilePath = filePath;
 
-                        File.WriteAllBytes(localFilePath, trustedcertFile);
+                            if (!Path.IsPathRooted(localFilePath))
+                            {
+                                localFilePath = Path.DirectorySeparatorChar.ToString() + localFilePath;
+                            }
+
+                            if (!Directory.Exists(Path.GetDirectoryName(localFilePath)))
+                            {
+                                Directory.CreateDirectory(Path.GetDirectoryName(localFilePath));
+                            }
+
+                            File.WriteAllBytes(localFilePath, trustedcertFile);
+                        }
                     }
                 }
             }

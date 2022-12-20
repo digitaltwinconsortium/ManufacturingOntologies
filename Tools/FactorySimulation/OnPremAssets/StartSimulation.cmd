@@ -114,7 +114,7 @@ kubectl apply -f UA-CloudPublisher.yaml
 
 ECHO Starting MES...
 kubectl apply -f MES.yaml
-Timeout 10
+Timeout 20
 
 ECHO Starting production line...
 kubectl apply -f ProductionLine.yaml
@@ -140,7 +140,7 @@ kubectl apply -f UA-CloudPublisher.yaml
 
 ECHO Starting MES...
 kubectl apply -f MES.yaml
-Timeout 10
+Timeout 20
 
 ECHO Starting production line...
 kubectl apply -f ProductionLine.yaml

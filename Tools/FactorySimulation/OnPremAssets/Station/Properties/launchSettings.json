@@ -7,7 +7,7 @@
       "commandName": "Docker",
       "environmentVariables": {
         "StationType": "assembly",
-        "StationURI": "opc.tcp://station.munich/",
+        "StationURI": "opc.tcp://assembly.munich/",
         "PowerConsumption": "200",
         "CycleTime": "6",
         "STORAGE_CONTAINER_NAME": "ontologies",

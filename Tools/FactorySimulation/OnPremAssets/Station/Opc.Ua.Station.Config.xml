@@ -4,9 +4,9 @@
   xmlns="http://opcfoundation.org/UA/SDK/Configuration.xsd"
   schemaLocation="./Schema/ApplicationConfiguration.xsd"
 >
-  <ApplicationName>Station</ApplicationName>
-  <ApplicationUri>urn:localhost:Station</ApplicationUri>
-  <ProductUri>http://contoso.com/UA/Station</ProductUri>
+  <ApplicationName>UndefinedStationName</ApplicationName>
+  <ApplicationUri>urn:UndefinedStationName</ApplicationUri>
+  <ProductUri>http://opcfoundation.org/UA/Station</ProductUri>
   <ApplicationType>Server_0</ApplicationType>
 
   <SecurityConfiguration>
@@ -56,7 +56,7 @@
 
   <ServerConfiguration>
     <BaseAddresses>
-      <ua:String>opc.tcp://localhost:4840/UA/[Station]Station</ua:String>
+      <ua:String>opc.tcp://localhost:4840</ua:String>
     </BaseAddresses>
 
     <SecurityPolicies>

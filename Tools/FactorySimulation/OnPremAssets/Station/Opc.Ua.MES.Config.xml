@@ -9,10 +9,10 @@
 
   <!-- A globally unique identifier for the application instance.
        This is overridden with the value contained in the application certificate. -->
-  <ApplicationUri>urn:localhost:Contoso:Munich:ProductionLine0:MES</ApplicationUri>
+  <ApplicationUri>urn:MES</ApplicationUri>
 
   <!-- A globally unique URI for the product (usually assigned by the product vendor) -->
-  <ProductUri>http://contoso.com/UA/MES/</ProductUri>
+  <ProductUri>http://opcfoundation.org/UA/MES/</ProductUri>
 
   <!-- Indicates the type of application (Client, Server or ClientServer). -->
   <ApplicationType>Client_1</ApplicationType>

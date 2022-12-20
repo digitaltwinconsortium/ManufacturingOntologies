@@ -669,9 +669,7 @@ namespace Station.Simulation
             ApplicationInstance.MessageDlg = new ApplicationMessageDlg();
             ApplicationInstance application = new ApplicationInstance();
 
-            string stationName = Environment.GetEnvironmentVariable("StationType").ToLowerInvariant();
             Uri stationUri = new Uri(Environment.GetEnvironmentVariable("StationURI"));
-            string stationPath = stationUri.AbsolutePath.TrimStart('/').ToLowerInvariant();
 
             application.ApplicationName = stationUri.DnsSafeHost.ToLowerInvariant();
             application.ConfigSectionName = "Opc.Ua.Station";
@@ -691,12 +689,6 @@ namespace Station.Simulation
                 throw new Exception("Application configuration is null!");
             }
 
-            // replace our placeholders with specific settings from the command line
-            config.ApplicationName = stationUri.DnsSafeHost.ToLowerInvariant();
-            config.ApplicationUri = "urn:" + stationName + ":" + stationPath.Replace("/", ":");
-            config.ProductUri = "http://contoso.com/UA/" + stationName;
-            config.ServerConfiguration.BaseAddresses[0] = stationUri.ToString();
-
             // calculate our power consumption in [kW] and cycle time in [s]
             PowerConsumption = ulong.Parse(Environment.GetEnvironmentVariable("PowerConsumption"), NumberStyles.Integer);
             CycleTime = ulong.Parse(Environment.GetEnvironmentVariable("CycleTime"), NumberStyles.Integer);
@@ -704,7 +696,7 @@ namespace Station.Simulation
             // print out our configuration
             Console.WriteLine("OPC UA Server Configuration:");
             Console.WriteLine("----------------------------");
-            Console.WriteLine("OPC UA Endpoint: " + stationUri.ToString());
+            Console.WriteLine("OPC UA Endpoint: " + config.ServerConfiguration.BaseAddresses[0].ToString());
             Console.WriteLine("Application URI: " + config.ApplicationUri);
             Console.WriteLine("Power consumption: " + PowerConsumption.ToString() + "kW");
             Console.WriteLine("Cycle time: " + CycleTime.ToString() + "s");

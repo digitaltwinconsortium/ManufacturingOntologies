@@ -179,7 +179,7 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 * PASSWORD - the primary key connection string of your event hubs namespace
 * TOPIC - set to "commander.corp.contoso.command"
 * RESPONSE_TOPIC - set to "commander.corp.contoso.response"
-* UA_SERVER_ENDPOINT - set to "opc.tcp://assembly.seattle.corp.contoso/ua/seattle/" to open the pressure relief valve of the Seattle assembly machine
+* UA_SERVER_ENDPOINT - set to "opc.tcp://assembly.seattle/" to open the pressure relief valve of the Seattle assembly machine
 * UA_SERVER_METHOD_ID - set to "ns=2;i=435"
 * UA_SERVER_OBJECT_ID - set to "ns=2;i=424"
 * UA_SERVER_APPLICATION_NAME - set to "assembly"

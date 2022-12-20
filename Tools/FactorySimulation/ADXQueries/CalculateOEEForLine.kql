@@ -1,6 +1,6 @@
 .create-or-alter function CalculateOEEForLine(location:string,idealCycleTime:int,hoursInShift:int) {
 let ADTInstance = "https://ontdemo-ADT.api.eus2.digitaltwins.azure.net";
-let ADTQueryPublisherID = strcat("SELECT T FROM digitaltwins T where T.equipmentID = 'publisher.", location, ".corp.contoso'");
+let ADTQueryPublisherID = strcat("SELECT T FROM digitaltwins T where T.equipmentID = 'publisher.", location, "'");
 let publisherId = toscalar(evaluate azure_digital_twins_query_request(ADTInstance, ADTQueryPublisherID)
 | project tostring(T.$dtId));
 let ADTQueryStations = strcat("SELECT T, CT FROM DIGITALTWINS T JOIN CT RELATED T.contains WHERE T.$dtId = '", publisherId, "'");

@@ -123,7 +123,9 @@ Once the deployment is complete, follow these steps to finish configuring the si
 1. Download this repository from [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/archive/refs/heads/main.zip) and extract to a directory of your choice.
 1. From a command prompt, navigate to the `AKSEdgeTools` directory and run `AksEdgePrompt`. On first run after some config steps, this will reboot the VM. Log in again and run `AksEdgePrompt` from a command prompt again. This will open a PowerShell window:
 
-<img src="Docs/akspowershell.png" alt="AKS" width="900" />
+    <img src="Docs/akspowershell.png" alt="AKS" width="900" />
+
+1. Run `New-AksEdgeDeployment -JsonConfigFilePath .\aksedge-config.json` from the PowerShell window.
 
 Your Kubernetes installation is now complete and you can start deploying workloads.
 

@@ -118,7 +118,7 @@ You can also **visualize** the resources that will get deployed by clicking the 
 Once the deployment is complete, follow these steps to finish configuring the simulation:
 
 1. Connect to the deployed Windows VM with an RDP (remote desktop) connection. You can download the RDP file in the [Azure portal](https://portal.azure.com) page for the VM, under the **Connect** options. Sign in using the credentials you provided during deployment.
-1. Inside the VM, download and install [Azure Kubernetes Services Edge Essentials](https://aka.ms/aks-edge/k8s-msi).
+1. From the VM, download and install [Azure Kubernetes Services Edge Essentials](https://aka.ms/aks-edge/k8s-msi).
 1. Download and install the [Azure CLI](https://aka.ms/installazurecliwindows).
 1. Download this repository from [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/archive/refs/heads/main.zip) and extract to a directory of your choice.
 1. From a command prompt, navigate to the `AKSEdgeTools` directory and run `AksEdgePrompt`. On first run after some config steps, this will reboot the VM. Log in again and run `AksEdgePrompt` from a command prompt again. This will open a PowerShell window:

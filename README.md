@@ -187,14 +187,14 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 1. On your virtual machine, From a command prompt, navigate to the `AKSEdgeTools` directory and run `AksEdgePrompt`.
 1. Run `notepad aide-userconfig.json` and provide the following information:
 
-| Attribute | Description |
-|:---------------:|:-----------------------------:|
-| SubscriptionName	| The name of your Azure subscription. You can find this on the Azure portal. |
-| SubscriptionId | Your subscription ID. In the Azure portal, click on the subscription you're using and copy/paste the subscription ID. |
-| TenantId | Your tenant ID. In the Azure portal, click on Azure Active Directory and copy/paste the tenant ID. |
-| ResourceGroupName | The name of the Azure resource group which was deployed for this solution. |
-| ServicePrincipalName | The name of the Azure Service Principal to use as credentials. AKS uses this service principal to connect your cluster to Arc. Set this to the same name as your ResourceGroupName for simplicity. |
-| Location | The location of you resource group. |
+  | Attribute | Description |
+  |:---------------:|:-----------------------------:|
+  | SubscriptionName	| The name of your Azure subscription. You can find this on the Azure portal. |
+  | SubscriptionId | Your subscription ID. In the Azure portal, click on the subscription you're using and copy/paste the subscription ID. |
+  | TenantId | Your tenant ID. In the Azure portal, click on Azure Active Directory and copy/paste the tenant ID. |
+  | ResourceGroupName | The name of the Azure resource group which was deployed for this solution. |
+  | ServicePrincipalName | The name of the Azure Service Principal to use as credentials. AKS uses this service principal to connect your cluster to Arc. Set this to the same name as your ResourceGroupName for simplicity. |
+  | Location | The location of you resource group. |
 
 1. Save the file and run `.\scripts\AksEdgeAzureSetup\AksEdgeAzureSetup.ps1 .\aide-userconfig.json -spContributorRole` from the PowerShell window.
 1. Run `Read-AideUserConfig` from the PowerShell window.

@@ -120,13 +120,13 @@ Once the deployment is complete, follow these steps to finish configuring the si
 1. Connect to the deployed Windows VM with an RDP (remote desktop) connection. You can download the RDP file in the [Azure portal](https://portal.azure.com) page for the VM, under the **Connect** options. Sign in using the credentials you provided during deployment.
 1. Inside the VM, download and install [Azure Kubernetes Services Edge Essentials](https://aka.ms/aks-edge/k8s-msi).
 1. Download this repository from [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/archive/refs/heads/main.zip) and extract to a directory of your choice.
-1. From a command prompt, navigate to the 'AKSEdgeTools' directory and run 'AksEdgePrompt'. On first run after some config steps, this will reboot the VM. Log in again and run 'AksEdgePrompt' from a command prompt again. This will open a PowerShell window:
+1. From a command prompt, navigate to the `AKSEdgeTools` directory and run `AksEdgePrompt`. On first run after some config steps, this will reboot the VM. Log in again and run `AksEdgePrompt` from a command prompt again. This will open a PowerShell window:
 
 <img src="Docs/akspowershell.png" alt="AKS" width="900" />
 
 Your Kubernetes installation is now complete and you can start deploying workloads.
 
-Note: To get logs from all your Kubernetes workloads and services at any time, simply run 'Get-AksEdgeLogs' from the Powershell window that can be opened via 'AksEdgePrompt'.
+Note: To get logs from all your Kubernetes workloads and services at any time, simply run `Get-AksEdgeLogs` from the Powershell window that can be opened via `AksEdgePrompt`.
 
 
 ## Running the Production Line Simulation
@@ -184,8 +184,8 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 
 ### Onboarding the Kubernetes Instance for Management via Azure Arc
 
-1. On your virtual machine, From a command prompt, navigate to the 'AKSEdgeTools' directory and run 'AksEdgePrompt'.
-1. Run 'notepad aide-userconfig.json' and provide the following information:
+1. On your virtual machine, From a command prompt, navigate to the `AKSEdgeTools` directory and run `AksEdgePrompt`.
+1. Run `notepad aide-userconfig.json` and provide the following information:
 
 | Attribute | Description |
 |:---------------:|:-----------------------------:|
@@ -196,19 +196,19 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 | ServicePrincipalName | The name of the Azure Service Principal to use as credentials. AKS uses this service principal to connect your cluster to Arc. Set this to the same name as your ResourceGroupName for simplicity. |
 | Location | The location of you resource group. |
 
-1. Save the file and run '.\scripts\AksEdgeAzureSetup\AksEdgeAzureSetup.ps1 .\aide-userconfig.json -spContributorRole' from the PowerShell window.
-1. Run 'Read-AideUserConfig' from the PowerShell window.
-1. Run 'Initialize-AideArc' from the Powershell window.
-1. Run 'Connect-AideArcKubernetes' from the Powershell window.
+1. Save the file and run `.\scripts\AksEdgeAzureSetup\AksEdgeAzureSetup.ps1 .\aide-userconfig.json -spContributorRole` from the PowerShell window.
+1. Run `Read-AideUserConfig` from the PowerShell window.
+1. Run `Initialize-AideArc` from the Powershell window.
+1. Run `Connect-AideArcKubernetes` from the Powershell window.
 
-You can now manage your Kubernetes cluster from the cloud via the newly deployed Azure Arc instance. In the Azure Portal, browse to the Azure Arc instance and select 'Workloads'. The required service token can be retrieved via 'Get-AideArcKubernetesServiceToken' from the 'AksEdgePrompt' on your virtual machine.
+You can now manage your Kubernetes cluster from the cloud via the newly deployed Azure Arc instance. In the Azure Portal, browse to the Azure Arc instance and select `Workloads`. The required service token can be retrieved via 'Get-AideArcKubernetesServiceToken' from the 'AksEdgePrompt' on your virtual machine.
 
 
 ## Replacing the Production Line Simulation with a Real Production Line
 
 Once you are ready to connect your own production line, simply delete the VM from the Azure Portal.
 
-1. Edit the UA-CloudPublisher.yaml file provided in the 'Deployment' folder of this repository, replacing [yourstorageaccountname] with the name of your Azure Storage Account and [key] with the key1 of your Azure Storage Account. You can access this information from the Axure Portal on your deployed stroage account under 'Access keys'.
+1. Edit the UA-CloudPublisher.yaml file provided in the `Deployment` folder of this repository, replacing [yourstorageaccountname] with the name of your Azure Storage Account and [key] with the key1 of your Azure Storage Account. You can access this information from the Axure Portal on your deployed stroage account under 'Access keys'.
 1. Run UA Cloud Publisher with the following command. The PC needs Internet access (via port 9093) and needs to be able to connect to your OPC UA-enabled machines in your production line:
 
         kubectl apply -f UA-CloudPublisher.yaml

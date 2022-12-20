@@ -119,7 +119,7 @@ Once the deployment is complete, follow these steps to finish configuring the si
 
 1. Connect to the deployed Windows VM with an RDP (remote desktop) connection. You can download the RDP file in the [Azure portal](https://portal.azure.com) page for the VM, under the **Connect** options. Sign in using the credentials you provided during deployment.
 1. Inside the VM, download and install [Azure Kubernetes Services Edge Essentials](https://aka.ms/aks-edge/k8s-msi).
-1. Download this repo from [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/archive/refs/heads/main.zip) and extract to a directory of your choice.
+1. Download this repository from [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/archive/refs/heads/main.zip) and extract to a directory of your choice.
 1. From a command prompt, navigate to the 'AKSEdgeTools' directory and run 'AksEdgePrompt'. On first run after some config steps, this will reboot the VM. Log in again and run 'AksEdgePrompt' from a command prompt again. This will open a PowerShell window:
 
 <img src="Docs/akspowershell.png" alt="AKS" width="900" />
@@ -131,7 +131,7 @@ Note: To get logs from all your Kubernetes workloads and services at any time, s
 
 ## Running the Production Line Simulation
 
-On the deployed VM, navigate to the OnPremAssets directory of the unzipped content and run the **StartSimulation** command from a command prompt by supplying the primary key connection string of your Event Hubs namespace, the key1 connection string of your Storage Account and the name of your Azure subscription. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey". The key1 connection string can be read in the Azure Portal under your Storage Account' "access keys". The Azure Subscription name can be read in the Azure Portal under Subscriptions. For example:
+On the deployed VM, navigate to the OnPremAssets directory of the unzipped repository content downloaded ealier and run the **StartSimulation** command from a command prompt by supplying the primary key connection string of your Event Hubs namespace, the key1 connection string of your Storage Account and the name of your Azure subscription. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey". The key1 connection string can be read in the Azure Portal under your Storage Account' "access keys". The Azure Subscription name can be read in the Azure Portal under Subscriptions. For example:
 
     StartSimulation Endpoint=sb://ontologies.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=abcdefgh= DefaultEndpointsProtocol=https;AccountName=ontologiesstorage;AccountKey=abcdefgh==;EndpointSuffix=core.windows.net MyAzureSubscription
 
@@ -206,42 +206,42 @@ You can now manage your Kubernetes cluster from the cloud via the newly deployed
 
 ## Replacing the Production Line Simulation with a Real Production Line
 
-Once you are ready to connect your own production line, simply delete the VM through the Azure Portal.
-
-Note: UA Cloud Publisher stores its configuration and log files in the cloud within the Azure Storage Account deployed in this solution.
+Once you are ready to connect your own production line, simply delete the VM from the Azure Portal.
 
 1. Edit the UA-CloudPublisher.yaml file provided in the 'Deployment' folder of this repository, replacing [yourstorageaccountname] with the name of your Azure Storage Account and [key] with the key1 of your Azure Storage Account. You can access this information from the Axure Portal on your deployed stroage account under 'Access keys'.
 1. Run UA Cloud Publisher with the following command. The PC needs Internet access (via port 9093) and needs to be able to connect to your OPC UA-enabled machines in your production line:
 
-    kubectl apply -f UA-CloudPublisher.yaml
+        kubectl apply -f UA-CloudPublisher.yaml
 
 1. Open a browser on the Edge PC and navigate to http://localhost:[kubernetesPortForYourPublisherService]. You are now connected to the UA Cloud Publisher's interactive UI. Select the Configuration menu item and enter the following information, replacing [myeventhubsnamespace] with the name of your Event Hubs namespace and replacing [myeventhubsnamespaceprimarykeyconnectionstring] with the primary key connection string of your Event Hubs namespace. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey". Then click Update:
   
-    BrokerClientName: "UACloudPublisher"  
-    BrokerUrl: "[myeventhubsnamespace].servicebus.windows.net"
-    BrokerPort: 9093  
-    BrokerUsername: "$ConnectionString"  
-    BrokerPassword: "[myeventhubsnamespaceprimarykeyconnectionstring]"  
-    BrokerMessageTopic: "data"
-    BrokerMetadataTopic: "metadata"  
-    SendUAMetadata: true  
-    MetadataSendInterval: 43200  
-    BrokerCommandTopic: ""
-    BrokerResponseTopic: ""  
-    BrokerMessageSize: 262144  
-    CreateBrokerSASToken: false  
-    UseTLS: false  
-    PublisherName: "UACloudPublisher"  
-    InternalQueueCapacity: 1000  
-    DefaultSendIntervalSeconds: 1  
-    DiagnosticsLoggingInterval: 30  
-    DefaultOpcSamplingInterval: 500  
-    DefaultOpcPublishingInterval: 1000  
-    UAStackTraceMask: 645  
-    ReversiblePubSubEncoding: false  
-    AutoLoadPersistedNodes: true  
+        BrokerClientName: "UACloudPublisher"  
+        BrokerUrl: "[myeventhubsnamespace].servicebus.windows.net"
+        BrokerPort: 9093  
+        BrokerUsername: "$ConnectionString"  
+        BrokerPassword: "[myeventhubsnamespaceprimarykeyconnectionstring]"  
+        BrokerMessageTopic: "data"
+        BrokerMetadataTopic: "metadata"  
+        SendUAMetadata: true  
+        MetadataSendInterval: 43200  
+        BrokerCommandTopic: ""
+        BrokerResponseTopic: ""  
+        BrokerMessageSize: 262144  
+        CreateBrokerSASToken: false  
+        UseTLS: false  
+        PublisherName: "UACloudPublisher"  
+        InternalQueueCapacity: 1000  
+        DefaultSendIntervalSeconds: 1  
+        DiagnosticsLoggingInterval: 30  
+        DefaultOpcSamplingInterval: 500  
+        DefaultOpcPublishingInterval: 1000  
+        UAStackTraceMask: 645  
+        ReversiblePubSubEncoding: false  
+        AutoLoadPersistedNodes: true  
 
 1. Configure the OPC UA data nodes from your machines (or connectivity adapter software). To do so, select the OPC UA Server Connect menu item, enter the OPC UA server IP address and port and click Connect. You can now browse the OPC UA Server you want to send telemetry data from. If you have found the OPC UA node you want, right click it and select publish.
+
+Note: UA Cloud Publisher stores its configuration and log files in the cloud within the Azure Storage Account deployed in this solution.
 
 Note: You can check what is currently being published by selecting the Publishes Nodes tab. You can also see diagnostics information from UA Cloud Publisher on the Diagnostics tab.
 

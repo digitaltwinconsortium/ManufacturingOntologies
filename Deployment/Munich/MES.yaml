@@ -32,17 +32,6 @@ spec:
         - name: ProductionLineName
           value: "munich"
         - name: STORAGE_CONNECTION_STRING
-          value: "DefaultEndpointsProtocol=https;AccountName=[yourstorageaccountname];AccountKey=[key];EndpointSuffix=core.windows.net"
+          value: "[mystorageaccountkey1connectionstring]"
         - name: STORAGE_CONTAINER_NAME
           value: "munich"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: mes
-  namespace: munich
-spec:
-  ports:
-  - port: 8080
-  selector:
-    app: mes

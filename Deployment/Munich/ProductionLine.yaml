@@ -36,7 +36,7 @@ spec:
         - name: CycleTime
           value: "6"
         - name: STORAGE_CONNECTION_STRING
-          value: "DefaultEndpointsProtocol=https;AccountName=[yourstorageaccountname];AccountKey=[key];EndpointSuffix=core.windows.net"
+          value: "[mystorageaccountkey1connectionstring]"
         - name: STORAGE_CONTAINER_NAME
           value: "munich"
         ports:
@@ -85,7 +85,7 @@ spec:
         - name: CycleTime
           value: "6"
         - name: STORAGE_CONNECTION_STRING
-          value: "DefaultEndpointsProtocol=https;AccountName=[yourstorageaccountname];AccountKey=[key];EndpointSuffix=core.windows.net"
+          value: "[mystorageaccountkey1connectionstring]"
         - name: STORAGE_CONTAINER_NAME
           value: "munich"
         ports:
@@ -134,7 +134,7 @@ spec:
         - name: CycleTime
           value: "6"
         - name: STORAGE_CONNECTION_STRING
-          value: "DefaultEndpointsProtocol=https;AccountName=[yourstorageaccountname];AccountKey=[key];EndpointSuffix=core.windows.net"
+          value: "[mystorageaccountkey1connectionstring]"
         - name: STORAGE_CONTAINER_NAME
           value: "munich"
         ports:

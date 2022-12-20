@@ -71,24 +71,23 @@ UA Cloud Twin takes the OPC UA Publisher ID and creates ISA95 Area assets for ea
 UA Cloud Twin takes each OPC UA Field discovered in the received Dataset metadata and creates an ISA95 Work Unit asset for each.
 
 
+## A Cloud-based OPC UA Certificate Store and Persisted Storage
+
+When running OPC UA applications on Kubernetes, their OPC UA configuration files, keys and certificates must be persisted. While Kubernetes has the ability to persist these files in volumes, a safer place for them is the cloud, especially on single-node clusters where the volume would be lost when the node fails. This is why the OPC UA applications used in this solution (i.e. the UA Cloud Publisher, the NES and the simulated machines/production line stations) store their configuration files, keys and certificates in the cloud. This also has the advantage of providing a single location for mutually trusted certificates for all OPC UA applications.
+
+
 ## Production Line Simulation
 
 The solution leverages a production line simulation made up of several Stations, leveraging an OPC UA information model, as well as a simple Manufacturing Execution System (MES). Both the Stations and the MES are containerized for easy deployment.
 
 ### Default Simulation Configuration
 
-The simulation is configured to include 8 production lines. The default configuration is depicted below:
+The simulation is configured to include 2 production lines. The default configuration is depicted below:
 
 | Production Line | Ideal Cycle Time (in seconds) |
 |:---------------:|:-----------------------------:|
 | Munich | 6 |
-| Capetown | 8 |
-| Mumbai | 11 |
-| Seattle |	6 |
-| Beijing 1	| 9 |
-| Beijing 2	| 8 |
-| Beijing 3	| 4 |
-| Rio |	10 |
+| Seattle |	10 |
 
 ### OPC UA Node IDs of Station OPC UA Server
 
@@ -115,25 +114,30 @@ You can also **visualize** the resources that will get deployed by clicking the 
 
 <a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fdigitaltwinconsortium%2FManufacturingOntologies%2Fmain%2FDeployment%2Farm.json" data-linktype="external"><img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true" alt="Visualize" data-linktype="external"></a>
 
-Once the deployment is complete, follow these steps to finish configuring the simulation.
+Once the deployment is complete, follow these steps to finish configuring the simulation:
 
 1. Connect to the deployed Windows VM with an RDP (remote desktop) connection. You can download the RDP file in the [Azure portal](https://portal.azure.com) page for the VM, under the **Connect** options. Sign in using the credentials you provided during deployment.
-1. Inside the VM, navigate in a browser to the [Docker Desktop page](https://www.docker.com/products/docker-desktop). Download and install the Docker Desktop, including the Windows Subsystem for Linux (WSL) integration. 
-1. After installation, the VM will need to restart. Log back in after the restart. 
-1. Follow the instructions in the VM to accept the Docker Desktop license terms and install the WSL Linux kernel. 
-1. Restart the VM one more time and log back in after the restart.
-1. In the VM, verify that Docker Desktop is running in the Windows System Tray. Enable Kubernetes under **Settings**, **Kubernetes**, **Enable Kubernetes**, and **Apply & restart**.
+1. Inside the VM, download and install [Azure Kubernetes Services Edge Essentials](https://aka.ms/aks-edge/k8s-msi).
+1. Download this repo from [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/archive/refs/heads/main.zip) and extract to a directory of your choice.
+1. From a command prompt, navigate to the 'AKSEdgeTools' directory and run 'AksEdgePrompt'. On first run after some config steps, this will reboot the VM. Log in again and run 'AksEdgePrompt' from a command prompt again. This will open a PowerShell window:
 
-<img src="Docs/Kubernetes.png" alt="Kubernetes" width="900" />
+<img src="Docs/akspowershell.png" alt="AKS" width="900" />
+
+Your Kubernetes installation is now complete and you can start deploying workloads.
+
+Note: To get logs from all your Kubernetes workloads and services at any time, simply run 'Get-AksEdgeLogs' from the Powershell window that can be opened via 'AksEdgePrompt'.
 
 
 ## Running the Production Line Simulation
 
-On the deployed VM, download this repo from [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/archive/refs/heads/main.zip) and extract to a directory of your choice. Then navigate to the OnPremAssets directory of the unzipped content and run the **StartSimulation** command from the OnPremAssets folder in a command prompt by supplying the primary key connection string of your Event Hubs namespace. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey":
+On the deployed VM, navigate to the OnPremAssets directory of the unzipped content and run the **StartSimulation** command from a command prompt by supplying the primary key connection string of your Event Hubs namespace, the key1 connection string of your Storage Account and the name of your Azure subscription. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey". The key1 connection string can be read in the Azure Portal under your Storage Account' "access keys". The Azure Subscription name can be read in the Azure Portal under Subscriptions. For example:
 
-    StartSimulation Endpoint=sb://ontologies.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=abcdefgh=
+    StartSimulation Endpoint=sb://ontologies.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=abcdefgh= DefaultEndpointsProtocol=https;AccountName=ontologiesstorage;AccountKey=abcdefgh==;EndpointSuffix=core.windows.net MyAzureSubscription
 
-:exclamation: If you restart Docker Desktop at any time, you'll need to stop and then restart the simulation, too!
+Note: On first run, a tool to copy files to Azure Storage needs to be installed. When prompted, simply press enter to proceed with the installation.
+
+Note: In this solution, the OPC UA application certificate store for UA Cloud Publisher, as well as the simulated production line's MES and individual machines, is located in the cloud in the deployed Azure Storage account.
+
 
 ## View Results
 
@@ -179,38 +183,38 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 
 ### Onboarding the Kubernetes Instance for Management via Azure Arc
 
-To onboard your on-premises Kubernetes cluster, you first need to install the [Azure CLI](https://aka.ms/installazurecliwindows) on the Windows VM. Once installation completes, open a Command Prompt Window and login to Azure via:
+1. On your virtual machine, From a command prompt, navigate to the 'AKSEdgeTools' directory and run 'AksEdgePrompt'.
+1. Run 'notepad aide-userconfig.json' and provide the following information:
 
-    az login
+| Attribute | Description |
+|:---------------:|:-----------------------------:|
+| SubscriptionName	| The name of your Azure subscription. You can find this on the Azure portal. |
+| SubscriptionId | Your subscription ID. In the Azure portal, click on the subscription you're using and copy/paste the subscription ID. |
+| TenantId | Your tenant ID. In the Azure portal, click on Azure Active Directory and copy/paste the tenant ID. |
+| ResourceGroupName | The name of the Azure resource group which was deployed for this solution. |
+| ServicePrincipalName | The name of the Azure Service Principal to use as credentials. AKS uses this service principal to connect your cluster to Arc. Set this to the same name as your ResourceGroupName for simplicity. |
+| Location | The location of you resource group. |
 
-Note: If you have access to more than one Azure subscription, you can verify you are using the correct subscription after login by running `az account show` and you can switch subscriptions by running `az account set -n <yourSubscriptionName>`.
+1. Save the file and run '.\scripts\AksEdgeAzureSetup\AksEdgeAzureSetup.ps1 .\aide-userconfig.json -spContributorRole' from the PowerShell window.
+1. Run 'Read-AideUserConfig' from the PowerShell window.
+1. Run 'Initialize-AideArc' from the Powershell window.
+1. Run 'Connect-AideArcKubernetes' from the Powershell window.
 
-Then, onboard your cluster via:
-
-    az connectedk8s connect -g <yourResourceGroupName> -n <theNameYouWantToGiveYourKubernetesClusterInAzure>
-
-Once the command completes, in the Azure Portal, click on the newly created Azure Arc instance and select Configuration. Open a PowerShell window and follow the instructions to create a bearer token to access the configuration. You can display the bearer token by typing echo $TOKEN in PowerShell.
-
-### Deploying UA Cloud Publisher on Kubernetes via Azure Arc and Flux
-
-Prerequisit: The Kubernetes cluster has been onboarded via Azure Arc (see previous paragraph).
-
-Open the Azure Arc page in the Azure Portal and select Workloads -> Add.
-
-Copy the UA Cloud Publisher Flux deployment YAML file contents from [here](https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/uacloudpublisher.yaml) into the YAML editor and replace [yourstorageaccountname] with the name and [key] with the key from the Azure Storage that was deployed in this solution. You can access this information in the Azure Portal in your Azure Storage page under Access keys -> key1 -> Connection string. Finally, click Add.
-
-In this scenario, UA Cloud Publisher will store it settings in the cloud in your Azure Storage account. Once deployment completes, open the UA Cloud Publisher UI via https://localhost on your on-premises Windows VM and configure its settings (see next section below).
+You can now manage your Kubernetes cluster from the cloud via the newly deployed Azure Arc instance. In the Azure Portal, browse to the Azure Arc instance and select 'Workloads'. The required service token can be retrieved via 'Get-AideArcKubernetesServiceToken' from the 'AksEdgePrompt' on your virtual machine.
 
 
 ## Replacing the Production Line Simulation with a Real Production Line
 
-Once you are ready to connect your own production line, simply delete the VM through the Azure Portal or, if you are running the simulation on a local PC, call the StopSimulation.cmd script. Then run UA Cloud Publisher on a Docker-enabled edge gateway PC (on Windows, for Linux, remove the "c:" bits) with the following command. The PC needs Internet access (via port 9093) and needs to be able to connect to your OPC UA-enabled machiens in your production line:
+Once you are ready to connect your own production line, simply delete the VM through the Azure Portal.
 
-    docker run -itd -e USE_KAFKA="1" -v c:/publisher/logs:/app/logs -v c:/publisher/settings:/app/settings -p 80:80 ghcr.io/barnstee/ua-cloudpublisher:main
+Note: UA Cloud Publisher stores its configuration and log files in the cloud within the Azure Storage Account deployed in this solution.
 
-In this case, UA Cloud Publisher stores its configuration and log files locally on the Edge PC under c:/publisher on Windows or /publisher on Linux.
+1. Edit the UA-CloudPublisher.yaml file provided in the 'Deployment' folder of this repository, replacing [yourstorageaccountname] with the name of your Azure Storage Account and [key] with the key1 of your Azure Storage Account. You can access this information from the Axure Portal on your deployed stroage account under 'Access keys'.
+1. Run UA Cloud Publisher with the following command. The PC needs Internet access (via port 9093) and needs to be able to connect to your OPC UA-enabled machines in your production line:
 
-Then, open a browser on the Edge PC and navigate to http://localhost. You are now connected to the UA Cloud Publisher's interactive UI. Select the Configuration menu item and enter the following information, replacing [myeventhubsnamespace] with the name of your Event Hubs namespace and replacing [myeventhubsnamespaceprimarykeyconnectionstring] with the primary key connection string of your Event Hubs namespace. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey". Then click Update:
+    kubectl apply -f UA-CloudPublisher.yaml
+
+1. Open a browser on the Edge PC and navigate to http://localhost:[kubernetesPortForYourPublisherService]. You are now connected to the UA Cloud Publisher's interactive UI. Select the Configuration menu item and enter the following information, replacing [myeventhubsnamespace] with the name of your Event Hubs namespace and replacing [myeventhubsnamespaceprimarykeyconnectionstring] with the primary key connection string of your Event Hubs namespace. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey". Then click Update:
   
     BrokerClientName: "UACloudPublisher"  
     BrokerUrl: "[myeventhubsnamespace].servicebus.windows.net"
@@ -236,9 +240,9 @@ Then, open a browser on the Edge PC and navigate to http://localhost. You are no
     ReversiblePubSubEncoding: false  
     AutoLoadPersistedNodes: true  
 
-Next, configure the OPC UA data nodes from your machines (or connectivity adapter software). To do so, select the OPC UA Server Connect menu item, enter the OPC UA server IP address and port and click Connect. You can now browse the OPC UA Server you want to send telemetry data from. If you have found the OPC UA node you want, right click it and select publish.
+1. Configure the OPC UA data nodes from your machines (or connectivity adapter software). To do so, select the OPC UA Server Connect menu item, enter the OPC UA server IP address and port and click Connect. You can now browse the OPC UA Server you want to send telemetry data from. If you have found the OPC UA node you want, right click it and select publish.
 
-That's it! You can check what is currently being published by selecting the Publishes Nodes tab. You can also see diagnostics information from UA Cloud Publisher on the Diagnostics tab.
+Note: You can check what is currently being published by selecting the Publishes Nodes tab. You can also see diagnostics information from UA Cloud Publisher on the Diagnostics tab.
 
 ## License
 

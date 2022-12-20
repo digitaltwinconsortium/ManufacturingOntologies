@@ -164,6 +164,7 @@ namespace Station.Simulation
                     catch (Exception ex)
                     {
                         Console.WriteLine("Exception connecting to assembly line: {0}, retry!", ex.Message);
+                        Thread.Sleep(1000);
                     }
 
                     if (DateTime.UtcNow > retryTimeout)

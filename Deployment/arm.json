@@ -113,7 +113,7 @@
             "BROKER_PASSWORD": "[listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString]",
             "BROKER_PORT": "9093",
             "BROKER_USERNAME": "$ConnectionString",
-            "CLIENT_NAME": "uacloudtwin.corp.contoso",
+            "CLIENT_NAME": "uacloudtwin",
             "METADATA_TOPIC": "metadata",
             "TOPIC": "data"
           },
@@ -346,7 +346,7 @@
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
       "apiVersion": "2017-04-01",
-      "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/commander.corp.contoso.command')]",
+      "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/commander.command')]",
       "properties": {
         "messageRetentionInDays": 1,
         "partitionCount": 1
@@ -358,7 +358,7 @@
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
       "apiVersion": "2017-04-01",
-      "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/commander.corp.contoso.response')]",
+      "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/commander.response')]",
       "properties": {
         "messageRetentionInDays": 1,
         "partitionCount": 1

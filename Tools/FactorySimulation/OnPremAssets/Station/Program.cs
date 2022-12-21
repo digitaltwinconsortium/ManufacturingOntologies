@@ -103,12 +103,7 @@ namespace Station.Simulation
                 application.ApplicationType = ApplicationType.Client;
                 application.ConfigSectionName = "Opc.Ua.MES";
 
-                LoadCertFromCloud("MES." + Environment.GetEnvironmentVariable("ProductionLineName"));
-
-                // replace the certificate subject name in the configuration
-                string configFilePath = Path.Combine(Directory.GetCurrentDirectory(), application.ConfigSectionName + ".Config.xml");
-                string configFileContent = File.ReadAllText(configFilePath).Replace("UndefinedMESName", "MES." + Environment.GetEnvironmentVariable("ProductionLineName"));
-                File.WriteAllText(configFilePath, configFileContent);
+                LoadCertsFromCloud("MES." + Environment.GetEnvironmentVariable("ProductionLineName"));
 
                 // load the application configuration
                 ApplicationConfiguration appConfiguration = application.LoadApplicationConfiguration(false).Result;
@@ -237,7 +232,7 @@ namespace Station.Simulation
             }
         }
 
-        private static void LoadCertFromCloud(string appName)
+        private static void LoadCertsFromCloud(string appName)
         {
             try
             {
@@ -675,9 +670,9 @@ namespace Station.Simulation
             application.ConfigSectionName = "Opc.Ua.Station";
             application.ApplicationType = ApplicationType.Server;
 
-            LoadCertFromCloud(application.ApplicationName);
+            LoadCertsFromCloud(application.ApplicationName);
 
-            // replace the certificate subject name in the configuration
+            // replace the app name in the configuration
             string configFilePath = Path.Combine(Directory.GetCurrentDirectory(), application.ConfigSectionName + ".Config.xml");
             string configFileContent = File.ReadAllText(configFilePath).Replace("UndefinedStationName", application.ApplicationName);
             File.WriteAllText(configFilePath, configFileContent);

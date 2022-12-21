@@ -210,8 +210,8 @@ You can now manage your Kubernetes cluster from the cloud via the newly deployed
 
 Once you are ready to connect your own production line, simply delete the VM from the Azure Portal.
 
-1. Edit the UA-CloudPublisher.yaml file provided in the `Deployment` folder of this repository, replacing [yourstorageaccountname] with the name of your Azure Storage Account and [key] with the key1 of your Azure Storage Account. You can access this information from the Axure Portal on your deployed stroage account under Access keys.
-1. Run UA Cloud Publisher with the following command. The PC needs Internet access (via port 9093) and needs to be able to connect to your OPC UA-enabled machines in your production line:
+1. Edit the UA-CloudPublisher.yaml file provided in the `Deployment` folder of this repository, replacing [yourstorageaccountname] with the name of your Azure Storage Account and [key] with the key1 of your Azure Storage Account. You can access this information from the Azure Portal on your deployed Azure Storage Account under Access keys.
+1. Run UA Cloud Publisher with the following command. The PC needs Kubernetes support and Internet access (via port 9093) and needs to be able to connect to your OPC UA-enabled machines in your production line:
 
         kubectl apply -f UA-CloudPublisher.yaml
 

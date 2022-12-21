@@ -97,11 +97,17 @@ ECHO Configuring Deployment files...
 CD "C:\k8s\Deployment\Munich\"
 CALL :ReplaceStorageAccountKeyMES
 CALL :ReplaceStorageAccountKeyPublisher
+CALL :ReplaceStorageAccountKeyCommander
+CALL :ReplaceEventHubNameCommander
+CALL :ReplaceEventHubKeyCommander
 CALL :ReplaceStorageAccountKeyProductionLine
 
 CD "C:\k8s\Deployment\Seattle\"
 CALL :ReplaceStorageAccountKeyMES
 CALL :ReplaceStorageAccountKeyPublisher
+CALL :ReplaceStorageAccountKeyCommander
+CALL :ReplaceEventHubNameCommander
+CALL :ReplaceEventHubKeyCommander
 CALL :ReplaceStorageAccountKeyProductionLine
 
 ECHO .
@@ -111,6 +117,9 @@ ECHO .
 ECHO Starting UA-CloudPublisher to upload OPC UA cert to cloud...
 CD "C:\k8s\Deployment\Munich\"
 kubectl apply -f UA-CloudPublisher.yaml
+
+ECHO Starting UA-CloudCommander...
+kubectl apply -f UA-CloudCommander.yaml
 
 ECHO Starting MES...
 kubectl apply -f MES.yaml
@@ -137,6 +146,9 @@ ECHO .
 ECHO Starting UA-CloudPublisher to upload OPC UA cert to cloud...
 CD "C:\k8s\Deployment\Seattle\"
 kubectl apply -f UA-CloudPublisher.yaml
+
+ECHO Starting UA-CloudCommander...
+kubectl apply -f UA-CloudCommander.yaml
 
 ECHO Starting MES...
 kubectl apply -f MES.yaml
@@ -176,6 +188,22 @@ DEL settings.json
 RENAME output.json settings.json
 EXIT /B 0
 
+:ReplaceEventHubNameCommander
+SET "original=[myeventhubsnamespace].servicebus.windows.net"
+SET "replacement=!name!"
+SET "replacement=!replacement:sb:=!"
+SET "replacement=!replacement:/=!"
+(
+FOR /F "tokens=* delims=" %%a IN (UA-CloudCommander.yaml) DO (
+ SET "line=%%a"
+ SET "line=!line:%original%=%replacement%!"
+ ECHO !line!
+)
+) > output.yaml
+DEL UA-CloudCommander.yaml
+RENAME output.yaml UA-CloudCommander.yaml
+EXIT /B 0
+
 :ReplaceEventHubKey
 SET "original=[myeventhubsnamespaceprimarykeyconnectionstring]"
 SET "replacement=!connectionstring!"
@@ -188,6 +216,20 @@ FOR /F "tokens=* delims=" %%a IN (settings.json) DO (
 ) > output.json
 DEL settings.json
 RENAME output.json settings.json
+EXIT /B 0
+
+:ReplaceEventHubKeyCommander
+SET "original=[myeventhubsnamespaceprimarykeyconnectionstring]"
+SET "replacement=!connectionstring!"
+(
+FOR /F "tokens=* delims=" %%a IN (UA-CloudCommander.yaml) DO (
+ SET "line=%%a"
+ SET "line=!line:%original%=%replacement%!"
+ ECHO !line!
+)
+) > output.yaml
+DEL UA-CloudCommander.yaml
+RENAME output.yaml UA-CloudCommander.yaml
 EXIT /B 0
 
 :ReplaceStorageAccountKeyMES
@@ -216,6 +258,20 @@ FOR /F "tokens=* delims=" %%a IN (UA-CloudPublisher.yaml) DO (
 ) > output.yaml
 DEL UA-CloudPublisher.yaml
 RENAME output.yaml UA-CloudPublisher.yaml
+EXIT /B 0
+
+:ReplaceStorageAccountKeyCommander
+SET "original=[mystorageaccountkey1connectionstring]"
+SET "replacement=!storageconnectionstring!"
+(
+FOR /F "tokens=* delims=" %%a IN (UA-CloudCommander.yaml) DO (
+ SET "line=%%a"
+ SET "line=!line:%original%=%replacement%!"
+ ECHO !line!
+)
+) > output.yaml
+DEL UA-CloudCommander.yaml
+RENAME output.yaml UA-CloudCommander.yaml
 EXIT /B 0
 
 :ReplaceStorageAccountKeyProductionLine

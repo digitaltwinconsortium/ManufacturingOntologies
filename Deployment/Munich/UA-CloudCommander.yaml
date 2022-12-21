@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: seattle
+  name: munich
 spec:
   finalizers:
   - kubernetes
@@ -10,7 +10,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ua-cloudcommander
-  namespace: seattle
+  namespace: munich
 spec:
   replicas: 1
   selector:
@@ -28,17 +28,17 @@ spec:
         image: ghcr.io/barnstee/ua-cloudcommander:main
         env:
         - name: APPNAME
-          value: "commander.seattle"
+          value: "commander.munich"
         - name: STORAGE_CONNECTION_STRING
           value: "[mystorageaccountkey1connectionstring]"
         - name: STORAGE_CONTAINER_NAME
-          value: "seattle"
+          value: "munich"
         - name: USE_KAFKA
           value: "1"
         - name: BROKERNAME
           value: "[myeventhubsnamespace].servicebus.windows.net"
         - name: CLIENTNAME
-          value: "commander.seattle"
+          value: "commander.munich"
         - name: TOPIC
           value: "commander.corp.contoso.command"
         - name: RESPONSE_TOPIC

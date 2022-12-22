@@ -298,12 +298,7 @@
         "mode": "Incremental",
         "parameters": {
           "ResourcesName": {
-            "type": "string",
-            "defaultValue": "ontologies",
-            "minLength": 2,
-            "metadata": {
-              "description": "Name of resources to be deployed."
-            }
+            "value": "[parameters('ResourcesName')]"
           },
           "template": {
             "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",

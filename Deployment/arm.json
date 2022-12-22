@@ -329,7 +329,7 @@
     },
     {
       "type": "Microsoft.EventHub/namespaces",
-      "apiVersion": "2017-04-01",
+      "apiVersion": "2021-11-01",
       "name": "[variables('eventHubsNamespaceName')]",
       "location": "[resourceGroup().location]",
       "sku": {
@@ -344,7 +344,7 @@
     },
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
-      "apiVersion": "2017-04-01",
+      "apiVersion": "2021-11-01",
       "name": "[variables('adtDataHistoryEventHubName')]",
       "properties": {
         "messageRetentionInDays": 1,
@@ -356,7 +356,7 @@
     },
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
-      "apiVersion": "2017-04-01",
+      "apiVersion": "2021-11-01",
       "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/commander.command')]",
       "properties": {
         "messageRetentionInDays": 1,
@@ -368,7 +368,7 @@
     },
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
-      "apiVersion": "2017-04-01",
+      "apiVersion": "2021-11-01",
       "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/commander.response')]",
       "properties": {
         "messageRetentionInDays": 1,
@@ -380,7 +380,7 @@
     },
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
-      "apiVersion": "2017-04-01",
+      "apiVersion": "2021-11-01",
       "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/data')]",
       "properties": {
         "messageRetentionInDays": 1,
@@ -392,7 +392,7 @@
     },
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
-      "apiVersion": "2017-04-01",
+      "apiVersion": "2021-11-01",
       "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/metadata')]",
       "properties": {
         "messageRetentionInDays": 1,

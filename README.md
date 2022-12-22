@@ -125,9 +125,9 @@ Once the deployment is complete, follow these steps to finish configuring the si
 
     <img src="Docs/akspowershell.png" alt="AKS" width="900" />
 
-1. Run `New-AksEdgeDeployment -JsonConfigFilePath .\aksedge-config.json` from the PowerShell window.
+1. Run `New-AksEdgeDeployment -JsonConfigFilePath .\aksedge-config.json` from the PowerShell window and select the amount of diagnostic data you want to send to Microsoft at the prompt.
 
-Your Kubernetes installation is now complete and you can start deploying workloads.
+Once the script is finished, your Kubernetes installation is complete and you can start deploying workloads.
 
 Note: To get logs from all your Kubernetes workloads and services at any time, simply run `Get-AksEdgeLogs` from the Powershell window that can be opened via `AksEdgePrompt`.
 

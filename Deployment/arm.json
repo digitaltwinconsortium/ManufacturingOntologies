@@ -296,11 +296,6 @@
           "scope": "inner"
         },
         "mode": "Incremental",
-        "parameters": {
-          "location": {
-            "value": "[resourceGroup().location]"
-          }
-        },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
           "contentVersion": "1.0.0.0",
@@ -432,7 +427,7 @@
     },
     {
       "type": "Microsoft.Authorization/roleAssignments",
-      "apiVersion": "2022-04-01",
+      "apiVersion": "2020-10-01-preview",
       "name": "[guid(variables('dataOwnerRoleDefinitionId'), resourceGroup().id)]",
       "dependsOn": [
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity'))]"
@@ -445,7 +440,7 @@
     },
     {
       "type": "Microsoft.Authorization/roleAssignments",
-      "apiVersion": "2022-04-01",
+      "apiVersion": "2020-10-01-preview",
       "scope": "[format('Microsoft.EventHub/namespaces/{0}/eventhubs/{1}', split(format('{0}/{1}', variables('eventHubsNamespaceName'), variables('adtDataHistoryEventHubName')), '/')[0], split(format('{0}/{1}', variables('eventHubsNamespaceName'), variables('adtDataHistoryEventHubName')), '/')[1])]",
       "name": "[guid(resourceId('Microsoft.EventHub/namespaces/eventhubs', split(format('{0}/{1}', variables('eventHubsNamespaceName'), variables('adtDataHistoryEventHubName')), '/')[0], split(format('{0}/{1}', variables('eventHubsNamespaceName'), variables('adtDataHistoryEventHubName')), '/')[1]), resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('ResourcesName'), '-ADT')), variables('azureRbacAzureEventHubsDataOwner'))]",
       "dependsOn": [
@@ -459,7 +454,7 @@
     },
     {
       "type": "Microsoft.Kusto/clusters/databases/principalAssignments",
-      "apiVersion": "2022-02-01",
+      "apiVersion": "2021-01-01",
       "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), variables('adxDBName'), guid(resourceId('Microsoft.Kusto/clusters/databases', split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[1]), resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('ResourcesName'), '-ADT')), 'Admin'))]",
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'dataExlorerCluster')]"
@@ -473,7 +468,7 @@
     },
     {
       "type": "Microsoft.Authorization/roleAssignments",
-      "apiVersion": "2022-04-01",
+      "apiVersion": "2020-10-01-preview",
       "scope": "[format('Microsoft.Kusto/clusters/{0}/databases/{1}', split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[1])]",
       "name": "[guid(resourceId('Microsoft.Kusto/clusters/databases', split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[1]), resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('ResourcesName'), '-ADT')), variables('azureRbacContributor'))]",
       "dependsOn": [

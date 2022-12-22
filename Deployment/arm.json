@@ -34,7 +34,6 @@
     "azureRbacAzureDigitalTwinsDataOwner": "bcd981a7-7f74-457b-83e1-cceb9e632ffe",
     "adxClusterName": "[concat(parameters('ResourcesName'), 'ADX')]",
     "adxDBName": "[concat(parameters('ResourcesName'), '-DB')]",
-    "adtDataHistoryEventHubName": "[concat(parameters('ResourcesName'), '-EventHubs', '/adthistory')]",
     "adtDataHistoryTableName": "[concat(parameters('ResourcesName'), '-adt-table')]",
     "eventHubsNamespaceName": "[concat(parameters('ResourcesName'), '-EventHubs')]"
   },
@@ -345,7 +344,7 @@
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
       "apiVersion": "2021-11-01",
-      "name": "[variables('adtDataHistoryEventHubName')]",
+      "name": "[concat(parameters('ResourcesName'), '-EventHubs', '/adthistory')]",
       "properties": {
         "messageRetentionInDays": 1,
         "partitionCount": 1
@@ -424,8 +423,8 @@
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-10-01-preview",
-      "scope": "[format('Microsoft.EventHub/namespaces/{0}/eventhubs/{1}', split(format('{0}/{1}', variables('eventHubsNamespaceName'), variables('adtDataHistoryEventHubName')), '/')[0], split(format('{0}/{1}', variables('eventHubsNamespaceName'), variables('adtDataHistoryEventHubName')), '/')[1])]",
-      "name": "[guid(resourceId('Microsoft.EventHub/namespaces/eventhubs', split(format('{0}/{1}', variables('eventHubsNamespaceName'), variables('adtDataHistoryEventHubName')), '/')[0], split(format('{0}/{1}', variables('eventHubsNamespaceName'), variables('adtDataHistoryEventHubName')), '/')[1]), resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('ResourcesName'), '-ADT')), variables('azureRbacAzureEventHubsDataOwner'))]",
+      "scope": "[format('Microsoft.EventHub/namespaces/{0}/eventhubs/{1}', split(format('{0}/{1}', variables('eventHubsNamespaceName'), 'adthistory'), '/')[0], split(format('{0}/{1}', variables('eventHubsNamespaceName'), 'adthistory'), '/')[1])]",
+      "name": "[guid(resourceId('Microsoft.EventHub/namespaces/eventhubs', split(format('{0}/{1}', variables('eventHubsNamespaceName'), 'adthistory'), '/')[0], split(format('{0}/{1}', variables('eventHubsNamespaceName'), 'adthistory'), '/')[1]), resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('ResourcesName'), '-ADT')), variables('azureRbacAzureEventHubsDataOwner'))]",
       "dependsOn": [
         "[resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('ResourcesName'), '-ADT'))]"
       ],
@@ -475,7 +474,7 @@
         "adxEndpointUri": "[reference(resourceId('Microsoft.Kusto/clusters', variables('adxClusterName')), '2022-02-01').uri]",
         "adxDatabaseName": "[variables('adxDBName')]",
         "eventHubEndpointUri": "[format('sb://{0}.servicebus.windows.net', variables('eventHubsNamespaceName'))]",
-        "eventHubEntityPath": "[variables('adtDataHistoryEventHubName')]",
+        "eventHubEntityPath": "adthistory",
         "adxResourceId": "[resourceId('Microsoft.Kusto/clusters', variables('adxClusterName'))]",
         "eventHubNamespaceResourceId": "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubsNamespaceName'))]"
       }

@@ -6,7 +6,7 @@ An ontology defines the language used to describe a system. In the manufacturing
 
 ### Digital Twin Definition Language
 
-The ontologies defined in this repository are described by leveraging the Digital Twin Definition Language (DTDL), which is specified [here](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2).
+The ontologies defined in this repository are described by leveraging the Digital Twin Definition Language (DTDL), which is specified [here](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md).
 
 ### International Society of Automation 95 (ISA95)
 

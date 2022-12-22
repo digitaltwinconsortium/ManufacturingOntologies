@@ -293,44 +293,22 @@
       "name": "dataExlorerCluster",
       "properties": {
         "expressionEvaluationOptions": {
-          "scope": "inner"
+          "scope": "Outer"
         },
         "mode": "Incremental",
-        "parameters": {
-          "adxClusterName": {
-            "value": "[variables('adxClusterName')]"
-          },
-          "adxDBName": {
-            "value": "[variables('adxDBName')]"
-          }
-        },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
           "contentVersion": "1.0.0.0",
-          "parameters": {
-            "adxClusterName": {
-              "type": "string",
-              "metadata": {
-                "description": "Name given to Azure Data Explorer cluster resource"
-              }
-            },
-            "adxDBName": {
-              "type": "string",
-              "metadata": {
-                "description": "Name given to database"
-              }
-            }
-          },
           "resources": [
             {
-              "name": "[parameters('adxClusterName')]",
               "type": "Microsoft.Kusto/clusters",
+              "apiVersion": "2021-01-01",
+              "name": "[variables('adxClusterName')]",
               "sku": {
                 "name": "Standard_D11_v2",
                 "tier": "Standard",
                 "capacity": 2
               },
-              "apiVersion": "2021-01-01",
               "location": "[resourceGroup().location]",
               "tags": {
                 "Created By": "GitHub quickstart template"
@@ -349,12 +327,12 @@
               }
             },
             {
-              "name": "[format('{0}/{1}', parameters('adxClusterName'), parameters('adxDBName'))]",
               "type": "Microsoft.Kusto/clusters/databases",
               "apiVersion": "2021-01-01",
+              "name": "[format('{0}/{1}', variables('adxClusterName'), variables('adxDBName'))]",
               "location": "[resourceGroup().location]",
               "dependsOn": [
-                "[resourceId('Microsoft.Kusto/clusters', parameters('adxClusterName'))]"
+                "[resourceId('Microsoft.Kusto/clusters', variables('adxClusterName'))]"
               ],
               "properties": {
                 "softDeletePeriodInDays": 365,

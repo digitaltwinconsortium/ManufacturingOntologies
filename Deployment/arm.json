@@ -33,7 +33,7 @@
     "azureRbacAzureEventHubsDataOwner": "f526a384-b230-433a-b45c-95f59c4a2dec",
     "azureRbacAzureDigitalTwinsDataOwner": "bcd981a7-7f74-457b-83e1-cceb9e632ffe",
     "adxClusterName": "[concat(parameters('ResourcesName'), 'ADX')]",
-    "adxDBName": "[concat(concat(parameters('ResourcesName'), 'ADX'), '/', concat(parameters('ResourcesName'), '-DB'))]",
+    "adxDBName": "[concat(parameters('ResourcesName'), '-DB')]",
     "adtDataHistoryEventHubName": "[concat(parameters('ResourcesName'), '-EventHubs', '/adthistory')]",
     "adtDataHistoryTableName": "[concat(parameters('ResourcesName'), '_adt_table')]",
     "eventHubsNamespaceName": "[concat(parameters('ResourcesName'), '-EventHubs')]"
@@ -314,7 +314,7 @@
       }
     },
     {
-      "name": "[variables('adxDBName')]",
+      "name": "[format('{0}/{1}', variables('adxClusterName'), variables('adxDBName'))]",
       "type": "Microsoft.Kusto/clusters/databases",
       "apiVersion": "2021-01-01",
       "location": "[resourceGroup().location]",

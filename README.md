@@ -6,7 +6,7 @@ An ontology defines the language used to describe a system. In the manufacturing
 
 ### Digital Twin Definition Language
 
-The ontologies defined in this repository are described by leveraging the Digital Twin Definition Language (DTDL), which is specified [here](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md).
+The ontologies defined in this repository are described by leveraging the Digital Twin Definition Language (DTDL), which is specified [here](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2).
 
 ### International Society of Automation 95 (ISA95)
 
@@ -147,7 +147,7 @@ Note: In this solution, the OPC UA application certificate store for UA Cloud Pu
 
 You can use [Azure Digital Twins Explorer](https://learn.microsoft.com/en-us/azure/digital-twins/concepts-azure-digital-twins-explorer) to monitor twin property updates and add more relationships to the digital twins that are created. For example, you might want to add *Next* and *Previous* relationships between machines on each production line to add more context to your solution.
 
-To access Azure Digital Twins Explorer, first make sure you have the [Azure Digital Twins Data Owner role](how-to-set-up-instance-portal.md#assign-the-role-using-azure-identity-management-iam) on your Azure Digital Twins instance. Then [open the explorer](quickstart-azure-digital-twins-explorer.md#open-instance-in-azure-digital-twins-explorer).
+To access Azure Digital Twins Explorer, first make sure you have the [Azure Digital Twins Data Owner role](https://learn.microsoft.com/en-us/azure/digital-twins/how-to-set-up-instance-portal#assign-the-role-using-azure-identity-management-iam) on your Azure Digital Twins instance. Then [open the explorer](https://learn.microsoft.com/en-us/azure/digital-twins/quickstart-azure-digital-twins-explorer#open-instance-in-azure-digital-twins-explorer).
 
 
 ## Condition Monitoring, Calculating OEE, Detecting Anomalies and Making Predictions in Azure Data Explorer

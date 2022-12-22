@@ -296,12 +296,34 @@
           "scope": "inner"
         },
         "mode": "Incremental",
+        "parameters": {
+          "adxClusterName": {
+            "value": "[variables('adxClusterName')]"
+          },
+          "adxDBName": {
+            "value": "[variables('adxDBName')]"
+          }
+        },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
           "contentVersion": "1.0.0.0",
+          "parameters": {
+            "adxClusterName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name given to Azure Data Explorer cluster resource"
+              }
+            },
+            "adxDBName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name given to database"
+              }
+            }
+          },
           "resources": [
             {
-              "name": "[variables('adxClusterName')]",
+              "name": "[parameters('adxClusterName')]",
               "type": "Microsoft.Kusto/clusters",
               "sku": {
                 "name": "Standard_D11_v2",
@@ -327,12 +349,12 @@
               }
             },
             {
-              "name": "[format('{0}/{1}', variables('adxClusterName'), variables('adxDBName'))]",
+              "name": "[format('{0}/{1}', parameters('adxClusterName'), parameters('adxDBName'))]",
               "type": "Microsoft.Kusto/clusters/databases",
               "apiVersion": "2021-01-01",
               "location": "[resourceGroup().location]",
               "dependsOn": [
-                "[resourceId('Microsoft.Kusto/clusters', variables('adxClusterName'))]"
+                "[resourceId('Microsoft.Kusto/clusters', parameters('adxClusterName'))]"
               ],
               "properties": {
                 "softDeletePeriodInDays": 365,

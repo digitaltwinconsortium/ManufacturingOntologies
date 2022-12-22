@@ -35,7 +35,7 @@
     "adxClusterName": "[concat(parameters('ResourcesName'), 'ADX')]",
     "adxDBName": "[concat(parameters('ResourcesName'), '-DB')]",
     "adtDataHistoryEventHubName": "[concat(parameters('ResourcesName'), '-EventHubs', '/adthistory')]",
-    "adtDataHistoryTableName": "[concat(parameters('ResourcesName'), '_adt_table')]",
+    "adtDataHistoryTableName": "[concat(parameters('ResourcesName'), '-adt-table')]",
     "eventHubsNamespaceName": "[concat(parameters('ResourcesName'), '-EventHubs')]"
   },
   "resources": [

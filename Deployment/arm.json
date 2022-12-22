@@ -299,64 +299,65 @@
         "parameters": {
           "ResourcesName": {
             "value": "[parameters('ResourcesName')]"
-          },
-          "template": {
-            "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-            "contentVersion": "1.0.0.0",
-            "parameters": {
-              "ResourcesName": {
-                "type": "string"
-              }
-            },
-            "variables": {
-              "adxClusterName": "[concat(parameters('ResourcesName'), 'ADX')]",
-              "adxDBName": "[concat(parameters('ResourcesName'), '-DB')]"
-            },
-            "resources": [
-              {
-                "type": "Microsoft.Kusto/clusters",
-                "apiVersion": "2021-01-01",
-                "name": "[variables('adxClusterName')]",
-                "sku": {
-                  "name": "Standard_D11_v2",
-                  "tier": "Standard",
-                  "capacity": 2
-                },
-                "location": "[resourceGroup().location]",
-                "tags": {
-                  "Created By": "GitHub quickstart template"
-                },
-                "properties": {
-                  "trustedExternalTenants": [
-                    {
-                      "value": "*"
-                    }
-                  ],
-                  "enableDiskEncryption": false,
-                  "enableStreamingIngest": true,
-                  "enablePurge": false,
-                  "enableDoubleEncryption": false,
-                  "engineType": "V3"
-                }
-              },
-              {
-                "type": "Microsoft.Kusto/clusters/databases",
-                "apiVersion": "2021-01-01",
-                "name": "[format('{0}/{1}', variables('adxClusterName'), variables('adxDBName'))]",
-                "location": "[resourceGroup().location]",
-                "dependsOn": [
-                  "[resourceId('Microsoft.Kusto/clusters', variables('adxClusterName'))]"
-                ],
-                "properties": {
-                  "softDeletePeriodInDays": 365,
-                  "hotCachePeriodInDays": 31
-                },
-                "kind": "ReadWrite"
-              }
-            ]
           }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "ResourcesName": {
+              "type": "string"
+            }
+          },
+          "variables": {
+            "adxClusterName": "[concat(parameters('ResourcesName'), 'ADX')]",
+            "adxDBName": "[concat(parameters('ResourcesName'), '-DB')]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Kusto/clusters",
+              "apiVersion": "2021-01-01",
+              "name": "[variables('adxClusterName')]",
+              "sku": {
+                "name": "Standard_D11_v2",
+                "tier": "Standard",
+                "capacity": 2
+              },
+              "location": "[resourceGroup().location]",
+              "tags": {
+                "Created By": "GitHub quickstart template"
+              },
+              "properties": {
+                "trustedExternalTenants": [
+                  {
+                    "value": "*"
+                  }
+                ],
+                "enableDiskEncryption": false,
+                "enableStreamingIngest": true,
+                "enablePurge": false,
+                "enableDoubleEncryption": false,
+                "engineType": "V3"
+              }
+            },
+            {
+              "type": "Microsoft.Kusto/clusters/databases",
+              "apiVersion": "2021-01-01",
+              "name": "[format('{0}/{1}', variables('adxClusterName'), variables('adxDBName'))]",
+              "location": "[resourceGroup().location]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Kusto/clusters', variables('adxClusterName'))]"
+              ],
+              "properties": {
+                "softDeletePeriodInDays": 365,
+                "hotCachePeriodInDays": 31
+              },
+              "kind": "ReadWrite"
+            }
+          ]
         }
-      },
+      }
+    },
     {
       "type": "Microsoft.EventHub/namespaces",
       "apiVersion": "2017-04-01",

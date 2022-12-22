@@ -288,75 +288,44 @@
       ]
     },
     {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2020-10-01",
-      "name": "dataExlorerCluster",
+      "type": "Microsoft.Kusto/clusters",
+      "apiVersion": "2021-01-01",
+      "name": "[variables('adxClusterName')]",
+      "sku": {
+        "name": "Standard_D11_v2",
+        "tier": "Standard",
+        "capacity": 2
+      },
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "Created By": "GitHub quickstart template"
+      },
       "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "ResourcesName": {
-            "value": "[parameters('ResourcesName')]"
+        "trustedExternalTenants": [
+          {
+            "value": "*"
           }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "parameters": {
-            "ResourcesName": {
-              "type": "string"
-            }
-          },
-          "variables": {
-            "adxClusterName": "[concat(parameters('ResourcesName'), 'ADX')]",
-            "adxDBName": "[concat(parameters('ResourcesName'), '-DB')]"
-          },
-          "resources": [
-            {
-              "type": "Microsoft.Kusto/clusters",
-              "apiVersion": "2021-01-01",
-              "name": "[variables('adxClusterName')]",
-              "sku": {
-                "name": "Standard_D11_v2",
-                "tier": "Standard",
-                "capacity": 2
-              },
-              "location": "[resourceGroup().location]",
-              "tags": {
-                "Created By": "GitHub quickstart template"
-              },
-              "properties": {
-                "trustedExternalTenants": [
-                  {
-                    "value": "*"
-                  }
-                ],
-                "enableDiskEncryption": false,
-                "enableStreamingIngest": true,
-                "enablePurge": false,
-                "enableDoubleEncryption": false,
-                "engineType": "V3"
-              }
-            },
-            {
-              "type": "Microsoft.Kusto/clusters/databases",
-              "apiVersion": "2021-01-01",
-              "name": "[format('{0}/{1}', variables('adxClusterName'), variables('adxDBName'))]",
-              "location": "[resourceGroup().location]",
-              "dependsOn": [
-                "[resourceId('Microsoft.Kusto/clusters', variables('adxClusterName'))]"
-              ],
-              "properties": {
-                "softDeletePeriodInDays": 365,
-                "hotCachePeriodInDays": 31
-              },
-              "kind": "ReadWrite"
-            }
-          ]
-        }
+        ],
+        "enableDiskEncryption": false,
+        "enableStreamingIngest": true,
+        "enablePurge": false,
+        "enableDoubleEncryption": false,
+        "engineType": "V3"
       }
+    },
+    {
+      "type": "Microsoft.Kusto/clusters/databases",
+      "apiVersion": "2021-01-01",
+      "name": "[format('{0}/{1}', variables('adxClusterName'), variables('adxDBName'))]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Kusto/clusters', variables('adxClusterName'))]"
+      ],
+      "properties": {
+        "softDeletePeriodInDays": 365,
+        "hotCachePeriodInDays": 31
+      },
+      "kind": "ReadWrite"
     },
     {
       "type": "Microsoft.EventHub/namespaces",
@@ -486,7 +455,7 @@
       "scope": "[format('Microsoft.Kusto/clusters/{0}/databases/{1}', split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[1])]",
       "name": "[guid(resourceId('Microsoft.Kusto/clusters/databases', split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[1]), resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('ResourcesName'), '-ADT')), variables('azureRbacContributor'))]",
       "dependsOn": [
-        "[resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('ResourcesName'), '-ADT'))]"
+        "[resourceId('Microsoft.Kusto/clusters/databases', format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')))]"
       ],
       "properties": {
         "principalId": "[reference(resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('ResourcesName'), '-ADT')), '2022-05-31', 'full').identity.principalId]",
@@ -499,7 +468,7 @@
       "apiVersion": "2022-05-31",
       "name": "[format('{0}/{1}', concat(parameters('ResourcesName'), '-ADT'), variables('adtDataHistoryTableName'))]",
       "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'dataExlorerCluster')]"
+        "[resourceId('Microsoft.Kusto/clusters/databases', format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')))]"
       ],
       "properties": {
         "connectionType": "AzureDataExplorer",

@@ -440,7 +440,7 @@
       "apiVersion": "2021-01-01",
       "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), variables('adxDBName'), guid(resourceId('Microsoft.Kusto/clusters/databases', split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[1]), resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('ResourcesName'), '-ADT')), 'Admin'))]",
       "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters/databases', concat(variables('adxClusterName'), '/', variables('adxDBName')))]"
+        "[resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), variables('adxDBName'))]"
       ],
       "properties": {
         "principalId": "[reference(resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('ResourcesName'), '-ADT')), '2022-05-31', 'full').identity.principalId]",
@@ -468,7 +468,7 @@
       "apiVersion": "2022-05-31",
       "name": "[format('{0}/{1}', concat(parameters('ResourcesName'), '-ADT'), variables('adtDataHistoryTableName'))]",
       "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters/databases', concat(variables('adxClusterName'), '/', variables('adxDBName')))]"
+        "[resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), variables('adxDBName'))]"
       ],
       "properties": {
         "connectionType": "AzureDataExplorer",

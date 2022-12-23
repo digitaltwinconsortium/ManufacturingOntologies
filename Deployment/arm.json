@@ -135,6 +135,46 @@
       ]
     },
     {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2021-02-01",
+      "name": "[concat(parameters('ResourcesName'), '-AAS-Repo')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "httpsOnly": true,
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', concat(parameters('ResourcesName'), '-AppService'))]",
+        "siteConfig": {
+          "numberOfWorkers": 1,
+          "linuxFxVersion": "DOCKER|ghcr.io/digitaltwinconsortium/aas-repository:masterv3",
+          "minTlsVersion": "1.2",
+          "ftpsState": "FtpsOnly",
+          "acrUseManagedIdentityCreds": false,
+          "alwaysOn": true,
+          "http20Enabled": false,
+          "functionAppScaleLimit": 0,
+          "minimumElasticInstanceCount": 0
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', concat(parameters('ResourcesName'), '-AppService'))]"
+      ],
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "location": "[resourceGroup().location]",
+          "name": "appsettings",
+          "properties": {
+            "ADX_PASSWORD": "TBD",
+            "UACLUsername": "TBD",
+            "UACLPassword": "TBD"
+          },
+          "type": "config",
+          "dependsOn": [
+            "[concat('Microsoft.Web/sites/', concat(parameters('ResourcesName'), '-AAS-Repo'))]"
+          ]
+        }
+      ]
+    },
+    {
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2021-04-01",
       "name": "[concat(parameters('ResourcesName'), 'storage')]",

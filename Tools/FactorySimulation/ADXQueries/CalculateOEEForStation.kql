@@ -1,18 +1,19 @@
 .create-or-alter function CalculateOEEForStation(stationName:string,location:string,idealCycleTime:int,hoursInShift:int) {
 // calculation from https://www.oee.com/calculating-oee/
+let dataHistoryTable = <tableName> // set to the name of your data history table
 let idealRunningTime = hoursInShift * 60 * 60; // [seconds]
 let shiftEndTime = now();
 let shiftStartTime = datetime_add('hour', -hoursInShift, shiftEndTime);
-let numProdTable = adt_dh_ontdemo_ADT_eastus2
+let numProdTable = dataHistoryTable
 | where TimeStamp > shiftStartTime and TimeStamp < shiftEndTime
 | where Id == toscalar(GetDigitalTwinIdForUANode(stationName, location, "NumberOfManufacturedProducts"));
-let numScrapTable = adt_dh_ontdemo_ADT_eastus2
+let numScrapTable = dataHistoryTable
 | where TimeStamp > shiftStartTime and TimeStamp < shiftEndTime
 | where Id == toscalar(GetDigitalTwinIdForUANode(stationName, location, "NumberOfDiscardedProducts"));
-let cycleTimeTable = adt_dh_ontdemo_ADT_eastus2
+let cycleTimeTable = dataHistoryTable
 | where TimeStamp > shiftStartTime and TimeStamp < shiftEndTime
 | where Id == toscalar(GetDigitalTwinIdForUANode(stationName, location, "ActualCycleTime"));
-let faultyTimeTable = adt_dh_ontdemo_ADT_eastus2
+let faultyTimeTable = dataHistoryTable
 | where TimeStamp > shiftStartTime and TimeStamp < shiftEndTime
 | where Id == toscalar(GetDigitalTwinIdForUANode(stationName, location, "FaultyTime"));
 let numProdEnd = toscalar(

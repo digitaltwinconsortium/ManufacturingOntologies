@@ -1,11 +1,11 @@
 .create-or-alter function  CalculateAvgEnergyConsumption(stationName:string,location:string,hoursInShift:int) {
 let shiftEndTime = now();
 let shiftStartTime = datetime_add('hour', -hoursInShift, shiftEndTime);
-let k = adt_dh_ontdemo_ADT_eastus2
+let dataHistoryTable = <tableName> // set to the name of your property data history table
 | where TimeStamp between (shiftStartTime .. shiftEndTime)
 | where Id == toscalar(GetDigitalTwinIdForUANode(stationName, location, "EnergyConsumption"));
 let averageEnergyConsumption = toscalar(
-k
+dataHistoryTable
 | where isnotnull(SourceTimeStamp)
 | extend energy = todouble(Value)
 | summarize avg(energy));

@@ -142,11 +142,11 @@ Syntax:
 
 Parameters:
 
-    | Parameter | Description |
-    | --- | --- |
-    | <EventHubCS> | Copy the Event Hubs namespace connection string as described [here](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string"). |
-    | <StorageAccountCS> | In the Azure Portal, navigate to the Storage Account created by this solution. Select "Access keys" from the left-hand navigation menu. Then, copy the connection string for key1. |
-    | <AzureSubscriptionName> | In Azure Portal, browse your Subscriptions and copy the name of the subscription used in this solution. |
+| Parameter | Description |
+| --- | --- |
+| <EventHubCS> | Copy the Event Hubs namespace connection string as described [here](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string"). |
+| <StorageAccountCS> | In the Azure Portal, navigate to the Storage Account created by this solution. Select "Access keys" from the left-hand navigation menu. Then, copy the connection string for key1. |
+| <AzureSubscriptionName> | In Azure Portal, browse your Subscriptions and copy the name of the subscription used in this solution. |
     
 Example:
 

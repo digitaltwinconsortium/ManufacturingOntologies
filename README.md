@@ -86,7 +86,7 @@ The solution leverages a production line simulation made up of several Stations,
 The simulation is configured to include 2 production lines. The default configuration is depicted below:
 
 | Production Line | Ideal Cycle Time (in seconds) |
-|:---------------:|:-----------------------------:|
+| --- | --- |
 | Munich | 6 |
 | Seattle |	10 |
 
@@ -143,8 +143,8 @@ Syntax:
 Parameters:
 
     | Parameter | Description |
-    |:---------:|:-----------:|
-    | <EventHubCS> | <EventHubCS>: Copy the Event Hubs namespace connection string as described [here](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string"). |
+    | --- | --- |
+    | <EventHubCS> | Copy the Event Hubs namespace connection string as described [here](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string"). |
     | <StorageAccountCS> | In the Azure Portal, navigate to the Storage Account created by this solution. Select "Access keys" from the left-hand navigation menu. Then, copy the connection string for key1. |
     | <AzureSubscriptionName> | In Azure Portal, browse your Subscriptions and copy the name of the subscription used in this solution. |
     

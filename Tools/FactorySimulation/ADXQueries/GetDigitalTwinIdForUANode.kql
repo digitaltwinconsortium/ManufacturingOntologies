@@ -1,5 +1,5 @@
 .create-or-alter function  GetDigitalTwinIdForUANode(stationName:string,location:string,displayName:string) {
-let dataHistoryTable = <tableName>; // set to the name of your property data history table
+let dataHistoryTable = <ADTHistoryTableName>; // set to the name of your data history table
 let dtId = toscalar(dataHistoryTable
 | where TimeStamp between (todatetime(now() - datetime(01:00:00)) .. now())
 | where Key == 'equipmentID'

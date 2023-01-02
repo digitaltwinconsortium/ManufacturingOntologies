@@ -61,15 +61,15 @@ The simulation makes use of the UA Cloud Twin also available from the Digital Tw
 
 #### Mapping OPC UA Servers to the ISA95 Hierarchy Model
 
-UA Cloud Twin takes the combination of the OPC UA Application URI and the OPC UA Namespace URIs discovered in the OPC UA telemetry stream (specifically, in the OPC UA PubSub metadata messages) and creates ISA95 Work Center assets for each one. UA Cloud Publisher sends the OPC UA PubSub metadata messages to a seperate broker topic to make sure all metadata can be read by UA Cloud Twin before the processing of the telemetry messags starts.
+UA Cloud Twin takes the combination of the OPC UA Application URI and the OPC UA Namespace URIs discovered in the OPC UA telemetry stream (specifically, in the OPC UA PubSub metadata messages) and creates OPC UA Nodeset digital twin instances (inherited from the ISA95 Work Center digital twin model) for each one. UA Cloud Publisher sends the OPC UA PubSub metadata messages to a seperate broker topic to make sure all metadata can be read by UA Cloud Twin before the processing of the telemetry messags starts.
 
 #### Mapping OPC UA PubSub Publishers to the ISA95 Hierarchy Model
 
-UA Cloud Twin takes the OPC UA Publisher ID and creates ISA95 Area assets for each one.
+UA Cloud Twin takes the OPC UA Publisher ID and creates ISA95 Area digital twin instances (derived from the digital twin model of the same name) for each one.
 
 #### Mapping OPC UA PubSub Datasets to the ISA95 Hierarchy Model
 
-UA Cloud Twin takes each OPC UA Field discovered in the received Dataset metadata and creates an ISA95 Work Unit asset for each.
+UA Cloud Twin takes each OPC UA Field discovered in the received Dataset metadata and creates an OPC UA Node digital twin instance (inherited from the ISA95 Work Unit digital twin model) for each.
 
 
 ## A Cloud-based OPC UA Certificate Store and Persisted Storage
@@ -115,13 +115,13 @@ You can also **visualize** the resources that will get deployed by clicking the 
 
 <a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fdigitaltwinconsortium%2FManufacturingOntologies%2Fmain%2FDeployment%2Farm.json" data-linktype="external"><img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true" alt="Visualize" data-linktype="external"></a>
 
-Once the deployment is complete, follow these steps to finish configuring the simulation:
+Once the deployment completes, follow these steps to setup a single-node Edge Kubernetes cluster and finish configuring the simulation:
 
 1. Connect to the deployed Windows VM with an RDP (remote desktop) connection. You can download the RDP file in the [Azure portal](https://portal.azure.com) page for the VM, under the **Connect** options. Sign in using the credentials you provided during deployment.
 1. From the VM, download and install [Azure Kubernetes Services Edge Essentials](https://aka.ms/aks-edge/k8s-msi).
 1. Download and install the [Azure CLI](https://aka.ms/installazurecliwindows).
 1. Download this repository from [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/archive/refs/heads/main.zip) and extract to a directory of your choice.
-1. From a command prompt, navigate to the `AKSEdgeTools` directory and run `AksEdgePrompt`. On first run after some config steps, this will reboot the VM. Log in again and run `AksEdgePrompt` from a command prompt again. This will open a PowerShell window:
+1. From a **Windows command prompt**, navigate to the `./AKSEdgeTools` directory of the extracted repository and run `AksEdgePrompt`. On first run after some config steps, this will reboot the VM. Log in again and run `AksEdgePrompt` from a command prompt again. This will open a PowerShell window:
 
     <img src="Docs/akspowershell.png" alt="AKS" width="900" />
 
@@ -134,13 +134,27 @@ Note: To get logs from all your Kubernetes workloads and services at any time, s
 
 ## Running the Production Line Simulation
 
-On the deployed VM, navigate to the OnPremAssets directory of the unzipped repository content downloaded ealier and run the **StartSimulation** command from a command prompt by supplying the primary key connection string of your Event Hubs namespace, the key1 connection string of your Storage Account and the name of your Azure subscription. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey". The key1 connection string can be read in the Azure Portal under your Storage Account' "access keys". The Azure Subscription name can be read in the Azure Portal under Subscriptions. For example:
+On the deployed VM, navigate to the `./Tools/FactorySimulation/OnPremAssets` directory of the extracted repository downloaded ealier and run the **StartSimulation** command from a **Windows command prompt** by supplying the following parameters:
+
+Syntax:
+
+    StartSimulation <EventHubsCS> <StorageAccountCS> <AzureSubscriptionName>
+
+Parameters:
+
+    | Parameter | Description |
+    |:---------:|:-----------:|
+    | <EventHubCS> | <EventHubCS>: Copy the Event Hubs namespace connection string as described [here](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string"). |
+    | <StorageAccountCS> | In the Azure Portal, navigate to the Storage Account created by this solution. Select "Access keys" from the left-hand navigation menu. Then, copy the connection string for key1. |
+    | <AzureSubscriptionName> | In Azure Portal, browse your Subscriptions and copy the name of the subscription used in this solution. |
+    
+Example:
 
     StartSimulation Endpoint=sb://ontologies.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=abcdefgh= DefaultEndpointsProtocol=https;AccountName=ontologiesstorage;AccountKey=abcdefgh==;EndpointSuffix=core.windows.net MyAzureSubscription
 
 Note: On first run, a tool to copy files to Azure Storage needs to be installed. When prompted, simply press enter to proceed with the installation.
 
-Note: In this solution, the OPC UA application certificate store for UA Cloud Publisher, as well as the simulated production line's MES and individual machines, is located in the cloud in the deployed Azure Storage account.
+Note: In this solution, the OPC UA application certificate store for UA Cloud Publisher, as well as the simulated production line's MES and individual machines' store, is located in the cloud in the deployed Azure Storage account.
 
 
 ## View Digital Twins in Azure Digital Twins Explorer
@@ -152,8 +166,9 @@ To access Azure Digital Twins Explorer, first make sure you have the [Azure Digi
 
 ## Condition Monitoring, Calculating OEE, Detecting Anomalies and Making Predictions in Azure Data Explorer
 
-You can also visit the [Azure Data Explorer documentation](https://learn.microsoft.com/en-us/azure/synapse-analytics/data-explorer/data-explorer-overview) to learn how to create no-code dashboards for condition monitoring, yield or maintenance predictions, or anomaly detection. There are a number of sample queries in the ADXQueries folder in this repo to get you started.
+You can also visit the [Azure Data Explorer documentation](https://learn.microsoft.com/en-us/azure/synapse-analytics/data-explorer/data-explorer-overview) to learn how to create no-code dashboards for condition monitoring, yield or maintenance predictions, or anomaly detection. There are a number of sample queries in the `./Tools/FactorySimulation/ADXQueries` folder in this repository to get you started, plus we have provided a sample dashboard in the same folder that you can deploy by following the steps outlined [here](https://learn.microsoft.com/en-us/azure/data-explorer/azure-data-explorer-dashboards#to-create-new-dashboard-from-a-file).
 
+Note: In each of the queries and in the provided ADX dashboard configuration file, replace <ADTHistoryTableName> with the name of your ADT history table. This name can be copied from the Azure Data Explorer page of this solutions's deployed instance in the Azure Portal under Query -> the deployed ADX cluster instance name -> the deployed ADX database instance name -> the ADT history table name.
 
 ## Using 3D Scenes Studio
 

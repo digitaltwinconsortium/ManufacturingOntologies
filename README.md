@@ -205,7 +205,7 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 1. Run `notepad aide-userconfig.json` and provide the following information:
 
     | Attribute | Description |
-    |:---------------:|:-----------------------------:|
+    | --- | --- |
     | SubscriptionName	| The name of your Azure subscription. You can find this on the Azure portal. |
     | SubscriptionId | Your subscription ID. In the Azure portal, click on the subscription you're using and copy/paste the subscription ID. |
     | TenantId | Your tenant ID. In the Azure portal, click on Azure Active Directory and copy/paste the tenant ID. |

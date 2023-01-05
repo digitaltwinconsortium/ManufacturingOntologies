@@ -168,7 +168,7 @@ To access Azure Digital Twins Explorer, first make sure you have the [Azure Digi
 
 You can also visit the [Azure Data Explorer documentation](https://learn.microsoft.com/en-us/azure/synapse-analytics/data-explorer/data-explorer-overview) to learn how to create no-code dashboards for condition monitoring, yield or maintenance predictions, or anomaly detection. There are a number of sample queries in the `./Tools/FactorySimulation/ADXQueries` folder in this repository to get you started, plus we have provided a sample dashboard in the same folder that you can deploy by following the steps outlined [here](https://learn.microsoft.com/en-us/azure/data-explorer/azure-data-explorer-dashboards#to-create-new-dashboard-from-a-file).
 
-Note: In each of the queries and in the provided ADX dashboard configuration file, replace <ADTHistoryTableName> with the name of your ADT history table. This name can be copied from the Azure Data Explorer page of this solutions's deployed instance in the Azure Portal under Query -> the deployed ADX cluster instance name -> the deployed ADX database instance name -> the ADT history table name.
+Note: In each of the queries and in the provided ADX dashboard configuration file, replace `<ADTHistoryTableName>` with the name of your ADT history table. This name can be copied from the Azure Data Explorer page of this solutions's deployed instance in the Azure Portal under Query -> the deployed ADX cluster instance name -> the deployed ADX database instance name -> the ADT history table name.
 
 ## Using 3D Scenes Studio
 

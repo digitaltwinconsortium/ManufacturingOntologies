@@ -5,7 +5,10 @@
     "displayName": "Material definition",
     "description": "A representation of a material with similar characteristics for the purpose of manufacturing operations definition, scheduling, capability and performance shall be presented as a material definition",
     "comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
-    "extends": ["dtmi:digitaltwins:isa95:BaseModel;1"],
+    "extends": [
+        "dtmi:digitaltwins:isa95:BaseModel;1",
+        "dtmi:digitaltwins:isa95:TestableObject;1"
+    ],
     "contents": [
         {
             "@type": "Relationship",
@@ -30,14 +33,6 @@
             "description": "This material definition objects support this material class. ",
             "target": "dtmi:digitaltwins:isa95:MaterialClass;1",
             "comment": "Relationship type: Association"
-        },
-        {
-            "@type": "Relationship",
-            "name": "testSpecification",
-            "displayName": "Test specification",
-            "description": "The test specification(s) used to evaluate this testable object.",
-            "comment": "TODO",
-            "target": "dtmi:digitaltwins:isa95:BaseModel;1"
         },
         {
             "@type": "Component",

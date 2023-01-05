@@ -6,7 +6,8 @@
   "description": "A  representation  of  a  specifically  identified  individual shall  be  presented  as  a person. A person may be a member of zero or more personnel classes.",
   "comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
   "extends": [
-    "dtmi:digitaltwins:isa95:BaseModel;1"
+    "dtmi:digitaltwins:isa95:BaseModel;1",
+    "dtmi:digitaltwins:isa95:TestableObject;1"
   ],
   "contents": [
     {
@@ -23,14 +24,6 @@
       "displayName": "Has values of",
       "description": "The person property values of this person.",
       "target": "dtmi:digitaltwins:isa95:PersonProperty;1"
-    },
-    {
-      "@type": "Relationship",
-      "name": "specifies",
-      "displayName": "Specifies",
-      "description": "The test specification(s) used to evaluate this testable object.",
-      "comment": "TODO",
-      "target": "dtmi:digitaltwins:isa95:BaseModel;1"
     },
     {
       "@type": "Component",
@@ -87,7 +80,7 @@
         "enumValues": [
           {
             "name": "operationalLocation",
-            "enumValue": "operationalLocation",
+            "enumValue": "Operational Location",
             "displayName": "Operational Location",
             "description": "operational location attribute references an operational location;"
           },

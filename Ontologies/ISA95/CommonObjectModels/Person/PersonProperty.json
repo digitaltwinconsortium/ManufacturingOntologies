@@ -6,7 +6,8 @@
   "description": "Properties  of  a person shall  be  presented as person  properties. Each person shall  have  zero  or more person properties. These specify the current property values of the person for the associated personnel class property. ",
   "comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
   "extends": [
-    "dtmi:digitaltwins:isa95:BaseModel;1"
+    "dtmi:digitaltwins:isa95:BaseModel;1",
+    "dtmi:digitaltwins:isa95:TestableObjectProperty;1"
   ],
   "contents": [
     {

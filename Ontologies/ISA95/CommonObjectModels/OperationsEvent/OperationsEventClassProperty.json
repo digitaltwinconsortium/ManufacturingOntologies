@@ -1,32 +1,26 @@
 {
     "@context": "dtmi:dtdl:context;2",
-    "@id": "dtmi:digitaltwins:isa95:MaterialDefinitionProperty;1",
+    "@id": "dtmi:digitaltwins:isa95:OperationsEventClassProperty;1",
     "@type": "Interface",
-    "displayName": "Material definition property",
-    "description": "Properties of a material definition shall be presented as material definition properties. A material definition may define zero or more material definition properties. A material definition property may be tested to the evaluated property in a test specification where the measured results may be recorded in a property measurement attribute in a test result.",
+    "displayName": "Operations event class property",
+    "description": "Properties of an operations event class shall be listed as operations event class properties. An operations event class shall be further characterized through zero or more operations event class properties. Operations event class properties may contain nested operations event class properties",
     "comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
-    "extends": ["dtmi:digitaltwins:isa95:BaseModel;1"],
+    "extends": [
+        "dtmi:digitaltwins:isa95:BaseModel;1"
+    ],
     "contents": [
         {
             "@type": "Relationship",
             "name": "contains",
             "displayName": "Contains",
-            "description": "The nested material definition property(s) makes up part of this material definition property as the whole.",
-            "target": "dtmi:digitaltwins:isa95:MaterialDefinitionProperty;1"
-        },
-        {
-            "@type": "Relationship",
-            "name": "mapsTo",
-            "displayName": "Maps to",
-            "description": "If the parent material definition supports a material class, the material class property(s) is applied in the material definition property(s). This material definition property maps to the corresponding material class property.",
-            "target": "dtmi:digitaltwins:isa95:MaterialClassProperty;1",
-            "comment": "Relationship type: Dependency"
+            "description": "The child operations event classes contained within this operations event class",
+            "target": "dtmi:digitaltwins:isa95:OperationsEventClassProperty;1"
         },
         {
             "@type": "Component",
             "name": "description",
             "displayName": "Description",
-            "description": "Additional information about the material definition property",
+            "description": "Additional information and description about the operations event class property",
             "schema": "dtmi:digitaltwins:isa95:LangStringSet;1"
         },
         {

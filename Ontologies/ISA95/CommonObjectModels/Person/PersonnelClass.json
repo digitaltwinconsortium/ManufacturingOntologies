@@ -6,7 +6,7 @@
   "description": "A representation of a grouping of persons with similar characteristics for a definite purpose such as manufacturing operations definition, scheduling, capability and performance shall be presented as a personnel class. Any person may be a member of zero or more personnel classes. A personnel class may be defined as a specialization of zero or more personnel class. A personnel class may be made up of zero or more personnel class(s).",
   "comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
   "extends": [
-    "dtmi:digitaltwins:isa95:BaseModel;1"
+    "dtmi:digitaltwins:isa95:BaseModel;1", "dtmi:digitaltwins:isa95:TestableObject;1"
   ],
   "contents": [
     {
@@ -22,14 +22,6 @@
       "displayName": "Has properties of",
       "target": "dtmi:digitaltwins:isa95:PersonnelClassProperty;1",
       "description": "The personnel class property(s)of this personnel class."
-    },
-    {
-      "@type": "Relationship",
-      "name": "specifies",
-      "displayName": "Specifies",
-      "description": "The test specification(s) used to evaluate this testable object.",
-      "comment": "TODO",
-      "target": "dtmi:digitaltwins:isa95:BaseModel;1"
     },
     {
       "@type": "Component",

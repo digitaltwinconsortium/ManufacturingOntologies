@@ -1,0 +1,177 @@
+@startjson AksEdgeSchema
+<style>
+jsonDiagram {
+    node {
+        FontName Segoe UI SemiBold
+        FontColor blue
+        FontSize 14
+        RoundCorner 10
+        LineThickness 1
+        separator {
+            LineThickness 0.25
+            LineColor black
+        }
+    }
+    arrow {
+        LineColor blue
+        LineThickness 1
+        LineStyle 2;5
+    }
+    highlight {
+        BackgroundColor Blue
+        FontColor White
+    }
+}
+</style>
+#highlight "SchemaVersion"
+{
+    "SchemaVersion": "1.0",
+    "Version": "1.0",
+    "KubernetesDistribution": [
+        "k8s",
+        "k3s"
+    ],
+    "Azure": {
+        "ClusterName": "string",
+        "Connect": {
+            "type": "boolean",
+            "default": false
+        },
+        "Location": "string",
+        "ResourceGroupName": "string",
+        "SubscriptionId": "GUID",
+        "TenantId": "GUID"
+    },
+    "DeployOptions": {
+        "ClusterJoinToken": "string",
+        "ControlPlane": {
+            "type": "boolean",
+            "default": false
+        },
+        "DiscoveryTokenHash": "string",
+        "CertificateKey": "string",
+        "ClusterId": "guid",
+        "Headless": {
+            "type": "boolean",
+            "default": false
+        },
+        "JoinCluster": {
+            "type": "boolean",
+            "default": false
+        },
+        "NetworkPlugin": {
+            "enum": [
+                "calico",
+                "flannel"
+            ],
+            "default": "flannel"
+        },
+        "SingleMachineCluster": {
+            "type": "boolean",
+            "default": false
+        },
+        "TimeoutSeconds": {
+            "type": "int",
+            "default": 900
+        },
+        "NodeType": {
+            "enum": [
+                "Linux",
+                "LinuxAndWindows",
+                "Windows"
+            ],
+            "default": "Linux"
+        }
+    },
+    "EndUser": {
+        "AcceptEula": {
+            "type": "boolean",
+            "default": false
+        },
+        "AcceptOptionalTelemetry": {
+            "type": "boolean",
+            "default": false
+        }
+    },
+    "LinuxVm": {
+        "CpuCount": {
+            "type": "integer",
+            "default": 2,
+            "minimum": 2
+        },
+        "MemoryInMB": {
+            "type": "integer",
+            "default": 2048,
+            "multipleOf": 2,
+            "minimum": 2048
+        },
+        "DataSizeInGB": {
+            "type": "integer",
+            "default": 10
+        },
+        "Ip4Address": "ipv4",
+        "MacAddress": "string",
+        "Mtu": "integer"
+    },
+    "WindowsVm": {
+        "CpuCount": {
+            "type": "integer",
+            "default": 2,
+            "minimum": 2
+        },
+        "MemoryInMB": {
+            "type": "integer",
+            "default": 2048,
+            "multipleOf": 2,
+            "minimum": 2048
+        },
+        "Ip4Address": "ipv4",
+        "MacAddress": "string",
+        "Mtu": "integer"
+    },
+    "Network": {
+        "VSwitch": {
+            "Type": [
+                "External",
+                "Internal"
+            ],
+            "AdapterName": "string",
+            "Name": "string"
+        },
+        "ControlPlaneEndpointIp": "ipv4",
+        "DnsServers": {
+            "type": "array",
+            "items": "ipv4",
+            "minitems": 1
+        },
+        "InternetDisabled": {
+            "type": "boolean",
+            "default": false
+        },
+        "Ip4GatewayAddress": "ipv4",
+        "Ip4PrefixLength": {
+            "type": "integer",
+            "default": 24,
+            "minimum": 1,
+            "maximum": 31
+        },
+        "ServiceIPRangeSize": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 1,
+            "maximum": 127
+        },
+        "ServiceIPRangeStart": "ipv4",
+        "ServiceIPRangeEnd": "ipv4",
+        "SkipAddressFreeCheck": {
+            "type": "boolean",
+            "default": false
+        },
+        "Proxy": {
+            "Http":"string",
+            "Https":"string",
+            "No":"string"
+        }
+    }
+}
+@endjson

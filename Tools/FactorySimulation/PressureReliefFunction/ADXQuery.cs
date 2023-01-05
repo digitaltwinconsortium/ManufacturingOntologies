@@ -5,6 +5,7 @@ namespace PressureRelief
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using System;
     using System.Net.Http;
     using System.Text;
@@ -24,40 +25,39 @@ namespace PressureRelief
                 string applicationKey = Environment.GetEnvironmentVariable("APPLICATION_KEY");
                 string adxInstanceURL = Environment.GetEnvironmentVariable("ADX_INSTANCE_URL");
                 string adxDatabaseName = Environment.GetEnvironmentVariable("ADX_DB_NAME");
+                string adxTableName = Environment.GetEnvironmentVariable("ADX_TABLE_NAME");
                 string tenantId = Environment.GetEnvironmentVariable("AAD_TENANT_ID");
                 string uaServerApplicationName = Environment.GetEnvironmentVariable("UA_SERVER_APPLICATION_NAME");
                 string uaServerLocationName = Environment.GetEnvironmentVariable("UA_SERVER_LOCATION_NAME");
 
-                // TODO: Fix the ADX query
-                //// acquire OAuth2 token via AAD REST endpoint
-                //webClient.DefaultRequestHeaders.Add("Accept", "application/json");
-                //string content = $"grant_type=client_credentials&resource={adxInstanceURL}&client_id={applicationClientId}&client_secret={applicationKey}";
-                //HttpResponseMessage responseMessage = webClient.Send(new HttpRequestMessage(HttpMethod.Post, "https://login.microsoftonline.com/" + tenantId + "/oauth2/token") {
-                //    Content = new StringContent(content, Encoding.UTF8, "application/x-www-form-urlencoded")
-                //});
-                //string response = responseMessage.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                // acquire OAuth2 token via AAD REST endpoint
+                webClient.DefaultRequestHeaders.Add("Accept", "application/json");
+                string content = $"grant_type=client_credentials&resource={adxInstanceURL}&client_id={applicationClientId}&client_secret={applicationKey}";
+                HttpResponseMessage responseMessage = webClient.Send(new HttpRequestMessage(HttpMethod.Post, "https://login.microsoftonline.com/" + tenantId + "/oauth2/token")
+                {
+                    Content = new StringContent(content, Encoding.UTF8, "application/x-www-form-urlencoded")
+                });
+                string restResponse = responseMessage.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
-                //// call ADX REST endpoint with query
-                //string query = "opcua_metadata_lkv"
-                //               + "| where Name contains '" + uaServerApplicationName + "'"
-                //               + "| where Name contains '" + uaServerLocationName + "'"
-                //               + "| join kind = inner(opcua_telemetry"
-                //               + "    | where Name == 'Pressure'"
-                //               + ") on DataSetWriterID"
-                //               + "| order by Timestamp desc"
-                //               + "| extend value = toint(Value)"
-                //               + "| where value > 4000"
-                //               + "| where Timestamp > now() - 10m" // Timestamp is when the data was generated in the UA server, so we take cloud ingestion time into account!"
-                //               + "| project Name";
+                // call ADX REST endpoint with query
+                string query = adxTableName
+                             + "| where TimeStamp > now() - 10m" // SourceTimeStamp is when the data was generated in the UA server, so we take cloud ingestion time into account!"
+                             + "| where Id == toscalar(GetDigitalTwinIdForUANode('" + uaServerApplicationName + "', '" + uaServerLocationName + "', 'Pressure'))"
+                             + "| where isnotnull(SourceTimeStamp)"
+                             + "| order by SourceTimeStamp desc"
+                             + "| extend value = toint(Value)"
+                             + "| where value > 4000"
+                             + "| project ModelId";
 
-                //webClient.DefaultRequestHeaders.Remove("Accept");
-                //webClient.DefaultRequestHeaders.Add("Authorization", "bearer " + JObject.Parse(response)["access_token"].ToString());
-                //responseMessage = webClient.Send(new HttpRequestMessage(HttpMethod.Post, adxInstanceURL + "/v2/rest/query") {
-                //    Content = new StringContent("{ \"db\":\"" + adxDatabaseName + "\", \"csl\":\"" + query + "\" }", Encoding.UTF8, "application/json")
-                //});
+                webClient.DefaultRequestHeaders.Remove("Accept");
+                webClient.DefaultRequestHeaders.Add("Authorization", "bearer " + JObject.Parse(restResponse)["access_token"].ToString());
+                responseMessage = webClient.Send(new HttpRequestMessage(HttpMethod.Post, adxInstanceURL + "/v2/rest/query")
+                {
+                    Content = new StringContent("{ \"db\":\"" + adxDatabaseName + "\", \"csl\":\"" + query + "\" }", Encoding.UTF8, "application/json")
+                });
 
-                //response = responseMessage.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                //if (response.Contains(uaServerApplicationName))
+                restResponse = responseMessage.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                if (restResponse.Contains("dtmi:digitaltwins:opcua:node:double"))
                 {
                     log.LogWarning("High pressure detected!");
 

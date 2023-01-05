@@ -1,15 +1,13 @@
 .create-or-alter function  CalculateAvgEnergyConsumption(stationName:string,location:string,hoursInShift:int) {
 let shiftEndTime = now();
 let shiftStartTime = datetime_add('hour', -hoursInShift, shiftEndTime);
+let dataHistoryTable = <ADTHistoryTableName> // set to the name of your data history table
+| where TimeStamp between (shiftStartTime .. shiftEndTime)
+| where Id == toscalar(GetDigitalTwinIdForUANode(stationName, location, "EnergyConsumption"));
 let averageEnergyConsumption = toscalar(
-opcua_metadata_lkv
-| where Name contains stationName
-| where Name contains location
-| join kind=inner (opcua_telemetry
-    | where Name == "EnergyConsumption"
-    | where Timestamp > shiftStartTime and Timestamp < shiftEndTime
-) on DataSetWriterID
+dataHistoryTable
+| where isnotnull(SourceTimeStamp)
 | extend energy = todouble(Value)
 | summarize avg(energy));
-print averageEnergyConsumption
+averageEnergyConsumption
 }

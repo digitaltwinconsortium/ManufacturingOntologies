@@ -19,7 +19,7 @@ namespace Station.Simulation
         {
             ServerProperties properties = new ServerProperties
             {
-                ManufacturerName = "Contoso",
+                ManufacturerName = "DTC",
                 ProductName = "Factory Station Simulation",
                 ProductUri = "",
                 SoftwareVersion = Utils.GetAssemblySoftwareVersion(),

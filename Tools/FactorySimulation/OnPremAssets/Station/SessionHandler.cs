@@ -1,7 +1,6 @@
 ﻿
 namespace Mes.Simulation
 {
-    using global::Station.Simulation;
     using Opc.Ua;
     using Opc.Ua.Client;
     using System;
@@ -15,6 +14,7 @@ namespace Mes.Simulation
         const uint c_connectTimeout = 60000;
 
         public Session Session { get; private set; }
+
         public bool SessionConnected => Session != null;
         private SessionReconnectHandler m_reconnectHandler = null;
 
@@ -36,7 +36,7 @@ namespace Mes.Simulation
 
             if (Session != null)
             {
-                Session.KeepAlive += new KeepAliveEventHandler((sender, e) => StandardClient_KeepAlive(sender, e));
+                Session.KeepAlive += new KeepAliveEventHandler(StandardClient_KeepAlive);
             }
             else
             {
@@ -55,14 +55,14 @@ namespace Mes.Simulation
                 return;
             }
 
-            Session = m_reconnectHandler.Session;
+            Session = (Session)m_reconnectHandler.Session;
             m_reconnectHandler.Dispose();
             m_reconnectHandler = null;
 
-            Console.WriteLine(String.Format("--- RECONNECTED --- {0}", Session.Endpoint.EndpointUrl));
+            Console.WriteLine(string.Format("--- RECONNECTED --- {0}", Session.Endpoint.EndpointUrl));
         }
 
-        private void StandardClient_KeepAlive(Session sender, KeepAliveEventArgs e)
+        private void StandardClient_KeepAlive(ISession sender, KeepAliveEventArgs e)
         {
             if (e != null && sender != null)
             {

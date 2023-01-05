@@ -4,48 +4,41 @@
   xmlns="http://opcfoundation.org/UA/SDK/Configuration.xsd"
   schemaLocation="./Schema/ApplicationConfiguration.xsd"
 >
-  <ApplicationName>Station</ApplicationName>
-  <ApplicationUri>urn:localhost:Station</ApplicationUri>
-  <ProductUri>http://contoso.com/UA/Station</ProductUri>
+  <ApplicationName>UndefinedStationName</ApplicationName>
+  <ApplicationUri>urn:UndefinedStationName</ApplicationUri>
+  <ProductUri>http://opcfoundation.org/UA/Station</ProductUri>
   <ApplicationType>Server_0</ApplicationType>
 
-
   <SecurityConfiguration>
-
-    <!-- Where the application instance certificate is stored (MachineDefault) -->
     <ApplicationCertificate>
-      <StoreType>X509Store</StoreType>
-      <StorePath>CurrentUser\UA_MachineDefault</StorePath>
-      <SubjectName>UndefinedStationName</SubjectName>
+      <StoreType>Directory</StoreType>
+      <StorePath>./pki/own</StorePath>
+      <SubjectName>CN=UndefinedStationName</SubjectName>
     </ApplicationCertificate>
-
-    <!-- Where the issuer certificate are stored (certificate authorities) -->
     <TrustedIssuerCertificates>
       <StoreType>Directory</StoreType>
-      <StorePath>../Shared/CertificateStores/UA Certificate Authorities</StorePath>
+      <StorePath>./pki/issuer</StorePath>
     </TrustedIssuerCertificates>
-
-    <!-- Where the trust list is stored (UA Applications) -->
     <TrustedPeerCertificates>
       <StoreType>Directory</StoreType>
-      <StorePath>../Shared/CertificateStores/UA Applications</StorePath>
+      <StorePath>./pki/trusted</StorePath>
     </TrustedPeerCertificates>
-
-    <!-- The directory used to store invalid certficates for later review by the administrator. -->
+    <NonceLength>32</NonceLength>
     <RejectedCertificateStore>
       <StoreType>Directory</StoreType>
-      <StorePath>../Shared/CertificateStores/RejectedCertificates</StorePath>
+      <StorePath>./pki/rejected</StorePath>
     </RejectedCertificateStore>
-
-    <!-- WARNING: The following setting (to automatically accept untrusted certificates) should be used
-    for easy debugging purposes ONLY and turned off for production deployments! -->
-    <AutoAcceptUntrustedCertificates>false</AutoAcceptUntrustedCertificates>
-
-    <!-- WARNING: SHA1 signed certficates are by default rejected and should be phased out.
-    The setting below to allow them is only required for UACTT (1.02.336.244) which uses SHA-1 signed certs. -->
     <RejectSHA1SignedCertificates>false</RejectSHA1SignedCertificates>
     <MinimumCertificateKeySize>1024</MinimumCertificateKeySize>
-
+    <SendCertificateChain>false</SendCertificateChain>
+    <UserIssuerCertificates>
+      <StoreType>Directory</StoreType>
+      <StorePath>./pki/issuerUser</StorePath>
+    </UserIssuerCertificates>
+    <TrustedUserCertificates>
+      <StoreType>Directory</StoreType>
+      <StorePath>./pki/trustedUser</StorePath>
+    </TrustedUserCertificates>
   </SecurityConfiguration>
 
   <TransportConfigurations/>
@@ -63,7 +56,7 @@
 
   <ServerConfiguration>
     <BaseAddresses>
-      <ua:String>opc.tcp://localhost:[Port]/UA/[Station]Station</ua:String>
+      <ua:String>opc.tcp://localhost:4840</ua:String>
     </BaseAddresses>
 
     <SecurityPolicies>

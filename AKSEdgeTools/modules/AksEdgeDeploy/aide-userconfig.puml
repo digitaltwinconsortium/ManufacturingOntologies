@@ -1,0 +1,59 @@
+@startjson AksEdgeDeploy
+<style>
+jsonDiagram {
+    node {
+        FontName Segoe UI SemiBold
+        FontColor blue
+        FontSize 14
+        RoundCorner 10
+        LineThickness 1
+        separator {
+            LineThickness 0.25
+            LineColor black
+        }
+    }
+    arrow {
+        LineColor blue
+        LineThickness 1
+        LineStyle 2;5
+    }
+    highlight {
+        BackgroundColor Blue
+        FontColor White
+    }
+}
+</style>
+#highlight "SchemaVersion"
+{
+    "SchemaVersion":"1.0",
+    "Version":"1.0",
+    "AksEdgeProduct" : [
+                "AKS Edge Essentials - K8s (Public Preview)",
+                "AKS Edge Essentials - K3s (Public Preview)"
+            ],
+    "AksEdgeProductUrl" : "URL",
+    "Azure":{
+        "ClusterName":"String",
+        "SubscriptionName":"String",
+        "SubscriptionId": "GUID",
+        "TenantId":"GUID",
+        "ResourceGroupName": "String",
+        "ServicePrincipalName" : "String",
+        "Location" : "String",
+        "Auth": {
+            "ServicePrincipalId" : "String",
+            "Password" : "String"
+        }
+    }
+    ,
+    "InstallOptions":{
+        "InstallPath":"String",
+        "VhdxPath":"String"
+    }
+    ,
+    "AksEdgeConfigFile":"String",
+    "AksEdgeConfig":{
+        "ref" :"aksedge-dc.json"
+    }
+}
+@endjson

@@ -1,0 +1,8 @@
+let intermediateTable = <ADTHistoryTableName> // set to the name of your data history table
+| where TimeStamp > _startTime and TimeStamp < _endTime
+| where Id == toscalar(GetDigitalTwinIdForUANode("assembly", "munich", "Status"));
+intermediateTable
+| where isnotnull(SourceTimeStamp)
+| join intermediateTable on $left.TimeStamp == $right.TimeStamp
+| where Key1 == "OPCUADisplayName"
+| project SourceTimeStamp, OPCUANodeValue = toint(Value), OPCUADisplayName = Value1

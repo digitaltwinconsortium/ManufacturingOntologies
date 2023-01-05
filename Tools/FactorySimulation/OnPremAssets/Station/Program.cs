@@ -57,6 +57,8 @@ namespace Station.Simulation
 
         private static Timer m_timer = null;
 
+        private static AzureFileStorage _storage = new AzureFileStorage();
+
         public static double PowerConsumption { get; set; }
 
         public static ulong CycleTime { get; set; }
@@ -101,6 +103,8 @@ namespace Station.Simulation
                 application.ApplicationType = ApplicationType.Client;
                 application.ConfigSectionName = "Opc.Ua.MES";
 
+                LoadCertsFromCloud("MES." + Environment.GetEnvironmentVariable("ProductionLineName"));
+
                 // replace the certificate subject name in the configuration
                 string configFilePath = Path.Combine(Directory.GetCurrentDirectory(), application.ConfigSectionName + ".Config.xml");
                 string configFileContent = File.ReadAllText(configFilePath).Replace("UndefinedMESName", "MES." + Environment.GetEnvironmentVariable("ProductionLineName"));
@@ -110,7 +114,19 @@ namespace Station.Simulation
                 ApplicationConfiguration appConfiguration = application.LoadApplicationConfiguration(false).Result;
 
                 // check the application certificate
-                application.CheckApplicationInstanceCertificate(false, 0).Wait();
+                bool certOK = application.CheckApplicationInstanceCertificate(false, 0).GetAwaiter().GetResult();
+                if (!certOK)
+                {
+                    throw new Exception("Application instance certificate invalid!");
+                }
+                else
+                {
+                    StoreCertsInCloud();
+                }
+
+                // create OPC UA cert validator
+                application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
+                application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(OPCUAClientCertificateValidationCallback);
 
                 // replace the production line name in the list of endpoints to connect to.
                 string endpointsFilePath = Path.Combine(Directory.GetCurrentDirectory(), application.ConfigSectionName + ".Endpoints.xml");
@@ -148,11 +164,12 @@ namespace Station.Simulation
                     catch (Exception ex)
                     {
                         Console.WriteLine("Exception connecting to assembly line: {0}, retry!", ex.Message);
+                        Thread.Sleep(1000);
                     }
 
                     if (DateTime.UtcNow > retryTimeout)
                     {
-                        throw new Exception(String.Format("Failed to connect to assembly line for {0} seconds!", c_connectTimeout / 1000));
+                        throw new Exception(string.Format("Failed to connect to assembly line for {0} seconds!", c_connectTimeout / 1000));
                     }
                 }
                 while (!(m_sessionAssembly.SessionConnected && m_sessionTest.SessionConnected && m_sessionPackaging.SessionConnected));
@@ -196,6 +213,111 @@ namespace Station.Simulation
             catch (Exception ex)
             {
                 Console.WriteLine("Critical Exception: {0}, MES exiting!", ex.Message);
+            }
+        }
+
+        private static void StoreCertsInCloud()
+        {
+            // store app certs
+            foreach (string filePath in Directory.EnumerateFiles(Path.Combine(Directory.GetCurrentDirectory(), "pki", "own", "certs"), "*.der"))
+            {
+                _storage.StoreFileAsync(filePath, File.ReadAllBytesAsync(filePath).GetAwaiter().GetResult()).GetAwaiter().GetResult();
+            }
+
+            // store private keys
+            foreach (string filePath in Directory.EnumerateFiles(Path.Combine(Directory.GetCurrentDirectory(), "pki", "own", "private"), "*.pfx"))
+            {
+                _storage.StoreFileAsync(filePath, File.ReadAllBytesAsync(filePath).GetAwaiter().GetResult()).GetAwaiter().GetResult();
+            }
+
+            // store trusted certs
+            foreach (string filePath in Directory.EnumerateFiles(Path.Combine(Directory.GetCurrentDirectory(), "pki", "trusted", "certs"), "*.der"))
+            {
+                _storage.StoreFileAsync(filePath, File.ReadAllBytesAsync(filePath).GetAwaiter().GetResult()).GetAwaiter().GetResult();
+            }
+        }
+
+        private static void LoadCertsFromCloud(string appName)
+        {
+            try
+            {
+                // load app cert from storage
+                string certFilePath = _storage.FindFileAsync(Path.Combine(Directory.GetCurrentDirectory(), "pki", "own", "certs"), appName).GetAwaiter().GetResult();
+                byte[] certFile = _storage.LoadFileAsync(certFilePath).GetAwaiter().GetResult();
+                if (certFile == null)
+                {
+                    Console.WriteLine("Could not load cert file, creating a new one. This means the new cert needs to be trusted by all OPC UA servers we connect to!");
+                }
+                else
+                {
+                    if (!Path.IsPathRooted(certFilePath))
+                    {
+                        certFilePath = Path.DirectorySeparatorChar.ToString() + certFilePath;
+                    }
+
+                    if (!Directory.Exists(Path.GetDirectoryName(certFilePath)))
+                    {
+                        Directory.CreateDirectory(Path.GetDirectoryName(certFilePath));
+                    }
+
+                    File.WriteAllBytes(certFilePath, certFile);
+                }
+
+                // load app private key from storage
+                string keyFilePath = _storage.FindFileAsync(Path.Combine(Directory.GetCurrentDirectory(), "pki", "own", "private"), appName).GetAwaiter().GetResult();
+                byte[] keyFile = _storage.LoadFileAsync(keyFilePath).GetAwaiter().GetResult();
+                if (keyFile == null)
+                {
+                   Console.WriteLine("Could not load key file, creating a new one. This means the new cert generated from the key needs to be trusted by all OPC UA servers we connect to!");
+                }
+                else
+                {
+                    if (!Path.IsPathRooted(keyFilePath))
+                    {
+                        keyFilePath = Path.DirectorySeparatorChar.ToString() + keyFilePath;
+                    }
+
+                    if (!Directory.Exists(Path.GetDirectoryName(keyFilePath)))
+                    {
+                        Directory.CreateDirectory(Path.GetDirectoryName(keyFilePath));
+                    }
+
+                    File.WriteAllBytes(keyFilePath, keyFile);
+                }
+
+                // load trusted certs
+                string[] trustedcertFilePath = _storage.FindFilesAsync(Path.Combine(Directory.GetCurrentDirectory(), "pki", "trusted", "certs")).GetAwaiter().GetResult();
+                if (trustedcertFilePath != null)
+                {
+                    foreach (string filePath in trustedcertFilePath)
+                    {
+                        byte[] trustedcertFile = _storage.LoadFileAsync(filePath).GetAwaiter().GetResult();
+                        if (trustedcertFile == null)
+                        {
+                            Console.WriteLine("Could not load trusted cert file " + filePath);
+                        }
+                        else
+                        {
+                            string localFilePath = filePath;
+
+                            if (!Path.IsPathRooted(localFilePath))
+                            {
+                                localFilePath = Path.DirectorySeparatorChar.ToString() + localFilePath;
+                            }
+
+                            if (!Directory.Exists(Path.GetDirectoryName(localFilePath)))
+                            {
+                                Directory.CreateDirectory(Path.GetDirectoryName(localFilePath));
+                            }
+
+                            File.WriteAllBytes(localFilePath, trustedcertFile);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Cloud not load cert or private key files, creating a new ones. This means the new cert needs to be trusted by all OPC UA servers we connect to!: " + ex.Message);
             }
         }
 
@@ -547,13 +669,13 @@ namespace Station.Simulation
             ApplicationInstance.MessageDlg = new ApplicationMessageDlg();
             ApplicationInstance application = new ApplicationInstance();
 
-            string stationName = Environment.GetEnvironmentVariable("StationType").ToLowerInvariant();
             Uri stationUri = new Uri(Environment.GetEnvironmentVariable("StationURI"));
-            string stationPath = stationUri.AbsolutePath.TrimStart('/').ToLowerInvariant();
 
             application.ApplicationName = stationUri.DnsSafeHost.ToLowerInvariant();
             application.ConfigSectionName = "Opc.Ua.Station";
             application.ApplicationType = ApplicationType.Server;
+
+            LoadCertsFromCloud(application.ApplicationName);
 
             // replace the certificate subject name in the configuration
             string configFilePath = Path.Combine(Directory.GetCurrentDirectory(), application.ConfigSectionName + ".Config.xml");
@@ -567,12 +689,6 @@ namespace Station.Simulation
                 throw new Exception("Application configuration is null!");
             }
 
-            // replace our placeholders with specific settings from the command line
-            config.ApplicationName = stationUri.DnsSafeHost.ToLowerInvariant();
-            config.ApplicationUri = "urn:" + stationName + ":" + stationPath.Replace("/", ":");
-            config.ProductUri = "http://contoso.com/UA/" + stationName;
-            config.ServerConfiguration.BaseAddresses[0] = stationUri.ToString();
-
             // calculate our power consumption in [kW] and cycle time in [s]
             PowerConsumption = ulong.Parse(Environment.GetEnvironmentVariable("PowerConsumption"), NumberStyles.Integer);
             CycleTime = ulong.Parse(Environment.GetEnvironmentVariable("CycleTime"), NumberStyles.Integer);
@@ -580,14 +696,30 @@ namespace Station.Simulation
             // print out our configuration
             Console.WriteLine("OPC UA Server Configuration:");
             Console.WriteLine("----------------------------");
-            Console.WriteLine("OPC UA Endpoint: " + stationUri.ToString());
+            Console.WriteLine("OPC UA Endpoint: " + config.ServerConfiguration.BaseAddresses[0].ToString());
             Console.WriteLine("Application URI: " + config.ApplicationUri);
             Console.WriteLine("Power consumption: " + PowerConsumption.ToString() + "kW");
             Console.WriteLine("Cycle time: " + CycleTime.ToString() + "s");
 
-            // check the application certificate.
-            await application.CheckApplicationInstanceCertificate(false, 0);
+            // load the application configuration
+            ApplicationConfiguration appConfiguration = application.LoadApplicationConfiguration(false).Result;
 
+            // check the application certificate
+            bool certOK = await application.CheckApplicationInstanceCertificate(false, 0).ConfigureAwait(false);
+            if (!certOK)
+            {
+                throw new Exception("Application instance certificate invalid!");
+            }
+            else
+            {
+                StoreCertsInCloud();
+            }
+
+#if DEBUG
+            // create OPC UA cert validator
+            application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
+            application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(OPCUAClientCertificateValidationCallback);
+#endif
             // start the server.
             await application.Start(new FactoryStationServer());
 
@@ -601,6 +733,15 @@ namespace Station.Simulation
             {
                 // wait forever if there is no console
                 Thread.Sleep(Timeout.Infinite);
+            }
+        }
+
+        private static void OPCUAClientCertificateValidationCallback(CertificateValidator sender, CertificateValidationEventArgs e)
+        {
+            // always trust the OPC UA client certificate ind debug mode
+            if (e.Error.StatusCode == StatusCodes.BadCertificateUntrusted)
+            {
+                e.Accept = true;
             }
         }
     }

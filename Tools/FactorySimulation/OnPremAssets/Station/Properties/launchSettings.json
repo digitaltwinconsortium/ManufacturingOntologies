@@ -1,12 +1,18 @@
 {
   "profiles": {
     "Station": {
-      "commandName": "Project",
-      "commandLineArgs": "station opc.tcp://station.munich.corp.contoso/ua/munich/ 200 6 yes"
+      "commandName": "Project"
     },
     "Docker": {
       "commandName": "Docker",
-      "commandLineArgs": "station opc.tcp://station.munich.corp.contoso/ua/munich/ 200 6 yes"
+      "environmentVariables": {
+        "StationType": "assembly",
+        "StationURI": "opc.tcp://assembly.munich/",
+        "PowerConsumption": "200",
+        "CycleTime": "6",
+        "STORAGE_CONTAINER_NAME": "ontologies",
+        "STORAGE_CONNECTION_STRING": "DefaultEndpointsProtocol=https;AccountName=[yourstorageaccountname];AccountKey=[key];EndpointSuffix=core.windows.net"
+      }
     }
   }
 }

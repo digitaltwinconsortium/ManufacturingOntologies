@@ -14,6 +14,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="app\**" />
+    <Compile Remove="pki\**" />
+    <EmbeddedResource Remove="app\**" />
+    <EmbeddedResource Remove="pki\**" />
+    <None Remove="app\**" />
+    <None Remove="pki\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Opc.Ua.MES.Config.xml" />
     <None Remove="Opc.Ua.MES.Endpoints.xml" />
     <None Remove="Opc.Ua.Station.Config.xml" />
@@ -37,8 +46,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.14.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
-    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.4.367.75" />
+    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.4.371.50" />
   </ItemGroup>
 
 </Project>

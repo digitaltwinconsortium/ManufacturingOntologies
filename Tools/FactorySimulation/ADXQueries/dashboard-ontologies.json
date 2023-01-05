@@ -1,0 +1,401 @@
+{
+  "$schema": "https://dataexplorer.azure.com/static/d/schema/33/dashboard.json",
+  "id": "19df582c-a2ea-4f55-bde7-5967326b1931",
+  "eTag": "PODWlL9B1NGKq3tTdDXrNA==",
+  "schema_version": "33",
+  "title": "ontologies",
+  "autoRefresh": {
+    "enabled": false
+  },
+  "sharedQueries": [
+  ],
+  "tiles": [
+    {
+      "id": "fa7b9b0d-a5d7-48b6-9626-4387d08d9fa1",
+      "title": "Assembly Munich Status 0=station ready to do work, 1=work in progress, 2=work done and good part manufactured, 3=work done and scrap manufactured, 4=station in fault state",
+      "visualType": "timechart",
+      "pageId": "1604d4fc-a7b5-4e47-82c6-640286103fde",
+      "layout": {
+        "x": 0,
+        "y": 3,
+        "width": 24,
+        "height": 8
+      },
+      "query": {
+        "kind": "inline",
+        "dataSource": {
+          "kind": "inline",
+          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+        },
+        "usedVariables": [
+          "_endTime",
+          "_startTime"
+        ],
+        "text": "let intermediateTable = <ADTHistoryTableName>\n| where TimeStamp > _startTime and TimeStamp < _endTime\n| where Id == toscalar(GetDigitalTwinIdForUANode(\"assembly\", \"munich\", \"status\"));\nintermediateTable\n| where isnotnull(SourceTimeStamp)\n| join intermediateTable on $left.TimeStamp == $right.TimeStamp\n| where Key1 == \"OPCUADisplayName\"\n| project SourceTimeStamp, OPCUANodeValue = toint(Value), OPCUADisplayName = Value1\n"
+      },
+      "visualOptions": {
+        "hideTileTitle": false,
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "",
+            "columns": [
+            ],
+            "yAxisMaximumValue": null,
+            "yAxisMinimumValue": null,
+            "yAxisScale": "linear",
+            "horizontalLines": [
+            ]
+          },
+          "additional": [
+          ],
+          "showMultiplePanels": false
+        },
+        "hideLegend": false,
+        "xColumnTitle": "",
+        "xColumn": {
+          "type": "infer"
+        },
+        "yColumns": {
+          "type": "infer"
+        },
+        "seriesColumns": {
+          "type": "specified",
+          "value": [
+            "OPCUADisplayName"
+          ]
+        },
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "crossFilter": [
+        ],
+        "drillthrough": [
+        ]
+      }
+    },
+    {
+      "id": "b1fb5a2b-2d91-4d81-ab04-b541ebae8b87",
+      "title": "Assembly Munich Energy Consumption",
+      "visualType": "anomalychart",
+      "pageId": "1604d4fc-a7b5-4e47-82c6-640286103fde",
+      "layout": {
+        "x": 0,
+        "y": 11,
+        "width": 24,
+        "height": 8
+      },
+      "query": {
+        "kind": "inline",
+        "dataSource": {
+          "kind": "inline",
+          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+        },
+        "usedVariables": [
+          "_endTime",
+          "_startTime"
+        ],
+        "text": "let intermediateTable = <ADTHistoryTableName>\n| where TimeStamp between (_startTime .. _endTime)\n| where Id == toscalar(GetDigitalTwinIdForUANode(\"assembly\", \"munich\", \"EnergyConsumption\"));\nintermediateTable\n| where isnotnull(SourceTimeStamp)\n| join intermediateTable on $left.TimeStamp == $right.TimeStamp\n| where Key1 == \"OPCUADisplayName\"\n| order by TimeStamp desc\n| make-series num=avg(todouble(Value)) on TimeStamp from _startTime to _endTime step 1s\n| extend (anomalies, score, baseline) = series_decompose_anomalies(num, 0.5, -1, 'linefit')"
+      },
+      "visualOptions": {
+        "hideTileTitle": false,
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "",
+            "columns": [
+            ],
+            "yAxisMaximumValue": null,
+            "yAxisMinimumValue": null,
+            "yAxisScale": "linear",
+            "horizontalLines": [
+            ]
+          },
+          "additional": [
+          ],
+          "showMultiplePanels": false
+        },
+        "hideLegend": false,
+        "xColumnTitle": "",
+        "xColumn": {
+          "type": "infer"
+        },
+        "yColumns": {
+          "type": "infer"
+        },
+        "seriesColumns": {
+          "type": "infer"
+        },
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "crossFilter": [
+        ],
+        "drillthrough": [
+        ]
+      }
+    },
+    {
+      "id": "009fe348-8126-4ac0-aedb-721e5b02c104",
+      "title": "Assembly Munich Number of Manufactured Products",
+      "visualType": "timechart",
+      "pageId": "1604d4fc-a7b5-4e47-82c6-640286103fde",
+      "layout": {
+        "x": 0,
+        "y": 19,
+        "width": 24,
+        "height": 8
+      },
+      "query": {
+        "kind": "inline",
+        "dataSource": {
+          "kind": "inline",
+          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+        },
+        "usedVariables": [
+          "_endTime",
+          "_startTime"
+        ],
+        "text": "let horizon = (_endTime - _startTime) / 2;\nlet dt = 5m;\nlet intermediateTable = <ADTHistoryTableName>\n| where TimeStamp between (_startTime .. _endTime)\n| where Id == toscalar(GetDigitalTwinIdForUANode(\"assembly\", \"munich\", \"NumberOfManufacturedProducts\"));\nintermediateTable\n| where isnotnull(SourceTimeStamp)\n| join intermediateTable on $left.TimeStamp == $right.TimeStamp\n| where Key1 == \"OPCUADisplayName\"\n| order by TimeStamp desc\n| make-series actual=avg(toint(Value)) on TimeStamp from _startTime to _endTime + horizon step dt\n| extend forecast = series_decompose_forecast(actual, toint(horizon/dt))"
+      },
+      "visualOptions": {
+        "hideTileTitle": false,
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "",
+            "columns": [
+            ],
+            "yAxisMaximumValue": null,
+            "yAxisMinimumValue": null,
+            "yAxisScale": "linear",
+            "horizontalLines": [
+            ]
+          },
+          "additional": [
+          ],
+          "showMultiplePanels": false
+        },
+        "hideLegend": false,
+        "xColumnTitle": "",
+        "xColumn": {
+          "type": "infer"
+        },
+        "yColumns": {
+          "type": "infer"
+        },
+        "seriesColumns": {
+          "type": "infer"
+        },
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "crossFilter": [
+        ],
+        "drillthrough": [
+        ]
+      }
+    },
+    {
+      "id": "3c7c802e-10dd-43d8-9f8b-7a6ce89248ea",
+      "title": "Assembly Munich OEE (%)",
+      "visualType": "card",
+      "pageId": "1604d4fc-a7b5-4e47-82c6-640286103fde",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 5,
+        "height": 3
+      },
+      "query": {
+        "kind": "inline",
+        "dataSource": {
+          "kind": "inline",
+          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+        },
+        "usedVariables": [
+        ],
+        "text": "let oee = CalculateOEEForStation(\"assembly\", \"munich\", 6, 6);\nprint round(oee * 100, 2)"
+      },
+      "visualOptions": {
+        "hideTileTitle": false,
+        "multiStat__textSize": "auto",
+        "multiStat__valueColumn": {
+          "type": "infer"
+        },
+        "colorRulesDisabled": false,
+        "colorRules": [
+        ],
+        "colorStyle": "light"
+      }
+    },
+    {
+      "id": "cecbff7d-419b-4f7e-b428-1bfc5d3fa9d4",
+      "title": "Test Munich OEE (%)",
+      "visualType": "card",
+      "pageId": "1604d4fc-a7b5-4e47-82c6-640286103fde",
+      "layout": {
+        "x": 5,
+        "y": 0,
+        "width": 4,
+        "height": 3
+      },
+      "query": {
+        "kind": "inline",
+        "dataSource": {
+          "kind": "inline",
+          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+        },
+        "usedVariables": [
+        ],
+        "text": "let oee = CalculateOEEForStation(\"test\", \"munich\", 6, 6);\nprint round(oee * 100, 2)"
+      },
+      "visualOptions": {
+        "hideTileTitle": false,
+        "multiStat__textSize": "auto",
+        "multiStat__valueColumn": {
+          "type": "infer"
+        },
+        "colorRulesDisabled": false,
+        "colorRules": [
+        ],
+        "colorStyle": "light"
+      }
+    },
+    {
+      "id": "53e9878c-4a51-400f-8b98-fc1ca5773db2",
+      "title": "Packaging Munich OEE (%)",
+      "visualType": "card",
+      "pageId": "1604d4fc-a7b5-4e47-82c6-640286103fde",
+      "layout": {
+        "x": 9,
+        "y": 0,
+        "width": 5,
+        "height": 3
+      },
+      "query": {
+        "kind": "inline",
+        "dataSource": {
+          "kind": "inline",
+          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+        },
+        "usedVariables": [
+        ],
+        "text": "let oee = CalculateOEEForStation(\"packaging\", \"munich\", 6, 6);\nprint round(oee * 100, 2)"
+      },
+      "visualOptions": {
+        "hideTileTitle": false,
+        "multiStat__textSize": "auto",
+        "multiStat__valueColumn": {
+          "type": "infer"
+        },
+        "colorRulesDisabled": false,
+        "colorRules": [
+        ],
+        "colorStyle": "light"
+      }
+    },
+    {
+      "id": "cd7418a2-2cdb-40c2-9a3f-ebd5d4cfc8c1",
+      "title": "Assembly Munich Average Energy Consumption (Watt)",
+      "visualType": "card",
+      "pageId": "1604d4fc-a7b5-4e47-82c6-640286103fde",
+      "layout": {
+        "x": 18,
+        "y": 0,
+        "width": 6,
+        "height": 3
+      },
+      "query": {
+        "kind": "inline",
+        "dataSource": {
+          "kind": "inline",
+          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+        },
+        "usedVariables": [
+        ],
+        "text": "let energy = CalculateAvgEnergyConsumption(\"assembly\", \"munich\", 6);\nprint round(energy * 1000, 2)\n\n"
+      },
+      "visualOptions": {
+        "hideTileTitle": false,
+        "multiStat__textSize": "auto",
+        "multiStat__valueColumn": {
+          "type": "infer"
+        },
+        "colorRulesDisabled": false,
+        "colorRules": [
+        ],
+        "colorStyle": "light"
+      }
+    },
+    {
+      "id": "bd5bd97d-e761-416b-a13a-198b394d60bd",
+      "title": "Munich OEE (%)",
+      "visualType": "card",
+      "pageId": "1604d4fc-a7b5-4e47-82c6-640286103fde",
+      "layout": {
+        "x": 14,
+        "y": 0,
+        "width": 4,
+        "height": 3
+      },
+      "query": {
+        "kind": "inline",
+        "dataSource": {
+          "kind": "inline",
+          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+        },
+        "usedVariables": [
+        ],
+        "text": "print round(CalculateOEEForLine(\"munich\", 6, 6) * 100, 2)\n"
+      },
+      "visualOptions": {
+        "hideTileTitle": false,
+        "multiStat__textSize": "auto",
+        "multiStat__valueColumn": {
+          "type": "infer"
+        },
+        "colorRulesDisabled": false,
+        "colorRules": [
+        ],
+        "colorStyle": "light"
+      }
+    }
+  ],
+  "parameters": [
+    {
+      "kind": "duration",
+      "id": "a39aa2bf-5ca5-4387-8d75-6c927c7f6c5c",
+      "displayName": "Time range",
+      "beginVariableName": "_startTime",
+      "endVariableName": "_endTime",
+      "defaultValue": {
+        "kind": "dynamic",
+        "count": 1,
+        "unit": "hours"
+      },
+      "showOnPages": {
+        "kind": "all"
+      }
+    }
+  ],
+  "dataSources": [
+    {
+      "id": "09ab8651-b041-4b8e-ba7b-347796f7911c",
+      "name": "ontologies",
+      "clusterUri": "https://onttestadx.eastus.kusto.windows.net/",
+      "database": "onttest-DB",
+      "kind": "manual-kusto",
+      "scopeId": "kusto"
+    }
+  ],
+  "pages": [
+    {
+      "name": "Page 1",
+      "id": "1604d4fc-a7b5-4e47-82c6-640286103fde"
+    }
+  ]
+}

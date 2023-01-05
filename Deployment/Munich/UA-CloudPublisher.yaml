@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: munich
+spec:
+  finalizers:
+  - kubernetes
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ua-cloudpublisher
+  namespace: munich
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ua-cloudpublisher
+  template:
+    metadata:
+      labels:
+        app: ua-cloudpublisher
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: ua-cloudpublisher
+        image: ghcr.io/barnstee/ua-cloudpublisher:main
+        env:
+        - name: USE_KAFKA
+          value: "1"
+        - name: STORAGE_TYPE
+          value: "Azure"
+        - name: STORAGE_CONNECTION_STRING
+          value: "[mystorageaccountkey1connectionstring]"
+        - name: STORAGE_CONTAINER_NAME
+          value: "munich"
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ua-cloudpublisher
+  namespace: munich
+spec:
+  type: LoadBalancer
+  ports:
+  - targetPort: 80
+    port: 80
+  selector:
+    app: ua-cloudpublisher

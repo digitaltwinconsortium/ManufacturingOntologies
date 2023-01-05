@@ -6,9 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PressureRelief", "PressureRelief.csproj", "{FD16D27C-42B5-49EC-9294-CB02EFBD4C5B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B6806AED-8646-4B4B-8F2B-FDE9A835BC8F}"
-	ProjectSection(SolutionItems) = preProject
-		StartUACloudCommander.bat = StartUACloudCommander.bat
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,51 +1,45 @@
 {
     "@context": "dtmi:dtdl:context;2",
-    "@id": "dtmi:digitaltwins:isa95:MaterialLot;1",
+    "@id": "dtmi:digitaltwins:isa95:MaterialSublot;1",
     "@type": "Interface",
-    "displayName": "Material lot",
-    "description": "A uniquely identified specific amount of material, either countable or weighable shall be presented as a material lot. A material lot describes the planned or actual total quantity or amount of material available, its current state, and its specific property values",
+    "displayName": "Material sublot",
+    "description": "Each separately identifiable quantity of the same material lot shall be presented as a material sublot. A material lot may be stored in separately identifiable quantities. All material sublots are part of the same material lot, so they have the material lot’s property values. A material sublot may be just a single item",
     "comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
-    "extends": ["dtmi:digitaltwins:isa95:BaseModel;1"],
+    "extends": [
+        "dtmi:digitaltwins:isa95:BaseModel;1",
+        "dtmi:digitaltwins:isa95:TestableObject;1"
+    ],
     "contents": [
         {
             "@type": "Relationship",
-            "name": "isAssembledFrom",
-            "displayName": "Is assembled from",
-            "description": "This material lot is part of the related object as the whole",
-            "target": "dtmi:digitaltwins:isa95:MaterialLot;1",
+            "name": "isMadeUpOf",
+            "displayName": "Is made up of",
+            "description": "This material sublot is part of the related object as the whole",
+            "target": "dtmi:digitaltwins:isa95:MaterialSublot;1",
             "comment": "Relationship type: Composition"
         },
         {
             "@type": "Relationship",
             "name": "hasValuesOf",
             "displayName": "Has values of",
-            "description": "The material lot property(s) of this material lot",
+            "description": "The material lot property(s) of this material sublot.",
             "target": "dtmi:digitaltwins:isa95:MaterialLotProperty;1",
             "comment": "Relationship type: Composition"
         },
         {
             "@type": "Relationship",
-            "name": "definedBy",
-            "displayName": "Defined by",
-            "description": "The material definition that defines this material lot",
-            "target": "dtmi:digitaltwins:isa95:MaterialDefinition;1",
-            "comment": "Relationship type: Association"
+            "name": "isAssembledFrom",
+            "displayName": "Is Assembled from",
+            "description": "The material sublot occurrences that are constructed based on this material sublot. The material sublot properties map to a corresponding material lot property",
+            "target": "dtmi:digitaltwins:isa95:MaterialSublot;1"
         },
         {
             "@type": "Relationship",
-            "name": "isAssembledFromSublot",
+            "name": "isAssembledFromLot",
             "displayName": "Is assembled from",
-            "description": "This material lot is part of the related object as the whole",
-            "target": "dtmi:digitaltwins:isa95:MaterialSublot;1",
+            "description": "The related object(s) makes up part of this material sublot as the whole.",
+            "target": "dtmi:digitaltwins:isa95:MaterialLot;1",
             "comment": "Relationship type: Aggregation"
-        },
-        {
-            "@type": "Relationship",
-            "name": "specifies",
-            "displayName": "Specifies",
-            "description": "The test specification(s) used to evaluate this testable object.",
-            "comment": "TODO",
-            "target": "dtmi:digitaltwins:isa95:BaseModel;1"
         },
         {
             "@type": "Component",
@@ -81,7 +75,7 @@
             "@type": "Property",
             "name": "storageLocation",
             "displayName": "Storage location",
-            "description": "Identifies the storage location of the material lot.",
+            "description": "Identifies the storage location of the material sublot.",
             "schema": "string",
             "writable": true
         },
@@ -89,7 +83,7 @@
             "@type": "Property",
             "name": "storageLocationType",
             "displayName": "Storage location type",
-            "description": "ndicates whether the storage location attribute refers to anoperational location, equipmentor physical asset object, or contains a description of the storage location.",
+            "description": "Indicates whether the storage location attribute refers to anoperational location, equipmentor physical asset object, or contains a description of the storage location.",
             "comment": "Mandatory where a storage location is specified",
             "schema": {
                 "@type": "Enum",
@@ -168,7 +162,7 @@
             "@type": "Property",
             "name": "status",
             "displayName": "Status",
-            "description": "Status of the material lot in manufacturing operations. Values defined by implementation",
+            "description": "Status of the material sublot in manufacturing operations. Values defined by implementation",
             "schema": "string",
             "writable": true
         },
@@ -177,7 +171,7 @@
             "name": "disposition",
             "displayName": "Disposition",
             "writable": true,
-            "description": "Planning and logistics disposition of a material lot or assembly of material lots. ",
+            "description": "Planning and logistics disposition of a material sublot or assembly of material lots. ",
             "schema": {
                 "@type": "Enum",
                 "valueSchema": "string",
@@ -185,27 +179,27 @@
                     {
                         "name": "planned",
                         "enumValue": "Planned",
-                        "description": "a material lot that does not yet physically exist, is assigned to an operations request (segment requirement) or work request (Part 4 object) or job order (Part 4 object)"
+                        "description": "a material sublot that does not yet physically exist, is assigned to an operations request (segment requirement) or work request (Part 4 object) or job order (Part 4 object)"
                     },
                     {
                         "name": "inProcess",
                         "enumValue": "In process",
-                        "description": "the material lot is in the process of being worked on"
+                        "description": "the material sublot is in the process of being worked on"
                     },
                     {
                         "name": "restricted",
                         "enumValue": "Restricted",
-                        "description": "a material lot is not permitted for normal use due to a restriction condition"
+                        "description": "a material sublot is not permitted for normal use due to a restriction condition"
                     },
                     {
                         "name": "unrestricted",
                         "enumValue": "Unrestricted",
-                        "description": "material lot is permitted for normal use without restriction"
+                        "description": "material sublot is permitted for normal use without restriction"
                     },
                     {
                         "name": "closed",
                         "enumValue": "Closed",
-                        "description": "material lot has been reconciled as completely consumed, sold or disposed of"
+                        "description": "material sublot has been reconciled as completely consumed, sold or disposed of"
                     }
                 ]
             }
@@ -215,7 +209,7 @@
             "name": "quantity",
             "displayName": "Quantity",
             "schema": "double",
-            "description": "The quantity of the material lot. ",
+            "description": "The quantity of the material sublot. ",
             "writable": true
         },
         {

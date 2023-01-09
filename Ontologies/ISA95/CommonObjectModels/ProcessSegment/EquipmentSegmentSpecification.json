@@ -1,0 +1,133 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:isa95:EquipmentSegmentSpecification;1",
+    "@type": "Interface",
+    "displayName": "Equipment segment specification",
+    "description": "Equipment resources that are required for a process segment shall be presented as equipment segment specifications",
+    "comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+    "extends": [
+        "dtmi:digitaltwins:isa95:BaseModel;1"
+    ],
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "isMadeUpOf",
+            "displayName": "Is made up of",
+            "description": "The related object(s) makes up part of this equipment segment specification as the whole",
+            "target": "dtmi:digitaltwins:isa95:EquipmentSegmentSpecification;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "specifies",
+            "displayName": "Specifies",
+            "description": "The test specification(s) used to evaluate this testable object.",
+            "target": "dtmi:digitaltwins:isa95:TestSpecification;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "hasPropertiesOf",
+            "displayName": "has properties of",
+            "description": "The equipment segment specification property(s) of this equipment segment specification",
+            "target": "dtmi:digitaltwins:isa95:EquipmentSegmentSpecificationProperty;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "correspondsToEquipmentClass",
+            "displayName": "Corresponds to",
+            "description": "A cross-model association to element in the equipment model as explained in Clause 3.3.8. Identifies the associated equipment class or set of equipment classes of the specification for a specific process segment",
+            "target": "dtmi:digitaltwins:isa95:EquipmentClass;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "correspondsToEquipment",
+            "displayName": "Corresponds to",
+            "description": "A cross-model association to element in the equipment model as explained in Clause 3.3.8. Identifies the associated equipment or set of equipment of the specification for a specific process segment. Typically, either equipment class or equipment is defined",
+            "target": "dtmi:digitaltwins:isa95:Equipment;1"
+        },
+        {
+            "@type": "Component",
+            "name": "description",
+            "displayName": "Description",
+            "description": "Contains additional information and descriptions",
+            "schema": "dtmi:digitaltwins:isa95:LangStringSet;1"
+        },
+        {
+            "@type": "Property",
+            "name": "hierarchyScope",
+            "displayName": "Hierarchy scope",
+            "description": "Identifies where the exchanged information fits within the role based equipment hierarchy. ",
+            "schema": "string"
+        },
+        {
+            "@type": "Relationship",
+            "name": "hierarchyScopeRel",
+            "displayName": "fits hierarchy scope",
+            "description": "Optional relationship to hierarchy.",
+            "comment": "Not part of the Standard Specs.",
+            "target": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+            "maxMultiplicity": 1
+        },
+        {
+            "@type": "Component",
+            "name": "spatialDefinition",
+            "displayName": "Spatial definition",
+            "description": "Spatially defines the equipment as a zero-dimensional point, one dimensional line, or two dimensional shape or three dimensional solid.",
+            "schema": "dtmi:digitaltwins:isa95:SpatialDefinition;1"
+        },
+        {
+            "@type": "Property",
+            "name": "operationalLocation",
+            "displayName": "Operational location",
+            "description": "Identifies the operational location of the equipment specified by this equipment segment specification",
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
+            "name": "operationalLocationType",
+            "displayName": "Operational location type",
+            "description": "Indicates whether the operational location attribute refers to an operational location object or contains a description of the operational location. Mandatory where an operational location attribute is specified",
+            "schema": {
+                "@type": "Enum",
+                "valueSchema": "string",
+                "enumValues": [
+                    {
+                        "name": "operationalLocation",
+                        "enumValue": "Operational Location",
+                        "displayName": "Operational Location",
+                        "description": "operational location attribute references an operational location;"
+                    },
+                    {
+                        "name": "description",
+                        "enumValue": "Description",
+                        "displayName": "Description",
+                        "description": "operational location attribute contains a description of the operational location, such as a street address."
+                    }
+                ]
+            }
+        },
+        {
+            "@type": "Property",
+            "name": "equipmentUse",
+            "displayName": "Equipment use",
+            "description": "Defines the expected use of the equipment class or equipment in the context of the process segment",
+            "schema": "string",
+            "writable": true
+        },
+        {
+            "@type": "Property",
+            "name": "quantity",
+            "displayName": "Quantity",
+            "schema": "double",
+            "description": "Specifies the amount of resources required",
+            "writable": true
+        },
+        {
+            "@type": "Property",
+            "name": "quantityUnitOfMeasure",
+            "displayName": "Quantity unit of measure",
+            "description": "The unit of measure of the associated quantity",
+            "schema": "string",
+            "writable": true
+        }
+    ]
+}

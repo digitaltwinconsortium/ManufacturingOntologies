@@ -5,7 +5,10 @@
     "displayName": "Physical Asset",
     "description": "A physical piece of equipment shall be presented as a physical asset.",
     "comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
-    "extends": ["dtmi:digitaltwins:isa95:BaseModel;1"],
+    "extends": [
+        "dtmi:digitaltwins:isa95:BaseModel;1",
+        "dtmi:digitaltwins:isa95:TestableObject;1"
+    ],
     "contents": [
         {
             "@type": "Relationship",
@@ -28,14 +31,6 @@
             "displayName": "Is made up of",
             "description": "The related object(s) makes up part of this physical asset as the whole.",
             "target": "dtmi:digitaltwins:isa95:PhysicalAsset;1"
-        },
-        {
-            "@type": "Relationship",
-            "name": "specifies",
-            "displayName": "Specifies",
-            "description": "The test specification(s) used to evaluate this testable object.",
-            "comment": "TODO",
-            "target": "dtmi:digitaltwins:isa95:BaseModel;1"
         },
         {
             "@type": "Component",

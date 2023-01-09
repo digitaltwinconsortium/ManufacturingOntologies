@@ -14,7 +14,7 @@ ISA95 is one of the ontologies leveraged by this solution. It is a standard and 
 
 ### IEC 63278 Asset Administration Shell (AAS)
 
-The IEC 63278 Asset Administration Shell is another ontology leveraged by this solution. This standard is described [here](https://www.plattform-i40.de/IP/Redaktion/EN/Standardartikel/specification-administrationshell.html).
+The IEC 63278 Asset Administration Shell is another ontology leveraged by this solution. This standard is described [here](https://www.plattform-i40.de/IP/Redaktion/EN/Standardartikel/specification-administrationshell.html) and tools to convert from Asset Administration Shell models to DTDL are provided in this repository [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/tree/main/Tools/AssetAdminShell). Furthermore, the reference solution provided in this repository also contains an AAS Repository service from the Digital Twin Consortium's repository here(https://github.com/digitaltwinconsortium/AAS-Repository).
 
 ### IEC 62541 Open Platform Communications Unified Architecture (OPC UA)
 

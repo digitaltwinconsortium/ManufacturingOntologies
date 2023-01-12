@@ -14,7 +14,7 @@ ISA95 is one of the ontologies leveraged by this solution. It is a standard and 
 
 ### IEC 63278 Asset Administration Shell (AAS)
 
-The IEC 63278 Asset Administration Shell is another ontology leveraged by this solution. This standard is described [here](https://www.plattform-i40.de/IP/Redaktion/EN/Standardartikel/specification-administrationshell.html) and tools to convert from Asset Administration Shell models to DTDL are provided in this repository [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/tree/main/Tools/AssetAdminShell). Furthermore, the reference solution provided in this repository also contains an AAS Repository service from the Digital Twin Consortium's reference implementation [here](https://github.com/digitaltwinconsortium/AAS-Repository).
+The IEC 63278 Asset Administration Shell (AAS) is another ontology leveraged by this solution. The AAS is used across all stages of an industrial asset and is a platform-independent data sharing service between enterprises along the manufacturing supply chain. This standard is described [here](https://www.plattform-i40.de/IP/Redaktion/EN/Standardartikel/specification-administrationshell.html) and tools to convert from Asset Administration Shell models to DTDL are provided in this repository [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/tree/main/Tools/AssetAdminShell). Furthermore, the reference solution provided in this repository also contains an AAS Repository service from the Digital Twin Consortium's reference implementation [here](https://github.com/digitaltwinconsortium/AAS-Repository) and makes the Product Carbon Footprint (PCF) of the simulated products built by the simulated production lines available to customers.
 
 ### IEC 62541 Open Platform Communications Unified Architecture (OPC UA)
 
@@ -104,6 +104,21 @@ The following OPC UA Node IDs are used in the Station OPC UA Server for telemetr
 * i=418 - actual cycle time
 * i=434 - pressure
 
+## Calculating the Product Carbon Footprint (PCF)
+
+One of the most popular use cases for the Asset Administration Shell (AAS) is to make the Product Carbon Footprint (PCF) of manufactured products avialable to customers of those products. In fact, the AAS will most likely become the underlying technology in the upcoming [Digital Product Passport (DPP)](https://circulareconomy.europa.eu/platform/en/news-and-events/all-events/eu-digital-product-passport-learning-frontrunners) initiative from the European Union. To calculate the PCF, all three scopes of emissions need to be taken into account:
+
+### Scope 1 Emissions
+
+These emissions come from all sources the manufacturer uses to burn fossil fules, either during production (for example when the manufacturer has a natural gas-powered production process) or before (for example picking up parts by truck) or afterwards (for example the cars of sales people or the delivery trucks with the produced products). They are relatively easy to calculate as the emissions from fossil fuel-powered engines are a well-understood quantity.
+
+### Scope 2 Emissions
+
+These emissions come from the eletricity used during production. If the manufacturer uses a 100% renewable energy provider, the scope 2 emissions are zero. However, most manufacturers have long-term contracts with energy providers and need to ask their energy provider for the carbon intensity per KWh of energy delivered. If this data is not available, an average for the electricity grid region the manufacturing site is in should be used. This data is available through services like [WattTime](https://www.watttime.org) and this is what this reference solution uses.
+
+### Scope 3 Emissions
+
+These emissions come from the parts and raw materials used within the product being manufactured and are the hardest to calculate simply due to a lack of data from the worldwide suppliers manufacturer uses today. Unfortunaterly, scope 3 emissions make up almost 90% of the emissions in manufacturing. However, this is where the AAS can help create a standardized interface and data model to provide and retrieve scope 3 emissions. This reference solution does just that by making an AAS available for each manufactured product built by the simulated production line.
 
 ## Installation of Production Line Simulation and Cloud Services
 

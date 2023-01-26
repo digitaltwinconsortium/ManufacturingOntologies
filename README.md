@@ -110,7 +110,7 @@ One of the most popular use cases for the Asset Administration Shell (AAS) is to
 
 ### Scope 1 Emissions
 
-These emissions come from all sources the manufacturer uses to burn fossil fules, either during production (for example when the manufacturer has a natural gas-powered production process) or before (for example picking up parts by truck) or afterwards (for example the cars of sales people or the delivery trucks with the produced products). They are relatively easy to calculate as the emissions from fossil fuel-powered engines are a well-understood quantity.
+These emissions come from all sources the manufacturer uses to burn fossil fules, either during production (for example when the manufacturer has a natural gas-powered production process) or before (for example picking up parts by truck) or afterwards (for example the cars of sales people or the delivery trucks with the produced products). They are relatively easy to calculate as the emissions from fossil fuel-powered engines are a well-understood quantity. This reference solution simply adds a fixed value for scope 1 emissions to the total product carbon footprint.
 
 ### Scope 2 Emissions
 
@@ -118,7 +118,7 @@ These emissions come from the eletricity used during production. If the manufact
 
 ### Scope 3 Emissions
 
-These emissions come from the parts and raw materials used within the product being manufactured and are the hardest to calculate simply due to a lack of data from the worldwide suppliers manufacturer uses today. Unfortunaterly, scope 3 emissions make up almost 90% of the emissions in manufacturing. However, this is where the AAS can help create a standardized interface and data model to provide and retrieve scope 3 emissions. This reference solution does just that by making an AAS available for each manufactured product built by the simulated production line.
+These emissions come from the parts and raw materials used within the product being manufactured and are the hardest to calculate simply due to a lack of data from the worldwide suppliers manufacturer uses today. Unfortunaterly, scope 3 emissions make up almost 90% of the emissions in manufacturing. However, this is where the AAS can help create a standardized interface and data model to provide and retrieve scope 3 emissions. This reference solution does just that by making an AAS available for each manufactured product built by the simulated production line and also reads PCF data from another AAS simulating a manufacturing supply chain.
 
 ## Installation of Production Line Simulation and Cloud Services
 

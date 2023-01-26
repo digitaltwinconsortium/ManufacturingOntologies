@@ -118,7 +118,7 @@ These emissions come from the eletricity used during production. If the manufact
 
 ### Scope 3 Emissions
 
-These emissions come from the parts and raw materials used within the product being manufactured and are the hardest to calculate simply due to a lack of data from the worldwide suppliers manufacturer uses today. Unfortunaterly, scope 3 emissions make up almost 90% of the emissions in manufacturing. However, this is where the AAS can help create a standardized interface and data model to provide and retrieve scope 3 emissions. This reference solution does just that by making an AAS available for each manufactured product built by the simulated production line and also reads PCF data from another AAS simulating a manufacturing supply chain.
+These emissions come from the parts and raw materials used within the product being manufactured as well as from using the product by the end customer (and getting it into the customer's hands in the first place!) and are the hardest to calculate simply due to a lack of data from the worldwide suppliers manufacturer uses today. Unfortunaterly, scope 3 emissions make up almost 90% of the emissions in manufacturing. However, this is where the AAS can help create a standardized interface and data model to provide and retrieve scope 3 emissions. This reference solution does just that by making an AAS available for each manufactured product built by the simulated production line and also reads PCF data from another AAS simulating a manufacturing supply chain.
 
 ## Installation of Production Line Simulation and Cloud Services
 

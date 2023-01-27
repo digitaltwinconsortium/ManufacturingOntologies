@@ -172,7 +172,7 @@
           "properties": {
             "ADX_HOST": "[reference(resourceId('Microsoft.Kusto/clusters', variables('adxClusterName')), '2022-02-01').uri]",
             "ADX_DB": "[variables('adxDBName')]",
-            "AAD_APPLICATION_ID": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity')), '2022-05-31').identity.clientId]",
+            "AAD_APPLICATION_ID": "[reference(concat(parameters('ResourcesName'), '-Identity')).clientId]",
             "CALCULATE_PCF": "1",
             "ADT_HOSTNAME": "[concat('https://', reference(concat(parameters('ResourcesName'), '-ADT')).hostName)]",
             "WATTTIME_USER": "",
@@ -508,9 +508,9 @@
         "[resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), variables('adxDBName'))]"
       ],
       "properties": {
-        "principalId": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity')), '2022-05-31', 'full').identity.principalId]",
+        "principalId": "[reference(concat(parameters('ResourcesName'), '-Identity')).principalId]",
         "role": "Admin",
-        "tenantId": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity')), '2022-05-31', 'full').identity.tenantId]",
+        "tenantId": "[reference(concat(parameters('ResourcesName'), '-Identity')).tenantId]",
         "principalType": "App"
       }
     },

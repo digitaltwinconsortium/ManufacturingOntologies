@@ -172,7 +172,7 @@
           "properties": {
             "ADX_HOST": "[reference(resourceId('Microsoft.Kusto/clusters', variables('adxClusterName')), '2022-02-01').uri]",
             "ADX_DB": "[variables('adxDBName')]",
-            "AAD_APPLICATION_ID": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity')), '2018-11-30').principalId]",
+            "AAD_APPLICATION_ID": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity')), '2022-05-31').identity.clientId]",
             "CALCULATE_PCF": "1",
             "ADT_HOSTNAME": "[concat('https://', reference(concat(parameters('ResourcesName'), '-ADT')).hostName)]",
             "WATTTIME_USER": "",
@@ -497,6 +497,20 @@
         "principalId": "[reference(resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('ResourcesName'), '-ADT')), '2022-05-31', 'full').identity.principalId]",
         "role": "Admin",
         "tenantId": "[reference(resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('ResourcesName'), '-ADT')), '2022-05-31', 'full').identity.tenantId]",
+        "principalType": "App"
+      }
+    },
+    {
+      "type": "Microsoft.Kusto/clusters/databases/principalAssignments",
+      "apiVersion": "2021-01-01",
+      "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), variables('adxDBName'), guid(resourceId('Microsoft.Kusto/clusters/databases', split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[1]), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity')), 'Admin'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), variables('adxDBName'))]"
+      ],
+      "properties": {
+        "principalId": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity')), '2022-05-31', 'full').identity.principalId]",
+        "role": "Admin",
+        "tenantId": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity')), '2022-05-31', 'full').identity.tenantId]",
         "principalType": "App"
       }
     },

@@ -106,7 +106,8 @@
       "dependsOn": [
         "[resourceId('Microsoft.Web/serverfarms', concat(parameters('ResourcesName'), '-AppService'))]",
         "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('ResourcesName'), '-EventHubs'))]",
-        "[resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('ResourcesName'), '-ADT'))]"
+        "[resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('ResourcesName'), '-ADT'))]",
+        "[resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), variables('adxDBName'))]"
       ],
       "resources": [
         {
@@ -154,6 +155,12 @@
           "minimumElasticInstanceCount": 0
         }
       },
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity'))]": {}
+        }
+      },
       "dependsOn": [
         "[resourceId('Microsoft.Web/serverfarms', concat(parameters('ResourcesName'), '-AppService'))]"
       ],
@@ -163,9 +170,14 @@
           "location": "[resourceGroup().location]",
           "name": "appsettings",
           "properties": {
-            "ADX_PASSWORD": "TBD",
-            "UACLUsername": "TBD",
-            "UACLPassword": "TBD"
+            "ADX_HOST": "[reference(resourceId('Microsoft.Kusto/clusters', variables('adxClusterName')), '2022-02-01').uri]",
+            "ADX_DB": "[variables('adxDBName')]",
+            "AAD_APPLICATION_ID": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('ResourcesName'), '-Identity')), '2018-11-30').principalId]",
+            "CALCULATE_PCF": "1",
+            "ADT_HOSTNAME": "[concat('https://', reference(concat(parameters('ResourcesName'), '-ADT')).hostName)]",
+            "WATTTIME_USER": "",
+            "WATTTIME_PASSWORD": "",
+            "USE_JSON_SERIALIZATION": "1"
           },
           "type": "config",
           "dependsOn": [

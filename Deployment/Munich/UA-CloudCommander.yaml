@@ -40,9 +40,9 @@ spec:
         - name: CLIENTNAME
           value: "commander.munich"
         - name: TOPIC
-          value: "commander.corp.contoso.command"
+          value: "commander.command"
         - name: RESPONSE_TOPIC
-          value: "commander.corp.contoso.response"
+          value: "commander.response"
         - name: USERNAME
           value: "$ConnectionString"
         - name: PASSWORD

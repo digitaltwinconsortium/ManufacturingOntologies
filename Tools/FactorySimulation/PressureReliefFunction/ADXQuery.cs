@@ -154,9 +154,20 @@ namespace PressureRelief
             }
             finally
             {
-                producer.Dispose();
-                consumer.Dispose();
-                webClient.Dispose();
+                if (producer != null)
+                {
+                    producer.Dispose();
+                }
+
+                if (consumer != null)
+                {
+                    consumer.Dispose();
+                }
+
+                if (webClient != null)
+                {
+                    webClient.Dispose();
+                }
             }
         }
     }

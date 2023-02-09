@@ -218,7 +218,7 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 * UA_SERVER_METHOD_ID - set to "ns=2;i=435"
 * UA_SERVER_OBJECT_ID - set to "ns=2;i=424"
 * UA_SERVER_APPLICATION_NAME - set to "assembly"
-* UA_SERVER_DNS_NAME - set to "seattle"
+* UA_SERVER_LOCATION_NAME - set to "seattle"
 
 
 ## Onboarding the Kubernetes Instance for Management via Azure Arc

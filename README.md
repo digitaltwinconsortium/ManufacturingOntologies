@@ -160,7 +160,7 @@ On the deployed VM, navigate to the `./Tools/FactorySimulation/OnPremAssets` dir
 
 Syntax:
 
-    StartSimulation <EventHubsCS> <StorageAccountCS> <AzureSubscriptionName>
+    StartSimulation <EventHubsCS> <StorageAccountCS> <AzureSubscriptionID>
 
 Parameters:
 
@@ -168,11 +168,11 @@ Parameters:
 | --- | --- |
 | EventHubCS | Copy the Event Hubs namespace connection string as described [here](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string"). |
 | StorageAccountCS | In the Azure Portal, navigate to the Storage Account created by this solution. Select "Access keys" from the left-hand navigation menu. Then, copy the connection string for key1. |
-| AzureSubscriptionName | In Azure Portal, browse your Subscriptions and copy the name of the subscription used in this solution. |
+| AzureSubscriptionID | In Azure Portal, browse your Subscriptions and copy the ID of the subscription used in this solution. |
     
 Example:
 
-    StartSimulation Endpoint=sb://ontologies.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=abcdefgh= DefaultEndpointsProtocol=https;AccountName=ontologiesstorage;AccountKey=abcdefgh==;EndpointSuffix=core.windows.net MyAzureSubscription
+    StartSimulation Endpoint=sb://ontologies.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=abcdefgh= DefaultEndpointsProtocol=https;AccountName=ontologiesstorage;AccountKey=abcdefgh==;EndpointSuffix=core.windows.net 9dd2eft0-3dad-4aeb-85d8-c3adssd8127a
 
 Note: On first run, a tool to copy files to Azure Storage needs to be installed. When prompted, simply press enter to proceed with the installation.
 
@@ -228,7 +228,7 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 
     | Attribute | Description |
     | --- | --- |
-    | SubscriptionName	| The name of your Azure subscription. You can find this on the Azure portal. |
+    | SubscriptionName	| The name of your Azure subscription. You can find this in the Azure portal. |
     | SubscriptionId | Your subscription ID. In the Azure portal, click on the subscription you're using and copy/paste the subscription ID. |
     | TenantId | Your tenant ID. In the Azure portal, click on Azure Active Directory and copy/paste the tenant ID. |
     | ResourceGroupName | The name of the Azure resource group which was deployed for this solution. |

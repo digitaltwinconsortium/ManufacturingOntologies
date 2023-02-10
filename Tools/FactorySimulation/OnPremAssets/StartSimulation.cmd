@@ -74,7 +74,7 @@ ECHO Storage Account name: !storagename!
 ECHO Subscription name: !arg15!
 
 CALL az login
-CALL az account set -n !arg15!
+CALL az account set -s !arg15!
 
 ECHO .
 ECHO Copying Publisher config files...

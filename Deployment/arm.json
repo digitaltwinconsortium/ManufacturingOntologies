@@ -4,7 +4,7 @@
   "parameters": {
     "ResourcesName": {
       "type": "string",
-      "defaultValue": "ontologies",
+      "defaultValue": "",
       "minLength": 2,
       "metadata": {
         "description": "Name of resources to be deployed."

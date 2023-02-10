@@ -57,7 +57,7 @@ goto :Config
 
 :InvalidArgument
 ECHO Argument error:
-ECHO Input parameters must be of the form Endpoint=sb://[eventhubnamespace].servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=[key] DefaultEndpointsProtocol=https;AccountName=[storageaccountname];AccountKey=[key];EndpointSuffix=core.windows.net [subscriptionname]
+ECHO Input parameters must be of the form Endpoint=sb://[eventhubnamespace].servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=[key] DefaultEndpointsProtocol=https;AccountName=[storageaccountname];AccountKey=[key];EndpointSuffix=core.windows.net [subscriptionID]
 EXIT /B 1
 
 :Config

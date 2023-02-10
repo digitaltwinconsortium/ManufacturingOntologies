@@ -143,7 +143,7 @@ Once the deployment completes, follow these steps to setup a single-node Edge Ku
 1. From the VM, download and install [Azure Kubernetes Services Edge Essentials](https://aka.ms/aks-edge/k8s-msi).
 1. Download and install the [Azure CLI](https://aka.ms/installazurecliwindows).
 1. Download this repository from [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/archive/refs/heads/main.zip) and extract to a directory of your choice.
-1. From a **Windows command prompt**, navigate to the `./AKSEdgeTools` directory of the extracted repository and run `Install-AksEdgeHostFeatures`. On first run after some config steps, this will reboot the VM. Log in again and run `AksEdgePrompt` from a command prompt again. This will open a PowerShell window:
+1. From a **Windows command prompt**, navigate to the `./AKSEdgeTools` directory of the extracted repository and run `AksEdgePrompt`. On first run after some config steps, this will reboot the VM. Log in again and run `AksEdgePrompt` from a command prompt again. This will open a PowerShell window:
 
     <img src="Docs/akspowershell.png" alt="AKS" width="900" />
 

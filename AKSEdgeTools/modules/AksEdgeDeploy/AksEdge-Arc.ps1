@@ -17,7 +17,7 @@ New-Variable -Option Constant -ErrorAction SilentlyContinue -Name azcmagentexe -
 
 New-Variable -Option Constant -ErrorAction SilentlyContinue -Name arciotEnvConfig -Value @{
     "RPNamespaces"  = @("Microsoft.HybridCompute", "Microsoft.GuestConfiguration", "Microsoft.HybridConnectivity",
-        "Microsoft.Kubernetes", "Microsoft.KubernetesConfiguration", "Microsoft.ExtendedLocation", "Microsoft.PolicyInsights")
+        "Microsoft.Kubernetes", "Microsoft.KubernetesConfiguration", "Microsoft.ExtendedLocation")
     "ArcExtensions" = @("MicrosoftMonitoringAgent", "CustomScriptExtension")
     "ReqRoles"      = @("Azure Connected Machine Onboarding", "Kubernetes Cluster - Azure Arc Onboarding")
     "AzExtensions"  = @("connectedmachine", "connectedk8s", "customlocation", "k8s-extension")
@@ -31,6 +31,12 @@ New-Variable -Option Constant -ErrorAction SilentlyContinue -Name azMinVersions 
     "customlocation"   = "0.1.3"
     "k8s-extension"    = "1.3.3"
 }
+New-Variable -option Constant -ErrorAction SilentlyContinue -Name arcLocations -Value @(
+    "westeurope", "eastus", "westcentralus", "southcentralus", "southeastasia", "uksouth",
+    "eastus2", "westus2", "australiaeast", "northeurope", "francecentral", "centralus",
+    "westus", "northcentralus", "koreacentral", "japaneast", "eastasia", "westus3",
+    "canadacentral", "eastus2euap"
+)
 function Get-AideArcUserConfig {
     return (Get-AideUserConfig).Azure
 }
@@ -51,6 +57,11 @@ function Test-AideArcUserConfig {
     }
     if ((-not $aicfg.Auth.ServicePrincipalId) -and (-not $aicfg.Auth.Password)) {
         Write-Host "Error: Specify Auth parameters" -ForegroundColor Red
+        $retval = $false
+    }
+    if ($arcLocations -inotcontains $($aicfg.Location)){
+        Write-Host "Error: Location $($aicfg.Location) is not supported for Azure Arc" -ForegroundColor Red
+        Write-Host "Supported Locations : $arcLocations"
         $retval = $false
     }
     return $retval
@@ -245,7 +256,8 @@ function Initialize-AideArc {
     .EXAMPLE
         Initialize-AideArc
     #>
-    $status = $true
+    $status = Test-AideArcUserConfig
+    if (!$status) { return $false }
     $aicfg = Get-AideArcUserConfig
     if (! $aicfg) {
         Write-Host "Error: UserConfig not set. Use Set-AideUserConfig to set" -Foreground Red
@@ -365,6 +377,7 @@ function Install-AideArcServer {
     .EXAMPLE
         Install-AideArcServer
     #>
+    if (Test-IsAzureVM) { return $false }
     if (Test-Path -Path $azcmagentexe -PathType Leaf) {
         Write-Host "> ConnectedMachineAgent is already installed" -ForegroundColor Green
         & $azcmagentexe version
@@ -456,7 +469,8 @@ function Get-AideArcServerInfo {
     }
     $vmInfo = @{}
     $apiVersion = "2020-06-01"
-    $InstanceUri = $env:IMDS_ENDPOINT + "/metadata/instance?api-version=$apiVersion"
+    $imdsEndpoint = [System.Environment]::GetEnvironmentVariable("IMDS_ENDPOINT","Machine")
+    $InstanceUri = $imdsEndpoint + "/metadata/instance?api-version=$apiVersion"
     $Proxy = New-Object System.Net.WebProxy
     $WebSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
     $WebSession.Proxy = $Proxy
@@ -484,6 +498,10 @@ function Connect-AideArcServer {
         Connect-AideArcServer
 
     #>
+    if (Test-IsAzureVM) {
+        Write-Host "Disabling WindowsAzureGuestAgent"
+        Disable-WindowsAzureGuestAgent
+    }
     if (!(Test-AideArcServer)) {
         if (!(Test-Path -Path $azcmagentexe -PathType Leaf)) {
             $retval = Install-AideArcServer
@@ -505,7 +523,7 @@ function Connect-AideArcServer {
             "--tenant-id", "$($aicfg.TenantId)",
             "--location", "$($aicfg.Location)",
             "--subscription-id", "$($aicfg.SubscriptionId)",
-            "--cloud", "$($arciotSession.azSession.environmentName)",
+            #"--cloud", "$($arciotSession.azSession.environmentName)",
             "--service-principal-id", "$($creds.Username)",
             "--service-principal-secret", "$($creds.Password)"
         )
@@ -549,6 +567,7 @@ function Disconnect-AideArcServer {
         Disconnect-AideArcServer
 
     #>
+    #if (Test-IsAzureVM) { return $false }
     if (! (Test-AideArcServer) ) {
         return $false
     }
@@ -618,10 +637,12 @@ function Get-AideArcServerSMI {
     .EXAMPLE
         Get-AideArcServerSMI
     #>
+    if (Test-IsAzureVM) { return $false }
     $token = $null
     $apiVersion = "2020-06-01"
     $resource = "https://management.azure.com/"
-    $endpoint = "{0}?resource={1}&api-version={2}" -f $env:IDENTITY_ENDPOINT, $resource, $apiVersion
+    $idEndpoint = [System.Environment]::GetEnvironmentVariable("IDENTITY_ENDPOINT","Machine")
+    $endpoint = "{0}?resource={1}&api-version={2}" -f $idEndpoint, $resource, $apiVersion
     $secretFile = ""
     try {
         Invoke-WebRequest -Method GET -Uri $endpoint -Headers @{Metadata = 'True' } -UseBasicParsing
@@ -812,6 +833,9 @@ function Connect-AideArcKubernetes {
             "--infrastructure","TBF"
         )
         #>
+        if ($($aicfg.CustomLocationOID)) {
+            $connectargs += @( "--custom-locations-oid", "$($aicfg.CustomLocationOID)")
+        }
         $tags = @("SKU=AKSEdgeEssentials")
         $modVersion = (Get-Module AksEdge).Version
         if ($modVersion) { $tags += @("Version=$modVersion") }
@@ -930,14 +954,7 @@ function Get-AideArcKubernetesServiceToken {
         Get-AideArcKubernetesServiceToken
 
     #>
-    $seraccs = $(kubectl get serviceaccounts)
-    if (!($seraccs | Where-Object { $_.Contains('aksedge-admin-user') })) {
-        kubectl create serviceaccount aksedge-admin-user | Write-Host
-        kubectl create clusterrolebinding aksedge-admin-user --clusterrole cluster-admin --serviceaccount default:aksedge-admin-user | Write-Host
-    }
-    $secretname = $(kubectl get serviceaccount aksedge-admin-user -o jsonpath='{$.secrets[0].name}')
-    $token = $(kubectl get secret ${secretname} -o jsonpath='{$.data.token}')
-    $servicetoken = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($token))
+    $servicetoken = Get-AksEdgeManagedServiceToken
     $servicetokenfile = "$($arciotSession.WorkspacePath)\servicetoken.txt"
     Set-Content -Path $servicetokenfile -Value "$servicetoken"
     return $servicetoken
@@ -961,8 +978,11 @@ function Connect-AideArc {
         Connect-AideArc
 
     #>
+    $serverStatus = $true
+
     Write-Host "Connecting Azure Arc-enabled Server.."
     $serverStatus = Connect-AideArcServer
+
     Write-Host "Connecting Azure Arc-enabled Kubernetes.."
     $kubernetesStatus = Connect-AideArcKubernetes
 
@@ -987,8 +1007,10 @@ function Disconnect-AideArc {
         Disconnect-AideArc
 
     #>
+    $serverStatus = $true
     Write-Host "Disconnecting Azure Arc-enabled Server.."
     $serverStatus = Disconnect-AideArcServer
+
     Write-Host "Disconnecting Azure Arc-enabled Kubernetes.."
     $kubernetesStatus = Disconnect-AideArcKubernetes
 

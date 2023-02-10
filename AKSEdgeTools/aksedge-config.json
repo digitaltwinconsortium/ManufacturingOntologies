@@ -1,46 +1,39 @@
 {
-    "SchemaVersion": "1.1",
+    "SchemaVersion": "1.5",
     "Version": "1.0",
-    "DeployOptions": {
-        "ControlPlane": false,
-        "Headless": false,
-        "JoinCluster": false,
-        "NetworkPlugin": "flannel",
-        "SingleMachineCluster": true,
-        "TimeoutSeconds": 900,
-        "NodeType": "Linux",
-        "ServerTLSBootstrap": true
+    "DeploymentType": "SingleMachineCluster",
+    "Init": {
+        "ServiceIPRangeSize": 0
     },
-    "EndUser": {
-        "AcceptEula": false,
-        "AcceptOptionalTelemetry": false
+    "Arc": {
+        "ClusterName": null,
+        "Location": null,
+        "ResourceGroupName": null,
+        "SubscriptionId": null,
+        "TenantId": null,
+        "ClientId": null,
+        "ClientSecret": null
     },
-    "LinuxVm": {
-        "CpuCount": 4,
-        "MemoryInMB": 4096,
-        "DataSizeinGB": 20,
-        "Ip4Address": "192.168.1.171"
-    },
-    "Network": {
-        "VSwitch": {
-            "Name": "",
-            "Type": "",
-            "AdapterName": ""
-        },
-        "ControlPlaneEndpointIp": "192.168.1.191",
-        "Ip4GatewayAddress": "192.168.1.1",
-        "Ip4PrefixLength": 24,
-        "ServiceIPRangeSize": 0,
-        "ServiceIPRangeStart": "192.168.1.151",
-        "ServiceIPRangeEnd": "192.168.1.170",
-        "DnsServers": [
-            "192.168.1.1"
-        ],
-        "InternetDisabled": false,
-        "Proxy": {
-            "Http": "",
-            "Https": "",
-            "No": ""
-        }
+  "Network": {
+    "NetworkPlugin": "calico",
+    "InternetDisabled": false,
+    "Proxy": {
+      "Http": null,
+      "Https": null,
+      "No": null
     }
+  },
+    "User": {
+        "AcceptEula": true,
+        "AcceptOptionalTelemetry": true
+    },
+    "Machines": [
+        {
+            "LinuxNode": {
+                "CpuCount": 2,
+                "MemoryInMB": 4096,
+                "DataSizeInGB": 20
+            }
+        }
+    ]
 }

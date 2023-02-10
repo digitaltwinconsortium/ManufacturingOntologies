@@ -17,7 +17,7 @@ $aideSession = @{
     AKSEdge        = @{"Product" = $null; "Version" = $null }
     UserConfig     = $null
     UserConfigFile = $null
-    ReadFromFile = $false
+    ReadFromFile   = $false
 }
 New-Variable -Option Constant -ErrorAction SilentlyContinue -Name aksedgeProductPrefix -Value "AKS Edge Essentials"
 New-Variable -Option Constant -ErrorAction SilentlyContinue -Name aksedgeProducts -Value @{
@@ -26,7 +26,7 @@ New-Variable -Option Constant -ErrorAction SilentlyContinue -Name aksedgeProduct
 }
 New-Variable -Option Constant -ErrorAction SilentlyContinue -Name WindowsInstallUrl -Value "https://aka.ms/aks-edge/windows-node-zip"
 New-Variable -Option Constant -ErrorAction SilentlyContinue -Name aksedgeValueSet -Value @{
-    NodeType  = @("Linux", "LinuxAndWindows","Windows")
+    NodeType      = @("Linux", "LinuxAndWindows", "Windows")
     NetworkPlugin = @("calico", "flannel")
 }
 
@@ -45,7 +45,6 @@ function Get-AideHostPcInfo {
     .EXAMPLE
         Get-AideHostPcInfo
     #>
-    Test-HyperVStatus -Enable | Out-Null
     $pOS = Get-CimInstance Win32_OperatingSystem
     $UBR = (Get-ItemPropertyValue "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" -Name UBR)
     $aideSession.HostOS.OSName = $pOS.Caption
@@ -68,14 +67,17 @@ function Get-AideHostPcInfo {
     if ((Get-CimInstance Win32_BaseBoard).Product -eq 'Virtual Machine') {
         $aideSession.HostOS.IsVM = $true
         Write-Host "Running as a virtual machine " -NoNewline
-        if (Get-Service WindowsAzureGuestAgent -ErrorAction SilentlyContinue) {
+        $guestAgent = Get-Service WindowsAzureGuestAgent -ErrorAction SilentlyContinue
+        if ($guestAgent) {
             $aideSession.HostOS.IsAzureVM = $true
             Write-Host "in Azure environment " -NoNewline
-            $vmInfo = Get-AzureVMInfo
-            Write-Host "(Name= $($vmInfo.name)" -NoNewline
-            Write-Host "vmSize= $($vmInfo.vmSize)" -NoNewline
-            Write-Host "offer= $($vmInfo.offer)" -NoNewline
-            Write-Host "sku= $($vmInfo.sku) )" -NoNewline
+            if ($guestAgent.Status -eq 'Running') {
+                $vmInfo = Get-AzureVMInfo
+                Write-Host "(Name= $($vmInfo.name)" -NoNewline
+                Write-Host "vmSize= $($vmInfo.vmSize)" -NoNewline
+                Write-Host "offer= $($vmInfo.offer)" -NoNewline
+                Write-Host "sku= $($vmInfo.sku) )" -NoNewline
+            }
         }
         if ($pCS.HypervisorPresent) {
             Write-Host "with Nested Hyper-V enabled"
@@ -103,13 +105,13 @@ function Get-AideInfra {
         "Microsoft Windows" = "Win"
         "IoT Enterprise"    = "IoT"
         "Enterprise"        = "Ent"
-        "Server"             = "Ser"
-        "Datacenter"         = "DC"
-        "Standard"           = ""
-        "Evaluation"         = ""
-        "2019"               = ""
-        "2022"               = ""
-        " "                  = ""
+        "Server"            = "Ser"
+        "Datacenter"        = "DC"
+        "Standard"          = ""
+        "Evaluation"        = ""
+        "2019"              = ""
+        "2022"              = ""
+        " "                 = ""
     }
     $Name = $aideSession.HostOS.OSName
     foreach ($key in $replacements.Keys) {
@@ -166,19 +168,20 @@ function Read-AideUserConfig {
     #>
     if ($aideSession.UserConfigFile) {
         $jsonContent = Get-Content "$($aideSession.UserConfigFile)" | ConvertFrom-Json
-        $upgraded = UpgradeJsonFormat $jsonContent
         if ($jsonContent.AksEdgeProduct) {
             $aideSession.UserConfig = $jsonContent
-            if ($upgraded) { Save-AideUserConfig }
             #if there is no AksEdgeConfig object or if it was previously read, re-read from file
-            if ((-not $jsonContent.AksEdgeConfig) -or (($jsonContent.AksEdgeConfig)-and ($aideSession.ReadFromFile))) {
+            if ((-not $jsonContent.AksEdgeConfig) -or (($jsonContent.AksEdgeConfig) -and ($aideSession.ReadFromFile))) {
                 #there is no embedded aksedge config, so read it from file
                 $aksfile = $jsonContent.AksEdgeConfigFile
                 if (($aksfile) -and (Test-Path -Path $aksfile)) {
                     $aksconfig = Get-Content $aksfile | ConvertFrom-Json
                     $aideSession.UserConfig | Add-Member -MemberType NoteProperty -Name 'AksEdgeConfig' -Value $aksconfig -Force
+                    $aideSession.ReadFromFile = $true
                 }
             }
+            $upgraded = UpgradeJsonFormat $jsonContent
+            if ($upgraded) { Save-AideUserConfig }
             return $true
         } else {
             Write-Host "Error: Incorrect json content" -ForegroundColor Red
@@ -216,7 +219,6 @@ function Set-AideUserConfig {
         $jsonContent = $jsonString | ConvertFrom-Json
         if ($jsonContent.AksEdgeProduct) {
             $aideSession.UserConfig = $jsonContent
-            UpgradeJsonFormat $jsonContent | Out-Null
             if (-not $jsonContent.AksEdgeConfig) {
                 #there is no embedded aksedge config, so read it from file
                 $aksfile = $jsonContent.AksEdgeConfigFile
@@ -226,6 +228,8 @@ function Set-AideUserConfig {
                     $aideSession.ReadFromFile = $true
                 }
             }
+            $upgraded = UpgradeJsonFormat $jsonContent
+            if ($upgraded) { Save-AideUserConfig }
         } else {
             Write-Host "Error: Incorrect jsonString" -ForegroundColor Red
             return $false
@@ -251,18 +255,18 @@ function UpgradeJsonFormat {
     if ($azCfg.Auth.spId) {
         $newAuth = @{
             ServicePrincipalId = $azCfg.Auth.spId
-            Password = $azCfg.Auth.password
+            Password           = $azCfg.Auth.password
         }
         $azCfg | Add-Member -MemberType NoteProperty -Name 'Auth' -Value $newAuth -Force
         $retval = $true
     }
-    if (($jsonObj.AksEdgeConfig) -or ($jsonObj.AksEdgeConfigFile)) { return $retval }
+    #Upgrade from pre-public preview format to public preview format
     if ($jsonObj.DeployOptions) {
-        $fieldsToCopy = @("DeployOptions","LinuxVm","WindowsVm","Network","EndUser")
-        $jsonObj | Add-Member -MemberType NoteProperty -Name 'AksEdgeConfig' -Value @{"SchemaVersion"="1.1";"Version"="1.0"} -Force
+        $fieldsToCopy = @("DeployOptions", "LinuxVm", "WindowsVm", "Network", "EndUser")
+        $jsonObj | Add-Member -MemberType NoteProperty -Name 'AksEdgeConfig' -Value @{"SchemaVersion" = "1.1"; "Version" = "1.0"} -Force
         $edgeConfig = [PSCustomObject]$jsonObj.AksEdgeConfig
         foreach ($field in $fieldsToCopy) {
-            if ($jsonObj.$field){
+            if ($jsonObj.$field) {
                 $edgeConfig | Add-Member -MemberType NoteProperty -Name $field -Value $jsonObj.$field -Force
                 $jsonObj.PSObject.properties.remove($field)
             }
@@ -270,7 +274,83 @@ function UpgradeJsonFormat {
         $jsonObj | Add-Member -MemberType NoteProperty -Name 'AksEdgeConfig' -Value $edgeConfig -Force
         $retval = $true
     }
-    return $retval
+    #upgrade from public preview format to GA format
+    $edgeCfg = $jsonObj.AksEdgeConfig
+    if ($jsonObj.AksEdgeConfigFile) {
+        if (Test-Path -Path $jsonObj.AksEdgeConfigFile) {
+            $edgeCfg = Get-Content $jsonObj.AksEdgeConfigFile | ConvertFrom-Json
+        }
+    }
+    if ($edgeCfg.SchemaVersion -eq '1.5') { return $retval }
+    $clustertype = "ScalableCluster"
+    if ($edgeCfg.DeployOptions.SingleMachineCluster) {
+        $clustertype = "SingleMachineCluster"
+        $smcluster = $true
+    }
+    $nodetype = $edgeCfg.DeployOptions.NodeType
+    $newEdgeConfig = New-AksEdgeConfig -DeploymentType $clustertype -NodeType $nodetype
+    #init section
+    if ($smcluster) {
+        $newEdgeConfig.Init.ServiceIPRangeSize = $edgeCfg.Network.ServiceIPRangeSize
+    } else {
+        $newEdgeConfig.Init.ServiceIPRangeStart = $edgeCfg.Network.ServiceIPRangeStart
+        #supporting only Class C address range.. so ip4 prefix 24
+        $startip = $edgeCfg.Network.ServiceIPRangeStart
+        $endip = $edgeCfg.Network.ServiceIPRangeEnd
+        $newEdgeConfig.Init.ServiceIPRangeSize = ($endip.Split(".")[3]) - ($startip.Split(".")[3])
+    }
+    #arc section
+    $arcdata = @{
+        Location          = $azCfg.Location
+        ResourceGroupName = $azCfg.ResourceGroupName
+        SubscriptionId    = $azCfg.SubscriptionId
+        TenantId          = $azCfg.TenantId
+        ClientId          = $azCfg.Auth.ServicePrincipalId
+        ClientSecret      = $azCfg.Auth.Password
+    }
+    if ($azCfg.ClusterName) {
+        $arcdata += @{ClusterName = $azCfg.ClusterName}
+    }
+    $newEdgeConfig | Add-Member -MemberType NoteProperty -Name 'Arc' -Value $arcdata -Force
+    #network section
+    $edgeCfgNW = $edgeCfg.Network
+    $nwdata = @{
+        NetworkPlugin    = $edgeCfg.DeployOptions.NetworkPlugin
+        InternetDisabled = [bool]$edgeCfgNW.InternetDisabled
+        Proxy            = $edgeCfgNW.Proxy
+    }
+    if (-not $smcluster) {
+        $nwdata = $nwdata + @{
+            ControlPlaneEndpointIp = $edgeCfgNW.ControlPlaneEndpointIp
+            Ip4GatewayAddress      = $edgeCfgNW.Ip4GatewayAddress
+            Ip4PrefixLength        = $edgeCfgNW.Ip4PrefixLength
+            DnsServers             = $edgeCfgNW.DnsServers
+            SkipAddressFreeCheck   = [bool]$edgeCfgNW.SkipAddressFreeCheck
+        }
+    }
+    $newEdgeConfig | Add-Member -MemberType NoteProperty -Name 'Network' -Value $nwdata -Force
+    #user section
+    $newEdgeConfig.User.AcceptEula = $edgeCfg.EndUser.AcceptEula
+    $newEdgeConfig.User.AcceptOptionalTelemetry = $edgeCfg.EndUser.AcceptOptionalTelemetry
+    #machines section
+    $machinenode = $newEdgeConfig.Machines[0]
+    $mtu = 0
+    if ($machinenode.LinuxNode) {
+        #TODO: extra Mtu field to be removed.
+        $machinenode.LinuxNode = $edgeCfg.LinuxVm
+        $mtu = [int]$edgeCfg.LinuxVm.Mtu
+    }
+    if ($machinenode.WindowsNode) {
+        $machinenode.WindowsNode = $edgeCfg.WindowsVm
+        $mtu = [int]$edgeCfg.WindowsVm.Mtu
+    }
+    if ($machinenode.NetworkConnection) {
+        $nwnode = $machinenode.NetworkConnection
+        $nwnode.AdapterName = $edgeCfg.Network.VSwitch.AdapterName
+        $nwnode.Mtu = $mtu
+    }
+    $jsonObj | Add-Member -MemberType NoteProperty -Name 'AksEdgeConfig' -Value $newEdgeConfig -Force
+    return $true
 }
 function Save-AideUserConfig {
     <#
@@ -288,6 +368,10 @@ function Save-AideUserConfig {
     } else {
         Write-Verbose "Error: Aide UserConfigFile not configured"
     }
+}
+
+function Test-IsAzureVM {
+    return $aideSession.HostOS.IsAzureVM
 }
 function Get-AzureVMInfo {
     if (!$aideSession.HostOS.IsAzureVM) {
@@ -309,134 +393,54 @@ function Get-AzureVMInfo {
     $vmInfo.Add("sku", $response.compute.sku)
     return $vmInfo
 }
+
+function Disable-WindowsAzureGuestAgent {
+    if (!$aideSession.HostOS.IsAzureVM) {
+        Write-Host "Error: Host is not an Azure VM" -ForegroundColor Red
+        return $null
+    }
+    $service = Get-Service WindowsAzureGuestAgent -ErrorAction SilentlyContinue
+    if ($service -and ($($service.Status) -ne 'Stopped')) {
+        Set-Service WindowsAzureGuestAgent -StartupType Disabled -Verbose
+        Stop-Service WindowsAzureGuestAgent -Force -Verbose
+        New-NetFirewallRule -Name BlockAzureIMDS -DisplayName "Block access to Azure IMDS" -Enabled True -Profile Any -Direction Outbound -Action Block -RemoteAddress 169.254.169.254
+    } else {
+        Write-Host "WindowsAzureGuestAgent is already stopped"
+    }
+}
+
 function Test-AideUserConfigNetwork {
     <#
     .DESCRIPTION
         Checks the AksEdge user configuration needed for AksEdge Network setup
     #>
     $errCnt = 0
-    $aideConfig = Get-AideAksEdgeConfig
-
-    $retval = Test-AksEdgeNetworkParameters -JsonConfigString ($aideConfig | ConvertTo-Json -Depth 4)
-    if (!$retval) {
-        $errCnt +=1
-    }
-    # 1) Check the virtual switch name
-    $nwCfg = $aideConfig.Network
-    if ($aideConfig.DeployOptions.SingleMachineCluster) {
-        Write-Host "Checking Network configuration for SingleMachine Cluster"
-        if ($nwCfg.ServiceIPRangeSize) {
-            if (($nwCfg.ServiceIPRangeSize -ge 0) -and ($nwCfg.ServiceIPRangeSize -le 127)) {
-                Write-Host "* ServiceIPRangeSize ok" -ForegroundColor Green
-            } else {
-                Write-Host "Error: ServiceIPRangeSize should be [0-127]" -ForegroundColor Red
-                $errCnt += 1
-            }
-        }
-        # Remove all other settings that are not relevant for single machine cluster
-        $nwcfgToRemove = @("VSwitch", "ControlPlaneEndpointIp", "Ip4GatewayAddress",
-            "Ip4PrefixLength", "ServiceIPRangeStart", "ServiceIPRangeEnd", "DnsServers")
-        $nwitems = $nwCfg.PSObject.properties.Name
-        foreach ($item in $nwitems) {
-            if ($nwcfgToRemove -contains $item) {
-                Write-Host "$item is redundant. Will be ignored" -ForegroundColor DarkGray
-                $nwCfg.PSObject.properties.remove($item)
-            }
-        }
-        if (($nwCfg) -and ($nwCfg.PSObject.properties.match('*').count -eq 0)) {
-            $aideConfig.PSObject.properties.remove('Network')
-        }
-        if ($aideConfig.LinuxVm.Ip4Address) {
-            Write-Host "Ignoring LinuxVm Ip4Address" -ForegroundColor DarkGray
-            $aideConfig.LinuxVm.PSObject.properties.remove('Ip4Address')
-        }
-        if ($aideConfig.WindowsVm.Ip4Address) {
-            Write-Host "Ignoring WindowsVm Ip4Address" -ForegroundColor DarkGray
-            $aideConfig.WindowsVm.PSObject.properties.remove('Ip4Address')
-        }
-        return $errCnt
-    }
-    #Scalable Cluster type from here on. Check required parameters for Scalable
-    if ($nwCfg.VSwitch.Type -ine 'External') {
-        Write-Host "Error: VSwitch.Type should be External." -ForegroundColor Red
-        $errCnt += 1
-    }
-    if ([string]::IsNullOrEmpty($nwCfg.VSwitch.Name)) {
-        Write-Host "Error: VSwitch.Name is required." -ForegroundColor Red
-        $errCnt += 1
-    }
-    if ([string]::IsNullOrEmpty($nwCfg.VSwitch.AdapterName)) {
-        Write-Host "Error: VSwitch.AdapterName is required for External switch" -ForegroundColor Red
-        $errCnt += 1
+    $akseeCfg = Get-AideAksEdgeConfig
+    if ($akseeCfg.DeploymentType -eq "SingleMachineCluster") {
+        Write-Host "SingleMachine cluster uses internal switch. Nothing to test."
+        return $true
     } else {
-        $nwadapters = (Get-NetAdapter -Physical) | Where-Object { $_.Status -eq "Up" }
-        if ($nwadapters.Name -notcontains ($nwCfg.VSwitch.AdapterName)) {
-            Write-Host "Error: $($nwCfg.VSwitch.AdapterName) not found. External switch creation will fail." -ForegroundColor Red
-            Write-Host "Available NetAdapters : ($nwadapters | Out-String)"
+        $aideConfig = Get-AideUserConfig
+        if ([string]::IsNullOrEmpty($aideConfig.VSwitch.Name)) {
+            Write-Host "Error: VSwitch.Name is required." -ForegroundColor Red
             $errCnt += 1
         }
-    }
-
-    # 3) Check the virtual switch IP address allocation
-    if (($nwCfg.Ip4PrefixLength -lt 0) -or ($nwCfg.Ip4PrefixLength -ge 32)) {
-        Write-Host "Error: Invalid IP4PrefixLength $($nwCfg.Ip4PrefixLength). Should be [0-32]" -ForegroundColor Red
-        $errCnt += 1
-    } else { Write-Host "* IP4PrefixLength ok" -ForegroundColor Green }
-    Write-Host "--- Verifying virtual switch IP address allocation..."
-    [IPAddress]$mask = "255.255.255.0"
-    $gwMask = ([IPAddress]$nwCfg.Ip4GatewayAddress).Address -band $mask.Address
-    $errCnt += Test-IPAddress -ipAddress $nwCfg.Ip4GatewayAddress -paramName 'Ip4GatewayAddress' -isReachable
-    $errCnt += Test-IPAddress -ipAddress $aideConfig.LinuxVm.Ip4Address -paramName 'LinuxVm.Ip4Address' -gatewayMask $gwMask
-    if ($aideConfig.WindowsVm.Ip4Address) {
-        $errCnt += Test-IPAddress -ipAddress $aideConfig.WindowsVm.Ip4Address -paramName 'WindowsVm.Ip4Address' -gatewayMask $gwMask
-    }
-    $errCnt += Test-IPAddress -ipAddress $nwCfg.ControlPlaneEndpointIp -paramName 'ControlPlaneEndpointIp' -gatewayMask $gwMask
-    $errCnt += Test-IPAddress -ipAddress $nwCfg.ServiceIPRangeStart -paramName 'ServiceIPRangeStart' -gatewayMask $gwMask
-    $errCnt += Test-IPAddress -ipAddress $nwCfg.ServiceIPRangeEnd -paramName 'ServiceIPRangeEnd' -gatewayMask $gwMask
-    #TODO : Ping DnsServers for reachability. No Tests for http proxies
-    Write-Host "--- Checking proxy settings..."
-    if (![string]::IsNullOrEmpty($nwCfg.Proxy.Http) -and ($nwCfg.Proxy.Http -NotLike "http://*")) {
-        Write-Host "Warning: The httpProxy address does not start with http://, $($nwCfg.Proxy.Http) may not valid." -ForegroundColor Yellow
-        #$errCnt += 1
-    }
-    if (![string]::IsNullOrEmpty($nwCfg.Proxy.Https) -and ($nwCfg.Proxy.Https -NotLike "https://*")) {
-        Write-Host "Warning: The httpsProxy address does not start with https://, $($nwCfg.Proxy.Https) may not valid." -ForegroundColor Yellow
-        #$errCnt += 1
-    }
-    return $errCnt
-}
-
-function Test-IPAddress {
-    Param([string]$ipAddress, [string]$paramName, [int]$gatewayMask, [Switch]$isReachable)
-    $errCnt = 0
-    if (-not ($ipAddress -as [IPAddress] -as [Bool])) {
-        Write-Host "Error: $paramName Invalid IP4Address $ipAddress" -ForegroundColor Red
-        $errCnt += 1
-    } else {
-        #Ping IP to ensure it is free
-        $status = Test-Connection $ipAddress -Count 1 -Quiet
-        if ($status) {
-            if (!$isReachable) {
-                Write-Host "Error: $paramName $ipAddress in use" -ForegroundColor Red
-                $errCnt += 1
-            }
+        if ([string]::IsNullOrEmpty($aideConfig.VSwitch.AdapterName)) {
+            Write-Host "Error: VSwitch.AdapterName is required for External switch" -ForegroundColor Red
+            $errCnt += 1
         } else {
-            if ($isReachable) {
-                Write-Host "Error: $paramName $ipAddress is not reachable" -ForegroundColor Red
+            $nwadapters = (Get-NetAdapter -Physical) | Where-Object { $_.Status -eq "Up" }
+            if ($nwadapters.Name -notcontains ($aideConfig.VSwitch.AdapterName)) {
+                Write-Host "Error: $($aideConfig.VSwitch.AdapterName) not found. External switch creation will fail." -ForegroundColor Red
+                Write-Host "Available NetAdapters : ($nwadapters | Out-String)"
                 $errCnt += 1
             }
         }
-        [IPAddress]$mask = "255.255.255.0"
-        if ( $gatewayMask -and ((([IPAddress]$ipAddress).Address -band $mask.Address ) -ne $gatewayMask)) {
-            Write-Host "Error: Ip4GatewayAddress and $paramName $ipAddress are not in the same subnet" -ForegroundColor Red
-            $errCnt += 1
-        }
     }
-    if (!$errCnt) {
-        Write-Host "* $paramName ok" -ForegroundColor Green
-    }
-    return $errCnt
+    $retval = Test-AksEdgeNetworkParameters -JsonConfigString ($akseeCfg | ConvertTo-Json -Depth 4)
+    return ($retval -and ($errCnt -eq 0))
 }
+
 function Test-AideUserConfigInstall {
     $errCnt = 0
     $aideConfig = Get-AideUserConfig
@@ -456,7 +460,7 @@ function Test-AideUserConfigInstall {
         Write-Host "Supported products: [$($aksedgeProducts.Keys -join ',' )]"
         $errCnt += 1
     }
-    $windowsRequired = $aideConfig.AksEdgeConfig.DeployOptions.NodeType -ilike '*Windows'
+    $windowsRequired = ($null -ne $($aideConfig.AksEdgeConfig.Machines.WindowsNode))
     # 2) Check if ProductUrl is valid if specified
     if (-not [string]::IsNullOrEmpty($aideConfig.AksEdgeProductUrl)) {
         if (Test-Path -Path $aideConfig.AksEdgeProductUrl) {
@@ -500,40 +504,6 @@ function Test-AideUserConfigInstall {
     return ($errCnt -eq 0)
 }
 
-function Test-AideUserConfigVMConfig {
-    Param
-    (
-        [Parameter(Position = 0, Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [PSCustomObject]$vmCfg
-    )
-    $errCnt = 0
-    if ($vmCfg.CpuCount -gt 1) {
-        Write-Host "* Virtual machine will be created with $($vmCfg.CpuCount) vCPUs."
-    } else {
-        Write-Host "* 0 or 1 vCPU specified - Using default configuration, virtual machine will be created with 2 vCPUs."
-        if ($vmCfg) { $vmCfg.PSObject.properties.remove('CpuCount') }
-    }
-    if ($vmCfg.MemoryInMB -gt 0) {
-        Write-Host "* Virtual machine will be created with $($vmCfg.MemoryInMB) MB of memory."
-    } else {
-        Write-Host "* No custom memory used - Using default configuration, virtual machine will be created with 2048 MB of memory."
-        if ($vmCfg) { $vmCfg.PSObject.properties.remove('MemoryInMB') }
-    }
-    if ($vmCfg.DataSizeInGB) {
-        if (($vmCfg.DataSizeInGB -ge 2) -and ($vmCfg.DataSizeInGB -le 2048)) {
-            #Between 2 GB and 2 TB
-            Write-Host "* Virtual machine VHDX will be created with $($vmCfg.DataSizeInGB) GB of data size."
-        } else {
-            Write-Host "Error: VmDataSizeInGB should be between 2 GB and 2048 GB(2TB)" -ForegroundColor Red
-            $errCnt += 1
-        }
-    } else {
-        Write-Host "* No custom data size used - Using default configuration, virtual machine VHDX will be created with 2 GB of data size."
-        if ($vmCfg) { $vmCfg.PSObject.properties.remove('DataSizeInGB') }
-    }
-    return $errCnt
-}
 function Test-AideUserConfigDeploy {
     <#
     .DESCRIPTION
@@ -541,8 +511,8 @@ function Test-AideUserConfigDeploy {
         Return $true if no blocking errors are found, and $false otherwise
     #>
     $errCnt = 0
-    $aideConfig = Get-AideAksEdgeConfig
-    $euCfg = $aideConfig.EndUser
+    $akseeCfg = Get-AideAksEdgeConfig
+    $euCfg = $akseeCfg.User
     Write-Host "`n--- Verifying AksEdge VM Deployment Configuration..."
     # 1) Check Mandatory configuration EULA
     Write-Host "--- Verifying EULA..."
@@ -555,44 +525,6 @@ function Test-AideUserConfigDeploy {
 
     if ($euCfg.AcceptOptionalTelemetry) {
         Write-Host "* Optional telemetry accepted." -ForegroundColor Green
-    }
-    <# if this is set to false, currently it queries during deployment.
-    else {
-        Write-Host "- Optional telemetry not accepted. Basic telemetry will be sent." -ForegroundColor Yellow
-        if ($euCfg) { $euCfg.PSObject.properties.remove('AcceptOptionalTelemetry') }
-    }#>
-
-    $doCfg = $aideConfig.DeployOptions
-    foreach ($key in $aksedgeValueSet.Keys) {
-        if ($($doCfg.$key)) {
-            if ($aksedgeValueSet[$key] -icontains $($doCfg.$key)) {
-                Write-Host "* DeployOptions $key ok." -ForegroundColor Green
-            } else {
-                Write-Host "Error: DeployOptions ($key : $($doCfg.$key)) is incorrect." -ForegroundColor Red
-                $errCnt += 1
-            }
-        }
-    }
-
-    #Check for mutually exclusive flags
-    if (($doCfg.JoinCluster) -and ($doCfg.SingleMachineCluster)) {
-        Write-Host "Error: JoinCluster and SingleMachineCluster are both specified" -ForegroundColor Red
-        $errCnt += 1
-    }
-
-    # 2) Check the virtual switch specified
-    if (-not (Test-AideVmSwitch)) {
-        $errCnt += 1
-    }
-
-    # 3) Check the virtual switch memory, cpu, and storage
-    Write-Host "--- Verifying linux virtual machine resources..."
-    if ($aideConfig.LinuxVm) {
-        $errCnt += Test-AideUserConfigVMConfig $aideConfig.LinuxVm
-    }
-    Write-Host "--- Verifying windows virtual machine resources..."
-    if ($aideConfig.WindowsVm) {
-        $errCnt += Test-AideUserConfigVMConfig $aideConfig.WindowsVm
     }
 
     if ($errCnt) {
@@ -666,32 +598,6 @@ function Test-AideMsiInstall {
     Write-Host "AksEdge version        `t: $version"
     return $true
 }
-function Test-HyperVStatus {
-    Param
-    (
-        [Switch] $Enable
-    )
-    $retval = $true
-    #Enable HyperV
-    $feature = Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V
-    if ($feature.State -ne "Enabled") {
-        $retval = $false
-        Write-Host "Hyper-V is disabled" -ForegroundColor Red
-        if ($Enable) {
-            Write-Host "Enabling Hyper-V"
-            if ($aideSession.HostOS.IsServerSKU) {
-                Install-WindowsFeature -Name Hyper-V -IncludeAllSubFeature -IncludeManagementTools
-            } else {
-                Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All -NoRestart
-            }
-            Write-Host "Rebooting machine for enabling Hyper-V" -ForegroundColor Yellow
-            Restart-Computer -Force -ErrorAction SilentlyContinue
-        }
-    } else {
-        Write-Host "Hyper-V is enabled" -ForegroundColor Green
-    }
-    return $retval
-}
 
 function Test-AideLinuxVmRun {
     <#
@@ -715,15 +621,13 @@ function Test-AideLinuxVmRun {
 
     } else {
         $retval = (hcsdiag list) | ConvertFrom-String -Delimiter "," -PropertyNames Type, State, Id, Name
-        $wssd = $retval | Where-Object { $_.Name.Trim() -ieq 'wssdagent' }
+        $wssd = $retval | Where-Object { $_.Name.Trim() -ieq 'wssdagent' } | Select-Object -Last 1
         if ($wssd -and ($wssd.State.Trim() -ieq 'Running')) { $retval = $true }
     }
     return $retval
 }
 
 New-Alias -Name mars -Value Invoke-AideLinuxVmShell
-New-Alias -Name mars-read -Value Get-AideLinuxVmFile
-New-Alias -Name mars-copy -Value Copy-AideLinuxVmFile
 
 function Invoke-AideLinuxVmShell {
     <#
@@ -747,75 +651,13 @@ function Invoke-AideLinuxVmShell {
             $retval = $true }#>
     } else {
         $retval = (hcsdiag list) | ConvertFrom-String -Delimiter "," -PropertyNames Type, State, Id, Name
-        $wssd = $retval | Where-Object { $_.Name.Trim() -ieq 'wssdagent' } | Select-Object -First 1
+        $wssd = $retval | Where-Object { $_.Name.Trim() -ieq 'wssdagent' } | Select-Object -Last 1
         if ($wssd -and ($wssd.State.Trim() -ieq 'Running')) {
             if ($args) {
                 hcsdiag console $wssd.ID.Trim() $args
             } else {
                 hcsdiag console $wssd.ID.Trim() su aksedge-user
             }
-        } else {
-            Write-Host "Error: VM is not deployed or VM is not running" -ForegroundColor Red
-        }
-    }
-}
-
-function Get-AideLinuxVmFile {
-    <#
-    .SYNOPSIS
-        Invokes the AksEdge Linux VM Shell and reads file from the linux vm.
-
-    .DESCRIPTION
-        Invokes the AksEdge Linux VM Shell and reads file from the linux vm. This is not supported on ServerSKU.
-
-    .OUTPUTS
-        None
-
-    .EXAMPLE
-        Get-AideLinuxVmFile
-    #>
-    if ($aideSession.HostOS.IsServerSKU) {
-        Write-Host "Not supported yet"
-        <#$vm = Get-VM | Where-Object { $_.Name -like '*edge' }
-        if ($vm -and ($vm.State -ieq 'Running')) {
-            $retval = $true }#>
-    } else {
-        $retval = (hcsdiag list) | ConvertFrom-String -Delimiter "," -PropertyNames Type, State, Id, Name
-        $wssd = $retval | Where-Object { $_.Name.Trim() -ieq 'wssdagent' } | Select-Object -First 1
-        if ($wssd -and ($wssd.State.Trim() -ieq 'Running')) {
-            hcsdiag read $wssd.ID.Trim() $args
-        } else {
-            Write-Host "Error: VM is not deployed or VM is not running" -ForegroundColor Red
-        }
-    }
-}
-function Copy-AideLinuxVmFile {
-    <#
-    .SYNOPSIS
-        Invokes the AksEdge Linux VM Shell and copies file to the linux vm.
-
-    .DESCRIPTION
-        Invokes the AksEdge Linux VM Shell and copies file to the linux vm. This is not supported on ServerSKU.
-
-    .ALIASES
-        mars-copy
-
-    .OUTPUTS
-        None
-
-    .EXAMPLE
-        Get-AideLinuxVmFile
-    #>
-    if ($aideSession.HostOS.IsServerSKU) {
-        Write-Host "Not supported yet"
-        <#$vm = Get-VM | Where-Object { $_.Name -like '*edge' }
-        if ($vm -and ($vm.State -ieq 'Running')) {
-            $retval = $true }#>
-    } else {
-        $retval = (hcsdiag list) | ConvertFrom-String -Delimiter "," -PropertyNames Type, State, Id, Name
-        $wssd = $retval | Where-Object { $_.Name.Trim() -ieq 'wssdagent' } | Select-Object -First 1
-        if ($wssd -and ($wssd.State.Trim() -ieq 'Running')) {
-            hcsdiag write $wssd.ID.Trim() $args
         } else {
             Write-Host "Error: VM is not deployed or VM is not running" -ForegroundColor Red
         }
@@ -844,8 +686,7 @@ function Test-AideDeployment {
         $VhdxPath = $aideConfig.InstallOptions.VhdxPath
     }
     $retval = $false
-    if (Get-ChildItem -Path $VhdxPath -Include *ledge.vhdx,*Image.vhdx -Recurse -ErrorAction SilentlyContinue)
-    {
+    if (Get-ChildItem -Path $VhdxPath -Include *ledge.vhdx, *Image.vhdx -Recurse -ErrorAction SilentlyContinue) {
         $retval = $true
     }
 
@@ -888,7 +729,7 @@ function Install-AideMsi {
     Write-Host "Installing $reqProduct from $url"
     Push-Location $env:Temp
     $argList = '/I AksEdge.msi /qn '
-    $windowsRequired = $aideConfig.DeployOptions.NodeType -ilike '*Windows'
+    $windowsRequired = ($null -ne $($aideConfig.AksEdgeConfig.Machines.WindowsNode))
     if (Test-Path -Path $url) {
         Copy-Item -Path $url -Destination $msiFile
         if($windowsRequired) {
@@ -967,8 +808,8 @@ function Expand-ArchiveLocal {
     Param(
         [string] $ZipFile,
         [string] $Destination
-        )
-    $Shell = New-Object -Comobject "Shell.Application"
+    )
+    $Shell = New-Object -ComObject "Shell.Application"
     $zipContents = $Shell.Namespace((Convert-Path $ZipFile)).items()
     $DestinationFolder = $Shell.Namespace((Convert-Path $Destination))
     $DestinationFolder.CopyHere($zipContents)
@@ -1052,8 +893,8 @@ function Invoke-AideDeployment {
         return $false
     }
     if (-not (Test-AideUserConfigDeploy)) { return $false }
-    $aideConfig = Get-AideAksEdgeConfig
-    $aksedgeDeployParams = $aideConfig | ConvertTo-Json -Depth 4
+    $akseeCfg = Get-AideAksEdgeConfig
+    $aksedgeDeployParams = $akseeCfg | ConvertTo-Json -Depth 4
     Write-Verbose "AksEdge VM deployment parameters for New-AksEdgeDeployment..."
     Write-Verbose "$aksedgeDeployParams"
     Write-Host "Starting AksEdge VM deployment..."
@@ -1085,7 +926,7 @@ function Remove-AideDeployment {
     .EXAMPLE
         Remove-AideDeployment
     #>
-    return Remove-AksEdgeDeployment
+    return Remove-AksEdgeDeployment -Force
 }
 function Test-AideVmSwitch {
     <#
@@ -1110,15 +951,18 @@ function Test-AideVmSwitch {
         [Switch] $Create
     )
     $retval = $true
-    # Stubbed out for now
-    $usrCfg = Get-AideAksEdgeConfig
-    $vSwitch = $usrCfg.Network.VSwitch
-    $switchName = $vSwitch.Name
-    if (Test-AideUserConfigNetwork) { Write-Host "Errors in Network configuration." -ForegroundColor Red; return $false }
+    $aideConfig = Get-AideUserConfig
+    $akseeCfg = Get-AideAksEdgeConfig
+    $switchName = $aideConfig.VSwitch.Name
+    $adapterName = $aideConfig.VSwitch.AdapterName
 
-    if ($usrCfg.DeployOptions.SingleMachineCluster) {
+    if ($akseeCfg.DeploymentType -eq "SingleMachineCluster") {
         Write-Host "SingleMachine cluster uses internal switch. Nothing to test."
         return $true
+    }
+    if (-not (Test-AideUserConfigNetwork)) {
+        Write-Host "Errors in Network configuration." -ForegroundColor Red
+        return $false
     }
     # Scalable cluster - check if switch already present
     Write-Host "--- Verifying virtual switch..."
@@ -1132,6 +976,10 @@ function Test-AideVmSwitch {
             Write-Host "* Name:$($netadapter.Name) is Up" -ForegroundColor Green
         } else {
             Write-Host "Error: NetAdapter $($netadapter.Name) is not Up.`nVMSwitch $name has not connectivity." -ForegroundColor Red
+            $retval = $false
+        }
+        if ($netadapter.Name -ine $adapterName) {
+            Write-Host "Error: NetAdapter $($netadapter.Name) doesnt match the specified value ($adapterName)" -ForegroundColor Red
             $retval = $false
         }
     } else {
@@ -1160,12 +1008,10 @@ function New-AideVmSwitch {
     .EXAMPLE
         New-AideVmSwitch
     #>
-    $usrCfg = Get-AideAksEdgeConfig
-    $vSwitch = $usrCfg.Network.VSwitch
-
-    $switchName = $vSwitch.Name
-    $type = $vSwitch.Type
-    $adapter = $vSwitch.AdapterName
+    $aideConfig = Get-AideUserConfig
+    $switchName = $aideConfig.VSwitch.Name
+    $type = "External"
+    $adapter = $aideConfig.VSwitch.AdapterName
 
     $aksedgeSwitch = Get-VMSwitch -Name $switchName -ErrorAction SilentlyContinue
     if ($aksedgeSwitch) {
@@ -1205,19 +1051,12 @@ function Remove-AideVmSwitch {
     .EXAMPLE
         Remove-AideVmSwitch
     #>
-    $usrCfg = Get-AideAksEdgeConfig
-    $switchName = $($usrCfg.Network.VSwitch.Name)
+    $aideConfig = Get-AideUserConfig
+    $switchName = $aideConfig.VSwitch.Name
     $aksedgeSwitch = Get-VMSwitch -Name $switchName -ErrorAction SilentlyContinue
     if ($aksedgeSwitch) {
         Write-Host "Removing $switchName"
         Remove-VMSwitch -Name $switchName
-        if ($aksedgeSwitch.SwitchType -ieq "Internal") {
-            $aksedgeNat = Get-NetNat -Name "$switchName-NAT"
-            if ($aksedgeNat) {
-                Write-Host "Removing $switchName-NAT"
-                Remove-NetNat -Name "$switchName-NAT"
-            }
-        }
     }
 }
 
@@ -1276,8 +1115,11 @@ function Start-AideWorkflow {
 
     Get-AideHostPcInfo
     # Check PC prequisites (Hyper-V, AksEdge)
-    if (!(Test-HyperVStatus -Enable)) { return $false } # todo resume after reboot. Intune will retry. Arc to be checked
     if (!(Test-AideMsiInstall -Install)) { return $false }
+    # Install required host features - can result in reboot.
+    
+    Write-Host "Running Install-AksEdgeHostFeatures" -ForegroundColor Cyan
+    if (!(Install-AksEdgeHostFeatures -Confirm:$false)) { return $false }
 
     # Check if AksEdge is deployed already and bail out
     if (Test-AideDeployment) {

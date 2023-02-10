@@ -6,7 +6,7 @@
     "properties": {
         "SchemaVersion": {
             "type": "string",
-            "default": "1.0",
+            "default": "1.1",
             "description": "Version of the schema/format of the json"
         },
         "Version": {
@@ -56,6 +56,10 @@
                     "type": "string",
                     "description": "ServicePrincipalName to be used for creating service principal to onboard Arc-enabled Server/Kubernetes"
                 },
+                "CustomLocationOID":{
+                    "type": "string",
+                    "description": "ObjectID for the custom locations resource provider to be used for creating custom locations "
+                },
                 "Auth": {
                     "type": "object",
                     "propertires": {
@@ -81,6 +85,19 @@
                 "VhdxPath": {
                     "type": "string",
                     "description": "Path to create/store AksEdge VM Vhdx files"
+                }
+            }
+        },
+        "VSwitch": {
+            "type": "object",
+            "properties": {
+                "Name": {
+                    "type": "string",
+                    "description": "Name of the External vSwitch"
+                },
+                "AdapterName": {
+                    "type": "string",
+                    "description": "Name of the Physical Network Adapter"
                 }
             }
         },

@@ -6,7 +6,7 @@ Param(
 )
 
 #Requires -RunAsAdministrator
-New-Variable -Name gAksEdgeAzureSetupTest -Value "1.0.221208.0900" -Option Constant -ErrorAction SilentlyContinue
+New-Variable -Name gAksEdgeAzureSetupTest -Value "1.0.230109.1600" -Option Constant -ErrorAction SilentlyContinue
 
 function Install-AzCli {
     #Check if Az CLI is installed. If not install it.
@@ -72,15 +72,23 @@ if (-not $session){
 (az account set --subscription $($aicfg.SubscriptionId)) | Out-Null
 $session = (az account show | ConvertFrom-Json -ErrorAction SilentlyContinue)
 Write-Host "Logged in $($session.name) subscription as $($session.user.name) ($($session.user.type))"
+$rgname = $aicfg.ResourceGroupName
+$rguri = "/subscriptions/$($aicfg.SubscriptionId)/resourceGroups/$rgname"
 $roles = (az role assignment list --all --assignee $($session.user.name)) | ConvertFrom-Json
-$reqRoles = @("Owner","Contributor","Azure Connected Machine Onboarding","Kubernetes Cluster - Azure Arc Onboarding")
+$reqRoles = @("Owner","Contributor")
+$onbRoles = @("Azure Connected Machine Onboarding","Kubernetes Cluster - Azure Arc Onboarding")
+$rolecnt = 0
 if ($roles) {
     Write-Host "Roles enabled for this account are:" -ForegroundColor Cyan
     foreach ($role in $roles){
-        Write-Host "$($role.roleDefinitionName) for scope $($role.scope)" -ForegroundColor Cyan
-        if ($($role.scope) -eq "/subscriptions/$($aicfg.SubscriptionId)/resourceGroups/$($aicfg.ResourceGroupName)") {
-            if ($reqRoles -contains $($role.roleDefinitionName) ){
+        $roledef = $($role.roleDefinitionName)
+        Write-Host "$roledef for scope $($role.scope)" -ForegroundColor Cyan
+        if ($($role.scope) -eq $rguri) {
+            if ($reqRoles -contains $roledef ){
                 $reqRoleFound = $true
+            } elseif ($onbRoles -contains $roledef) {
+                $rolecnt +=1
+                if($rolecnt -eq 2) {$reqRoleFound = $true}
             }
         }
     }
@@ -91,7 +99,6 @@ if ($reqRoleFound){
     Write-Host "x You do not have sufficient privileges for this service principal" -ForegroundColor Red
 }
 # Resource group
-$rgname = $aicfg.ResourceGroupName
 Write-Host "Checking $rgname..."
 $rgexists = az group exists --name $rgname
 if ($rgexists -ieq 'true') {

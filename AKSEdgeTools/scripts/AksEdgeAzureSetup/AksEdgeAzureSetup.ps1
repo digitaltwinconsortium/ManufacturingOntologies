@@ -8,11 +8,17 @@ Param(
 )
 
 #Requires -RunAsAdministrator
-New-Variable -Name gAksEdgeAzureSetup -Value "1.0.221208.0900" -Option Constant -ErrorAction SilentlyContinue
+New-Variable -Name gAksEdgeAzureSetup -Value "1.0.230130.1600" -Option Constant -ErrorAction SilentlyContinue
 New-Variable -Option Constant -ErrorAction SilentlyContinue -Name cliMinVersions -Value @{
-    "azure-cli"        = "2.41.0"
-    "azure-cli-core"   = "2.41.0"
+    "azure-cli"      = "2.41.0"
+    "azure-cli-core" = "2.41.0"
 }
+New-Variable -Option Constant -ErrorAction SilentlyContinue -Name arcLocations -Value @(
+    "westeurope", "eastus", "westcentralus", "southcentralus", "southeastasia", "uksouth",
+    "eastus2", "westus2", "australiaeast", "northeurope", "francecentral", "centralus",
+    "westus", "northcentralus", "koreacentral", "japaneast", "eastasia", "westus3",
+    "canadacentral", "eastus2euap"
+)
 function Test-AzVersions {
     #Function to check if the installed az versions are greater or equal to minVersions
     $retval = $true
@@ -89,6 +95,17 @@ function Format-Json([Parameter(Mandatory, ValueFromPipeline)][String] $json) {
         $line
     }) -Join "`n"
 }
+function AssignRole([String] $roleToAssign) {
+    #NOTE: using global values here for rest of the parameters.
+    $roleparams = @(
+        "--assignee", "$($servicePrincipal.appId)",
+        "--role", "$roleToAssign",
+        "--scope", "$rguri"
+    )
+    Write-Host "Creating $roleToAssign role assignment"
+    $res = (az role assignment create @roleparams ) | ConvertFrom-Json
+    if (!$res) { Write-Host " Error in assigning $roleToAssign role " -ForegroundColor Red }
+}
 ###
 # Main
 ###
@@ -109,6 +126,11 @@ if ($jsonContent.Azure) {
     $aicfg = $jsonContent
 } else {
     Write-Host "Error: Incorrect json content" -ForegroundColor Red
+    exit -1
+}
+if ($arcLocations -inotcontains $($aicfg.Location)) {
+    Write-Host "Error: Location $($aicfg.Location) is not supported for Azure Arc" -ForegroundColor Red
+    Write-Host "Supported Locations : $arcLocations"
     exit -1
 }
 # Install Cli
@@ -203,7 +225,7 @@ if (-not $hasRights) {
                 $hasRights = $true
             }
         }
-   }
+    }
 }
 if (-not $hasRights) {
     Write-Host "Error: You do not have sufficient privileges for this subscription $($aicfg.SubscriptionId)." -ForegroundColor Red
@@ -212,6 +234,7 @@ if (-not $hasRights) {
 }
 # Resource group
 $rgname = $aicfg.ResourceGroupName
+$rguri = "/subscriptions/$($aicfg.SubscriptionId)/resourceGroups/$rgname"
 Write-Host "Checking $rgname..."
 $rgexists = az group exists --name $rgname
 if ($rgexists -ieq 'true') {
@@ -247,67 +270,61 @@ foreach ($namespace in $namespaces) {
 $spName = $aicfg.ServicePrincipalName
 $spApp = (az ad sp list --display-name $spName | ConvertFrom-Json -ErrorAction SilentlyContinue)
 $servicePrincipal = $null
+$enableContributor = $spContributorRole.IsPresent
+$enableKcOnboarding = (!$spContributorRole.IsPresent)
+$enableAcmOnboarding = (!$spContributorRole.IsPresent)
+$savePassword = $false
+
 if ($spApp -is [Array]) {$spApp = $spApp | Where-Object {$_.displayName -ieq $spName}; }
 if ($spApp) {
+    # service principal found. Check roles required
+    $servicePrincipal = $spApp
     Write-Host "$spName is already present."
-    #TODO : Check Roles for the spName
     $spRoles = (az role assignment list --all --assignee $($spApp.appId)) | ConvertFrom-Json
-    $enableContributor = $false
     if ($spRoles) {
-        Write-Host "Roles enabled for this account are:" -ForegroundColor Cyan
-        foreach ($role in $spRoles){
-            Write-Host "$($role.roleDefinitionName) for scope $($role.scope)" -ForegroundColor Cyan
-            if ($($role.scope) -eq "/subscriptions/$($aicfg.SubscriptionId)/resourceGroups/$($aicfg.ResourceGroupName)") {
-                if ($($role.roleDefinitionName) -ieq 'Contributor' ){
-                    if ($spContributorRole) {
-                        Write-Host "* Contributor role already enabled" -ForegroundColor Green
-                    } else { $enableContributor = $true }
-                }
+        $spRolesRgScope = $spRoles | Where-Object {$_.scope -eq $rguri } # resource group scope
+        if ($spRolesRgScope) {
+            if ($spRolesRgScope.roleDefinitionName -contains 'Contributor') {
+                Write-Host "* Contributor role enabled" -ForegroundColor Green
+                $enableContributor = $false
+                $enableKcOnboarding = $false
+                $enableAcmOnboarding = $false
+            }
+            if ($spRolesRgScope.roleDefinitionName -contains 'Azure Connected Machine Onboarding') {
+                Write-Host "* Azure Connected Machine Onboarding role enabled" -ForegroundColor Green
+                $enableAcmOnboarding = $false
+            }
+            if ($spRolesRgScope.roleDefinitionName -contains 'Kubernetes Cluster - Azure Arc Onboarding') {
+                Write-Host "* Kubernetes Cluster - Azure Arc Onboarding role enabled" -ForegroundColor Green
+                $enableKcOnboarding = $false
             }
         }
     }
+    #TODO : Check assigning multiple roles in one go.
     if ($enableContributor) {
-        Write-Host "Contributor role not found. Assigning Contributor role..."
-        $roleparams = @(
-            "--assignee", "$($spApp.appId)",
-            "--role", "Contributor",
-            "--scope", "/subscriptions/$($aicfg.SubscriptionId)/resourceGroups/$($aicfg.ResourceGroupName)"
-        )
-        $res = (az role assignment create @roleparams ) | ConvertFrom-Json
-        if (!$res) { Write-Host " Error in assigning Contributor role " -ForegroundColor Red }
+        AssignRole -roleToAssign "Contributor"
+    } elseif ($enableAcmOnboarding) {
+        #Check and assign the connected machine onboarding role. the kuberenetes role is assigned later.
+        AssignRole -roleToAssign "Azure Connected Machine Onboarding"
     }
+
     if ($spCredReset) {
         Write-Host "Resetting credentials.."
         $servicePrincipal = (az ad sp credential reset --id $spApp.appId | ConvertFrom-Json)
         if ($servicePrincipal) {
             Write-Host "ServicePrincipal credentials reset successfully"
+            $savePassword = $true
         } else {
             Write-Host "ServicePrincipal reset failed"
             az logout
             exit -1
         }
-    } else {
-        $xml = "$env:USERPROFILE\.arciot\$($spName).xml"
-        $backupxml = "$env:USERPROFILE\.arciot\$($spName)-backup.xml"
-        if (!(Test-Path -Path $xml )) {
-            Write-Host "Use existing password for $spName in Auth.Password field"
-            Write-Host "ServicePrincipalId for $spName is $($spApp.appId)"
-            az logout
-            exit -1
-        }
-        Write-Host "Importing creds from $xml"
-        $credinfo = Import-Clixml -Path $xml
-        $servicePrincipal = @{
-            "appId" = $credinfo.Credential.Username
-            "password" = $credinfo.Credential.GetNetworkCredential().Password
-        }
-        Rename-Item -Path $xml -NewName $backupxml -Force -ErrorAction SilentlyContinue
     }
 } else {
     Write-Host "$spName not found. Creating.."
     $spparams = @(
         "--name", "$spName",
-        "--scopes", "/subscriptions/$($aicfg.SubscriptionId)/resourceGroups/$($aicfg.ResourceGroupName)"
+        "--scopes", "$rguri"
     )
     if ($spContributorRole) {
         $spparams += @("--role", "Contributor")
@@ -320,27 +337,47 @@ if ($spApp) {
         az logout
         exit -1
     }
-    if (-not $spContributorRole) {
-        #Assign the Kubernetes Cluster - Azure Arc Onboarding role to serviceprincipal too
-        $roleparams = @(
-            "--assignee", "$($servicePrincipal.appId)",
-            "--role", "Kubernetes Cluster - Azure Arc Onboarding",
-            "--scope", "/subscriptions/$($aicfg.SubscriptionId)/resourceGroups/$($aicfg.ResourceGroupName)"
-        )
-        $res = (az role assignment create @roleparams ) | ConvertFrom-Json
-        if (!$res) { Write-Host " Error in assigning Kubernetes Cluster - Azure Arc Onboarding role " -ForegroundColor Red }
+    $savePassword = $true
+}
+if ($enableKcOnboarding) {
+    #Assign the Kubernetes Cluster - Azure Arc Onboarding role to serviceprincipal too
+    AssignRole -roleToAssign "Kubernetes Cluster - Azure Arc Onboarding"
+}
+if ($savePassword) {
+    $aicfg | Add-Member -MemberType NoteProperty -Name 'Auth' -Value @{"ServicePrincipalId" = "$($servicePrincipal.appId)"; "Password" = "$($servicePrincipal.password)"} -Force
+    Write-Host "WARNING: The Service Principal password is stored in clear at $jsonFile" -ForegroundColor Yellow
+}
+$customLocationRPOID = (az ad sp list --filter "displayname eq 'Custom Locations RP'" --query "[?appDisplayName=='Custom Locations RP'].id" -o tsv)
+$jsonContent.Azure | Add-Member -MemberType NoteProperty -Name 'CustomLocationOID' -Value $customLocationRPOID -Force
+
+#Adding Arc config as per AKSEdge schema
+$arcdata = @{
+    Location          = $aicfg.Location
+    ResourceGroupName = $aicfg.ResourceGroupName
+    SubscriptionId    = $aicfg.SubscriptionId
+    TenantId          = $aicfg.TenantId
+    ClientId          = $aicfg.Auth.ServicePrincipalId
+    ClientSecret      = $aicfg.Auth.Password
+    ClusterName       = ""
+}
+$ecFile = $jsonContent.AksEdgeConfigFile
+if ($ecFile) {
+    $parentpath = Split-Path -Path $jsonFile -Parent
+    if ($ecFile.Contains("\")) {
+        $ecFile = Resolve-Path -Path $ecFile
+    } else {
+        $ecFile = Join-Path -Path $parentpath -ChildPath $ecFile
     }
-}
-Write-Host "$($servicePrincipal.appId)"
-$ServicePrincipalId = $($servicePrincipal.appId)
-$password = $($servicePrincipal.password)
-if (!($aicfg.Auth)) {
-    $aicfg | Add-Member -MemberType NoteProperty -Name 'Auth' -Value @{"ServicePrincipalId" = "$ServicePrincipalId"; "Password" = "$password"} -Force
+    Write-Host "Updating $ecFile with Arc information"
+    if (Test-Path -Path $ecFile) {
+        $edgeCfg = Get-Content $ecFile | ConvertFrom-Json
+        $edgeCfg | Add-Member -MemberType NoteProperty -Name 'Arc' -Value $arcdata -Force
+        $edgeCfg | ConvertTo-Json -Depth 4 | Format-Json | Set-Content -Path "$ecFile" -Force
+    }
 } else {
-    $aicfg.Auth.ServicePrincipalId = $ServicePrincipalId
-    $aicfg.Auth.Password = $password
+    $jsonContent | Add-Member -MemberType NoteProperty -Name 'Arc' -Value $arcdata -Force
 }
-Write-Host "WARNING: The Service Principal password is stored in clear at $jsonFile" -ForegroundColor Yellow
+
 $jsonContent | ConvertTo-Json | Format-Json | Set-Content -Path "$jsonFile" -Force
 az logout
 exit 0

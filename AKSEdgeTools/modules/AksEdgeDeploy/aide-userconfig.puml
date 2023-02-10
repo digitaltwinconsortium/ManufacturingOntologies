@@ -2,30 +2,26 @@
 <style>
 jsonDiagram {
     node {
-        FontName Segoe UI SemiBold
-        FontColor blue
-        FontSize 14
+        FontSize 12
         RoundCorner 10
-        LineThickness 1
+        LineThickness 0.5
         separator {
             LineThickness 0.25
-            LineColor black
         }
     }
     arrow {
-        LineColor blue
-        LineThickness 1
-        LineStyle 2;5
+        LineThickness 0.5
+        LineStyle 2;6
     }
     highlight {
-        BackgroundColor Blue
+        BackgroundColor black
         FontColor White
     }
 }
 </style>
 #highlight "SchemaVersion"
 {
-    "SchemaVersion":"1.0",
+    "SchemaVersion":"1.1",
     "Version":"1.0",
     "AksEdgeProduct" : [
                 "AKS Edge Essentials - K8s (Public Preview)",
@@ -40,8 +36,9 @@ jsonDiagram {
         "ResourceGroupName": "String",
         "ServicePrincipalName" : "String",
         "Location" : "String",
+        "CustomLocationOID":"GUID",
         "Auth": {
-            "ServicePrincipalId" : "String",
+            "ServicePrincipalId" : "GUID",
             "Password" : "String"
         }
     }
@@ -51,9 +48,14 @@ jsonDiagram {
         "VhdxPath":"String"
     }
     ,
+    "VSwitch": {
+        "Name": "String",
+        "AdapterName": "String"
+    }
+    ,
     "AksEdgeConfigFile":"String",
     "AksEdgeConfig":{
-        "ref" :"aksedge-dc.json"
+        "ref" :"aksedge-config.json"
     }
 }
 @endjson

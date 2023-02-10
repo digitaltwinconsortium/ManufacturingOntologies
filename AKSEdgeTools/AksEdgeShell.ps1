@@ -3,7 +3,7 @@
   Validates and loads the config file and imports the bootstrap scripts
 #>
 #Requires -RunAsAdministrator
-New-Variable -Name gAksEdgeShellVersion -Value "1.0.221208.0900" -Option Constant -ErrorAction SilentlyContinue
+New-Variable -Name gAksEdgeShellVersion -Value "1.0.230203.1200" -Option Constant -ErrorAction SilentlyContinue
 if (! [Environment]::Is64BitProcess) {
     Write-Host "Error: Run this in 64bit Powershell session" -ForegroundColor Red
     exit -1
@@ -33,9 +33,22 @@ Write-Host "Loading AksEdgeDeploy module from $modulePath.." -ForegroundColor Cy
 Import-Module AksEdgeDeploy.psd1 -Force
 $aideVersion = (Get-Module -Name AksEdgeDeploy).Version.ToString()
 Get-AideHostPcInfo
-Test-AideMsiInstall | Out-Null
+
+$retval = Test-AideMsiInstall
 Write-Host "AksEdgeShell  version  `t: $gAksEdgeShellVersion"
 Write-Host "AksEdgeDeploy version  `t: $aideVersion"
+
+$feature = Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V
+if ($feature.State -ne "Enabled") {
+    Write-Host "Hyper-V is disabled." -ForegroundColor Red
+    if ($retval) {
+        Write-Host "Running Install-AksEdgeHostFeatures (may reboot to enable Hyper-V)" -ForegroundColor Cyan
+        if (!(Install-AksEdgeHostFeatures)) { return $false }
+    }
+} else {
+    Write-Host "Hyper-V is enabled" -ForegroundColor Green
+}
+
 
 Set-AideUserConfig $aksjson | Out-Null
 if (Test-AideDeployment) {

@@ -1,4 +1,4 @@
-let intermediateTable = <ADTHistoryTableName>
+let intermediateTable = AdtPropertyEvents
 | where TimeStamp between (_startTime .. _endTime)
 | where Id == toscalar(GetDigitalTwinIdForUANode("assembly", "munich", "EnergyConsumption"));
 intermediateTable

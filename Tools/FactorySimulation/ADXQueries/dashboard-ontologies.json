@@ -31,7 +31,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "let intermediateTable = <ADTHistoryTableName>\n| where TimeStamp > _startTime and TimeStamp < _endTime\n| where Id == toscalar(GetDigitalTwinIdForUANode(\"assembly\", \"munich\", \"status\"));\nintermediateTable\n| where isnotnull(SourceTimeStamp)\n| join intermediateTable on $left.TimeStamp == $right.TimeStamp\n| where Key1 == \"OPCUADisplayName\"\n| project SourceTimeStamp, OPCUANodeValue = toint(Value), OPCUADisplayName = Value1\n"
+        "text": "let intermediateTable = AdtPropertyEvents\n| where TimeStamp > _startTime and TimeStamp < _endTime\n| where Id == toscalar(GetDigitalTwinIdForUANode(\"assembly\", \"munich\", \"status\"));\nintermediateTable\n| where isnotnull(SourceTimeStamp)\n| join intermediateTable on $left.TimeStamp == $right.TimeStamp\n| where Key1 == \"OPCUADisplayName\"\n| project SourceTimeStamp, OPCUANodeValue = toint(Value), OPCUADisplayName = Value1\n"
       },
       "visualOptions": {
         "hideTileTitle": false,
@@ -96,7 +96,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "let intermediateTable = <ADTHistoryTableName>\n| where TimeStamp between (_startTime .. _endTime)\n| where Id == toscalar(GetDigitalTwinIdForUANode(\"assembly\", \"munich\", \"EnergyConsumption\"));\nintermediateTable\n| where isnotnull(SourceTimeStamp)\n| join intermediateTable on $left.TimeStamp == $right.TimeStamp\n| where Key1 == \"OPCUADisplayName\"\n| order by TimeStamp desc\n| make-series num=avg(todouble(Value)) on TimeStamp from _startTime to _endTime step 1s\n| extend (anomalies, score, baseline) = series_decompose_anomalies(num, 0.5, -1, 'linefit')"
+        "text": "let intermediateTable = AdtPropertyEvents\n| where TimeStamp between (_startTime .. _endTime)\n| where Id == toscalar(GetDigitalTwinIdForUANode(\"assembly\", \"munich\", \"EnergyConsumption\"));\nintermediateTable\n| where isnotnull(SourceTimeStamp)\n| join intermediateTable on $left.TimeStamp == $right.TimeStamp\n| where Key1 == \"OPCUADisplayName\"\n| order by TimeStamp desc\n| make-series num=avg(todouble(Value)) on TimeStamp from _startTime to _endTime step 1s\n| extend (anomalies, score, baseline) = series_decompose_anomalies(num, 0.5, -1, 'linefit')"
       },
       "visualOptions": {
         "hideTileTitle": false,
@@ -158,7 +158,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "let horizon = (_endTime - _startTime) / 2;\nlet dt = 5m;\nlet intermediateTable = <ADTHistoryTableName>\n| where TimeStamp between (_startTime .. _endTime)\n| where Id == toscalar(GetDigitalTwinIdForUANode(\"assembly\", \"munich\", \"NumberOfManufacturedProducts\"));\nintermediateTable\n| where isnotnull(SourceTimeStamp)\n| join intermediateTable on $left.TimeStamp == $right.TimeStamp\n| where Key1 == \"OPCUADisplayName\"\n| order by TimeStamp desc\n| make-series actual=avg(toint(Value)) on TimeStamp from _startTime to _endTime + horizon step dt\n| extend forecast = series_decompose_forecast(actual, toint(horizon/dt))"
+        "text": "let horizon = (_endTime - _startTime) / 2;\nlet dt = 5m;\nlet intermediateTable = AdtPropertyEvents\n| where TimeStamp between (_startTime .. _endTime)\n| where Id == toscalar(GetDigitalTwinIdForUANode(\"assembly\", \"munich\", \"NumberOfManufacturedProducts\"));\nintermediateTable\n| where isnotnull(SourceTimeStamp)\n| join intermediateTable on $left.TimeStamp == $right.TimeStamp\n| where Key1 == \"OPCUADisplayName\"\n| order by TimeStamp desc\n| make-series actual=avg(toint(Value)) on TimeStamp from _startTime to _endTime + horizon step dt\n| extend forecast = series_decompose_forecast(actual, toint(horizon/dt))"
       },
       "visualOptions": {
         "hideTileTitle": false,

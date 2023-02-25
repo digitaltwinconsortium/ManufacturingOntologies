@@ -1,4 +1,4 @@
-let intermediateTable = <ADTHistoryTableName> // set to the name of your data history table
+let intermediateTable = AdtPropertyEvents
 | where TimeStamp > _startTime and TimeStamp < _endTime
 | where Id == toscalar(GetDigitalTwinIdForUANode("assembly", "munich", "Status"));
 intermediateTable

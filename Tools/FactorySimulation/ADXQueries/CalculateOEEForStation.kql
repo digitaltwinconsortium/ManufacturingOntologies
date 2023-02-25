@@ -1,6 +1,6 @@
 .create-or-alter function CalculateOEEForStation(stationName:string,location:string,idealCycleTime:int,hoursInShift:int) {
 // calculation from https://www.oee.com/calculating-oee/
-let dataHistoryTable = <ADTHistoryTableName>; // set to the name of your data history table
+let dataHistoryTable = AdtPropertyEvents;
 let idealRunningTime = hoursInShift * 60 * 60; // [seconds]
 let shiftEndTime = now();
 let shiftStartTime = datetime_add('hour', -hoursInShift, shiftEndTime);

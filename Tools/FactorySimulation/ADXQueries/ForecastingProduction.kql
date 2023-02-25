@@ -1,6 +1,6 @@
 let horizon = (_endTime - _startTime) / 2;
 let dt = 5m;
-let intermediateTable = <ADTHistoryTableName> // set to the name of your data history table
+let intermediateTable = AdtPropertyEvents
 | where TimeStamp between (_startTime .. _endTime)
 | where Id == toscalar(GetDigitalTwinIdForUANode("assembly", "munich", "NumberOfManufacturedProducts"));
 intermediateTable

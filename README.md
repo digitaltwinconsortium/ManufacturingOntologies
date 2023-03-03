@@ -209,9 +209,9 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 * AAD_TENANT_ID - the GUID of your AAD tenant of your Azure subscription
 * APPLICATION_KEY - the secret you created during pressure relief function app registration
 * APPLICATION_ID - the GUID assigned to the pressure relief function during app registration
-* BROKERNAME - the name of your event hubs namespace, e.g. ontologies-eventhubs.servicebus.windows.net
-* USERNAME - set to "$ConnectionString"
-* PASSWORD - the primary key connection string of your event hubs namespace
+* BROKER_NAME - the name of your event hubs namespace, e.g. ontologies-eventhubs.servicebus.windows.net
+* BROKER_USERNAME - set to "$ConnectionString"
+* BROKER_PASSWORD - the primary key connection string of your event hubs namespace
 * TOPIC - set to "commander.command"
 * RESPONSE_TOPIC - set to "commander.response"
 * UA_SERVER_ENDPOINT - set to "opc.tcp://assembly.seattle/" to open the pressure relief valve of the Seattle assembly machine

@@ -1,0 +1,84 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:isa95:OperationsSegment;1",
+    "@type": "Interface",
+    "displayName": "Operations segment",
+    "description": "The information needed to quantify a segment for a specific operation shall be presented as an operations segment. An operations segment identifies, references, or corresponds to a process segment. ",
+    "comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+    "extends": [
+        "dtmi:digitaltwins:isa95:Segment;1"
+    ],
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "correspondsTo",
+            "displayName": "Corresponds To",
+            "description": "The process segments correspond to this operations segment. I",
+            "target": "dtmi:digitaltwins:isa95:ProcessSegment;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "isMadeUpOf",
+            "displayName": "Is made up of",
+            "description": "This parent operations segment is whole of the child operations segment(s) as the part",
+            "target": "dtmi:digitaltwins:isa95:OperationsSegment;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "hasAnExecutionDependencyOn",
+            "displayName": "Has an execution dependency on",
+            "description": "Operations segment has an association class relationship with operations dependency. The operations segment(s) applying the ordering / sequencing rules from the segment dependency related to the operations segment execution",
+            "target": "dtmi:digitaltwins:isa95:OperationsSegment;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "includesPropertiesOf",
+            "displayName": "Includes properties of",
+            "description": "This operations segment class(s) include properties of the operations segment class",
+            "maxMultiplicity": 1,
+            "target": "dtmi:digitaltwins:isa95:OperationsSegment;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "hasAnExecutionDependencyOnSegment",
+            "displayName": "Has an execution dependency on",
+            "description": "Operations segment has an association class relationship with segment dependency. The ordering / sequencing rules related to the operations segment execution",
+            "target": "dtmi:digitaltwins:isa95:OperationsSegmentDependency;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "containsParameter",
+            "displayName": "Contains",
+            "description": "The operations parameter specifications related to this operations segment",
+            "target": "dtmi:digitaltwins:isa95:ParameterSpecification;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "containsPersonnelSpecification",
+            "displayName": "Contains",
+            "description": "The personnel specification(s) defining part of this operations segment",
+            "target": "dtmi:digitaltwins:isa95:PersonnelSpecification;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "containsEquipmentSpecification",
+            "displayName": "Contains",
+            "description": "The equipment specification(s) defining part of this operations segment",
+            "target": "dtmi:digitaltwins:isa95:EquipmentSpecification;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "containsPhysicalAssetSpecification",
+            "displayName": "Contains",
+            "description": "The physical asset specification(s) defining part of this operations segment",
+            "target": "dtmi:digitaltwins:isa95:PhysicalAssetSpecification;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "containsMaterialSpecification",
+            "displayName": "Contains",
+            "description": "The material specification(s) defining part of this operations segment",
+            "target": "dtmi:digitaltwins:isa95:MaterialSpecification;1"
+        }
+    ]
+}

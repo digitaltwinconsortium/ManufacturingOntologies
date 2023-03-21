@@ -2,25 +2,11 @@
     "@context": "dtmi:dtdl:context;2",
     "@id": "dtmi:digitaltwins:isa95:SegmentDependency;1",
     "@type": "Interface",
-    "displayName": "Segment dependency",
-    "description": "Process dependencies that are independent of any particular product or operations task shall be presented as segment dependencies.",
+    "displayName": "/Abstract/ Segment dependency",
+    "description": "Segment dependencies that are independent of any particular product or operations task shall be presented as segment dependencies.",
     "comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
     "extends": ["dtmi:digitaltwins:isa95:BaseModel;1"],
     "contents": [
-        {
-            "@type": "Relationship",
-            "name": "processSegmentFrom",
-            "displayName": "Has an execution dependency on",
-            "description": "The source process segment(s) that the target process segment(s) are dependent. Process segment has an association class relationship with segment dependency",
-            "target": "dtmi:digitaltwins:isa95:ProcessSegment;1"
-        },
-        {
-            "@type": "Relationship",
-            "name": "processSegmentTo",
-            "displayName": "Has an execution dependency on",
-            "description": "The target process segment(s) that are dependent on source process segment(s).Process segment has an association class relationship with segment dependency",
-            "target": "dtmi:digitaltwins:isa95:ProcessSegment;1"
-        },
         {
             "@type": "Component",
             "name": "description",

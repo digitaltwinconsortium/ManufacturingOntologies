@@ -8,9 +8,9 @@ An ontology defines the language used to describe a system. In the manufacturing
 
 The ontologies defined in this repository are described by leveraging the Digital Twin Definition Language (DTDL), which is specified [here](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md).
 
-### International Society of Automation 95 (ISA95)
+### International Society of Automation 95 (ISA95/IEC 62264)
 
-ISA95 is one of the ontologies leveraged by this solution. It is a standard and described [here](https://en.wikipedia.org/wiki/ANSI/ISA-95).
+ISA95 / IEC 62264 is one of the ontologies leveraged by this solution. It is a standard and described [here](https://en.wikipedia.org/wiki/ANSI/ISA-95) and [here](https://en.wikipedia.org/wiki/IEC_62264).
 
 ### IEC 63278 Asset Administration Shell (AAS)
 

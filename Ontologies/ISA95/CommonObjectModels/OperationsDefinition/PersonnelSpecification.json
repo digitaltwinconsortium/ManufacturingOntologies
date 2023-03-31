@@ -1,20 +1,20 @@
 {
     "@context": "dtmi:dtdl:context;2",
-    "@id": "dtmi:digitaltwins:isa95:EquipmentSegmentSpecification;1",
+    "@id": "dtmi:digitaltwins:isa95:PersonnelSpecification;1",
     "@type": "Interface",
-    "displayName": "Equipment segment specification",
-    "description": "Equipment resources that are required for a process segment shall be presented as equipment segment specifications",
+    "displayName": "Personnel specification",
+    "description": "Personnel resources that are required for a operations segment shall be presented as personnel specifications",
     "comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
     "extends": [
-        "dtmi:digitaltwins:isa95:EquipmentSegment;1"
+        "dtmi:digitaltwins:isa95:PersonnelSegment;1"
     ],
     "contents": [
         {
             "@type": "Relationship",
             "name": "isMadeUpOf",
             "displayName": "Is made up of",
-            "description": "The related object(s) makes up part of this equipment segment specification as the whole",
-            "target": "dtmi:digitaltwins:isa95:EquipmentSegmentSpecification;1"
+            "description": "The related object(s) makes up part of this personnel specification as the whole",
+            "target": "dtmi:digitaltwins:isa95:PersonnelSpecification;1"
         },
         {
             "@type": "Relationship",
@@ -27,8 +27,8 @@
             "@type": "Relationship",
             "name": "hasPropertiesOf",
             "displayName": "has properties of",
-            "description": "The equipment segment specification property(s) of this equipment segment specification",
-            "target": "dtmi:digitaltwins:isa95:EquipmentSegmentSpecificationProperty;1"
+            "description": "The personnel specification property(s) of this personnel specification",
+            "target": "dtmi:digitaltwins:isa95:PersonnelSpecificationProperty;1"
         }
-   ]
+    ]
 }

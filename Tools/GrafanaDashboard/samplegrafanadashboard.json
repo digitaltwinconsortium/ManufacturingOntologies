@@ -81,7 +81,7 @@
               }
             },
             "pluginVersion": "4.3.0",
-            "query": "let ADTInstance = \"https://expmanufont-ADT.api.eus.digitaltwins.azure.net\"; \nlet ADTQuery = \"SELECT T.equipmentID FROM DIGITALTWINS T WHERE IS_OF_MODEL(T , 'dtmi:digitaltwins:isa95:Area;1')\";\nevaluate azure_digital_twins_query_request(ADTInstance, ADTQuery)\n| extend factory = substring(equipmentID, 10, 15)\n| project factory",
+            "query": "let ADTInstance = \"${adtURL}\"; \nlet ADTQuery = \"SELECT T.equipmentID FROM DIGITALTWINS T WHERE IS_OF_MODEL(T , 'dtmi:digitaltwins:isa95:Area;1')\";\nevaluate azure_digital_twins_query_request(ADTInstance, ADTQuery)\n| extend factory = substring(equipmentID, 10, 15)\n| project factory",
             "querySource": "raw",
             "queryType": "KQL",
             "rawMode": true,

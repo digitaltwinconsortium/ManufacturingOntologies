@@ -29,11 +29,11 @@
     },
     "Machines": [
         {
-            "LinuxNode": {
-                "CpuCount": 2,
-                "MemoryInMB": 4096,
-                "DataSizeInGB": 20
-            }
+          "LinuxNode": {
+            "CpuCount": 2,
+            "MemoryInMB": 6144,
+            "DataSizeInGB": 20
+          }
         }
     ]
 }

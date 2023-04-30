@@ -1,6 +1,6 @@
 {
     "@context": "dtmi:dtdl:context;2",
-    "@id": "dtmi:digitaltwins:isa95:MaterialSegmentSpecificationProperty;1",
+    "@id": "dtmi:digitaltwins:isa95:MaterialSpecificationProperty;1",
     "@type": "Interface",
     "displayName": "Material segment specification property",
     "description": "Specific properties that are required for material segment specifications shall be presented as material segment specification properties",

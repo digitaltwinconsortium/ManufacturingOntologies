@@ -1,4 +1,4 @@
-# Configure Grafana dashboard
+# Configuring the Azure Managed Grafana Dashboard
 
 ## Background Grafana
 Grafana is used within manufacturing to create dasbhoards that displays real-time data. Azure offers a service named Azure Managed Grafana. With this, you can create cloud dashboards. In this configuration manual, you will enable Grafana on Azure and you will create a dashboard with data that is queried from Azure Data Explorer and Azure Digital Twins service, using the simulated production line data from this reference solution. Below is a screenshot from the dashboard:

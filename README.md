@@ -253,7 +253,7 @@ You can now manage your Kubernetes cluster from the cloud via the newly deployed
 
 The Asset Admin Shell (AAS) Repository is automatically configured during deployment of the reference solution, but for the Product Carbon Footprint (PCF) calculation, a WattTime service account needs to be provided. Please refer to [the WattTime API documentation](https://www.watttime.org/api-documentation/#best-practices-for-api-usage) on how to register for an account. Once your account has been activated, provide your username and password in the settings of the AAS Repo website from the Azure Portal via YourDeploymentName-AAS-Repo -> Configuration -> Application settings.
 
-<img src="Docs/aas.png" alt="aas" width="500" />
+<img src="Docs/aas.png" alt="aas" width="400" />
 
 ## Replacing the Production Line Simulation with a Real Production Line
 

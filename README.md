@@ -246,14 +246,14 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 
 You can now manage your Kubernetes cluster from the cloud via the newly deployed Azure Arc instance. In the Azure Portal, browse to the Azure Arc instance and select Workloads. The required service token can be retrieved via `Get-AideArcKubernetesServiceToken` from the `AksEdgePrompt` on your virtual machine.
 
-<img src="Docs/arc.png" alt="arc" width="900" />
+<img src="Docs/arc.png" alt="arc" width="500" />
 
 
 ## Enabling the Product Carbon Footprint Calculation (PCF) in the Asset Admin Shell (AAS) Repository
 
 The Asset Admin Shell (AAS) Repository is automatically configured during deployment of the reference solution, but for the Product Carbon Footprint (PCF) calculation, a WattTime service account needs to be provided. Please refer to [the WattTime API documentation](https://www.watttime.org/api-documentation/#best-practices-for-api-usage) on how to register for an account. Once your account has been activated, provide your username and password in the settings of the AAS Repo website from the Azure Portal via YourDeploymentName-AAS-Repo -> Configuration -> Application settings.
 
-<img src="Docs/aas.png" alt="aas" width="900" />
+<img src="Docs/aas.png" alt="aas" width="500" />
 
 ## Replacing the Production Line Simulation with a Real Production Line
 

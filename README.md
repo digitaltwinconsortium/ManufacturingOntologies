@@ -190,9 +190,11 @@ To access Azure Digital Twins Explorer, first make sure you have the [Azure Digi
 
 ## Condition Monitoring, Calculating OEE, Detecting Anomalies and Making Predictions in Azure Data Explorer
 
-You can also visit the [Azure Data Explorer documentation](https://learn.microsoft.com/en-us/azure/synapse-analytics/data-explorer/data-explorer-overview) to learn how to create no-code dashboards for condition monitoring, yield or maintenance predictions, or anomaly detection. There are a number of sample queries in the `./Tools/FactorySimulation/ADXQueries` folder in this repository to get you started, plus we have provided a sample dashboard in the same folder that you can deploy by following the steps outlined [here](https://learn.microsoft.com/en-us/azure/data-explorer/azure-data-explorer-dashboards#to-create-new-dashboard-from-a-file).
+You can also visit the [Azure Data Explorer documentation](https://learn.microsoft.com/en-us/azure/synapse-analytics/data-explorer/data-explorer-overview) to learn how to create no-code dashboards for condition monitoring, yield or maintenance predictions, or anomaly detection. There are a number of sample queries in the `./Tools/FactorySimulation/ADXQueries` folder in this repository to get you started, plus we have provided a sample dashboard in the same folder that you can deploy by following the steps outlined [here](https://learn.microsoft.com/en-us/azure/data-explorer/azure-data-explorer-dashboards#to-create-new-dashboard-from-a-file). After import, you need to update the dashboard's data source by specifying the HTTPS endpoint of your ADX server cluster instance in the format 'https://<ADXInstanceName>.<AzureRegion>.kusto.windows.net/' in the top-right-hand corner of the dashboard.
 
-Note: After importing the ontologies dashboard, you need run all the provided ADX queries in the Query tab of your ADX cluster once to register the Kusto functions. You also need to set your ADT instance URL in the `CalculateOEEForLine.kql` query. Then, set the data source by providing your ADX cluster URI in the dashboard's hamburger menu (top-right-hand corner) under Data sources.
+<img src="Docs/dashboard.png" alt="dashboard" width="900" />
+
+Note: After importing the ontologies dashboard, you need run all the provided ADX queries in the Query tab of your ADX cluster once to register the ADX functions, since the dashboard uses them internally. You also need to set your ADT instance URL in the `CalculateOEEForLine.kql` query.
 
 ## Using Azure Managed Grafana Service
 

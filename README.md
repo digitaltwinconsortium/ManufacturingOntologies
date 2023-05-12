@@ -246,7 +246,7 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 
 You can now manage your Kubernetes cluster from the cloud via the newly deployed Azure Arc instance. In the Azure Portal, browse to the Azure Arc instance and select Workloads. The required service token can be retrieved via `Get-AideArcKubernetesServiceToken` from the `AksEdgePrompt` on your virtual machine.
 
-<img src="Docs/arc.png" alt="arc" width="500" />
+<img src="Docs/arc.png" alt="arc" width="900" />
 
 
 ## Enabling the Product Carbon Footprint Calculation (PCF) in the Asset Admin Shell (AAS) Repository

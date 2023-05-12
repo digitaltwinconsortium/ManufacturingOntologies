@@ -231,7 +231,7 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 
 ## Onboarding the Kubernetes Instance for Management via Azure Arc
 
-1. On your virtual machine, From a **Windows PowerShell window**, navigate to the `AKSEdgeTools` directory and run `AksEdgePrompt`.
+1. On your virtual machine, From a **Windows PowerShell window**, navigate to the `AKSEdgeTools` directory.
 1. Run `notepad aide-userconfig.json` and provide the following information:
 
     | Attribute | Description |

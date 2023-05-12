@@ -194,7 +194,7 @@ You can also visit the [Azure Data Explorer documentation](https://learn.microso
 
 <img src="Docs/dashboard.png" alt="dashboard" width="900" />
 
-Note: After importing the ontologies dashboard, you need run all the provided ADX queries in the Query tab of your ADX cluster once to register the ADX functions, since the dashboard uses them internally. You also need to set your ADT instance URL in the `CalculateOEEForLine.kql` query.
+Note: After importing the ontologies dashboard, you need run **all** provided ADX queries in the Query tab of your ADX cluster once to register the ADX functions, since the dashboard uses them internally. You also need to set your ADT instance URL in the `CalculateOEEForLine.kql` query.
 
 ## Using Azure Managed Grafana Service
 
@@ -231,27 +231,28 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 
 ## Onboarding the Kubernetes Instance for Management via Azure Arc
 
-1. On your virtual machine, From a command prompt, navigate to the `AKSEdgeTools` directory and run `AksEdgePrompt`.
+1. On your virtual machine, From a **Windows PowerShell window**, navigate to the `AKSEdgeTools` directory and run `AksEdgePrompt`.
 1. Run `notepad aide-userconfig.json` and provide the following information:
 
     | Attribute | Description |
     | --- | --- |
-    | SubscriptionName	| The name of your Azure subscription. You can find this in the Azure portal. |
+    | SubscriptionName	| The name of your Azure subscription. You can find this in the Azure portal under Subscriptions. |
     | SubscriptionId | Your subscription ID. In the Azure portal, click on the subscription you're using and copy/paste the subscription ID. |
     | TenantId | Your tenant ID. In the Azure portal, click on Azure Active Directory and copy/paste the tenant ID. |
     | ResourceGroupName | The name of the Azure resource group which was deployed for this solution. |
     | ServicePrincipalName | The name of the Azure Service Principal to use as credentials. AKS uses this service principal to connect your cluster to Arc. Set this to the same name as your ResourceGroupName for simplicity. |
 
-1. Save the file and run `.\scripts\AksEdgeAzureSetup\AksEdgeAzureSetup.ps1 .\aide-userconfig.json -spContributorRole` from the PowerShell window.
-1. Run `Read-AideUserConfig` from the PowerShell window.
-1. Run `Initialize-AideArc` from the Powershell window.
-1. Run `Connect-AideArcKubernetes` from the Powershell window.
+1. Save the file, and run `SetupArc` from the PowerShell window.
 
 You can now manage your Kubernetes cluster from the cloud via the newly deployed Azure Arc instance. In the Azure Portal, browse to the Azure Arc instance and select Workloads. The required service token can be retrieved via `Get-AideArcKubernetesServiceToken` from the `AksEdgePrompt` on your virtual machine.
+
+<img src="Docs/arc.png" alt="arc" width="900" />
+
 
 ## Enabling the Product Carbon Footprint Calculation (PCF) in the Asset Admin Shell (AAS) Repository
 
 The Asset Admin Shell (AAS) Repository is automatically configured during deployment of the reference solution, but for the Product Carbon Footprint (PCF) calculation, a WattTime service account needs to be provided. Please refer to [the WattTime API documentation](https://www.watttime.org/api-documentation/#best-practices-for-api-usage) on how to register for an account. Once your account has been activated, provide your username and password in the settings of the AAS Repo website from the Azure Portal via YourDeploymentName-AAS-Repo -> Configuration -> Application settings.
+
 
 ## Replacing the Production Line Simulation with a Real Production Line
 
@@ -293,6 +294,7 @@ Once you are ready to connect your own production line, simply delete the VM fro
 Note: UA Cloud Publisher stores its configuration and log files in the cloud within the Azure Storage Account deployed in this solution.
 
 Note: You can check what is currently being published by selecting the Publishes Nodes tab. You can also see diagnostics information from UA Cloud Publisher on the Diagnostics tab.
+
 
 ## License
 

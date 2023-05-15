@@ -49,6 +49,7 @@ Here are the components involved in this solution:
 | [AASX Package Explorer](https://github.com/admin-shell-io/aasx-package-explorer) | This app allows you to view and modify Asset Administration Shells on your PC. |
 | [UA Cloud Metaverse](https://github.com/OPCFoundation/UA-CloudMetaverse) | This Industrial Metaverse app allows you to view digital twins of our manufacturing assets via Augmented Reality or Virtual Reality headsets. Work in progress! |
 | [Microsoft Sustainability Manager](https://github.com/digitaltwinconsortium/ManufacturingOntologies/blob/main/Tools/MicrosoftSustainabilityManager/configuremsm.md) | Microsoft Sustainability Manager is an extensible solution that unifies data intelligence and provides comprehensive, integrated, and automated sustainability management for organizations at any stage of their sustainability journey. It automates manual processes, enabling organizations to more efficiently record, report, and reduce their emissions. |
+| [Azure Managed Grafana](https://learn.microsoft.com/en-us/azure/managed-grafana/overview) | Azure Managed Grafana is a data visualization platform built on top of the Grafana software by Grafana Labs. It's built as a fully managed Azure service operated and supported by Microsoft. |
 
 :exclamation: In a real-world deployment, something as critical as opening a pressure relief valve would of course be done on-premises and this is just a simple example of how to achieve the digital feedback loop.
 
@@ -167,7 +168,7 @@ Parameters:
 
 | Parameter | Description |
 | --- | --- |
-| EventHubCS | Copy the Event Hubs namespace connection string as described [here](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string"). |
+| EventHubCS | Copy the Event Hubs namespace connection string as described [here](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string). |
 | StorageAccountCS | In the Azure Portal, navigate to the Storage Account created by this solution. Select "Access keys" from the left-hand navigation menu. Then, copy the connection string for key1. |
 | AzureSubscriptionID | In Azure Portal, browse your Subscriptions and copy the ID of the subscription used in this solution. |
     
@@ -189,9 +190,11 @@ To access Azure Digital Twins Explorer, first make sure you have the [Azure Digi
 
 ## Condition Monitoring, Calculating OEE, Detecting Anomalies and Making Predictions in Azure Data Explorer
 
-You can also visit the [Azure Data Explorer documentation](https://learn.microsoft.com/en-us/azure/synapse-analytics/data-explorer/data-explorer-overview) to learn how to create no-code dashboards for condition monitoring, yield or maintenance predictions, or anomaly detection. There are a number of sample queries in the `./Tools/FactorySimulation/ADXQueries` folder in this repository to get you started, plus we have provided a sample dashboard in the same folder that you can deploy by following the steps outlined [here](https://learn.microsoft.com/en-us/azure/data-explorer/azure-data-explorer-dashboards#to-create-new-dashboard-from-a-file).
+You can also visit the [Azure Data Explorer documentation](https://learn.microsoft.com/en-us/azure/synapse-analytics/data-explorer/data-explorer-overview) to learn how to create no-code dashboards for condition monitoring, yield or maintenance predictions, or anomaly detection. There are a number of sample queries in the `./Tools/FactorySimulation/ADXQueries` folder in this repository to get you started, plus we have provided a sample dashboard in the same folder that you can deploy by following the steps outlined [here](https://learn.microsoft.com/en-us/azure/data-explorer/azure-data-explorer-dashboards#to-create-new-dashboard-from-a-file). After import, you need to update the dashboard's data source by specifying the HTTPS endpoint of your ADX server cluster instance in the format `https://ADXInstanceName.AzureRegion.kusto.windows.net/` in the top-right-hand corner of the dashboard.
 
-Note: After importing the ontologies dashboard, you need run all the provided ADX queries in the Query tab of your ADX cluster once to register the Kusto functions. You also need to set your ADT instance URL in the `CalculateOEEForLine.kql` query. Then, set the data source by providing your ADX cluster URI in the dashboard's hamburger menu (top-right-hand corner) under Data sources.
+<img src="Docs/dashboard.png" alt="dashboard" width="900" />
+
+Note: After importing the ontologies dashboard, you need run **all** provided ADX queries in the Query tab of your ADX cluster once to register the ADX functions, since the dashboard uses them internally. You also need to set your ADT instance URL in the `CalculateOEEForLine.kql` query.
 
 ## Using Azure Managed Grafana Service
 
@@ -228,27 +231,29 @@ If you want to test a "digital feedback loop", i.e. triggering a command on one 
 
 ## Onboarding the Kubernetes Instance for Management via Azure Arc
 
-1. On your virtual machine, From a command prompt, navigate to the `AKSEdgeTools` directory and run `AksEdgePrompt`.
+1. On your virtual machine, From a **Windows PowerShell window**, navigate to the `AKSEdgeTools` directory.
 1. Run `notepad aide-userconfig.json` and provide the following information:
 
     | Attribute | Description |
     | --- | --- |
-    | SubscriptionName	| The name of your Azure subscription. You can find this in the Azure portal. |
+    | SubscriptionName	| The name of your Azure subscription. You can find this in the Azure portal under Subscriptions. |
     | SubscriptionId | Your subscription ID. In the Azure portal, click on the subscription you're using and copy/paste the subscription ID. |
     | TenantId | Your tenant ID. In the Azure portal, click on Azure Active Directory and copy/paste the tenant ID. |
     | ResourceGroupName | The name of the Azure resource group which was deployed for this solution. |
     | ServicePrincipalName | The name of the Azure Service Principal to use as credentials. AKS uses this service principal to connect your cluster to Arc. Set this to the same name as your ResourceGroupName for simplicity. |
 
-1. Save the file and run `.\scripts\AksEdgeAzureSetup\AksEdgeAzureSetup.ps1 .\aide-userconfig.json -spContributorRole` from the PowerShell window.
-1. Run `Read-AideUserConfig` from the PowerShell window.
-1. Run `Initialize-AideArc` from the Powershell window.
-1. Run `Connect-AideArcKubernetes` from the Powershell window.
+1. Save the file, and run `SetupArc` from the PowerShell window.
 
 You can now manage your Kubernetes cluster from the cloud via the newly deployed Azure Arc instance. In the Azure Portal, browse to the Azure Arc instance and select Workloads. The required service token can be retrieved via `Get-AideArcKubernetesServiceToken` from the `AksEdgePrompt` on your virtual machine.
+
+<img src="Docs/arc.png" alt="arc" width="900" />
+
 
 ## Enabling the Product Carbon Footprint Calculation (PCF) in the Asset Admin Shell (AAS) Repository
 
 The Asset Admin Shell (AAS) Repository is automatically configured during deployment of the reference solution, but for the Product Carbon Footprint (PCF) calculation, a WattTime service account needs to be provided. Please refer to [the WattTime API documentation](https://www.watttime.org/api-documentation/#best-practices-for-api-usage) on how to register for an account. Once your account has been activated, provide your username and password in the settings of the AAS Repo website from the Azure Portal via YourDeploymentName-AAS-Repo -> Configuration -> Application settings.
+
+<img src="Docs/aas.png" alt="aas" width="400" />
 
 ## Replacing the Production Line Simulation with a Real Production Line
 
@@ -290,6 +295,7 @@ Once you are ready to connect your own production line, simply delete the VM fro
 Note: UA Cloud Publisher stores its configuration and log files in the cloud within the Azure Storage Account deployed in this solution.
 
 Note: You can check what is currently being published by selecting the Publishes Nodes tab. You can also see diagnostics information from UA Cloud Publisher on the Diagnostics tab.
+
 
 ## License
 

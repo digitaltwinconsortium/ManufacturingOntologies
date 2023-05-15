@@ -50,7 +50,7 @@ Select on the left on 'Variables' and update the two URL with the URL of your Az
 
 ![Variable setting](variablesetting.png)
 
-After you have done that navigate back to the dashboard and hit the refresh button. You should see now data (don't forget to hit the save button on the dashboard).
+Then, navigate back to the dashboard and hit the refresh button. You should now see data (don't forget to hit the save button on the dashboard).
 
 ![End result](endresult.png)
 

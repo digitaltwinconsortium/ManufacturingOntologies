@@ -60,4 +60,4 @@ If data is not showed on your dashboard, please go the individual panels and see
 
 ![Right data source selected](datasourceselected.png)
 
-Within Grafana it is also possible to create Alerts. Please follow [this](configuregrafana.md) manual to create an alert.
+Within Grafana it is also possible to create Alerts. Please follow [this](grafanaalert.md) manual to create an alert.

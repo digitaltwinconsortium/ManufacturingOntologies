@@ -1,6 +1,6 @@
 # Grafana alert setup
 
-In this example we will create an low OEE alert for one of the production lines. First login to your Grafana service and select in the menu for Alert rules.
+In this example we will create a low OEE alert for one of the production lines. First login to your Grafana service and select in the menu for Alert rules.
 
 ![Navigate](navigatetoalerts.png)
 

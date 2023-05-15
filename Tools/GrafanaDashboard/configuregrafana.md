@@ -1,6 +1,7 @@
 # Configure Grafana dashboard for Manufacturing ontologies
 
 ## Background Grafana
+
 Grafana is used within manufacturing to create dasbhoards that displays real-time data. Within Azure there is a service called the Azure Managed Grafana Managed . With this managed Grafana service can you create real-time dashboards based on the manufacturing ontologies solution in this repo. In this configuration manual you will enable Grafana on Azure and will create a dashboard with data that is coming from Azure Data Explorer and Azure Digital Twins from the simulators of this repo. The dashboard can look as follows:
 
 ![Sample manufacturing dashboard](example%20dashboard.png)
@@ -58,3 +59,5 @@ The location variable on the top of the page is automatically filled with data f
 If data is not showed on your dashboard, please go the individual panels and see if the right data source is selected:
 
 ![Right data source selected](datasourceselected.png)
+
+Within Grafana it is also possible to create Alerts. Please follow [this](configuregrafana.md) manual to create an alert.

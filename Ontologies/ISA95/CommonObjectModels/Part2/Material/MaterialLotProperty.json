@@ -1,0 +1,30 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:isa95:MaterialLotProperty;1",
+    "@type": "Interface",
+    "displayName": "Material lot property",
+    "description": "Properties of a material lot shall be presented as material lot properties. Each material can have unique values for zero or more material lot properties, such as a specific pH value for the specific material lot, or a specific density for the material lot",
+    "comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+    "extends": [
+        "dtmi:digitaltwins:isa95:ResourceProperty;1",
+        "dtmi:digitaltwins:isa95:TestableObjectProperty;1"
+    ],
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "contains",
+            "displayName": "Contains",
+            "description": "The nested material lot property(s) makes up part of this material lot property as the whole",
+            "target": "dtmi:digitaltwins:isa95:MaterialLotProperty;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "mapsTo",
+            "displayName": "Maps to",
+            "description": "If the parent material lot supports a material definition, the material definition property(s) is applied in the material lot property(s)",
+            "target": "dtmi:digitaltwins:isa95:MaterialDefinitionProperty;1",
+            "comment": "Relationship type: Dependency",
+            "maxMultiplicity": 1
+        }
+    ]
+}

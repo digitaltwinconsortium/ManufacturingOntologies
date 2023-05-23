@@ -1,0 +1,47 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:isa95:WorkflowSpecificationConnectionProperty;1",
+    "@type": "Interface",
+    "displayName": "Workflow specification connection property",
+    "description": "A property of a workflow specification connection shall be defined as a workflow specification connection property.",
+    "comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+    "extends": ["dtmi:digitaltwins:isa95:BaseModel;1"],
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "contains",
+            "displayName": "Contains",
+            "target": "dtmi:digitaltwins:isa95:WorkflowSpecificationConnectionProperty;1",
+            "description": "The child workflow specification connection properties of this workflow specification connection property."
+        },
+        {
+            "@type": "Relationship",
+            "name": "mapsTo",
+            "displayName": "Maps to",
+            "maxMultiplicity": 1,
+            "description": "If the workflow specification connection supports a workflow specification connection type, the workflow specification connection type property is applied in this workflow specification connection property(s).",
+            "target": "dtmi:digitaltwins:isa95:WorkflowSpecificationConnectionTypeProperty;1"
+        },
+        {
+            "@type": "Component",
+            "name": "description",
+            "displayName": "Description",
+            "description": "Contains additional information",
+            "schema": "dtmi:digitaltwins:isa95:LangStringSet;1"
+        },
+        {
+            "@type": "Property",
+            "name": "value",
+            "displayName": "Value",
+            "description": "The value, set of values, or range of the property.",
+            "schema": "string"
+          },
+          {
+            "@type": "Property",
+            "name": "valueUnitOfMeasure",
+            "displayName": "Value unit of measure",
+            "description": "The unit of measure of the associated property value",
+            "schema": "string"
+          }
+    ]
+}

@@ -1,0 +1,115 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:isa95:FromResourceReference;1",
+    "@type": "Interface",
+    "displayName": "From resource reference",
+    "description": "A 'from' reference to a resource shall be defined as a from resource reference.",
+    "comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+    "extends": [
+        "dtmi:digitaltwins:isa95:BaseModel;1"
+    ],
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "hasPropertiesOf",
+            "displayName": "Has properties of",
+            "description": "The to resource reference property(s) defines in part this to resource reference property",
+            "target": "dtmi:digitaltwins:isa95:FromResourceReferenceProperty;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "correspondsToResourceClass",
+            "displayName": "Corresponds To",
+            "description": "A cross-model association to element in the [resource] model as explained in Clause 3.3.8.",
+            "target": "dtmi:digitaltwins:isa95:ResourceClass;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "correspondsToResource",
+            "displayName": "Corresponds To",
+            "description": "A cross-model association to element in the [resource] model as explained in Clause 3.3.8.",
+            "target": "dtmi:digitaltwins:isa95:Resource;1"
+        },
+        {
+            "@type": "Property",
+            "name": "resourceType",
+            "displayName": "resourceType",
+            "description": "The type of the resource. ",
+            "schema": {
+                "@type": "Enum",
+                "valueSchema": "string",
+                "enumValues": [
+                    {
+                        "name": "personnelClass",
+                        "enumValue": "personnel class"
+                    },
+                    {
+                        "name": "person",
+                        "enumValue": "person"
+                    },
+                    {
+                        "name": "equipmentClass",
+                        "enumValue": "equipment class"
+                    },
+                    {
+                        "name": "equipment",
+                        "enumValue": "equipment"
+                    },
+                    {
+                        "name": "physicalAssetClass",
+                        "enumValue": "physical asset class"
+                    },
+                    {
+                        "name": "physicalAsset",
+                        "enumValue": "physical asset"
+                    },
+                    {
+                        "name": "materialClass",
+                        "enumValue": "material class"
+                    },
+                    {
+                        "name": "materialDefinition",
+                        "enumValue": "material definition"
+                    },
+                    {
+                        "name": "materialLot",
+                        "enumValue": "material lot"
+                    },
+                    {
+                        "name": "materialSublot",
+                        "enumValue": "material sublot"
+                    },
+                    {
+                        "name": "workMaster",
+                        "enumValue": "work master"
+                    },
+                    {
+                        "name": "processSegment",
+                        "enumValue": "process segment"
+                    },
+                    {
+                        "name": "operationDefinition",
+                        "enumValue": "operation definition"
+                    },
+                    {
+                        "name": "operationalLocation",
+                        "enumValue": "operational location"
+                    },
+                    {
+                        "name": "operationsSegment",
+                        "enumValue": "operations segment"
+                    },
+                    {
+                        "name": "testSpecification",
+                        "enumValue": "test specification"
+                    },
+                    {
+                        "name": "testResult",
+                        "enumValue": "test result"
+                    }
+                ]
+            },
+            "writable": true
+        }
+    ]
+}

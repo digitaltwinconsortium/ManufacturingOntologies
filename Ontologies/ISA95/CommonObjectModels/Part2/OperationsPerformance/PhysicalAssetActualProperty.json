@@ -1,0 +1,71 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:isa95:PhysicalAssetActualProperty;1",
+    "@type": "Interface",
+    "displayName": "Physical Asset actual property",
+    "description": "Specific properties that are required for a physical asset actual shall be presented as physical asset actual properties.",
+    "comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+    "extends": [
+        "dtmi:digitaltwins:isa95:BaseModel;1"
+    ],
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "contains",
+            "displayName": "Contains",
+            "description": "The physical asset actual property(s) of this physical asset actual property",
+            "target": "dtmi:digitaltwins:isa95:PhysicalAssetActualProperty;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "mapsToClassProperty",
+            "displayName": "Maps to",
+            "description": "A cross-model dependency to element in the physical asset model as explained in Clause 3.3.8",
+            "target": "dtmi:digitaltwins:isa95:PhysicalAssetClassProperty;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "mapsToProperty",
+            "displayName": "Maps to",
+            "description": "A cross-model dependency to element in the physical asset model as explained in Clause 3.3.8",
+            "target": "dtmi:digitaltwins:isa95:PhysicalAssetProperty;1"
+        },
+        {
+            "@type": "Component",
+            "name": "description",
+            "displayName": "Description",
+            "description": "Contains additional information and descriptions of the property",
+            "schema": "dtmi:digitaltwins:isa95:LangStringSet;1"
+        },
+        {
+            "@type": "Property",
+            "name": "value",
+            "displayName": "Value",
+            "description": "The value, set of values, or range of the property.",
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
+            "name": "valueUnitOfMeasure",
+            "displayName": "Value unit of measure",
+            "description": "The unit of measure of the associated property value",
+            "schema": "string"
+        },
+        {
+            "@type": "Property",
+            "name": "quantity",
+            "displayName": "Quantity",
+            "schema": "double",
+            "description": "Specifies the amount of resources used in the parent segment",
+            "writable": true
+        },
+        {
+            "@type": "Property",
+            "name": "quantityUnitOfMeasure",
+            "displayName": "Quantity unit of measure",
+            "description": "The unit of measure of the associated quantity",
+            "schema": "string",
+            "writable": true
+        }
+    ]
+}

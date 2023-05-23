@@ -1,0 +1,21 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:isa95:PhysicalAssetClassProperty;1",
+    "@type": "Interface",
+    "displayName": "Physical Asset class property",
+    "description": "Properties of a physical asset class shall be presented as physical asset class properties. Each may have zero or more recognized properties.",
+    "comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+    "extends": [
+        "dtmi:digitaltwins:isa95:ResourceClassProperty;1",
+        "dtmi:digitaltwins:isa95:TestableObjectProperty;1"
+    ],
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "contains",
+            "displayName": "Contains",
+            "description": "The nested physical asset class property(s) makes up part of this physical asset class property as the whole",
+            "target": "dtmi:digitaltwins:isa95:PhysicalAssetClassProperty;1"
+        }
+    ]
+}

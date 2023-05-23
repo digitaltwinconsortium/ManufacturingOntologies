@@ -1,0 +1,30 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:isa95:PhysicalAssetProperty;1",
+    "@type": "Interface",
+    "displayName": "Physical Asset property",
+    "description": "Properties of physical assets shall be presented as physical asset properties. A physical asset shall have zero or more physical asset properties. These specify the current property values of the physical asset for the associated physical asset class property. Physical asset properties may include a unit of measure. ",
+    "comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+    "extends": [
+        "dtmi:digitaltwins:isa95:ResourceProperty;1",
+        "dtmi:digitaltwins:isa95:TestableObjectProperty;1"
+    ],
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "contains",
+            "displayName": "Contains",
+            "description": "The nested physical asset property(s) makes up part of this physical asset property as the whole.",
+            "target": "dtmi:digitaltwins:isa95:PhysicalAssetProperty;1",
+            "comment": "Relationship type: Composition hierarchy"
+        },
+        {
+            "@type": "Relationship",
+            "name": "mapsTo",
+            "displayName": "Maps to",
+            "description": "If the parent physical asset supports a physical asset class, the physical asset class property(s) is applied in this physical asset property(s).This physical asset property maps to the corresponding physical asset class property.",
+            "target": "dtmi:digitaltwins:isa95:PhysicalAssetClassProperty;1",
+            "comment": "Relationship type: Dependency"
+        }
+    ]
+}

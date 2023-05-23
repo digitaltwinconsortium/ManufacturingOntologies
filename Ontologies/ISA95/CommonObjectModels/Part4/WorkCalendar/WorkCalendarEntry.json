@@ -1,0 +1,67 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:isa95:WorkCalendarEntry;1",
+    "@type": "Interface",
+    "displayName": "Work calendar entry",
+    "description": "The work calendar entry shall be defined as a calendar entry with a start date and time, a finish date and time, and an entry type.",
+    "comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+    "extends": [
+        "dtmi:digitaltwins:isa95:BaseModel;1"
+    ],
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "mapsTo",
+            "displayName": "Maps to",
+            "description": "The work calendar definition entry that defines this work calendar entry.",
+            "target": "dtmi:digitaltwins:isa95:WorkCalendarDefinitionEntry;1",
+            "comment": "Mandatory - Cardinality 1",
+            "maxMultiplicity": 1
+        },
+        {
+            "@type": "Relationship",
+            "name": "isMadeUpOf",
+            "displayName": "Is made up of",
+            "description": "The work calendar entry(s) makes up part of this work calendar entry as the whole",
+            "target": "dtmi:digitaltwins:isa95:WorkCalendarEntry;1"
+        },
+        {
+            "@type": "Relationship",
+            "name": "hasValuesOf",
+            "displayName": "Has values of",
+            "description": "The work calendar entry property(s) in part defines this work calendar entry.",
+            "target": "dtmi:digitaltwins:isa95:WorkCalendarEntryProperty;1"
+        },
+        {
+            "@type": "Component",
+            "name": "description",
+            "displayName": "Description",
+            "description": "Additional information and description",
+            "schema": "dtmi:digitaltwins:isa95:LangStringSet;1"
+        },
+        {
+            "@type": "Property",
+            "name": "startDatetime",
+            "displayName": "Start datetime",
+            "description": "Defines the starting date and time of the work calendar entry.",
+            "schema": "dateTime",
+            "writable": true
+        },
+        {
+            "@type": "Property",
+            "name": "finishDatetime",
+            "displayName": "Finish datetime",
+            "description": "Defines the finishing date and time of the work calendar entry.",
+            "schema": "dateTime",
+            "writable": true
+        },
+        {
+            "@type": "Property",
+            "name": "entryType",
+            "displayName": "Entry type",
+            "description": "Defines the type of work calendar definition entry. There are no standard entry types defined.",
+            "schema": "string",
+            "writable": true
+        }
+    ]
+}

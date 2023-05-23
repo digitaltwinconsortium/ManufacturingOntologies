@@ -1,0 +1,21 @@
+{
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:digitaltwins:isa95:MaterialClassProperty;1",
+    "@type": "Interface",
+    "displayName": "Material class property",
+    "description": "Properties of a material class shall be presented as material class properties. A material class may define zero or more material class properties. A material class property may be tested to the evaluated property in a test specification where the measured results may be recorded in a property measurement attribute in a test result.",
+    "comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+    "extends": [
+        "dtmi:digitaltwins:isa95:ResourceClassProperty;1",
+        "dtmi:digitaltwins:isa95:TestableObjectProperty;1"
+    ],
+    "contents": [
+        {
+            "@type": "Relationship",
+            "name": "contains",
+            "displayName": "Contains",
+            "description": "The nested material class property(s) makes up part of this material class property as the whole",
+            "target": "dtmi:digitaltwins:isa95:MaterialClassProperty;1"
+        }
+    ]
+}

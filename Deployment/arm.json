@@ -80,7 +80,7 @@
     {
       "type": "Microsoft.Web/sites",
       "apiVersion": "2021-02-01",
-      "name": "[concat(parameters('resourcesName'), '-WebApp')]",
+      "name": "[concat(parameters('resourcesName'), '-UA-Cloud-Twin')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "httpsOnly": true,
@@ -130,7 +130,7 @@
           },
           "type": "config",
           "dependsOn": [
-            "[concat('Microsoft.Web/sites/', concat(parameters('resourcesName'), '-WebApp'))]"
+            "[concat('Microsoft.Web/sites/', concat(parameters('resourcesName'), '-UA-Cloud-Twin'))]"
           ]
         }
       ]

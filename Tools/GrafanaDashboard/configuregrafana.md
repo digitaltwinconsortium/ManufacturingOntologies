@@ -1,11 +1,12 @@
-# Configuring the Azure Managed Grafana Dashboard
+# Configure Grafana dashboard for Manufacturing ontologies
 
-## Grafana Introduction
+## Background Grafana
+
 Grafana is used within manufacturing to create dasbhoards that displays real-time data. Azure offers a service named Azure Managed Grafana. With this, you can create cloud dashboards. In this configuration manual, you will enable Grafana on Azure and you will create a dashboard with data that is queried from Azure Data Explorer and Azure Digital Twins service, using the simulated production line data from this reference solution. Below is a screenshot from the dashboard:
 
 ![Sample manufacturing dashboard](example%20dashboard.png)
 
-## Enable Azure Managed Grafana Service
+## ## Enable Azure Managed Grafana Service
 
 Go to the Microsoft Azure portal and search for the service 'Grafana' and select the 'Azure Managed Grafana' service.
 
@@ -17,13 +18,13 @@ After the service is created, navigate to the URL where you can have access to y
 
 ![Navigate to URL](urltografana.png)
 
-## Add new Datasource in Grafana
+## Add new Data source in Grafana
 
 After your first login, you will need to add a new data source to Azure Data Explorer. Navigate to 'Configuration' and add a new datasource.
 
 ![Add new service](adddatasroucegrafana.png)
 
-Search for Azure Data Explorer and select the service.
+Search for Azure Data Explorer and select the service
 
 ![Search ADX](searchadx.png)
 
@@ -58,3 +59,5 @@ The location variable on the top of the page is automatically filled with data f
 If data is not showing up in your dashboard, please navigate to the individual panels and see if the right data source is selected:
 
 ![Right data source selected](datasourceselected.png)
+
+Within Grafana it is also possible to create Alerts. Please follow [this](grafanaalert.md) manual to create an alert.

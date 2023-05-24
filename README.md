@@ -204,7 +204,7 @@ Note: After importing the ontologies dashboard, you need run **all** provided AD
 
 You can also leverage Grafana to create a dashboard on Azure for this reference solution. Please see the documentation [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/blob/main/Tools/GrafanaDashboard/configuregrafana.md).
 
-<img src="Docs/example dashboard.png" alt="grafana" width="900" />
+<img src="Docs/grafana.png" alt="grafana" width="900" />
 
 ## Using 3D Scenes Studio
 

@@ -1,6 +1,6 @@
-# Grafana alert setup
+# Grafana Alerts Setup
 
-In this example we will create an low OEE alert for one of the production lines. First login to your Grafana service and select in the menu for Alert rules.
+In this example, we will create a low OEE alert for one of the production lines. First, login to your Grafana service and select Alert rules in the menu.
 
 ![Navigate](navigatetoalerts.png)
 
@@ -12,7 +12,7 @@ Then give your alert a name and select 'Azure Data Explorer' as data source. Cli
 
 ![Alert query](alertquery.png)
 
-Put in the following in the query field and try to run your query. In this example we use the 'Seattle' production line. 
+In the query field, enter the following. In this example, we will use the 'Seattle' production line. 
 
 ```
 let oee = CalculateOEEForStation("assembly", "seattle", 6, 6);
@@ -20,16 +20,16 @@ print round(oee * 100, 2)
 ```
 and select 'table' as output. 
 
-Scroll down to the next section. In this example your will configure the alert threshold. In this example we will use below '10' as threshold, but in production environment this will be higher.
+Scroll down to the next section. Here, you will configure the alert threshold. In this example, we will use 'below 10' as the threshold, but in production environments, this will be higher.
 
 ![Threshold Alert](threshold%20alert.png)
 
-Select the folder where you want to save your alerts and configure the 'Alert Evaluation behavior' - select there every 2 minutes. 
+Select the folder where you want to save your alerts and configure the 'Alert Evaluation behavior' - here, select 'every 2 minutes'.
 
 Hit the 'Save and exit' button on the top. 
 
-Now you will see in the overview of your alerts that an alert is triggered when your OEE is below '10'. 
+In the overview of your alerts, you can now see an alert being triggered when your OEE is below '10'.
 
 ![Alert overview](alertoverview.png)
 
-Now you can integrate this with for example 'Microsoft Dynamics Field Services' or other own services. 
+You can integrate this with, for example, Microsoft Dynamics Field Services.

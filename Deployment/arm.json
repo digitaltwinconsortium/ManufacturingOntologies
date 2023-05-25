@@ -508,20 +508,18 @@
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
       "apiVersion": "2021-11-01",
-      "name": "[concat(parameters('resourcesName'), '-EventHubs', '/data/adx')]",
+      "name": "[format('{0}/{1}/{2}', concat(parameters('resourcesName'), '-EventHubs'), 'data', 'adx')]",
       "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs', 'data'))]",
-        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]"
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'data')]"
       ],
       "properties": {}
     },
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
       "apiVersion": "2021-11-01",
-      "name": "[concat(parameters('resourcesName'), '-EventHubs', '/metadata/adx')]",
+      "name": "[format('{0}/{1}/{2}', concat(parameters('resourcesName'), '-EventHubs'), 'metadata', 'adx')]",
       "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs', 'metadata'))]",
-        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]"
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'metadata')]"
       ],
       "properties": {}
     },

@@ -107,7 +107,7 @@
         "[resourceId('Microsoft.Web/serverfarms', concat(parameters('resourcesName'), '-AppService'))]",
         "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]",
         "[resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('resourcesName'), '-ADT'))]",
-        "[resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), variables('adxDBName'))]"
+        "[resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), 'ontologies')]"
       ],
       "resources": [
         {
@@ -171,7 +171,7 @@
           "name": "appsettings",
           "properties": {
             "ADX_HOST": "[reference(resourceId('Microsoft.Kusto/clusters', variables('adxClusterName')), '2022-02-01').uri]",
-            "ADX_DB": "[variables('adxDBName')]",
+            "ADX_DB": "ontologies",
             "AAD_APPLICATION_ID": "[reference(concat(parameters('resourcesName'), '-Identity')).clientId]",
             "CALCULATE_PCF": "1",
             "ADT_HOSTNAME": "[concat('https://', reference(concat(parameters('resourcesName'), '-ADT')).hostName)]",
@@ -367,7 +367,7 @@
     {
       "type": "Microsoft.Kusto/clusters/databases",
       "apiVersion": "2021-01-01",
-      "name": "[format('{0}/{1}', variables('adxClusterName'), variables('adxDBName'))]",
+      "name": "[format('{0}/{1}', variables('adxClusterName'), 'ontologies')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[resourceId('Microsoft.Kusto/clusters', variables('adxClusterName'))]"
@@ -377,6 +377,104 @@
         "hotCachePeriodInDays": 31
       },
       "kind": "ReadWrite"
+    },
+    {
+      "type": "Microsoft.Kusto/Clusters/Databases/DataConnections",
+      "apiVersion": "2022-12-29",
+      "name": "[concat(variables('adxClusterName'), 'ontologies','EventConnection')]",
+      "location": "West Europe",
+      "dependsOn": [
+        "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'DB-script')]"
+      ],
+      "kind": "EventHub",
+      "properties": {
+        "eventHubResourceId": "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), '/data')]",
+        "consumerGroup": "adx",
+        "tableName": "opcua_raw",
+        "mappingRuleName": "opcua_mapping",
+        "dataFormat": "MULTIJSON",
+        "eventSystemProperties": [],
+        "compression": "None",
+        "databaseRouting": "Single"
+      }
+    },
+    {
+      "type": "Microsoft.Kusto/Clusters/Databases/DataConnections",
+      "apiVersion": "2022-12-29",
+      "name": "[concat(variables('adxClusterName'), 'ontologies','EventConnection')]",
+      "location": "West Europe",
+      "dependsOn": [
+        "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'DB-script')]"
+      ],
+      "kind": "EventHub",
+      "properties": {
+        "eventHubResourceId": "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), '/metadata')]",
+        "consumerGroup": "adx",
+        "tableName": "opcua_metadata_raw",
+        "mappingRuleName": "opcua_metadata_mapping",
+        "dataFormat": "MULTIJSON",
+        "eventSystemProperties": [],
+        "compression": "None",
+        "databaseRouting": "Single"
+      }
+    },
+    {
+      "type": "Microsoft.Kusto/clusters/databases/scripts",
+      "apiVersion": "2022-12-29",
+      "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies', 'DB-script')]",
+      "properties": {
+        "scriptContent": "
+          // Enable streaming ingestion for the database\n
+          .alter database ontologies policy streamingingestion enable\n
+          \n
+          // Create a landing table for raw OPC UA telemetry\n
+          .create table opcua_raw(payload: dynamic)\n
+          \n
+          // Create mapping from JSON ingestion to the landing table\n
+          .create-or-alter table opcua_raw ingestion json mapping 'opcua_mapping' '[{\"column\":\"payload\",\"path\":\"$\",\"datatype\":\"dynamic\"}]'\n
+          \n
+          // Create an intermediate table to unbatch our OPC UA PubSub messages into\n
+          .create table opcua_intermediate(DataSetWriterID: string, Timestamp: datetime, Payload: dynamic)\n
+          \n
+          // Create a function to do the raw OPC UA expansion\n
+          .create-or-alter function OPCUARawExpand() { opcua_raw | mv-expand records = payload.Messages | where records != '' | project DataSetWriterID = tostring(records[\"DataSetWriterId\"]), Timestamp = todatetime(records[\"Timestamp\"]), Payload = todynamic(records[\"Payload\"]) }\n
+          \n
+          // Apply the raw expansion function to the OPC UA raw table\n
+          .alter table opcua_intermediate policy update @'[{\"Source\": \"opcua_raw\", \"Query\": \"OPCUARawExpand()\", \"IsEnabled\": \"True\"}]'\n
+          \n
+          // Create our final OPC UA telemetry table\n
+          .create table opcua_telemetry (DataSetWriterID: string, Timestamp: datetime, Name: string, Value: dynamic)\n
+          \n
+          // Create a function to do the OPC UA dataset expansion\n
+          .create-or-alter function OPCUADatasetExpand() { opcua_intermediate | mv-apply Payload on (extend key = tostring(bag_keys(Payload)[0]) | extend p = Payload[key] | project Name = key, Value = todynamic(p.Value)) }\n          \n
+          \n
+          // Apply the dataset expansion function to the intermediate table\n
+          .alter table opcua_telemetry policy update @'[{\"Source\": \"opcua_intermediate\", \"Query\": \"OPCUADatasetExpand()\", \"IsEnabled\": \"True\"}]'\n
+          \n
+          // Create a landing table for raw OPC UA metadata\n
+          .create table opcua_metadata_raw(payload: dynamic)\n
+          \n
+          // Create mapping from JSON ingestion to the metadata landing table\n
+          .create-or-alter table opcua_metadata_raw ingestion json mapping 'opcua_metadata_mapping' '[{\"column\":\"payload\",\"path\":\"$\",\"datatype\":\"dynamic\"}]'\n
+          \n
+          // Create an OPC UA metadata landing table\n
+          .create table opcua_metadata(DataSetWriterID: string, Name: string)\n
+          \n
+          // Create a function to do the raw OPC UA metadata expansion\n
+          .create-or-alter function OPCUAMetaDataExpand() { opcua_metadata_raw | project DataSetWriterId = tostring(payload.DataSetWriterId), Name = tostring(payload.MetaData.Name) }\n
+          \n
+          // Apply the raw metadata expansion function to the metadata landing table\n
+          .alter table opcua_metadata policy update @'[{\"Source\": \"opcua_metadata_raw\", \"Query\": \"OPCUAMetaDataExpand()\", \"IsEnabled\": \"True\"}]'\n,
+          \n
+          // Create a materialized view for the last known value (LKV) of our metadata\n
+          .create materialized-view opcua_metadata_lkv on table opcua_metadata { opcua_metadata | extend iTime = ingestion_time() | summarize arg_max(iTime, *) by Name, DataSetWriterID }\n
+          \n
+        ",
+        "continueOnErrors": false
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), 'ontologies')]"
+      ]
     },
     {
       "type": "Microsoft.EventHub/namespaces",
@@ -454,6 +552,26 @@
       ]
     },
     {
+      "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
+      "apiVersion": "2021-11-01",
+      "name": "[concat(parameters('resourcesName'), '-EventHubs', '/data/adx')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs', 'data'))]",
+        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]"
+      ],
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
+      "apiVersion": "2021-11-01",
+      "name": "[concat(parameters('resourcesName'), '-EventHubs', '/metadata/adx')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs', 'metadata'))]",
+        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]"
+      ],
+      "properties": {}
+    },
+    {
       "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
       "name": "[concat(parameters('resourcesName'), '-Identity')]",
       "apiVersion": "2018-11-30",
@@ -489,9 +607,9 @@
     {
       "type": "Microsoft.Kusto/clusters/databases/principalAssignments",
       "apiVersion": "2021-01-01",
-      "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), variables('adxDBName'), guid(resourceId('Microsoft.Kusto/clusters/databases', split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[1]), resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('resourcesName'), '-ADT')), 'Admin'))]",
+      "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies', guid(resourceId('Microsoft.Kusto/clusters/databases', split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[1]), resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('resourcesName'), '-ADT')), 'Admin'))]",
       "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), variables('adxDBName'))]"
+        "[resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), 'ontologies')]"
       ],
       "properties": {
         "principalId": "[reference(resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('resourcesName'), '-ADT')), '2022-05-31', 'full').identity.principalId]",
@@ -503,9 +621,9 @@
     {
       "type": "Microsoft.Kusto/clusters/databases/principalAssignments",
       "apiVersion": "2021-01-01",
-      "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), variables('adxDBName'), guid(resourceId('Microsoft.Kusto/clusters/databases', split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[1]), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), 'Admin'))]",
+      "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies', guid(resourceId('Microsoft.Kusto/clusters/databases', split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[1]), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), 'Admin'))]",
       "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), variables('adxDBName'))]"
+        "[resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), 'ontologies')]"
       ],
       "properties": {
         "principalId": "[reference(concat(parameters('resourcesName'), '-Identity')).principalId]",
@@ -517,8 +635,8 @@
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-10-01-preview",
-      "scope": "[format('Microsoft.Kusto/clusters/{0}/databases/{1}', split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[1])]",
-      "name": "[guid(resourceId('Microsoft.Kusto/clusters/databases', split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), variables('adxDBName')), '/')[1]), resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('resourcesName'), '-ADT')), variables('azureRbacContributor'))]",
+      "scope": "[format('Microsoft.Kusto/clusters/{0}/databases/{1}', split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[1])]",
+      "name": "[guid(resourceId('Microsoft.Kusto/clusters/databases', split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[1]), resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('resourcesName'), '-ADT')), variables('azureRbacContributor'))]",
       "dependsOn": [
         "[resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('resourcesName'), '-ADT'))]"
       ],
@@ -533,12 +651,12 @@
       "apiVersion": "2022-05-31",
       "name": "[format('{0}/{1}', concat(parameters('resourcesName'), '-ADT'), variables('adtDataHistoryTableName'))]",
       "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), variables('adxDBName'))]"
+        "[resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), 'ontologies')]"
       ],
       "properties": {
         "connectionType": "AzureDataExplorer",
         "adxEndpointUri": "[reference(resourceId('Microsoft.Kusto/clusters', variables('adxClusterName')), '2022-02-01').uri]",
-        "adxDatabaseName": "[variables('adxDBName')]",
+        "adxDatabaseName": "ontologies",
         "eventHubEndpointUri": "[format('sb://{0}.servicebus.windows.net', variables('eventHubsNamespaceName'))]",
         "eventHubEntityPath": "adthistory",
         "adxResourceId": "[resourceId('Microsoft.Kusto/clusters', variables('adxClusterName'))]",

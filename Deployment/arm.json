@@ -423,7 +423,7 @@
       "apiVersion": "2022-12-29",
       "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies', 'DB-script')]",
       "properties": {
-        "scriptContent": "
+        "scriptContent": "\n
           // Enable streaming ingestion for the database\n
           .alter database ontologies policy streamingingestion enable\n
           \n
@@ -446,7 +446,7 @@
           .create table opcua_telemetry (DataSetWriterID: string, Timestamp: datetime, Name: string, Value: dynamic)\n
           \n
           // Create a function to do the OPC UA dataset expansion\n
-          .create-or-alter function OPCUADatasetExpand() { opcua_intermediate | mv-apply Payload on (extend key = tostring(bag_keys(Payload)[0]) | extend p = Payload[key] | project Name = key, Value = todynamic(p.Value)) }\n          \n
+          .create-or-alter function OPCUADatasetExpand() { opcua_intermediate | mv-apply Payload on (extend key = tostring(bag_keys(Payload)[0]) | extend p = Payload[key] | project Name = key, Value = todynamic(p.Value)) }\n
           \n
           // Apply the dataset expansion function to the intermediate table\n
           .alter table opcua_telemetry policy update @'[{\"Source\": \"opcua_intermediate\", \"Query\": \"OPCUADatasetExpand()\", \"IsEnabled\": \"True\"}]'\n

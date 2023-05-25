@@ -381,14 +381,14 @@
     {
       "type": "Microsoft.Kusto/Clusters/Databases/DataConnections",
       "apiVersion": "2022-12-29",
-      "name": "[concat(variables('adxClusterName'), 'ontologies','EventConnection')]",
+      "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies','EventConnection')]",
       "location": "West Europe",
       "dependsOn": [
         "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'DB-script')]"
       ],
       "kind": "EventHub",
       "properties": {
-        "eventHubResourceId": "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), '/data')]",
+        "eventHubResourceId": "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'data')]",
         "consumerGroup": "adx",
         "tableName": "opcua_raw",
         "mappingRuleName": "opcua_mapping",
@@ -401,14 +401,14 @@
     {
       "type": "Microsoft.Kusto/Clusters/Databases/DataConnections",
       "apiVersion": "2022-12-29",
-      "name": "[concat(variables('adxClusterName'), 'ontologies','EventConnection')]",
+      "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies','EventConnection')]",
       "location": "West Europe",
       "dependsOn": [
         "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'DB-script')]"
       ],
       "kind": "EventHub",
       "properties": {
-        "eventHubResourceId": "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), '/metadata')]",
+        "eventHubResourceId": "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'metadata')]",
         "consumerGroup": "adx",
         "tableName": "opcua_metadata_raw",
         "mappingRuleName": "opcua_metadata_mapping",

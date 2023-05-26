@@ -1,9 +1,9 @@
 {
-  "$schema": "https://dataexplorer.azure.com/static/d/schema/33/dashboard.json",
-  "id": "19df582c-a2ea-4f55-bde7-5967326b1931",
-  "eTag": "PODWlL9B1NGKq3tTdDXrNA==",
-  "schema_version": "33",
-  "title": "ontologies",
+  "$schema": "https://dataexplorer.azure.com/static/d/schema/36/dashboard.json",
+  "id": "502439bb-aeb5-49a6-be94-379c612ffc30",
+  "eTag": "mNOdVQGWiIzi6yGwU3lxmw==",
+  "schema_version": "36",
+  "title": "ontologies4",
   "autoRefresh": {
     "enabled": false
   },
@@ -31,7 +31,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "let intermediateTable = AdtPropertyEvents\n| where TimeStamp > _startTime and TimeStamp < _endTime\n| where Id == toscalar(GetDigitalTwinIdForUANode(\"assembly\", \"munich\", \"status\"));\nintermediateTable\n| where isnotnull(SourceTimeStamp)\n| join intermediateTable on $left.TimeStamp == $right.TimeStamp\n| where Key1 == \"OPCUADisplayName\"\n| project SourceTimeStamp, OPCUANodeValue = toint(Value), OPCUADisplayName = Value1\n"
+        "text": "opcua_metadata_lkv\n| where Name contains \"assembly\"\n| where Name contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = toint(Value)\n| project Timestamp, NodeValue\n"
       },
       "visualOptions": {
         "hideTileTitle": false,
@@ -60,10 +60,7 @@
           "type": "infer"
         },
         "seriesColumns": {
-          "type": "specified",
-          "value": [
-            "OPCUADisplayName"
-          ]
+          "type": "infer"
         },
         "xAxisScale": "linear",
         "verticalLine": "",
@@ -96,7 +93,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "let intermediateTable = AdtPropertyEvents\n| where TimeStamp between (_startTime .. _endTime)\n| where Id == toscalar(GetDigitalTwinIdForUANode(\"assembly\", \"munich\", \"EnergyConsumption\"));\nintermediateTable\n| where isnotnull(SourceTimeStamp)\n| join intermediateTable on $left.TimeStamp == $right.TimeStamp\n| where Key1 == \"OPCUADisplayName\"\n| order by TimeStamp desc\n| make-series num=avg(todouble(Value)) on TimeStamp from _startTime to _endTime step 1s\n| extend (anomalies, score, baseline) = series_decompose_anomalies(num, 0.5, -1, 'linefit')"
+        "text": "opcua_metadata_lkv\n| where Name contains \"assembly\"\n| where Name contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"EnergyConsumption\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| order by Timestamp desc\n| make-series num=avg(todouble(Value)) on Timestamp from _startTime to _endTime step 1s \n| extend (anomalies, score, baseline) = series_decompose_anomalies(num, 0.5, -1, 'linefit')"
       },
       "visualOptions": {
         "hideTileTitle": false,
@@ -158,7 +155,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "let horizon = (_endTime - _startTime) / 2;\nlet dt = 5m;\nlet intermediateTable = AdtPropertyEvents\n| where TimeStamp between (_startTime .. _endTime)\n| where Id == toscalar(GetDigitalTwinIdForUANode(\"assembly\", \"munich\", \"NumberOfManufacturedProducts\"));\nintermediateTable\n| where isnotnull(SourceTimeStamp)\n| join intermediateTable on $left.TimeStamp == $right.TimeStamp\n| where Key1 == \"OPCUADisplayName\"\n| order by TimeStamp desc\n| make-series actual=avg(toint(Value)) on TimeStamp from _startTime to _endTime + horizon step dt\n| extend forecast = series_decompose_forecast(actual, toint(horizon/dt))"
+        "text": "let horizon = (_endTime - _startTime) / 2;\nlet dt = 1m;\nopcua_metadata_lkv\n| where Name contains \"assembly\"\n| where Name contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"NumberOfManufacturedProducts\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| order by Timestamp desc\n| make-series actual=avg(toint(Value)) on Timestamp from _startTime to _endTime + horizon step dt\n| extend forecast = series_decompose_forecast(actual, toint(horizon/dt))"
       },
       "visualOptions": {
         "hideTileTitle": false,
@@ -218,7 +215,7 @@
         },
         "usedVariables": [
         ],
-        "text": "let oee = CalculateOEEForStation(\"assembly\", \"munich\", 6, 6);\nprint round(oee * 100, 2)"
+        "text": "let oee = CalculateOEEForStation(\"assembly\", \"munich\", 6000, 6);\nprint round(oee * 100, 2)"
       },
       "visualOptions": {
         "hideTileTitle": false,
@@ -227,9 +224,9 @@
           "type": "infer"
         },
         "colorRulesDisabled": false,
+        "colorStyle": "light",
         "colorRules": [
-        ],
-        "colorStyle": "light"
+        ]
       }
     },
     {
@@ -251,7 +248,7 @@
         },
         "usedVariables": [
         ],
-        "text": "let oee = CalculateOEEForStation(\"test\", \"munich\", 6, 6);\nprint round(oee * 100, 2)"
+        "text": "let oee = CalculateOEEForStation(\"test\", \"munich\", 6000, 6);\nprint round(oee * 100, 2)"
       },
       "visualOptions": {
         "hideTileTitle": false,
@@ -260,9 +257,9 @@
           "type": "infer"
         },
         "colorRulesDisabled": false,
+        "colorStyle": "light",
         "colorRules": [
-        ],
-        "colorStyle": "light"
+        ]
       }
     },
     {
@@ -284,7 +281,7 @@
         },
         "usedVariables": [
         ],
-        "text": "let oee = CalculateOEEForStation(\"packaging\", \"munich\", 6, 6);\nprint round(oee * 100, 2)"
+        "text": "let oee = CalculateOEEForStation(\"packaging\", \"munich\", 6000, 6);\nprint round(oee * 100, 2)"
       },
       "visualOptions": {
         "hideTileTitle": false,
@@ -293,9 +290,9 @@
           "type": "infer"
         },
         "colorRulesDisabled": false,
+        "colorStyle": "light",
         "colorRules": [
-        ],
-        "colorStyle": "light"
+        ]
       }
     },
     {
@@ -317,7 +314,7 @@
         },
         "usedVariables": [
         ],
-        "text": "let energy = CalculateAvgEnergyConsumption(\"assembly\", \"munich\", 6);\nprint round(energy * 1000, 2)\n\n"
+        "text": "let shiftEndTime = now();\nlet shiftStartTime = datetime_add('hour', -6, shiftEndTime);\nlet averageEnergyConsumption = toscalar(\nopcua_metadata_lkv\n| where Name contains \"assembly\"\n| where Name contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"EnergyConsumption\"\n    | where Timestamp > shiftStartTime and Timestamp < shiftEndTime\n) on DataSetWriterID\n| extend energy = todouble(Value)\n| summarize avg(energy));\nprint round(toscalar(averageEnergyConsumption) * 1000, 2)\n\n"
       },
       "visualOptions": {
         "hideTileTitle": false,
@@ -326,9 +323,9 @@
           "type": "infer"
         },
         "colorRulesDisabled": false,
+        "colorStyle": "light",
         "colorRules": [
-        ],
-        "colorStyle": "light"
+        ]
       }
     },
     {
@@ -350,7 +347,7 @@
         },
         "usedVariables": [
         ],
-        "text": "print round(CalculateOEEForLine(\"munich\", 6, 6) * 100, 2)\n"
+        "text": "print round(CalculateOEEForLine(\"munich\", 6000, 6) * 100, 2)\n"
       },
       "visualOptions": {
         "hideTileTitle": false,
@@ -359,9 +356,9 @@
           "type": "infer"
         },
         "colorRulesDisabled": false,
+        "colorStyle": "light",
         "colorRules": [
-        ],
-        "colorStyle": "light"
+        ]
       }
     }
   ],
@@ -386,8 +383,8 @@
     {
       "id": "09ab8651-b041-4b8e-ba7b-347796f7911c",
       "name": "ontologies",
-      "clusterUri": "https://onttestadx.eastus.kusto.windows.net/",
-      "database": "onttest-DB",
+      "clusterUri": "https://erichbtest4adx.westeurope.kusto.windows.net/",
+      "database": "ontologies",
       "kind": "manual-kusto",
       "scopeId": "kusto"
     }

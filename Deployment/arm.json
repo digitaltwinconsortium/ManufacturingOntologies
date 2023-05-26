@@ -448,18 +448,6 @@
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
       "apiVersion": "2021-11-01",
-      "name": "[concat(parameters('resourcesName'), '-EventHubs', '/adthistory')]",
-      "properties": {
-        "messageRetentionInDays": 1,
-        "partitionCount": 1
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.EventHub/namespaces/eventhubs",
-      "apiVersion": "2021-11-01",
       "name": "[concat(parameters('resourcesName'), '-EventHubs', '/commander.command')]",
       "properties": {
         "messageRetentionInDays": 1,
@@ -596,23 +584,6 @@
         "principalId": "[reference(resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', concat(parameters('resourcesName'), '-ADT')), '2022-05-31', 'full').identity.principalId]",
         "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('azureRbacContributor'))]",
         "principalType": "ServicePrincipal"
-      }
-    },
-    {
-      "type": "Microsoft.DigitalTwins/digitalTwinsInstances/timeSeriesDatabaseConnections",
-      "apiVersion": "2022-05-31",
-      "name": "[format('{0}/{1}', concat(parameters('resourcesName'), '-ADT'), variables('adtDataHistoryTableName'))]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), 'ontologies')]"
-      ],
-      "properties": {
-        "connectionType": "AzureDataExplorer",
-        "adxEndpointUri": "[reference(resourceId('Microsoft.Kusto/clusters', variables('adxClusterName')), '2022-02-01').uri]",
-        "adxDatabaseName": "ontologies",
-        "eventHubEndpointUri": "[format('sb://{0}.servicebus.windows.net', variables('eventHubsNamespaceName'))]",
-        "eventHubEntityPath": "adthistory",
-        "adxResourceId": "[resourceId('Microsoft.Kusto/clusters', variables('adxClusterName'))]",
-        "eventHubNamespaceResourceId": "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubsNamespaceName'))]"
       }
     }
   ]

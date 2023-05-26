@@ -384,7 +384,7 @@
       "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies','EventHubDataConnection')]",
       "location": "West Europe",
       "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'DB-script')]"
+        "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'OPCUA-parsing-script')]"
       ],
       "kind": "EventHub",
       "properties": {
@@ -404,7 +404,7 @@
       "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies','EventHubMetadataConnection')]",
       "location": "West Europe",
       "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'DB-script')]"
+        "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'OPCUA-parsing-script')]"
       ],
       "kind": "EventHub",
       "properties": {

@@ -439,7 +439,7 @@
         "continueOnErrors": false
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters/scripts', variables('adxClusterName'), 'ontologies/OPCUA-parsing-script')]"
+        "[resourceId('Microsoft.Kusto/clusters/scripts', format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies', 'OPCUA-parsing-script'))]"
       ]
     },
     {

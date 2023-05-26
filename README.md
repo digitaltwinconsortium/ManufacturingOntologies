@@ -198,9 +198,7 @@ You can also visit the [Azure Data Explorer documentation](https://learn.microso
 
 <img src="Docs/dashboard.png" alt="dashboard" width="900" />
 
-Note: After importing the ontologies dashboard, you need run **all** provided ADX queries in the Query tab of your ADX cluster once to register the ADX functions, since the dashboard uses them internally. You also need to set your ADT instance URL in the `CalculateOEEForLine.kql` query.
-
-Note: To calculate the OEE for the entire production lines, you need to have the [Azure Digital Twins Data Owner role](https://learn.microsoft.com/en-us/azure/digital-twins/how-to-set-up-instance-portal#assign-the-role-using-azure-identity-management-iam) on your Azure Digital Twins instance.
+Note: To calculate the OEE for the entire production lines, you need to set your ADT instance URL in the `CalculateOEEForLine.kql` query. Also, you need to have the [Azure Digital Twins Data Owner role](https://learn.microsoft.com/en-us/azure/digital-twins/how-to-set-up-instance-portal#assign-the-role-using-azure-identity-management-iam) on your Azure Digital Twins instance.
 
 
 ## Using Azure Managed Grafana Service

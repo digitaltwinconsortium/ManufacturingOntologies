@@ -85,6 +85,21 @@ UA Cloud Twin takes each OPC UA Field discovered in the received Dataset metadat
 
 When running OPC UA applications, their OPC UA configuration files, keys and certificates must be persisted. While Kubernetes has the ability to persist these files in volumes, a safer place for them is the cloud, especially on single-node clusters where the volume would be lost when the node fails. This is why the OPC UA applications used in this solution (i.e. the UA Cloud Publisher, the MES and the simulated machines/production line stations) store their configuration files, keys and certificates in the cloud. This also has the advantage of providing a single location for mutually trusted certificates for all OPC UA applications.
 
+## UA Cloud Library
+
+UA Cloud Library is an online store of OPC UA Information Models, hosted by the OPC Foundation [here](https://uacloudlibrary.opcfoundation.org/). The UA Cloud Library can also be hosted elsewhere by running the pre-built Docker container from [here](https://github.com/OPCFoundation/UA-CloudLibrary). The Asset Admin Shell Repository used in this reference solution also reads referenced OPC UA Information Models from the UA Cloud Library automatically. You can also read OPC UA Information Models directly from Azure Data Explorer (also used in this reference solution) and import the OPC UA nodes defined in the OPC UA Information Model into a table for lookup of additional metadata. Simply run the following Azure Data Explorer query:
+
+        let uri='https://uacloudlibrary.opcfoundation.org/infomodel/download/<insert information model identifier from cloud library here>';
+        let headers=dynamic({'accept':'text/plain'});
+        let options=dynamic({'Authorization':'Basic <insert your cloud library credentials hash here>'});
+        evaluate http_request(uri, headers, options)
+        | project title = tostring(ResponseBody.['title']), contributor = tostring(https://lnkd.in/d_tvwMHN), nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
+        | mv-expand UAVariable=nodeset.UANodeSet.UAVariable
+        | project-away nodeset
+        | extend NodeId = UAVariable.['@NodeId'], DisplayName = tostring(UAVariable.DisplayName.['#text']), BrowseName = tostring(UAVariable.['@BrowseName']), DataType = tostring(UAVariable.['@DataType'])
+        | project-away UAVariable
+        | take 100
+
 
 ## Production Line Simulation
 

@@ -294,7 +294,7 @@
       "location": "[resourceGroup().location]",
       "properties": {
         "hardwareProfile": {
-          "vmSize": "Standard_E2_v3"
+          "vmSize": "Standard_E2s_v3"
         },
         "osProfile": {
           "computerName": "[parameters('resourcesName')]",
@@ -312,7 +312,7 @@
             "createOption": "FromImage",
             "caching": "ReadWrite",
             "managedDisk": {
-              "storageAccountType": "Premium_LRS"
+              "storageAccountType": "StandardSSD_LRS"
             },
             "deleteOption": "Delete",
             "diskSizeGB": 127

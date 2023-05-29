@@ -87,7 +87,7 @@ When running OPC UA applications, their OPC UA configuration files, keys and cer
 
 ## UA Cloud Library
 
-UA Cloud Library is an online store of OPC UA Information Models, hosted by the OPC Foundation [here](https://uacloudlibrary.opcfoundation.org/). The UA Cloud Library can also be hosted elsewhere by running the pre-built Docker container from [here](https://github.com/OPCFoundation/UA-CloudLibrary). The Asset Admin Shell Repository used in this reference solution also reads referenced OPC UA Information Models from the UA Cloud Library automatically. You can also read OPC UA Information Models directly from Azure Data Explorer (also used in this reference solution) and import the OPC UA nodes defined in the OPC UA Information Model into a table for lookup of additional metadata. Simply run the following Azure Data Explorer query:
+UA Cloud Library is an online store of OPC UA Information Models, hosted by the OPC Foundation [here](https://uacloudlibrary.opcfoundation.org/). The UA Cloud Library can also be hosted elsewhere by running the pre-built Docker container from [here](https://github.com/OPCFoundation/UA-CloudLibrary). The Asset Admin Shell Repository used in this reference solution reads referenced OPC UA Information Models from the UA Cloud Library automatically. You can also read OPC UA Information Models directly from Azure Data Explorer (used in this reference solution) and import the OPC UA nodes defined in the OPC UA Information Model into a table for lookup of additional metadata. Simply run the following Azure Data Explorer query:
 
         let uri='https://uacloudlibrary.opcfoundation.org/infomodel/download/<insert information model identifier from cloud library here>';
         let headers=dynamic({'accept':'text/plain'});

@@ -382,7 +382,7 @@
       "type": "Microsoft.Kusto/Clusters/Databases/DataConnections",
       "apiVersion": "2022-12-29",
       "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies','EventHubDataConnection')]",
-      "location": "West Europe",
+      "location": "[resourceGroup().location]",
       "dependsOn": [
         "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'OPCUA-parsing-script')]"
       ],
@@ -402,7 +402,7 @@
       "type": "Microsoft.Kusto/Clusters/Databases/DataConnections",
       "apiVersion": "2022-12-29",
       "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies','EventHubMetadataConnection')]",
-      "location": "West Europe",
+      "location": "[resourceGroup().location]",
       "dependsOn": [
         "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'OPCUA-parsing-script')]"
       ],

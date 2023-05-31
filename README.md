@@ -95,7 +95,7 @@ The Asset Admin Shell Repository used in this reference solution reads OPC UA In
         let headers=dynamic({'accept':'text/plain'});
         let options=dynamic({'Authorization':'Basic <insert your cloud library credentials hash here>'});
         evaluate http_request(uri, headers, options)
-        | project title = tostring(ResponseBody.['title']), contributor = tostring(https://lnkd.in/d_tvwMHN), nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
+        | project title = tostring(ResponseBody.['title']), contributor = tostring(ResponseBody.contributor.name), nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
         | mv-expand UAVariable=nodeset.UANodeSet.UAVariable
         | project-away nodeset
         | extend NodeId = UAVariable.['@NodeId'], DisplayName = tostring(UAVariable.DisplayName.['#text']), BrowseName = tostring(UAVariable.['@BrowseName']), DataType = tostring(UAVariable.['@DataType'])

@@ -52,6 +52,8 @@ Here are the components involved in this solution:
 | [Azure Managed Grafana](https://learn.microsoft.com/en-us/azure/managed-grafana/overview) | Azure Managed Grafana is a data visualization platform built on top of the Grafana software by Grafana Labs. It's built as a fully managed Azure service operated and supported by Microsoft. |
 | [UA Cloud Library](https://github.com/OPCFoundation/UA-CloudLibrary) | The UA Cloud Library is an online store of OPC UA Information Models, hosted by the OPC Foundation [here](https://uacloudlibrary.opcfoundation.org/). |
 | [WattTime Service](https://www.watttime.org/api-documentation/#introduction) | The WattTime service can be used to get the carbon intensity for a unit of electrical energy consumed during a manufacturing process, specific to a particular geographic coordinate passed into the service. |
+| [Microsoft Power BI](https://learn.microsoft.com/en-us/power-bi/fundamentals/power-bi-overview) | Microsoft Power BI is a collection of software services, apps, and connectors that work together to turn your unrelated sources of data into coherent, visually immersive, and interactive insights. |
+| [Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/get-started/microsoft-fabric-overview) | Microsoft Fabric is an all-in-one analytics solution for enterprises that covers everything from data movement to data science, Analytics, and business intelligence. It offers a comprehensive suite of services, including data lake, data engineering, and data integration, all in one place. |
 
 :exclamation: In a real-world deployment, something as critical as opening a pressure relief valve would of course be done on-premises and this is just a simple example of how to achieve the digital feedback loop.
 
@@ -278,6 +280,19 @@ You can now manage your Kubernetes cluster from the cloud via the newly deployed
 The Asset Admin Shell (AAS) Repository is automatically configured during deployment of the reference solution, but for the Product Carbon Footprint (PCF) calculation, a WattTime service account needs to be provided. Please refer to [the WattTime API documentation](https://www.watttime.org/api-documentation/#best-practices-for-api-usage) on how to register for an account. Once your account has been activated, provide your username and password in the settings of the AAS Repo website from the Azure Portal via YourDeploymentName-AAS-Repo -> Configuration -> Application settings.
 
 <img src="Docs/aas.png" alt="aas" width="400" />
+
+
+## Connecting the Reference Solution to Microsoft Power BI
+
+Coming soon!
+
+
+## Connecting the Reference Solution to Microsoft Fabric
+
+1. You can start a Microsoft Fabric trial from [here](https://learn.microsoft.com/en-us/fabric/get-started/fabric-trial).
+1. Once you are logged into Microsoft Fabric, open the Azure Portal, navigate to your Azure Event Hubs Namespace and create a new `fabic` consumer group in both the data and metadata Event Hubs. Also, take a note of the primary key associated with your `RootManageSharedAccessKey` Shared Access Policy of your Event Hubs Namespace. You will need it later in Microsoft Fabric as username and password to connect to the Event Hubs.
+1. Follow the steps described [here](https://learn.microsoft.com/en-us/fabric/real-time-analytics/event-streams/overview) to create Event Streams for both the OPC UA PubSub telemetry data as well as for the OPC UA PubSub metadata, directly from the solution's Event Hubs..
+
 
 ## Replacing the Production Line Simulation with a Real Production Line
 

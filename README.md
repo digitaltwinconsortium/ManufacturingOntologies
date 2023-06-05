@@ -306,29 +306,28 @@ Once you are ready to connect your own production line, simply delete the VM fro
 
 1. Open a browser on the Edge PC and navigate to http://localhost:[kubernetesPortForYourPublisherService]. You are now connected to the UA Cloud Publisher's interactive UI. Select the Configuration menu item and enter the following information, replacing [myeventhubsnamespace] with the name of your Event Hubs namespace and replacing [myeventhubsnamespaceprimarykeyconnectionstring] with the primary key connection string of your Event Hubs namespace. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey". Then click Update:
   
-        BrokerClientName: "UACloudPublisher"  
-        BrokerUrl: "[myeventhubsnamespace].servicebus.windows.net"
-        BrokerPort: 9093  
-        BrokerUsername: "$ConnectionString"  
-        BrokerPassword: "[myeventhubsnamespaceprimarykeyconnectionstring]"  
-        BrokerMessageTopic: "data"
-        BrokerMetadataTopic: "metadata"  
-        SendUAMetadata: true  
-        MetadataSendInterval: 43200  
-        BrokerCommandTopic: ""
-        BrokerResponseTopic: ""  
-        BrokerMessageSize: 262144  
-        CreateBrokerSASToken: false  
-        UseTLS: false  
-        PublisherName: "UACloudPublisher"  
-        InternalQueueCapacity: 1000  
-        DefaultSendIntervalSeconds: 1  
-        DiagnosticsLoggingInterval: 30  
-        DefaultOpcSamplingInterval: 500  
-        DefaultOpcPublishingInterval: 1000  
-        UAStackTraceMask: 645  
-        ReversiblePubSubEncoding: false  
-        AutoLoadPersistedNodes: true  
+        PublisherName: "UACloudPublisher",
+        BrokerUrl: "[myeventhubsnamespace].servicebus.windows.net",
+        BrokerPort: 9093,
+        BrokerUsername: "$ConnectionString",
+        BrokerPassword: "[myeventhubsnamespaceprimarykeyconnectionstring]",
+        BrokerMessageTopic: "data",
+        BrokerMetadataTopic: "metadata",
+        SendUAMetadata: true,
+        MetadataSendInterval: 43200,
+        BrokerCommandTopic: "",
+        BrokerResponseTopic: "",
+        BrokerMessageSize: 262144,
+        CreateBrokerSASToken: false,
+        UseTLS: false,
+        InternalQueueCapacity: 1000,
+        DefaultSendIntervalSeconds: 1,
+        DiagnosticsLoggingInterval: 30,
+        DefaultOpcSamplingInterval: 500,
+        DefaultOpcPublishingInterval: 1000,
+        UAStackTraceMask: 645,
+        ReversiblePubSubEncoding: false,
+        AutoLoadPersistedNodes: true
 
 1. Configure the OPC UA data nodes from your machines (or connectivity adapter software). To do so, select the OPC UA Server Connect menu item, enter the OPC UA server IP address and port and click Connect. You can now browse the OPC UA Server you want to send telemetry data from. If you have found the OPC UA node you want, right click it and select publish.
 

@@ -123,7 +123,8 @@ kubectl apply -f UA-CloudCommander.yaml
 
 ECHO Starting MES...
 kubectl apply -f MES.yaml
-ECHO "Waiting for OPC UA certs to be created, please be patient!"
+
+ECHO Waiting for OPC UA certs to be created, please be patient...
 Timeout 45 /nobreak
 
 ECHO Starting production line...
@@ -134,7 +135,8 @@ kubectl delete service -n munich ua-cloudpublisher
 kubectl delete deployment -n munich ua-cloudpublisher
 CD "C:\k8s\PublisherConfig\Munich\"
 CALL az storage azcopy blob upload -c munich --account-name !storagename! -s "./*" -d "app/settings" --recursive
-ECHO "Waiting for OPC UA certs to be oploaded, please be patient!"
+
+ECHO Waiting for OPC UA certs to be oploaded, please be patient...
 Timeout 45 /nobreak
 
 ECHO Starting UA-CloudPublisher again...
@@ -154,7 +156,8 @@ kubectl apply -f UA-CloudCommander.yaml
 
 ECHO Starting MES...
 kubectl apply -f MES.yaml
-ECHO "Waiting for OPC UA certs to be created, please be patient!"
+
+ECHO Waiting for OPC UA certs to be created, please be patient...
 Timeout 45 /nobreak
 
 ECHO Starting production line...
@@ -165,7 +168,8 @@ kubectl delete service -n seattle ua-cloudpublisher
 kubectl delete deployment -n seattle ua-cloudpublisher
 CD "C:\k8s\PublisherConfig\Seattle\"
 CALL az storage azcopy blob upload -c seattle --account-name !storagename! -s "./*" -d "app/settings" --recursive
-ECHO "Waiting for OPC UA certs to be uploaded, please be patient!"
+
+ECHO Waiting for OPC UA certs to be uploaded, please be patient...
 Timeout 45 /nobreak
 
 ECHO Starting UA-CloudPublisher again...

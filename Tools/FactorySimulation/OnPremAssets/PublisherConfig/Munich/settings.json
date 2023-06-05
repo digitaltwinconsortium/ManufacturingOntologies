@@ -1,5 +1,5 @@
 {
-  "BrokerClientName": "publisher.munich",
+  "PublisherName": "publisher.munich",
   "BrokerUrl": "[myeventhubsnamespace].servicebus.windows.net",
   "BrokerPort": 9093,
   "BrokerUsername": "$ConnectionString",
@@ -13,7 +13,6 @@
   "BrokerMessageSize": 262144,
   "CreateBrokerSASToken": false,
   "UseTLS": false,
-  "PublisherName": "UACloudPublisher",
   "InternalQueueCapacity": 1000,
   "DefaultSendIntervalSeconds": 1,
   "DiagnosticsLoggingInterval": 30,

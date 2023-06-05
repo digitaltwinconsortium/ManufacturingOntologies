@@ -289,12 +289,12 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2021-03-01",
+      "apiVersion": "2022-11-01",
       "name": "[concat(parameters('resourcesName'), '-VM')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "hardwareProfile": {
-          "vmSize": "Standard_E2s_v3"
+          "vmSize": "Standard_E2s_v5"
         },
         "osProfile": {
           "computerName": "[parameters('resourcesName')]",
@@ -304,8 +304,8 @@
         "storageProfile": {
           "imageReference": {
             "publisher": "MicrosoftWindowsDesktop",
-            "offer": "Windows-10",
-            "sku": "20h2-pro-g2",
+            "offer": "Windows-11",
+            "sku": "win11-22h2-ent",
             "version": "latest"
           },
           "osDisk": {

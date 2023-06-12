@@ -284,7 +284,7 @@ The Asset Admin Shell (AAS) Repository is automatically configured during deploy
 
 ## Connecting the Reference Solution to Microsoft Power BI
 
-Coming soon!
+To see how you can use the Azure Data Explorer time-series data as a data source for Power BI, see [here](https://learn.microsoft.com/en-us/azure/data-explorer/power-bi-data-connector). Once the data connection is made, you can create Power BI reports and dashboards by following the instructions [here](https://learn.microsoft.com/en-us/power-bi/create-reports/).
 
 
 ## Connecting the Reference Solution to Microsoft Fabric

@@ -79,10 +79,6 @@ UA Cloud Twin takes the combination of the OPC UA Application URI and the OPC UA
 
 UA Cloud Twin takes the OPC UA Publisher ID and creates ISA95 Area digital twin instances (derived from the digital twin model of the same name) for each one.
 
-#### Mapping OPC UA PubSub Datasets to the ISA95 Hierarchy Model
-
-UA Cloud Twin takes each OPC UA Field discovered in the received Dataset metadata and creates an OPC UA Node digital twin instance (inherited from the ISA95 Work Unit digital twin model) for each.
-
 
 ## A Cloud-based OPC UA Certificate Store and Persisted Storage
 

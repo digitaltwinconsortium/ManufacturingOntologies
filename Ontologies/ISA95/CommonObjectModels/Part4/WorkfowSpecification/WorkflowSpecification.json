@@ -69,12 +69,12 @@
                 "enumValues": [
                     {
                         "name": "pattern",
-                        "enumValue": "Pattern",
+                        "enumValue": "pattern",
                         "description": "a Workflow specification used as a template for other Workflow specifications"
                     },
                     {
                         "name": "instance",
-                        "enumValue": "Instance",
+                        "enumValue": "instance",
                         "description": "a Workflow specification that may be directly scheduled and tracked"
                     }
                 ]

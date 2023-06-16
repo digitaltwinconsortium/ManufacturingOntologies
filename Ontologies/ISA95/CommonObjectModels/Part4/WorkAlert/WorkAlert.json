@@ -58,7 +58,7 @@
         },
         {
             "@type": "Property",
-            "name": "Priority",
+            "name": "priority",
             "displayName": "Priority",
             "description": "Guide to the relative level of importance of the value for the work alert",
             "schema": "string",

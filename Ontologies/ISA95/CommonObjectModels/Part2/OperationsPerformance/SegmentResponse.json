@@ -100,23 +100,28 @@
                 "enumValues": [
                     {
                         "name": "production",
-                        "enumValue": "Production"
+                        "displayName": "Production",
+                        "enumValue": "production"
                     },
                     {
                         "name": "maintenance",
-                        "enumValue": "Maintenance"
+                        "displayName": "Maintenance",
+                        "enumValue": "maintenance"
                     },
                     {
                         "name": "quality",
-                        "enumValue": "Quality"
+                        "displayName": "Quality",
+                        "enumValue": "quality"
                     },
                     {
                         "name": "inventory",
-                        "enumValue": "Inventory"
+                        "displayName": "Inventory",
+                        "enumValue": "inventory"
                     },
                     {
                         "name": "mixed",
-                        "enumValue": "Mixed",
+                        "displayName": "Mixed",
+                        "enumValue": "mixed",
                         "comment": " can be used when the activity contains several categories of process segments"
                     }
                 ]
@@ -124,17 +129,17 @@
         },
         {
             "@type": "Property",
-            "name": "actualStartTime",
-            "displayName": "Actual Start Time",
-            "description": "The actual start time of this segment response.",
+            "name": "startTime",
+            "displayName": "Start Time",
+            "description": "The actual start time of this segment response",
             "schema": "dateTime",
             "writable": true
         },
         {
             "@type": "Property",
-            "name": "latestEndTime",
-            "displayName": "Latest End Time",
-            "description": "The actual end time of this segment response.",
+            "name": "endTime",
+            "displayName": "End Time",
+            "description": "The actual end time of this segment response",
             "schema": "dateTime",
             "writable": true
         },

@@ -1,0 +1,8 @@
+{
+  "AdtInstanceUrl": "https://erichbtest2-adt.api.neu.digitaltwins.azure.net/",
+  "ExcelFile": "",
+  "ExcelSheetForTwins": "",
+  "ExcelSheetForRelationships": "",
+  "FirstMetadataColumn": 7,
+  "FirstPropertyColumn": 9
+}

@@ -41,7 +41,7 @@
         },
         {
             "@type": "Property",
-            "name": "Priority",
+            "name": "priority",
             "displayName": "Priority",
             "description": "List of the priorities that act as a guide to the relative level of importance of an work alert",
             "comment": "Production examples: {1,2,3}; Maintenance examples: {Low, Medium, High}",
@@ -50,7 +50,7 @@
         },
         {
             "@type": "Property",
-            "name": "Category",
+            "name": "category",
             "displayName": "Category",
             "description": "General grouping associated with a work alert definition.",
             "schema": "string",

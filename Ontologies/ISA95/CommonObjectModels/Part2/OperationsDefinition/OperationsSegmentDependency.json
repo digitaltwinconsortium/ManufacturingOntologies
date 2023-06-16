@@ -40,52 +40,62 @@
                 "enumValues": [
                     {
                         "name": "atStart",
-                        "enumValue": "at start",
+                        "displayName": "At start",
+                        "enumValue": "atStart",
                         "description": "start B at A start"
                     },
                     {
                         "name": "afterStart",
-                        "enumValue": "after start",
+                        "displayName": "After start",
+                        "enumValue": "afterStart",
                         "description": "start B after A start"
                     },
                     {
                         "name": "afterEnd",
-                        "enumValue": "after end",
+                        "displayName": "After end",
+                        "enumValue": "afterEnd",
                         "description": "start B after A end"
                     },
                     {
                         "name": "notFollow",
-                        "enumValue": "not follow",
+                        "displayName": "Not follow",
+                        "enumValue": "notFollow",
                         "description": "B cannot follow A;"
                     },
                     {
                         "name": "possibleParallel",
-                        "enumValue": "possible parallel",
+                        "displayName": "Possible parallel",
+                        "enumValue": "possibleParallel",
                         "description": "B may run in parallel to A"
                     },
                     {
                         "name": "notInParallel",
-                        "enumValue": "not in parallel",
+                        "displayName": "Not in parallel",
+                        "enumValue": "notInParallel",
                         "description": "B may not run in parallel to A"
                     },
                     {
                         "name": "noLaterAfterStart",
-                        "enumValue": "no later after start",
+                        "displayName": "No later after start",
+                        "enumValue": "noLaterAfterStart",
                         "description": "start B no later than dependency factor after A start"
                     },
                     {
                         "name": "noEarlierAfterStart",
-                        "enumValue": "no earlier after start",
+                        "displayName": "No earlier after start",
+                        "enumValue": "noEarlierAfterStart",
                         "description": "start B no earlier than dependency factor after A start"
                     },
                     {
                         "name": "noLaterAfterEnd",
-                        "enumValue": "no later after end",
+                        "displayName": "No later after end",
+                        "enumValue": "noLaterAfterEnd",
                         "description": "start B no later than dependency factor after A end"
                     },
                     {
                         "name": "noEarlierAfterEnd",
-                        "enumValue": "no earlier after end",
+                        "displayName": "No earlier after end",
+                        "enumValue": "noEarlierAfterEnd",
                         "description": " B no earlier than dependency factor after A end"
                     }
                 ]

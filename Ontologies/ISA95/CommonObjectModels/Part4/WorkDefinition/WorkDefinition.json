@@ -96,7 +96,8 @@
                     },
                     {
                         "name": "mixed",
-                        "enumValue": "mixed"
+                        "enumValue": "mixed",
+                        "comment": " can be used when the activity contains several categories"
                     }
                 ]
             }

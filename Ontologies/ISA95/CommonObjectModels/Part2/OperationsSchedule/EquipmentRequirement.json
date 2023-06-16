@@ -69,6 +69,15 @@
             "schema": "dtmi:digitaltwins:isa95:SpatialDefinition;1"
         },
         {
+            "@type": "Relationship",
+            "name": "operationalLocationRel",
+            "displayName": "fits operational location",
+            "description": "Optional relationship to operational location.",
+            "comment": "Not part of the Standard Specs.",
+            "target": "dtmi:digitaltwins:isa95:OperationalLocation;1",
+            "maxMultiplicity": 1
+        },		
+        {
             "@type": "Property",
             "name": "operationalLocation",
             "displayName": "Operational location",
@@ -86,13 +95,13 @@
                 "enumValues": [
                     {
                         "name": "operationalLocation",
-                        "enumValue": "Operational Location",
+                        "enumValue": "operationalLocation",
                         "displayName": "Operational Location",
                         "description": "operational location attribute references an operational location;"
                     },
                     {
                         "name": "description",
-                        "enumValue": "Description",
+                        "enumValue": "description",
                         "displayName": "Description",
                         "description": "operational location attribute contains a description of the operational location, such as a street address."
                     }
@@ -128,7 +137,7 @@
             "name": "equipmentLevel",
             "displayName": "Equipment level",
             "writable": true,
-            "description": "Identification of the equipment level if the equipment element is defined",
+            "description": "An identification of the level in the role-based equipment hierarchy",
             "schema": {
                 "@type": "Enum",
                 "valueSchema": "string",
@@ -154,6 +163,40 @@
                         "name": "WorkUnit",
                         "displayName": "Work Unit",
                         "enumValue": "Work Unit"
+                    },
+                    {
+                        "name": "ProcessCell",
+                        "displayName": "Process Cell",
+                        "enumValue": "Process Cell"
+                    },
+                    {
+                        "name": "Unit",
+                        "enumValue": "Unit"
+                    },
+                    {
+                        "name": "ProductionLine",
+                        "displayName": "Production Line",
+                        "enumValue": "Production Line"
+                    },
+                    {
+                        "name": "ProductionUnit",
+                        "displayName": "Production Unit",
+                        "enumValue": "Production Unit"
+                    },
+                    {
+                        "name": "WorkCell",
+                        "displayName": "Work Cell",
+                        "enumValue": "Work Cell"
+                    },
+                    {
+                        "name": "StorageZone",
+                        "displayName": "Storage Zone",
+                        "enumValue": "Storage Zone"
+                    },
+                    {
+                        "name": "StorageUnit",
+                        "displayName": "Storage Unit",
+                        "enumValue": "Storage Unit"
                     }
                 ]
             }

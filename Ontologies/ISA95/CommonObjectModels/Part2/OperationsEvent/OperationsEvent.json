@@ -80,8 +80,8 @@
         },
         {
             "@type": "Property",
-            "name": "Priority",
-            "displayName": "Priority",
+            "name": "priority",
+            "displayName": "priority",
             "description": "Priority of the operations event that Is a guide to the relative level of importance of an operations event",
             "schema": "string",
             "writable": true
@@ -97,17 +97,17 @@
                 "enumValues": [
                     {
                         "name": "event",
-                        "enumValue": "Event",
+                        "enumValue": "event",
                         "displayName": "Event"
                     },
                     {
                         "name": "alert",
-                        "enumValue": "Alert",
+                        "enumValue": "alert",
                         "displayName": "Alert"
                     },
                     {
                         "name": "alarm",
-                        "enumValue": "Alarm",
+                        "enumValue": "alarm",
                         "displayName": "Alarm"
                     }
                 ]
@@ -148,27 +148,27 @@
                     {
                         "name": "production",
                         "displayName": "Production",
-                        "enumValue": "Production"
+                        "enumValue": "production"
                     },
                     {
                         "name": "inventory",
                         "displayName": "Inventory",
-                        "enumValue": "Inventory"
+                        "enumValue": "inventory"
                     },
                     {
                         "name": "quality",
                         "displayName": "Quality",
-                        "enumValue": "Quality"
+                        "enumValue": "quality"
                     },
                     {
                         "name": "maintenance",
                         "displayName": "Maintenance",
-                        "enumValue": "Maintenance"
+                        "enumValue": "maintenance"
                     },
                     {
                         "name": "mixed",
                         "displayName": "Mixed",
-                        "enumValue": "Mixed",
+                        "enumValue": "mixed",
                         "comment": "Mixed can be used when the operations event does not refer to a specific operations activity or refers to several operation activities"
                     }
                 ]
@@ -186,42 +186,42 @@
                 "enumValues": [
                     {
                         "name": "resourceManagement",
-                        "enumValue": "Resource management",
+                        "enumValue": "resourceManagement",
                         "displayName": "Resource management"
                     },
                     {
                         "name": "definitionManagement",
-                        "enumValue": "Definition management",
+                        "enumValue": "definitionManagement",
                         "displayName": "Definition management"
                     },
                     {
                         "name": "detailedScheduling",
-                        "enumValue": "Detailed scheduling",
+                        "enumValue": "detailedScheduling",
                         "displayName": "Detailed scheduling"
                     },
                     {
                         "name": "dispatching",
-                        "enumValue": "Dispatching",
+                        "enumValue": "dispatching",
                         "displayName": "Dispatching"
                     },
                     {
                         "name": "executionManagement",
-                        "enumValue": "Execution management",
+                        "enumValue": "executionManagement",
                         "displayName": "Execution management"
                     },
                     {
                         "name": "dataCollection",
-                        "enumValue": "Data collection",
+                        "enumValue": "dataCollection",
                         "displayName": "Data collection"
                     },
                     {
                         "name": "performanceAnalysis",
-                        "enumValue": "Performance analysis",
+                        "enumValue": "performanceAnalysis",
                         "displayName": "Performance analysis"
                     },
                     {
                         "name": "tracking",
-                        "enumValue": "Tracking",
+                        "enumValue": "tracking",
                         "displayName": "Tracking"
                     }
                 ]
@@ -239,67 +239,67 @@
                 "enumValues": [
                     {
                         "name": "orderProcessing",
-                        "enumValue": "Order processing",
+                        "enumValue": "orderProcessing",
                         "displayName": "Order processing"
                     },
                     {
                         "name": "operationsScheduling",
-                        "enumValue": "Operations scheduling",
+                        "enumValue": "operationsScheduling",
                         "displayName": "Operations scheduling"
                     },
                     {
                         "name": "productionControl",
-                        "enumValue": "Production control",
+                        "enumValue": "productionControl",
                         "displayName": "Production control"
                     },
                     {
                         "name": "materialAndEnergyControl",
-                        "enumValue": "Material and energy control",
+                        "enumValue": "materialAndEnergyControl",
                         "displayName": "Material and energy control"
                     },
                     {
                         "name": "procurement",
-                        "enumValue": "Procurement",
+                        "enumValue": "procurement",
                         "displayName": "Procurement"
                     },
                     {
                         "name": "qualityAssurance",
-                        "enumValue": "Quality assurance",
+                        "enumValue": "qualityAssurance",
                         "displayName": "Quality assurance"
                     },
                     {
                         "name": "productInventoryControl",
-                        "enumValue": "Product inventory control",
+                        "enumValue": "productInventoryControl",
                         "displayName": "Product inventory control"
                     },
                     {
                         "name": "productCostAccounting",
-                        "enumValue": "Product cost accounting",
+                        "enumValue": "productCostAccounting",
                         "displayName": "Product cost accounting"
                     },
                     {
                         "name": "productShippingAdministration",
-                        "enumValue": "Product shipping administration",
+                        "enumValue": "productShippingAdministration",
                         "displayName": "Product shipping administration"
                     },
                     {
                         "name": "maintenanceManagement",
-                        "enumValue": "Maintenance management",
+                        "enumValue": "maintenanceManagement",
                         "displayName": "Maintenance management"
                     },
                     {
                         "name": "marketingAndSales",
-                        "enumValue": "Marketing and sales",
+                        "enumValue": "marketingAndSales",
                         "displayName": "Marketing and sales"
                     },
                     {
                         "name": "rAndD",
-                        "enumValue": "R&D",
+                        "enumValue": "rAndD",
                         "displayName": "R&D"
                     },
                     {
                         "name": "engineering",
-                        "enumValue": "Engineering",
+                        "enumValue": "engineering",
                         "displayName": "Engineering"
                     }
                 ]

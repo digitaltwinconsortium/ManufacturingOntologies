@@ -59,32 +59,70 @@
             "name": "equipmentLevel",
             "displayName": "Equipment level",
             "writable": true,
-            "description": "Identification of the equipment level if the equipment element is defined",
+            "description": "An identification of the level in the role-based equipment hierarchy",
             "schema": {
                 "@type": "Enum",
                 "valueSchema": "string",
                 "enumValues": [
                     {
                         "name": "Enterprise",
-                        "enumValue": "Enterprise"
+                        "displayName": "Enterprise",
+                        "enumValue": "enterprise"
                     },
                     {
                         "name": "Site",
-                        "enumValue": "Site"
+                        "displayName": "Site",
+                        "enumValue": "site"
                     },
                     {
                         "name": "Area",
-                        "enumValue": "Area"
+                        "displayName": "Area",
+                        "enumValue": "area"
                     },
                     {
                         "name": "WorkCenter",
                         "displayName": "Work Center",
-                        "enumValue": "Work Center"
+                        "enumValue": "workCenter"
                     },
                     {
                         "name": "WorkUnit",
                         "displayName": "Work Unit",
-                        "enumValue": "Work Unit"
+                        "enumValue": "workUnit"
+                    },
+                    {
+                        "name": "ProcessCell",
+                        "displayName": "Process Cell",
+                        "enumValue": "processCell"
+                    },
+                    {
+                        "name": "Unit",
+                        "displayName": "Unit",
+                        "enumValue": "unit"
+                    },
+                    {
+                        "name": "ProductionLine",
+                        "displayName": "Production Line",
+                        "enumValue": "productionLine"
+                    },
+                    {
+                        "name": "ProductionUnit",
+                        "displayName": "Production Unit",
+                        "enumValue": "productionUnit"
+                    },
+                    {
+                        "name": "WorkCell",
+                        "displayName": "Work Cell",
+                        "enumValue": "workCell"
+                    },
+                    {
+                        "name": "StorageZone",
+                        "displayName": "Storage Zone",
+                        "enumValue": "storageZone"
+                    },
+                    {
+                        "name": "StorageUnit",
+                        "displayName": "Storage Unit",
+                        "enumValue": "Storage Unit"
                     }
                 ]
             }

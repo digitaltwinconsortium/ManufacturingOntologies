@@ -3,7 +3,9 @@
     "@id": "dtmi:digitaltwins:isa95:SiteAsset;1",
     "@type": "Interface",
     "displayName": "Site asset",
-    "description": "A generic site asset in the physical asset equipment hierarchy",
+    "description": "An Abstract site asset in the physical asset equipment hierarchy",
     "comment": "According to ANSI/ISA-95.00.01-2010 (IEC 62264-1 Mod) Enterprise-Control System Integration − Part 1: Models and Terminology - Approved 13 May 2010",
-    "extends": ["dtmi:digitaltwins:isa95:BaseModel;1"]
+    "extends": [
+      "dtmi:digitaltwins:isa95:HierarchyScope;1"
+    ]
   }

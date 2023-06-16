@@ -34,7 +34,7 @@
         },
         {
             "@type": "Property",
-            "name": "informationObjectTypeMltiplicity",
+            "name": "informationObjectTypeMultiplicity",
             "displayName": "Information object type multiplicity",
             "description": "The range of the information object(s) in operations record entry template allowed in the operations record template occurrence. If no limit is explicitly specified, the unbounded keyword is specified. If no multiplicity entry is specified, this is equivalent to no constraint. EXAMPLE 2 {Min: 0, Max: Unbounded}",
             "comment": "Samples: {Min: 1, Max: 1}, Min:1, Max: Unbounded}",
@@ -46,9 +46,29 @@
             "name": "action",
             "displayName": "Action",
             "description": "The permitted set of actions applied to the operations record entry template object in the operations record template by the publisher. Defined values for action are added, changed, deleted, and observed. If no action is specified, this is equivalent to all actions being allowed",
-            "comment": "Samples: [Added, Deleted, Changed, Observed], Changed]",
-            "schema": "string",
-            "writable": true
+            "writable": true,            
+            "schema": {
+                "@type": "Enum",
+                "valueSchema": "string",
+                "enumValues": [
+                    {
+                        "name": "added",
+                        "enumValue": "added"
+                    },
+                    {
+                        "name": "changed",
+                        "enumValue": "changed"
+                    },
+                    {
+                        "name": "deleted",
+                        "enumValue": "deleted"
+                    },
+                    {
+                        "name": "observed",
+                        "enumValue": "observed"
+                    }
+                ]
+            }
         },
         {
             "@type": "Property",

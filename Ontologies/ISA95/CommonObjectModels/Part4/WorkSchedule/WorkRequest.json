@@ -86,7 +86,8 @@
                     },
                     {
                         "name": "mixed",
-                        "enumValue": "mixed"
+                        "enumValue": "mixed",
+                        "comment": " can be used when the activity contains several categories"
                     }
                 ]
             }
@@ -117,10 +118,10 @@
         },
         {
             "@type": "Property",
-            "name": "segmentRequirementId",
+            "name": "segmentRequirementID",
             "displayName": "Segment requirement id",
             "description": "A unique identification of the segment requirement within the scope of an operations request that specifically relates to the work request.",
-            "schema": "dateTime",
+            "schema": "string",
             "writable": true
         },
         {

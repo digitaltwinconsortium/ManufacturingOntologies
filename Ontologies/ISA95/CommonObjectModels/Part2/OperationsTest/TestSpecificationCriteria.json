@@ -51,22 +51,22 @@
                     {
                         "name": "pass",
                         "displayName": "Pass",
-                        "enumValue": "Pass"
+                        "enumValue": "pass"
                     },
                     {
                         "name": "fail",
                         "displayName": "Fail",
-                        "enumValue": "Fail"
+                        "enumValue": "fail"
                     },
                     {
                         "name": "warn",
                         "displayName": "Warn",
-                        "enumValue": "Warn"
+                        "enumValue": "warm"
                     },
                     {
                         "name": "other",
                         "displayName": "Other",
-                        "enumValue": "Other",
+                        "enumValue": "other",
                         "comment": "See additional property 'otherResult'"
                     }
                 ]

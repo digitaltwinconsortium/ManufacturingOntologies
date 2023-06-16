@@ -35,7 +35,7 @@
             "name": "startRule",
             "displayName": "Start rule",
             "description": "Defines the starting date and time for the work calendar definition entry in ISO 8601 format for a date and time.",
-            "schema": "dateTime",
+            "schema": "string",
             "writable": true
         },
         {

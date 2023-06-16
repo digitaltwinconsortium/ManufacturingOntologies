@@ -46,8 +46,8 @@
         },
         {
             "@type": "Property",
-            "name": "capacityType",
-            "displayName": "Capacity type",
+            "name": "capabilityType",
+            "displayName": "Capability type",
             "description": "Defines the type of capability. ",
             "schema": {
                 "@type": "Enum",
@@ -127,6 +127,15 @@
             "schema": "dtmi:digitaltwins:isa95:SpatialDefinition;1"
         },
         {
+            "@type": "Relationship",
+            "name": "operationalLocationRel",
+            "displayName": "fits operational location",
+            "description": "Optional relationship to operational location.",
+            "comment": "Not part of the Standard Specs.",
+            "target": "dtmi:digitaltwins:isa95:OperationalLocation;1",
+            "maxMultiplicity": 1
+        },		
+        {
             "@type": "Property",
             "name": "operationalLocation",
             "displayName": "Operational location",
@@ -144,13 +153,13 @@
                 "enumValues": [
                     {
                         "name": "operationalLocation",
-                        "enumValue": "OperationalLocation",
+                        "enumValue": "operationalLocation",
                         "displayName": "Operational Location",
                         "description": "operational location attribute references an operational location;"
                     },
                     {
                         "name": "description",
-                        "enumValue": "Description",
+                        "enumValue": "description",
                         "displayName": "Description",
                         "description": "operational location attribute contains a description of the operational location, such as a street address."
                     }

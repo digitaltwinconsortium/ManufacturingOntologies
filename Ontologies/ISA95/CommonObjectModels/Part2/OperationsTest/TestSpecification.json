@@ -126,13 +126,13 @@
                     {
                         "name": "yes",
                         "displayName": "Yes",
-                        "enumValue": "Yes",
+                        "enumValue": "yes",
                         "description": "physical samples are required"
                     },
                     {
                         "name": "no",
                         "displayName": "No",
-                        "enumValue": "No",
+                        "enumValue": "no",
                         "description": "physical samples are not required"
                     }
                 ]

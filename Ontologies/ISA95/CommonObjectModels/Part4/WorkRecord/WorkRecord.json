@@ -90,7 +90,7 @@
         },
         {
             "@type": "Property",
-            "name": "expirationDate",
+            "name": "expiration",
             "displayName": "Expiration date",
             "description": "Date and time at which the work record is no longer relevant.",
             "schema": "dateTime",

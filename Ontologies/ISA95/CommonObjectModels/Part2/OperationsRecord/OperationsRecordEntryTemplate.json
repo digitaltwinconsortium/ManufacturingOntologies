@@ -57,6 +57,14 @@
         },
         {
             "@type": "Property",
+            "name": "informationObjectType",
+            "displayName": "Information object type",
+            "description": "Identifies the type of information object type that an operations record entry template is based upon. The allowed information object types are defined in the operations record specification template",
+            "schema": "string",
+            "writable": true
+        },
+        {
+            "@type": "Property",
             "name": "effectiveTimestamp",
             "displayName": "Effective timestamp",
             "description": "The date and time that the operations record entry template was/is effective. If no effective timestamp is provided with operations record entry template, the effective timestamp is represented by the effective timestamp attribute in the operations record template",
@@ -69,14 +77,6 @@
             "displayName": "Record timestamp",
             "description": "The date and time the publisher recorded / transacted the action. If no entry is provided, the record timestamp is the record timestamp attribute in the operations record template",
             "schema": "dateTime",
-            "writable": true
-        },
-        {
-            "@type": "Property",
-            "name": "informationObjectType",
-            "displayName": "Information object type",
-            "description": "Identifies the type of information object type that an operations record entry template is based upon. The allowed information object types are defined in the operations record specification template",
-            "schema": "string",
             "writable": true
         }
     ]

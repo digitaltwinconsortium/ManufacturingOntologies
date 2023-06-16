@@ -33,6 +33,15 @@
             "target": "dtmi:digitaltwins:isa95:Equipment;1"
         },
         {
+            "@type": "Relationship",
+            "name": "implementedBy",
+            "displayName": "Implemented by",
+            "description": "This equipment as role in a process segment is implemented by the physical asset.",
+            "comment": "For Equipment asset mapping",
+            "target": "dtmi:digitaltwins:isa95:PhysicalAsset;1",
+            "maxMultiplicity": 1
+        },
+        {
             "@type": "Component",
             "name": "description",
             "displayName": "Description",
@@ -67,25 +76,63 @@
                 "enumValues": [
                     {
                         "name": "Enterprise",
-                        "enumValue": "Enterprise"
+                        "displayName": "Enterprise",
+                        "enumValue": "enterprise"
                     },
                     {
                         "name": "Site",
-                        "enumValue": "Site"
+                        "displayName": "Site",
+                        "enumValue": "site"
                     },
                     {
                         "name": "Area",
-                        "enumValue": "Area"
+                        "displayName": "Area",
+                        "enumValue": "area"
                     },
                     {
                         "name": "WorkCenter",
                         "displayName": "Work Center",
-                        "enumValue": "Work Center"
+                        "enumValue": "workCenter"
                     },
                     {
                         "name": "WorkUnit",
                         "displayName": "Work Unit",
-                        "enumValue": "Work Unit"
+                        "enumValue": "workUnit"
+                    },
+                    {
+                        "name": "ProcessCell",
+                        "displayName": "Process Cell",
+                        "enumValue": "processCell"
+                    },
+                    {
+                        "name": "Unit",
+                        "displayName": "Unit",
+                        "enumValue": "unit"
+                    },
+                    {
+                        "name": "ProductionLine",
+                        "displayName": "Production Line",
+                        "enumValue": "productionLine"
+                    },
+                    {
+                        "name": "ProductionUnit",
+                        "displayName": "Production Unit",
+                        "enumValue": "productionUnit"
+                    },
+                    {
+                        "name": "WorkCell",
+                        "displayName": "Work Cell",
+                        "enumValue": "workCell"
+                    },
+                    {
+                        "name": "StorageZone",
+                        "displayName": "Storage Zone",
+                        "enumValue": "storageZone"
+                    },
+                    {
+                        "name": "StorageUnit",
+                        "displayName": "Storage Unit",
+                        "enumValue": "Storage Unit"
                     }
                 ]
             }
@@ -96,15 +143,6 @@
             "displayName": "Spatial definition",
             "description": "Spatially defines the equipment as a zero-dimensional point, one dimensional line, or two dimensional shape or three dimensional solid.",
             "schema": "dtmi:digitaltwins:isa95:SpatialDefinition;1"
-        },
-        {
-            "@type": "Relationship",
-            "name": "implementedBy",
-            "displayName": "Implemented by",
-            "description": "This equipment as role in a process segment is implemented by the physical asset.",
-            "comment": "For Equipment asset mapping",
-            "target": "dtmi:digitaltwins:isa95:PhysicalAsset;1",
-            "maxMultiplicity": 1
         }
     ]
 }

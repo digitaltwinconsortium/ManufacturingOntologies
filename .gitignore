@@ -21,3 +21,9 @@
 /Tools/FactorySimulation/OnPremAssets/Station/pki
 /Tools/FactorySimulation/OnPremAssets/Station/app/pki/own
 /Tools/FactorySimulation/OnPremAssets/Station/app/pki/trusted/certs
+/Tools/ADTGenerator/.vs/ADTGenerator
+/Tools/ADTGenerator/bin/Debug/net7.0-windows
+/Tools/ADTGenerator/obj
+/Tools/ADTGenerator/~$isa95-test.xlsx
+/Tools/ADTGenerator/isa95-test.xlsx
+/Tools/ADTGenerator/ADTGenerator.csproj.user

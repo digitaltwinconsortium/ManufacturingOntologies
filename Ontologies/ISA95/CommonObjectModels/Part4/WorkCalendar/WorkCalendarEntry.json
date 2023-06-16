@@ -41,17 +41,19 @@
         },
         {
             "@type": "Property",
-            "name": "startDatetime",
-            "displayName": "Start datetime",
+            "name": "startTime",
+            "displayName": "Start time",
             "description": "Defines the starting date and time of the work calendar entry.",
+            "comment": "the spec declared this field 'Start datetime' we renamed as 'Start time' to align with other models in Part2.",
             "schema": "dateTime",
             "writable": true
         },
         {
             "@type": "Property",
-            "name": "finishDatetime",
-            "displayName": "Finish datetime",
+            "name": "endTime",
+            "displayName": "End time",
             "description": "Defines the finishing date and time of the work calendar entry.",
+            "comment": "the spec declared this field 'Finish datetime' we renamed as 'end time' to align with other models in Part2.",
             "schema": "dateTime",
             "writable": true
         },

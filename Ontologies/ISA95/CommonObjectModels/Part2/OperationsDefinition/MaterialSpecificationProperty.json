@@ -2,7 +2,7 @@
     "@context": "dtmi:dtdl:context;2",
     "@id": "dtmi:digitaltwins:isa95:MaterialSpecificationProperty;1",
     "@type": "Interface",
-    "displayName": "Material segment specification property",
+    "displayName": "Material specification property",
     "description": "Specific properties that are required for material segment specifications shall be presented as material segment specification properties",
     "comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
     "extends": [

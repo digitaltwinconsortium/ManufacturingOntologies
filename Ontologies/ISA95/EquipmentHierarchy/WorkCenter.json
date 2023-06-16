@@ -5,7 +5,9 @@
     "displayName": "Work center",
     "description": "Work centers are elements of the equipment hierarchy under an area. The term work center may be used when the specific type of the equipment element is not significant for the purpose of the discussion.",
     "comment": "According to ANSI/ISA-95.00.01-2010 (IEC 62264-1 Mod) Enterprise-Control System Integration − Part 1: Models and Terminology - Approved 13 May 2010",
-    "extends": ["dtmi:digitaltwins:isa95:HierarchyScope;1", "dtmi:digitaltwins:isa95:SiteAsset;1"],
+    "extends": [
+      "dtmi:digitaltwins:isa95:SiteAsset;1"
+    ],
     "contents": [
       {
         "@type": "Relationship",

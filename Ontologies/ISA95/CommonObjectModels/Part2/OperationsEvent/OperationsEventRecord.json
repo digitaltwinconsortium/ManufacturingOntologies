@@ -44,9 +44,29 @@
             "name": "action",
             "displayName": "Action",
             "description": "The action performed on the operations event record entry within the operations event record",
-            "comment": "Samples: [Added, Deleted, Changed, Observed], Changed]",
-            "schema": "string",
-            "writable": true
+            "writable": true,            
+            "schema": {
+                "@type": "Enum",
+                "valueSchema": "string",
+                "enumValues": [
+                    {
+                        "name": "added",
+                        "enumValue": "added"
+                    },
+                    {
+                        "name": "changed",
+                        "enumValue": "changed"
+                    },
+                    {
+                        "name": "deleted",
+                        "enumValue": "deleted"
+                    },
+                    {
+                        "name": "observed",
+                        "enumValue": "observed"
+                    }
+                ]
+            }
         },
         {
             "@type": "Property",

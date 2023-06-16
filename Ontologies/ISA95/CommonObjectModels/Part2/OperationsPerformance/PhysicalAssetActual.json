@@ -69,6 +69,15 @@
             "schema": "dtmi:digitaltwins:isa95:SpatialDefinition;1"
         },
         {
+            "@type": "Relationship",
+            "name": "physicalLocationRel",
+            "displayName": "fits physical location",
+            "description": "Optional relationship to physical location.",
+            "comment": "Not part of the Standard Specs.",
+            "target": "dtmi:digitaltwins:isa95:OperationalLocation;1",
+            "maxMultiplicity": 1
+        },		
+        {
             "@type": "Property",
             "name": "physicalLocation",
             "displayName": "Physical location",
@@ -77,7 +86,7 @@
         },
         {
             "@type": "Property",
-            "name": "physicaLocationType",
+            "name": "physicalLocationType",
             "displayName": "Physical location type",
             "description": "Indicates whether the physical location attribute refers to an operational location object or contains a description of the physical location. Mandatory where a physical location attribute is specified",
             "schema": {

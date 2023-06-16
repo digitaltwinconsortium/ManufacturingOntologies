@@ -76,12 +76,12 @@
                 "enumValues": [
                     {
                         "name": "physical",
-                        "enumValue": "Physical",
+                        "enumValue": "physical",
                         "description": "the components of the assembly are physically connected or in the same area"
                     },
                     {
                         "name": "logical",
-                        "enumValue": "Logical",
+                        "enumValue": "logical",
                         "description": "the components of the assembly are not necessarily physically connected or in the same area"
                     }
                 ]
@@ -99,12 +99,12 @@
                 "enumValues": [
                     {
                         "name": "permanent",
-                        "enumValue": "Permanent",
+                        "enumValue": "permanent",
                         "description": "an assembly that is not intended to be split during the production process"
                     },
                     {
                         "name": "transient",
-                        "enumValue": "Transient",
+                        "enumValue": "transient",
                         "description": "a temporary assembly using during production, such as a pallet of different materials or a batch kit"
                     }
                 ]

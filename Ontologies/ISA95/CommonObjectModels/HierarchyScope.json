@@ -5,6 +5,9 @@
     "displayName": "Hierarchy scope",
     "description": "The hierarchy scope identifies where the exchanged information fits within the role-based equipment hierarchy. It defines the scope of the exchanged information, such as a site or area for ANSI/ISA-95.00.02-2018 – 19 –which the information is relevant. The hierarchy scope identifies the associated instance in the role-based equipment hierarchy. ",
     "comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+    "extends": [
+      "dtmi:digitaltwins:isa95:BaseModel;1"
+    ],
     "contents": [
       {
         "@type": "Relationship",
@@ -26,7 +29,7 @@
         "name": "equipmentLevel",
         "displayName": "Equipment level",
         "writable": true,
-        "description": "Identification of the equipment level if the equipment element is defined",
+        "description": "An identification of the level in the role-based equipment hierarchy",
         "schema": {
             "@type": "Enum",
             "valueSchema": "string",
@@ -52,9 +55,43 @@
                     "name": "WorkUnit",
                     "displayName": "Work Unit",
                     "enumValue": "Work Unit"
+                },
+                {
+                    "name": "ProcessCell",
+                    "displayName": "Process Cell",
+                    "enumValue": "Process Cell"
+                },
+                {
+                    "name": "Unit",
+                    "enumValue": "Unit"
+                },
+                {
+                    "name": "ProductionLine",
+                    "displayName": "Production Line",
+                    "enumValue": "Production Line"
+                },
+                {
+                    "name": "ProductionUnit",
+                    "displayName": "Production Unit",
+                    "enumValue": "Production Unit"
+                },
+                {
+                    "name": "WorkCell",
+                    "displayName": "Work Cell",
+                    "enumValue": "Work Cell"
+                },
+                {
+                    "name": "StorageZone",
+                    "displayName": "Storage Zone",
+                    "enumValue": "Storage Zone"
+                },
+                {
+                    "name": "StorageUnit",
+                    "displayName": "Storage Unit",
+                    "enumValue": "Storage Unit"
                 }
             ]
         }
-      }
+    }
     ]
   }

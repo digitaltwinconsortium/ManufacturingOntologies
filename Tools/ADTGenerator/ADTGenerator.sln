@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33723.286
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ADTGenerator", "ADTGenerator.csproj", "{805BDA33-7325-4366-989F-D971720CC1CD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{805BDA33-7325-4366-989F-D971720CC1CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{805BDA33-7325-4366-989F-D971720CC1CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{805BDA33-7325-4366-989F-D971720CC1CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{805BDA33-7325-4366-989F-D971720CC1CD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DBBFE0B0-F25E-4C97-AFB7-C98B5E3B8735}
+	EndGlobalSection
+EndGlobal

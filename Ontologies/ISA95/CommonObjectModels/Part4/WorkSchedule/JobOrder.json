@@ -92,24 +92,24 @@
                 "enumValues": [
                     {
                         "name": "production",
-                        "enumValue": "Production"
+                        "enumValue": "production"
                     },
                     {
                         "name": "maintenance",
-                        "enumValue": "Maintenance"
+                        "enumValue": "maintenance"
                     },
                     {
                         "name": "quality",
-                        "enumValue": "Quality"
+                        "enumValue": "quality"
                     },
                     {
                         "name": "inventory",
-                        "enumValue": "Inventory"
+                        "enumValue": "inventory"
                     },
                     {
                         "name": "mixed",
-                        "enumValue": "Mixed",
-                        "comment": " can be used when the activity contains several categories of process segments"
+                        "enumValue": "mixed",
+                        "comment": " can be used when the activity contains several categories"
                     }
                 ]
             }

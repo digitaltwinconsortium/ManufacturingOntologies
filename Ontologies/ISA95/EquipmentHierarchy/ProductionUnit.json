@@ -5,5 +5,7 @@
     "displayName": "Production unit",
     "description": "A production unit generally encompasses all of the equipment required for a segment of continuous production that operates in a relatively autonomous manner. ", 
     "comment": "According to ANSI/ISA-95.00.01-2010 (IEC 62264-1 Mod) Enterprise-Control System Integration − Part 1: Models and Terminology - Approved 13 May 2010",
-    "extends": ["dtmi:digitaltwins:isa95:WorkCenter;1"]
+    "extends": [
+      "dtmi:digitaltwins:isa95:WorkCenter;1"
+    ]
   }

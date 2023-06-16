@@ -45,9 +45,29 @@
             "name": "action",
             "displayName": "Action",
             "description": "The action performed on the operations record entry template(s) within the operations record template. Defined values are added, changed, deleted and observed",
-            "comment": "Samples: [Added, Deleted, Changed, Observed], Changed]",
-            "schema": "string",
-            "writable": true
+            "writable": true,            
+            "schema": {
+                "@type": "Enum",
+                "valueSchema": "string",
+                "enumValues": [
+                    {
+                        "name": "added",
+                        "enumValue": "added"
+                    },
+                    {
+                        "name": "changed",
+                        "enumValue": "changed"
+                    },
+                    {
+                        "name": "deleted",
+                        "enumValue": "deleted"
+                    },
+                    {
+                        "name": "observed",
+                        "enumValue": "observed"
+                    }
+                ]
+            }
         },
         {
             "@type": "Property",

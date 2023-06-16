@@ -50,17 +50,20 @@
                 "enumValues": [
                     {
                         "name": "consumed",
-                        "enumValue": "Consumed",
+                        "displayName": "Consumed",
+                        "enumValue": "consumed",
                         "description": "indicates that operations material bill items are all consumed material."
                     },
                     {
                         "name": "produced",
-                        "enumValue": "Produced",
+                        "displayName": "Produced",
+                        "enumValue": "produced",
                         "description": "indicates that operations material bill items are all produced materials. "
                     },
                     {
                         "name": "mixed",
-                        "enumValue": "Mixed",
+                        "displayName": "Mixed",
+                        "enumValue": "mixed",
                         "description": "indicates that operations material bill items are both consumed and produced materials. "
                     }
                 ]

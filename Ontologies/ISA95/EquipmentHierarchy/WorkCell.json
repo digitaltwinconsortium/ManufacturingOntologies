@@ -5,5 +5,7 @@
     "displayName": "Work cell",
     "description": "Work cells are usually only identified when there is flexibility in the routing of work within a production line.", 
     "comment": "According to ANSI/ISA-95.00.01-2010 (IEC 62264-1 Mod) Enterprise-Control System Integration − Part 1: Models and Terminology - Approved 13 May 2010",
-    "extends": ["dtmi:digitaltwins:isa95:WorkUnit;1"]
+    "extends": [
+      "dtmi:digitaltwins:isa95:WorkUnit;1"
+    ]
   }

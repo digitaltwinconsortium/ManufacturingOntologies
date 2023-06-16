@@ -32,9 +32,9 @@
         },
         {
             "@type": "Property",
-            "name": "capacityType",
-            "displayName": "Capacity type",
-            "description": "Defines the type of capability. ",
+            "name": "relationshipType",
+            "displayName": "Relationship Type",
+            "description": "Defines the type of relationship. ",
             "schema": {
                 "@type": "Enum",
                 "valueSchema": "string",

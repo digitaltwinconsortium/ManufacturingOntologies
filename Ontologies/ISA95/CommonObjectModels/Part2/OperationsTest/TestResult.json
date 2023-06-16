@@ -83,22 +83,22 @@
                     {
                         "name": "pass",
                         "displayName": "Pass",
-                        "enumValue": "Pass"
+                        "enumValue": "pass"
                     },
                     {
                         "name": "fail",
                         "displayName": "Fail",
-                        "enumValue": "Fail"
+                        "enumValue": "fail"
                     },
                     {
                         "name": "warn",
                         "displayName": "Warn",
-                        "enumValue": "Warn"
+                        "enumValue": "warn"
                     },
                     {
                         "name": "other",
                         "displayName": "Other",
-                        "enumValue": "Other",
+                        "enumValue": "other",
                         "comment": "See additional property 'otherEvaluatedCriterionResult'"
                     }
                 ]

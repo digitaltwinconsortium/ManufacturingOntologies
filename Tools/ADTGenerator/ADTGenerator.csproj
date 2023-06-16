@@ -9,13 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="isa95-test.xlsx" />
+    <None Remove="binaries\isa95-test.xlsx" />
     <None Remove="Picture1.png" />
     <None Remove="Picture2.png" />
     <None Remove="Picture3.png" />
     <None Remove="Picture4.png" />
     <None Remove="Picture5.png" />
     <None Remove="Readme.md" />
+    <None Remove="~%24isa95-test.xlsx" />
   </ItemGroup>
 
   <ItemGroup>

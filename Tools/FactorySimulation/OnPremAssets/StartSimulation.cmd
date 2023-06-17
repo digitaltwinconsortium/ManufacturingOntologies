@@ -114,7 +114,12 @@ ECHO .
 ECHO Starting Munich production line...
 ECHO ==================================
 ECHO .
-ECHO Starting UA-CloudPublisher to upload OPC UA cert to cloud...
+
+ECHO Uploading UA-CloudPublisher config files to cloud...
+CD "C:\k8s\PublisherConfig\Munich\"
+CALL az storage azcopy blob upload -c munich --account-name !storagename! -s "./*" -d "app/settings" --recursive
+
+ECHO Starting UA-CloudPublisher, UA-CloudCommander and MES to upload OPC UA cert to cloud...
 CD "C:\k8s\Deployment\Munich\"
 kubectl apply -f UA-CloudPublisher.yaml
 
@@ -130,24 +135,25 @@ Timeout 45 /nobreak
 ECHO Starting production line...
 kubectl apply -f ProductionLine.yaml
 
-ECHO Uploading UA-CloudPublisher config files to cloud...
-kubectl delete service -n munich ua-cloudpublisher
-kubectl delete deployment -n munich ua-cloudpublisher
-CD "C:\k8s\PublisherConfig\Munich\"
-CALL az storage azcopy blob upload -c munich --account-name !storagename! -s "./*" -d "app/settings" --recursive
-
 ECHO Waiting for OPC UA certs to be oploaded, please be patient...
 Timeout 45 /nobreak
 
-ECHO Starting UA-CloudPublisher again...
+ECHO Restarting UA-CloudPublisher...
 CD "C:\k8s\Deployment\Munich\"
+kubectl delete service -n munich ua-cloudpublisher
+kubectl delete deployment -n munich ua-cloudpublisher
 kubectl apply -f UA-CloudPublisher.yaml
 
 ECHO .
 ECHO Starting Seattle production line...
 ECHO ==================================
 ECHO .
-ECHO Starting UA-CloudPublisher to upload OPC UA cert to cloud...
+
+Echo Uploading UA-CloudPublisher config files to cloud...
+CD "C:\k8s\PublisherConfig\Seattle\"
+CALL az storage azcopy blob upload -c seattle --account-name !storagename! -s "./*" -d "app/settings" --recursive
+
+ECHO Starting UA-CloudPublisher, UA-CloudCommander and MES to upload OPC UA cert to cloud...
 CD "C:\k8s\Deployment\Seattle\"
 kubectl apply -f UA-CloudPublisher.yaml
 
@@ -163,17 +169,13 @@ Timeout 45 /nobreak
 ECHO Starting production line...
 kubectl apply -f ProductionLine.yaml
 
-Echo Uploading UA-CloudPublisher config files to cloud...
-kubectl delete service -n seattle ua-cloudpublisher
-kubectl delete deployment -n seattle ua-cloudpublisher
-CD "C:\k8s\PublisherConfig\Seattle\"
-CALL az storage azcopy blob upload -c seattle --account-name !storagename! -s "./*" -d "app/settings" --recursive
-
 ECHO Waiting for OPC UA certs to be uploaded, please be patient...
 Timeout 45 /nobreak
 
-ECHO Starting UA-CloudPublisher again...
+Echo Restarting UA-CloudPublisher...
 CD "C:\k8s\Deployment\Seattle\"
+kubectl delete service -n seattle ua-cloudpublisher
+kubectl delete deployment -n seattle ua-cloudpublisher
 kubectl apply -f UA-CloudPublisher.yaml
 
 ECHO .

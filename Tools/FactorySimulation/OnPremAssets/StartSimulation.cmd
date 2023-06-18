@@ -117,7 +117,8 @@ ECHO .
 
 ECHO Uploading UA-CloudPublisher config files to cloud...
 CD "C:\k8s\PublisherConfig\Munich\"
-CALL az storage azcopy blob upload -c munich --account-name !storagename! -s "./*" -d "app/settings" --recursive
+CALL az storage container create -n munich --connection-string !storageconnectionstring!
+CALL az storage blob upload-batch -d munich --connection-string !storageconnectionstring! -s "." --destination-path "app/settings"
 
 ECHO Starting UA-CloudPublisher, UA-CloudCommander and MES to upload OPC UA cert to cloud...
 CD "C:\k8s\Deployment\Munich\"
@@ -151,7 +152,8 @@ ECHO .
 
 Echo Uploading UA-CloudPublisher config files to cloud...
 CD "C:\k8s\PublisherConfig\Seattle\"
-CALL az storage azcopy blob upload -c seattle --account-name !storagename! -s "./*" -d "app/settings" --recursive
+CALL az storage container create -n seattle --connection-string !storageconnectionstring!
+CALL az storage blob upload-batch -d seattle --connection-string !storageconnectionstring! -s "." --destination-path "app/settings"
 
 ECHO Starting UA-CloudPublisher, UA-CloudCommander and MES to upload OPC UA cert to cloud...
 CD "C:\k8s\Deployment\Seattle\"

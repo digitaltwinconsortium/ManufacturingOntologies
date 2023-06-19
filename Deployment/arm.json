@@ -187,6 +187,65 @@
       ]
     },
     {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2021-02-01",
+      "name": "[concat(parameters('resourcesName'), '-UA-Cloud-Action')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "httpsOnly": true,
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', concat(parameters('resourcesName'), '-AppService'))]",
+        "siteConfig": {
+          "numberOfWorkers": 1,
+          "linuxFxVersion": "DOCKER|ghcr.io/digitaltwinconsortium/ua-cloudaction:main",
+          "minTlsVersion": "1.2",
+          "ftpsState": "FtpsOnly",
+          "acrUseManagedIdentityCreds": false,
+          "alwaysOn": true,
+          "http20Enabled": false,
+          "functionAppScaleLimit": 0,
+          "minimumElasticInstanceCount": 0
+        }
+      },
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]": {}
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', concat(parameters('resourcesName'), '-AppService'))]"
+      ],
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "location": "[resourceGroup().location]",
+          "name": "appsettings",
+          "properties": {
+            "ADX_INSTANCE_URL": "[reference(resourceId('Microsoft.Kusto/clusters', variables('adxClusterName')), '2022-02-01').uri]",
+            "ADX_DB_NAME": "ontologies",
+            "ADX_TABLE_NAME": "opcua_telemetry",
+            "AAD_TENANT_ID": "[subscription().tenantId]",
+            "APPLICATION_ID": "[reference(concat(parameters('resourcesName'), '-Identity')).clientId]",
+            "APPLICATION_KEY": "",
+            "BROKER_NAME": "[concat(parameters('resourcesName'), '-EventHubs.servicebus.windows.net')]",
+            "BROKER_USERNAME": "$ConnectionString",
+            "BROKER_PASSWORD": "[listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString]",
+            "TOPIC": "commander.command",
+            "RESPONSE_TOPIC": "commander.response",
+            "UA_SERVER_ENDPOINT": "opc.tcp://assembly.seattle/",
+            "UA_SERVER_METHOD_ID": "ns=2;i=435",
+            "UA_SERVER_OBJECT_ID": "ns=2;i=424",
+            "UA_SERVER_APPLICATION_NAME": "assembly",
+            "UA_SERVER_LOCATION_NAME": "seattle"
+          },
+          "type": "config",
+          "dependsOn": [
+            "[concat('Microsoft.Web/sites/', concat(parameters('resourcesName'), '-AAS-Repo'))]"
+          ]
+        }
+      ]
+    },
+    {
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2021-04-01",
       "name": "[concat(parameters('resourcesName'), 'storage')]",

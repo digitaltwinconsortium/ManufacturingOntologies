@@ -39,7 +39,7 @@ Here are the components involved in this solution:
 | [UA Cloud Twin](https://github.com/digitaltwinconsortium/UA-CloudTwin) | This cloud application converts OPC UA PubSub cloud messages into digital twin updates. It also creates digital twins automatically by processing the cloud messages. Twins are instantiated from models in ISA95-compatible DTDL ontology. It's hosted in a Docker container. |
 | [Azure Digital Twins](https://learn.microsoft.com/en-us/azure/digital-twins/overview) | The platform that enables the creation of a digital representation of real-world assets, places, business processes, and people. |
 | [Azure Data Explorer](https://learn.microsoft.com/en-us/azure/synapse-analytics/data-explorer/data-explorer-overview) | The time series database and front-end dashboard service for advanced cloud analytics, including built-in anomaly detection and predictions. |
-| [Pressure Relief Azure Function](https://github.com/digitaltwinconsortium/ManufacturingOntologies/tree/main/Tools/FactorySimulation/PressureReliefFunction) | This Azure Function queries the Azure Data Explorer for a specific data value (the pressure in one of the simulated production line machines) and calls UA Cloud Commander via Azure Event Hubs when a certain threshold is reached (4000 mbar). UA Cloud Commander then calls the OpenPressureReliefValve method on the machine via OPC UA. |
+| [UA Cloud Action](https://github.com/digitaltwinconsortium/UA-CloudAction) | This cloud application queries the Azure Data Explorer for a specific data value (the pressure in one of the simulated production line machines) and calls UA Cloud Commander via Azure Event Hubs when a certain threshold is reached (4000 mbar). UA Cloud Commander then calls the OpenPressureReliefValve method on the machine via OPC UA. |
 | [Azure Arc](https://learn.microsoft.com/en-us/azure/azure-arc/kubernetes/overview) | This cloud service is used to manage the on-premises Kubernetes cluster at the edge. New workloads can be deployed via Flux. |
 | [Azure Storage](https://learn.microsoft.com/en-us/azure/storage/common/storage-introduction) | This cloud service is used to manage the OPC UA certificate store and settings of the Edge Kubernetes workloads. |
 | [Azure 3D Scenes Studio](https://github.com/digitaltwinconsortium/ManufacturingOntologies#using-3d-scenes-studio) | This cloud app allows the creation of 3D immersive viewers for your manufacturing data. |
@@ -143,6 +143,12 @@ These emissions come from the electricity used during production. If the manufac
 
 These emissions come from the parts and raw materials used within the product being manufactured as well as from using the product by the end customer (and getting it into the customer's hands in the first place!) and are the hardest to calculate simply due to a lack of data from the worldwide suppliers manufacturer uses today. Unfortunately, scope 3 emissions make up almost 90% of the emissions in manufacturing. However, this is where the AAS can help create a standardized interface and data model to provide and retrieve scope 3 emissions. This reference solution does just that by making an AAS available for each manufactured product built by the simulated production line and also reads PCF data from another AAS simulating a manufacturing supply chain.
 
+
+## Digital Feedback Loop with UA Cloud Commander and UA Cloud Action
+
+This reference implementation implements a "digital feedback loop", i.e. triggering a command on one of the OPC UA servers in the simulation from the cloud, based on a time-series reaching a certain threshold (the simulated pressure). You can see the pressure of the assembly machine in the Seattle production line being released on regular intervals in the Azure Data Explorer dashboard.
+
+
 ## Installation of Production Line Simulation and Cloud Services
 
 Clicking on the button below will **deploy** all required resources (on Microsoft Azure):
@@ -174,7 +180,7 @@ Note: To get logs from all your Kubernetes workloads and services at any time, s
 
 ## Running the Production Line Simulation
 
-On the deployed VM, navigate to the `./Tools/FactorySimulation/OnPremAssets` directory of the extracted repository downloaded ealier and run the **StartSimulation** command from a **Windows command prompt** by supplying the following parameters:
+On the deployed VM, navigate to the `./Tools/FactorySimulation` directory of the extracted repository downloaded ealier and run the **StartSimulation** command from a **Windows command prompt** by supplying the following parameters:
 
 Syntax:
 
@@ -232,28 +238,6 @@ You can also leverage Grafana to create a dashboard on Azure for this reference 
 If you want to add a 3D viewer to the simulation, you can follow the steps to configure the 3D Scenes Studio outlined [here](https://learn.microsoft.com/en-us/azure/digital-twins/how-to-use-3d-scenes-studio) and map the 3D robot model from [here](https://cardboardresources.blob.core.windows.net/public/RobotArms.glb) to the digital twins automatically generated by the UA Cloud Twin:
 
 <img src="Docs/3dviewer.png" alt="3dviewer" width="900" />
-
-
-## Enabling the Digital Feedback Loop with UA Cloud Commander and the Pressure Relief Azure Function
-
-If you want to test a "digital feedback loop", i.e. triggering a command on one of the OPC UA servers in the simulation from the cloud, based on a time-series reaching a certain threshold (the simulated pressure), deploy the PressureRelief Azure Function in your Azure subscription and create an application registration for your ADX instance as described [here](https://docs.microsoft.com/en-us/azure/data-explorer/provision-azure-ad-app). You also need to define the following environment variables in the Azure portal for the Function:
-
-* ADX_INSTANCE_URL - the endpoint of your ADX cluster, e.g. https://ontologies.eastus2.kusto.windows.net/
-* ADX_DB_NAME - the name of your ADX database
-* ADX_TABLE_NAME - the name of your ADX table
-* AAD_TENANT_ID - the GUID of your AAD tenant of your Azure subscription
-* APPLICATION_KEY - the secret you created during pressure relief function app registration
-* APPLICATION_ID - the GUID assigned to the pressure relief function during app registration
-* BROKER_NAME - the name of your event hubs namespace, e.g. ontologies-eventhubs.servicebus.windows.net
-* BROKER_USERNAME - set to "$ConnectionString"
-* BROKER_PASSWORD - the primary key connection string of your event hubs namespace
-* TOPIC - set to "commander.command"
-* RESPONSE_TOPIC - set to "commander.response"
-* UA_SERVER_ENDPOINT - set to "opc.tcp://assembly.seattle/" to open the pressure relief valve of the Seattle assembly machine
-* UA_SERVER_METHOD_ID - set to "ns=2;i=435"
-* UA_SERVER_OBJECT_ID - set to "ns=2;i=424"
-* UA_SERVER_APPLICATION_NAME - set to "assembly"
-* UA_SERVER_LOCATION_NAME - set to "seattle"
 
 
 ## Onboarding the Kubernetes Instance for Management via Azure Arc

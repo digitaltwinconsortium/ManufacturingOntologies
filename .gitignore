@@ -28,3 +28,8 @@
 /Tools/ADTGenerator/isa95-test.xlsx
 /Tools/ADTGenerator/ADTGenerator.csproj.user
 /Tools/ADTGenerator/.vs/ProjectEvaluation
+/Tools/FactorySimulation/Station/.vs
+/Tools/FactorySimulation/Station/bin
+/Tools/FactorySimulation/Station/obj
+/Tools/FactorySimulation/Station/pki
+/Tools/FactorySimulation/Station/Station.csproj.user

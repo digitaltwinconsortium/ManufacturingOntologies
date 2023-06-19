@@ -221,6 +221,8 @@
           "location": "[resourceGroup().location]",
           "name": "appsettings",
           "properties": {
+            "ADMIN_PASSWORD": "[parameters('adminPassword')]",
+            "ADMIN_USERNAME": "[parameters('adminUsername')]",
             "ADX_INSTANCE_URL": "[reference(resourceId('Microsoft.Kusto/clusters', variables('adxClusterName')), '2022-02-01').uri]",
             "ADX_DB_NAME": "ontologies",
             "ADX_TABLE_NAME": "opcua_telemetry",

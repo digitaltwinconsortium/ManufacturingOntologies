@@ -240,7 +240,7 @@
           },
           "type": "config",
           "dependsOn": [
-            "[concat('Microsoft.Web/sites/', concat(parameters('resourcesName'), '-AAS-Repo'))]"
+            "[concat('Microsoft.Web/sites/', concat(parameters('resourcesName'), '-UA-Cloud-Action'))]"
           ]
         }
       ]

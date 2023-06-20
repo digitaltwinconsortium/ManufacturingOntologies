@@ -3,7 +3,6 @@
 
 kubectl delete service -n munich ua-cloudpublisher
 kubectl delete deployment -n munich ua-cloudpublisher
-kubectl delete deployment -n munich ua-cloudcommander
 kubectl delete deployment -n munich mes
 kubectl delete service -n munich assembly
 kubectl delete deployment -n munich assembly

@@ -322,9 +322,11 @@ Note: You can query for the external Kubernetes port of your UA Cloud Publisher 
 
 1. Configure the OPC UA data nodes from your machines (or connectivity adapter software). To do so, select the OPC UA Server Connect menu item, enter the OPC UA server IP address and port and click Connect. You can now browse the OPC UA Server you want to send telemetry data from. If you have found the OPC UA node you want, right click it and select publish.
 
-Note: UA Cloud Publisher stores its configuration and log files in the cloud within the Azure Storage Account deployed in this solution.
+Note: UA Cloud Publisher stores its configuration and persistency files in the cloud within the Azure Storage Account deployed in this solution.
 
-Note: You can check what is currently being published by selecting the Publishes Nodes tab. You can also see diagnostics information from UA Cloud Publisher on the Diagnostics tab.
+Note: You can check what is currently being published by selecting the Publishes Nodes tab.
+
+Note: You can see diagnostics information from UA Cloud Publisher on the Diagnostics tab.
 
 
 ## License

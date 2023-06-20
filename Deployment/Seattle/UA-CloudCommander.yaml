@@ -25,7 +25,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: ua-cloudcommander
-        image: ghcr.io/barnstee/ua-cloudcommander:main
+        image: ghcr.io/opcfoundation/ua-cloudcommander:main
         env:
         - name: APPNAME
           value: "commander.seattle"

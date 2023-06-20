@@ -285,11 +285,17 @@ To see how you can use the Azure Data Explorer time-series data as a data source
 Once you are ready to connect your own production line, simply delete the VM from the Azure Portal.
 
 1. Edit the UA-CloudPublisher.yaml file provided in the `Deployment` folder of this repository, replacing [yourstorageaccountname] with the name of your Azure Storage Account and [key] with the key1 of your Azure Storage Account. You can access this information from the Azure Portal on your deployed Azure Storage Account under Access keys.
-1. Run UA Cloud Publisher with the following command. The PC needs Kubernetes support and Internet access (via port 9093) and needs to be able to connect to your OPC UA-enabled machines in your production line:
+1. Run UA Cloud Publisher with the following command. The edge PC hosting UA Cloud Publisher needs Kubernetes support and Internet access (via port 9093) and needs to be able to connect to your OPC UA-enabled machines in your production line:
 
         kubectl apply -f UA-CloudPublisher.yaml
 
-1. Open a browser on the Edge PC and navigate to http://localhost:[kubernetesPortForYourPublisherService]. You are now connected to the UA Cloud Publisher's interactive UI. Select the Configuration menu item and enter the following information, replacing [myeventhubsnamespace] with the name of your Event Hubs namespace and replacing [myeventhubsnamespaceprimarykeyconnectionstring] with the primary key connection string of your Event Hubs namespace. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey". Then click Update:
+Note: On Azure Kubernetes Services Edge Essentials, you can get the IP address of your Kubernetes cluster via `Get-AksEdgeNodeAddr`.
+
+Note: You can query for the external Kubernetes port of your UA Cloud Publisher service via `kubectl get services -n <namespace>`.
+
+<img src="Docs/publisher.png" alt="publisher" width="900" />
+
+1. Open a browser on the Edge PC and navigate to http://[IPAddressOfYourKubernetesCluster]:[KubernetesPortOfYourPublisherService]. You are now connected to the UA Cloud Publisher's interactive UI. Select the Configuration menu item and enter the following information, replacing [myeventhubsnamespace] with the name of your Event Hubs namespace and replacing [myeventhubsnamespaceprimarykeyconnectionstring] with the primary key connection string of your Event Hubs namespace. The primary key connection string can be read in the Azure Portal under your Event Hubs' "share access policy" -> "RootManagedSharedAccessKey". Then click Update:
   
         PublisherName: "UACloudPublisher",
         BrokerUrl: "[myeventhubsnamespace].servicebus.windows.net",

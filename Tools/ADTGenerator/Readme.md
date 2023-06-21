@@ -15,15 +15,16 @@ We provided a tool that can load an Excel file to simplify the creation of a dig
 
 1. Navigate to the `./Tools/ADTGenerator/binaries` directory of the extracted repository and run 'ADTGenerator`.
 
-<img src="Picture1.png" width="900" />
-
 1. Provide the URL of your ADT instance, then select `Test`, to validate the URL.
 
-<img src="Picture2.png" width="900" />
+<img src="Picture1.png" width="900" />
 
 Note: Select `Save Config` to persist the URL of your ADT instance.
 
 1. Load the Excel file (use the isa95-test.xlsx provided with the tool to get started).
+
+<img src="Picture2.png" width="900" />
+
 1. Before starting the graph generation, you must select the Excel worksheets you are going to use for ADT digital twins and relationships generation. In our case we will select `Physical Asset & Equipment` and `Relationships`.
 1. Select `Generate Graph` to process your Excel document. This will generate the digital twins and relationships in your ADT instance.
 

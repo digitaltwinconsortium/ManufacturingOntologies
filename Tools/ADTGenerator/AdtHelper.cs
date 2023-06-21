@@ -150,7 +150,7 @@ namespace ADTGenerator
         private static Dictionary<string, object> ExtractValues(string? rawInput)
         {
             string[]? inputs = rawInput?.Split(',');
-            var output = new Dictionary<string, object>();
+            Dictionary<string, object> output = new();
 
             if (inputs != null)
             {
@@ -186,7 +186,7 @@ namespace ADTGenerator
                     await FindAndDeleteIncomingRelationshipsAsync(client, logger, twinId);
                 }
 
-                var response = await client.DeleteDigitalTwinAsync(twinId);
+                Response response = await client.DeleteDigitalTwinAsync(twinId);
                 if (!response.IsError)
                 {
                     logger.WriteLog($"Twin '{twinId}' deleted successfully");
@@ -219,11 +219,29 @@ namespace ADTGenerator
             return false;
         }
 
+        private static dynamic RemovePropertyFromInitData(dynamic obj, string propertyPath)
+        {
+            var propertyNames = propertyPath.Split('.');
+            dynamic currentObj = obj;
 
+            for (int i = 0; i < propertyNames.Length - 1; i++)
+            {
+                string propertyName = propertyNames[i];
+                currentObj = currentObj[propertyName];
+            }
+
+            string lastPropertyName = propertyNames[propertyNames.Length - 1];
+            if (currentObj is IDictionary<string, object> dict && dict.ContainsKey(lastPropertyName))
+            {
+                dict.Remove(lastPropertyName);
+            }
+
+            return obj;
+        }
 
         public static async Task<bool> CreateDigitalTwin(DigitalTwinsClient client, ILogger logger, bool verbose, string? twinId, string? modelId, Dictionary<string, object?> properties, string? components)
         {
-            var twinData = new BasicDigitalTwin
+            BasicDigitalTwin twinData = new()
             {
                 Id = twinId,
                 Metadata =
@@ -239,7 +257,7 @@ namespace ADTGenerator
 
             if (twinId == null || twinId.Length == 0)
             {
-                if (twinData.Contents.TryGetValue("ID", out var twinIdObj) && twinIdObj is string twinIdStr)
+                if (twinData.Contents.TryGetValue("ID", out object? twinIdObj) && twinIdObj is string twinIdStr)
                 {
                     twinId = twinIdStr.Replace(" ", "");
                 }
@@ -268,17 +286,17 @@ namespace ADTGenerator
                                 {
                                     if (key == "description")
                                     {
-                                        var descriptions = ExtractValues(value.ToString());
+                                        Dictionary<string, object> descriptions = ExtractValues(value.ToString());
                                         content.Add("langString", descriptions);
                                     }
                                     else if (key == "tags")
                                     {
-                                        var tags = ExtractValues(value.ToString());
+                                        Dictionary<string, object> tags = ExtractValues(value.ToString());
                                         content.Add("values", tags);
                                     }
                                     else if (key == "spatialDefinition")
                                     {
-                                        var spatialDefinition = ExtractValues(value.ToString());
+                                        Dictionary<string, object> spatialDefinition = ExtractValues(value.ToString());
                                         content = spatialDefinition;
                                     }
                                 }
@@ -329,7 +347,7 @@ namespace ADTGenerator
             if (client != null)
             {
 
-                var relationship = new BasicRelationship
+                BasicRelationship relationship = new()
                 {
                     Id = relationshipId,
                     SourceId = sourceTwinId,

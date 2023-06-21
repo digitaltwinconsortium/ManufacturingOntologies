@@ -189,19 +189,19 @@ namespace ADTGenerator
             {
                 return value;
             }
-            else if ((_propertyType == "boolean" | _propertyType == "bool") && bool.TryParse(value?.ToString(), out var bvalue))
+            else if ((_propertyType == "boolean" | _propertyType == "bool") && bool.TryParse(value?.ToString(), out bool bvalue))
             {
                 return bvalue;
             }
-            else if (_propertyType == "datetime" && DateTime.TryParse(value?.ToString().Trim(' ', '"', '\\', '{', '}'), out var dtvalue))
+            else if (_propertyType == "datetime" && DateTime.TryParse(value?.ToString().Trim(' ', '"', '\\', '{', '}'), out DateTime dtvalue))
             {
                 return dtvalue;
             }
-            else if (_propertyType == "double" && double.TryParse(value?.ToString(), out var dvalue))
+            else if (_propertyType == "double" && double.TryParse(value?.ToString(), out double dvalue))
             {
                 return dvalue;
             }
-            else if ((_propertyType == "long" | _propertyType == "int") && long.TryParse(value?.ToString(), out var lvalue))
+            else if ((_propertyType == "long" | _propertyType == "int") && long.TryParse(value?.ToString(), out long lvalue))
             {
                 return lvalue;
             }
@@ -368,7 +368,7 @@ namespace ADTGenerator
                 excelApp = new Excel.Application();
                 wkb = excelApp.Workbooks.Open(excelFile);
 
-                var sheets = wkb.Sheets.Cast<Excel.Worksheet>().Select(s => s.Name).ToArray();
+                string[] sheets = wkb.Sheets.Cast<Excel.Worksheet>().Select(s => s.Name).ToArray();
                 SheetForTwinsComboBox.Items.Clear();
                 SheetForTwinsComboBox.Items.AddRange(sheets);
                 SheetForTwinsComboBox.SelectedIndex = 0;
@@ -517,22 +517,23 @@ namespace ADTGenerator
                     for (int column = firstPropertyColumn; column <= lastUsedColumn; column++)
                     {
                         object? value = values.GetValue(1, column);
-                        string? name = properties[column].name;
-                        if (name != null)
+                        if (value != null)
                         {
-                            string? stringValue = value?.ToString();
-                            if (stringValue == null)
-                            {
-                                stringValue = string.Empty;
-                            }
-
-                            twinProperties.Add(name, ParseValue(stringValue, properties[column].type));
+                            string? name = properties[column].name;
+                            if (name != null)
+							{
+                            	string? stringValue = value?.ToString();
+                            	if (stringValue != null)
+                            	{
+                                	twinProperties.Add(name, ParseValue(stringValue, properties[column].type));
+                            	}
+                        	}
                         }
                     }
 
                     if (client != null)
                     {
-                        var status = await AdtHelper.CreateDigitalTwin(client, this, verbose, twinId?.ToString(), model.ToString(), twinProperties, components);
+                        bool status = await AdtHelper.CreateDigitalTwin(client, this, verbose, twinId?.ToString(), model.ToString(), twinProperties, components);
                         if (status)
                         {
                             successes++;
@@ -584,7 +585,7 @@ namespace ADTGenerator
                     relationshipId = values.GetValue(1, 1) as string;
                     relationshipId ??= $"{relationShipFrom}_{relationShipName}_{relationShipTo}";
 
-                    var status = await AdtHelper.CreateRelationship(client, this, relationshipId.ToString(), relationShipFrom, relationShipTo, relationShipName);
+                    bool status = await AdtHelper.CreateRelationship(client, this, relationshipId.ToString(), relationShipFrom, relationShipTo, relationShipName);
                     if (status) { successes++; } else { failures++; }
                 }
             }
@@ -620,7 +621,7 @@ namespace ADTGenerator
                 excelApp = new Excel.Application();
                 wkb = excelApp.Workbooks.Open(config.ExcelFile);
 
-                var twinsWorksheet = (Excel.Worksheet)wkb.Sheets[config.ExcelSheetForTwins];
+                Excel.Worksheet twinsWorksheet = (Excel.Worksheet)wkb.Sheets[config.ExcelSheetForTwins];
 
                 // We initiate the properties related to the surface of data to read in the worksheet
                 Excel.Range lastCell = twinsWorksheet.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell, Type.Missing);
@@ -640,11 +641,11 @@ namespace ADTGenerator
                     }
 
                     Array values = (Array)twinsWorksheet.get_Range("A" + row.ToString(), lastUsedColumnName + row.ToString()).Cells.Value2;
-                    var twinId = values.GetValue(1, firstMetadataColumn);
 
+                    object? twinId = values.GetValue(1, firstMetadataColumn);
                     if ((client != null) && (twinId?.ToString()?.Length > 0))
                     {
-                        var status = await AdtHelper.DeleteDigitalTwin(client, this, verbose, twinId?.ToString(), forceDeletion);
+                        await AdtHelper.DeleteDigitalTwin(client, this, verbose, twinId?.ToString(), forceDeletion);
                     }
                 }
             }

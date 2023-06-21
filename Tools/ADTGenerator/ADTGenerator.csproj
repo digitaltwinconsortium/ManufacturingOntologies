@@ -15,7 +15,6 @@
     <None Remove="Picture3.png" />
     <None Remove="Picture4.png" />
     <None Remove="Picture5.png" />
-    <None Remove="Readme.md" />
     <None Remove="~%24isa95-test.xlsx" />
   </ItemGroup>
 

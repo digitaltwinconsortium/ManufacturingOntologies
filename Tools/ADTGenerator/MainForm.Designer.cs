@@ -61,163 +61,193 @@
             // 
             // TestButton
             // 
-            TestButton.Location = new Point(772, 24);
+            TestButton.BackColor = SystemColors.MenuHighlight;
+            TestButton.ForeColor = SystemColors.Window;
+            TestButton.Location = new Point(1323, 48);
+            TestButton.Margin = new Padding(5, 6, 5, 6);
             TestButton.Name = "TestButton";
-            TestButton.Size = new Size(75, 23);
+            TestButton.Size = new Size(129, 46);
             TestButton.TabIndex = 0;
             TestButton.Text = "Test";
-            TestButton.UseVisualStyleBackColor = true;
+            TestButton.UseVisualStyleBackColor = false;
             TestButton.Click += TestButton_Click;
             // 
             // AdtInstanceURL
             // 
-            AdtInstanceURL.Location = new Point(136, 25);
+            AdtInstanceURL.Location = new Point(233, 50);
+            AdtInstanceURL.Margin = new Padding(5, 6, 5, 6);
             AdtInstanceURL.Name = "AdtInstanceURL";
-            AdtInstanceURL.Size = new Size(603, 23);
+            AdtInstanceURL.Size = new Size(1031, 35);
             AdtInstanceURL.TabIndex = 1;
             // 
             // AdtUrlLabel
             // 
             AdtUrlLabel.AutoSize = true;
-            AdtUrlLabel.Location = new Point(31, 28);
+            AdtUrlLabel.Location = new Point(53, 56);
+            AdtUrlLabel.Margin = new Padding(5, 0, 5, 0);
             AdtUrlLabel.Name = "AdtUrlLabel";
-            AdtUrlLabel.Size = new Size(99, 15);
+            AdtUrlLabel.Size = new Size(178, 30);
             AdtUrlLabel.TabIndex = 2;
             AdtUrlLabel.Text = "ADT instance URL";
             // 
             // GenerateButton
             // 
-            GenerateButton.Location = new Point(870, 178);
+            GenerateButton.BackColor = SystemColors.MenuHighlight;
+            GenerateButton.ForeColor = SystemColors.Window;
+            GenerateButton.Location = new Point(1491, 356);
+            GenerateButton.Margin = new Padding(5, 6, 5, 6);
             GenerateButton.Name = "GenerateButton";
-            GenerateButton.Size = new Size(97, 58);
+            GenerateButton.Size = new Size(166, 116);
             GenerateButton.TabIndex = 3;
             GenerateButton.Text = "Generate Graph";
-            GenerateButton.UseVisualStyleBackColor = true;
+            GenerateButton.UseVisualStyleBackColor = false;
             GenerateButton.Click += GenerateButton_Click;
             // 
             // FindTwinsButton
             // 
-            FindTwinsButton.Location = new Point(31, 104);
+            FindTwinsButton.BackColor = SystemColors.MenuHighlight;
+            FindTwinsButton.ForeColor = SystemColors.Window;
+            FindTwinsButton.Location = new Point(53, 208);
+            FindTwinsButton.Margin = new Padding(5, 6, 5, 6);
             FindTwinsButton.Name = "FindTwinsButton";
-            FindTwinsButton.Size = new Size(130, 23);
+            FindTwinsButton.Size = new Size(223, 46);
             FindTwinsButton.TabIndex = 4;
             FindTwinsButton.Text = "Find Twins";
-            FindTwinsButton.UseVisualStyleBackColor = true;
+            FindTwinsButton.UseVisualStyleBackColor = false;
             FindTwinsButton.Click += FindTwinsButton_Click;
             // 
             // LogRichTextBox
             // 
-            LogRichTextBox.Location = new Point(0, 400);
+            LogRichTextBox.Location = new Point(0, 800);
+            LogRichTextBox.Margin = new Padding(5, 6, 5, 6);
             LogRichTextBox.Name = "LogRichTextBox";
-            LogRichTextBox.Size = new Size(1585, 362);
+            LogRichTextBox.Size = new Size(2714, 720);
             LogRichTextBox.TabIndex = 5;
             LogRichTextBox.Text = "";
             // 
             // SaveButton
             // 
-            SaveButton.Location = new Point(870, 24);
+            SaveButton.BackColor = SystemColors.MenuHighlight;
+            SaveButton.ForeColor = SystemColors.Window;
+            SaveButton.Location = new Point(1491, 48);
+            SaveButton.Margin = new Padding(5, 6, 5, 6);
             SaveButton.Name = "SaveButton";
-            SaveButton.Size = new Size(97, 24);
+            SaveButton.Size = new Size(166, 48);
             SaveButton.TabIndex = 6;
             SaveButton.Text = "Save Config";
-            SaveButton.UseVisualStyleBackColor = true;
+            SaveButton.UseVisualStyleBackColor = false;
             SaveButton.Click += SaveButton_Click;
             // 
             // panel1
             // 
             panel1.BackColor = Color.Black;
             panel1.BorderStyle = BorderStyle.Fixed3D;
-            panel1.Location = new Point(33, 77);
+            panel1.Location = new Point(57, 154);
+            panel1.Margin = new Padding(5, 6, 5, 6);
             panel1.Name = "panel1";
-            panel1.Size = new Size(950, 1);
+            panel1.Size = new Size(1626, 0);
             panel1.TabIndex = 7;
             // 
             // panel2
             // 
             panel2.BackColor = Color.Black;
             panel2.BorderStyle = BorderStyle.Fixed3D;
-            panel2.Location = new Point(31, 153);
+            panel2.Location = new Point(53, 306);
+            panel2.Margin = new Padding(5, 6, 5, 6);
             panel2.Name = "panel2";
-            panel2.Size = new Size(950, 1);
+            panel2.Size = new Size(1626, 0);
             panel2.TabIndex = 8;
             // 
             // DeleteTwinsButton
             // 
-            DeleteTwinsButton.Location = new Point(175, 104);
+            DeleteTwinsButton.BackColor = SystemColors.MenuHighlight;
+            DeleteTwinsButton.ForeColor = SystemColors.Window;
+            DeleteTwinsButton.Location = new Point(300, 208);
+            DeleteTwinsButton.Margin = new Padding(5, 6, 5, 6);
             DeleteTwinsButton.Name = "DeleteTwinsButton";
-            DeleteTwinsButton.Size = new Size(130, 23);
+            DeleteTwinsButton.Size = new Size(223, 46);
             DeleteTwinsButton.TabIndex = 9;
             DeleteTwinsButton.Text = "Delete All Twins";
-            DeleteTwinsButton.UseVisualStyleBackColor = true;
+            DeleteTwinsButton.UseVisualStyleBackColor = false;
             DeleteTwinsButton.Click += DeleteTwinsButton_Click;
             // 
             // SelectFileButton
             // 
-            SelectFileButton.Location = new Point(772, 178);
+            SelectFileButton.BackColor = SystemColors.MenuHighlight;
+            SelectFileButton.ForeColor = SystemColors.Window;
+            SelectFileButton.Location = new Point(1323, 356);
+            SelectFileButton.Margin = new Padding(5, 6, 5, 6);
             SelectFileButton.Name = "SelectFileButton";
-            SelectFileButton.Size = new Size(75, 23);
+            SelectFileButton.Size = new Size(129, 46);
             SelectFileButton.TabIndex = 10;
             SelectFileButton.Text = "Select file";
-            SelectFileButton.UseVisualStyleBackColor = true;
+            SelectFileButton.UseVisualStyleBackColor = false;
             SelectFileButton.Click += SelectFileButton_Click;
             // 
             // ExcelFilePathTextBox
             // 
             ExcelFilePathTextBox.Enabled = false;
-            ExcelFilePathTextBox.Location = new Point(136, 178);
+            ExcelFilePathTextBox.Location = new Point(233, 356);
+            ExcelFilePathTextBox.Margin = new Padding(5, 6, 5, 6);
             ExcelFilePathTextBox.Name = "ExcelFilePathTextBox";
-            ExcelFilePathTextBox.Size = new Size(603, 23);
+            ExcelFilePathTextBox.Size = new Size(1031, 35);
             ExcelFilePathTextBox.TabIndex = 11;
             // 
             // ExcelFileLabel
             // 
             ExcelFileLabel.AutoSize = true;
-            ExcelFileLabel.Location = new Point(31, 182);
+            ExcelFileLabel.Location = new Point(53, 364);
+            ExcelFileLabel.Margin = new Padding(5, 0, 5, 0);
             ExcelFileLabel.Name = "ExcelFileLabel";
-            ExcelFileLabel.Size = new Size(99, 15);
+            ExcelFileLabel.Size = new Size(176, 30);
             ExcelFileLabel.TabIndex = 12;
             ExcelFileLabel.Text = "Excel file selected";
             // 
             // SheetsForTwinsLabel
             // 
             SheetsForTwinsLabel.AutoSize = true;
-            SheetsForTwinsLabel.Location = new Point(31, 225);
+            SheetsForTwinsLabel.Location = new Point(53, 450);
+            SheetsForTwinsLabel.Margin = new Padding(5, 0, 5, 0);
             SheetsForTwinsLabel.Name = "SheetsForTwinsLabel";
-            SheetsForTwinsLabel.Size = new Size(86, 15);
+            SheetsForTwinsLabel.Size = new Size(154, 30);
             SheetsForTwinsLabel.TabIndex = 13;
             SheetsForTwinsLabel.Text = "Sheet for Twins";
             // 
             // SheetForTwinsComboBox
             // 
             SheetForTwinsComboBox.FormattingEnabled = true;
-            SheetForTwinsComboBox.Location = new Point(31, 243);
+            SheetForTwinsComboBox.Location = new Point(53, 486);
+            SheetForTwinsComboBox.Margin = new Padding(5, 6, 5, 6);
             SheetForTwinsComboBox.Name = "SheetForTwinsComboBox";
-            SheetForTwinsComboBox.Size = new Size(130, 23);
+            SheetForTwinsComboBox.Size = new Size(220, 38);
             SheetForTwinsComboBox.TabIndex = 14;
             // 
             // SheetForRelationshipsComboBox
             // 
             SheetForRelationshipsComboBox.FormattingEnabled = true;
-            SheetForRelationshipsComboBox.Location = new Point(175, 243);
+            SheetForRelationshipsComboBox.Location = new Point(300, 486);
+            SheetForRelationshipsComboBox.Margin = new Padding(5, 6, 5, 6);
             SheetForRelationshipsComboBox.Name = "SheetForRelationshipsComboBox";
-            SheetForRelationshipsComboBox.Size = new Size(130, 23);
+            SheetForRelationshipsComboBox.Size = new Size(220, 38);
             SheetForRelationshipsComboBox.TabIndex = 16;
             // 
             // SheetForRelationshipsLabel
             // 
             SheetForRelationshipsLabel.AutoSize = true;
-            SheetForRelationshipsLabel.Location = new Point(175, 225);
+            SheetForRelationshipsLabel.Location = new Point(300, 450);
+            SheetForRelationshipsLabel.Margin = new Padding(5, 0, 5, 0);
             SheetForRelationshipsLabel.Name = "SheetForRelationshipsLabel";
-            SheetForRelationshipsLabel.Size = new Size(127, 15);
+            SheetForRelationshipsLabel.Size = new Size(225, 30);
             SheetForRelationshipsLabel.TabIndex = 15;
             SheetForRelationshipsLabel.Text = "Sheet for Relationships";
             // 
             // AdvancedPropertiesCheckBox
             // 
             AdvancedPropertiesCheckBox.AutoSize = true;
-            AdvancedPropertiesCheckBox.Location = new Point(31, 287);
+            AdvancedPropertiesCheckBox.Location = new Point(53, 574);
+            AdvancedPropertiesCheckBox.Margin = new Padding(5, 6, 5, 6);
             AdvancedPropertiesCheckBox.Name = "AdvancedPropertiesCheckBox";
-            AdvancedPropertiesCheckBox.Size = new Size(229, 19);
+            AdvancedPropertiesCheckBox.Size = new Size(396, 34);
             AdvancedPropertiesCheckBox.TabIndex = 17;
             AdvancedPropertiesCheckBox.Text = "Show advanced properties and actions";
             AdvancedPropertiesCheckBox.UseVisualStyleBackColor = true;
@@ -226,88 +256,105 @@
             // FirstMetadataColumnLabel
             // 
             FirstMetadataColumnLabel.AutoSize = true;
-            FirstMetadataColumnLabel.Location = new Point(330, 319);
+            FirstMetadataColumnLabel.Location = new Point(566, 638);
+            FirstMetadataColumnLabel.Margin = new Padding(5, 0, 5, 0);
             FirstMetadataColumnLabel.Name = "FirstMetadataColumnLabel";
-            FirstMetadataColumnLabel.Size = new Size(126, 15);
+            FirstMetadataColumnLabel.Size = new Size(221, 30);
             FirstMetadataColumnLabel.TabIndex = 18;
             FirstMetadataColumnLabel.Text = "First Metadata column";
             FirstMetadataColumnLabel.Visible = false;
             // 
             // FirstMetadataColumnTextBox
             // 
-            FirstMetadataColumnTextBox.Location = new Point(330, 337);
+            FirstMetadataColumnTextBox.Location = new Point(566, 674);
+            FirstMetadataColumnTextBox.Margin = new Padding(5, 6, 5, 6);
             FirstMetadataColumnTextBox.Name = "FirstMetadataColumnTextBox";
-            FirstMetadataColumnTextBox.Size = new Size(130, 23);
+            FirstMetadataColumnTextBox.Size = new Size(220, 35);
             FirstMetadataColumnTextBox.TabIndex = 19;
             FirstMetadataColumnTextBox.Visible = false;
             // 
             // FirstPropertyColumnTextBox
             // 
-            FirstPropertyColumnTextBox.Location = new Point(474, 337);
+            FirstPropertyColumnTextBox.Location = new Point(813, 674);
+            FirstPropertyColumnTextBox.Margin = new Padding(5, 6, 5, 6);
             FirstPropertyColumnTextBox.Name = "FirstPropertyColumnTextBox";
-            FirstPropertyColumnTextBox.Size = new Size(130, 23);
+            FirstPropertyColumnTextBox.Size = new Size(220, 35);
             FirstPropertyColumnTextBox.TabIndex = 21;
             FirstPropertyColumnTextBox.Visible = false;
             // 
             // FirstPropertyColumnLabel
             // 
             FirstPropertyColumnLabel.AutoSize = true;
-            FirstPropertyColumnLabel.Location = new Point(474, 319);
+            FirstPropertyColumnLabel.Location = new Point(813, 638);
+            FirstPropertyColumnLabel.Margin = new Padding(5, 0, 5, 0);
             FirstPropertyColumnLabel.Name = "FirstPropertyColumnLabel";
-            FirstPropertyColumnLabel.Size = new Size(121, 15);
+            FirstPropertyColumnLabel.Size = new Size(210, 30);
             FirstPropertyColumnLabel.TabIndex = 20;
             FirstPropertyColumnLabel.Text = "First Property column";
             FirstPropertyColumnLabel.Visible = false;
             // 
             // CancelGenerationButton
             // 
+            CancelGenerationButton.BackColor = SystemColors.MenuHighlight;
             CancelGenerationButton.Enabled = false;
-            CancelGenerationButton.Location = new Point(870, 242);
+            CancelGenerationButton.ForeColor = SystemColors.Window;
+            CancelGenerationButton.Location = new Point(1491, 484);
+            CancelGenerationButton.Margin = new Padding(5, 6, 5, 6);
             CancelGenerationButton.Name = "CancelGenerationButton";
-            CancelGenerationButton.Size = new Size(97, 23);
+            CancelGenerationButton.Size = new Size(166, 46);
             CancelGenerationButton.TabIndex = 22;
             CancelGenerationButton.Text = "Cancel";
-            CancelGenerationButton.UseVisualStyleBackColor = true;
+            CancelGenerationButton.UseVisualStyleBackColor = false;
             CancelGenerationButton.Click += CancelGenerationButton_Click;
             // 
             // ClearOutputButton
             // 
-            ClearOutputButton.Location = new Point(870, 337);
+            ClearOutputButton.BackColor = SystemColors.MenuHighlight;
+            ClearOutputButton.ForeColor = SystemColors.Window;
+            ClearOutputButton.Location = new Point(1491, 674);
+            ClearOutputButton.Margin = new Padding(5, 6, 5, 6);
             ClearOutputButton.Name = "ClearOutputButton";
-            ClearOutputButton.Size = new Size(97, 23);
+            ClearOutputButton.Size = new Size(166, 46);
             ClearOutputButton.TabIndex = 23;
             ClearOutputButton.Text = "Clear output";
-            ClearOutputButton.UseVisualStyleBackColor = true;
+            ClearOutputButton.UseVisualStyleBackColor = false;
             ClearOutputButton.Click += ClearOutputButton_Click;
             // 
             // DeleteSelectedTwinsButton
             // 
-            DeleteSelectedTwinsButton.Location = new Point(31, 337);
+            DeleteSelectedTwinsButton.BackColor = SystemColors.MenuHighlight;
+            DeleteSelectedTwinsButton.ForeColor = SystemColors.Window;
+            DeleteSelectedTwinsButton.Location = new Point(53, 674);
+            DeleteSelectedTwinsButton.Margin = new Padding(5, 6, 5, 6);
             DeleteSelectedTwinsButton.Name = "DeleteSelectedTwinsButton";
-            DeleteSelectedTwinsButton.Size = new Size(130, 23);
+            DeleteSelectedTwinsButton.Size = new Size(223, 46);
             DeleteSelectedTwinsButton.TabIndex = 24;
             DeleteSelectedTwinsButton.Text = "Delete Twins in Excel";
-            DeleteSelectedTwinsButton.UseVisualStyleBackColor = true;
+            DeleteSelectedTwinsButton.UseVisualStyleBackColor = false;
             DeleteSelectedTwinsButton.Visible = false;
             DeleteSelectedTwinsButton.Click += DeleteSelectedTwinsButton_Click;
             // 
             // DeleteSelectedRelationshipsButton
             // 
-            DeleteSelectedRelationshipsButton.Location = new Point(175, 337);
+            DeleteSelectedRelationshipsButton.BackColor = SystemColors.MenuHighlight;
+            DeleteSelectedRelationshipsButton.ForeColor = SystemColors.Window;
+            DeleteSelectedRelationshipsButton.Location = new Point(300, 674);
+            DeleteSelectedRelationshipsButton.Margin = new Padding(5, 6, 5, 6);
             DeleteSelectedRelationshipsButton.Name = "DeleteSelectedRelationshipsButton";
-            DeleteSelectedRelationshipsButton.Size = new Size(130, 23);
+            DeleteSelectedRelationshipsButton.Size = new Size(223, 46);
             DeleteSelectedRelationshipsButton.TabIndex = 25;
             DeleteSelectedRelationshipsButton.Text = "Delete Rel in Excel";
-            DeleteSelectedRelationshipsButton.UseVisualStyleBackColor = true;
+            DeleteSelectedRelationshipsButton.UseVisualStyleBackColor = false;
             DeleteSelectedRelationshipsButton.Visible = false;
             DeleteSelectedRelationshipsButton.Click += DeleteSelectedRelationshipsButton_Click;
             // 
             // ForceDeletionCheckBox
             // 
             ForceDeletionCheckBox.AutoSize = true;
-            ForceDeletionCheckBox.Location = new Point(31, 375);
+            ForceDeletionCheckBox.Location = new Point(53, 750);
+            ForceDeletionCheckBox.Margin = new Padding(5, 6, 5, 6);
             ForceDeletionCheckBox.Name = "ForceDeletionCheckBox";
-            ForceDeletionCheckBox.Size = new Size(192, 19);
+            ForceDeletionCheckBox.Size = new Size(328, 34);
             ForceDeletionCheckBox.TabIndex = 26;
             ForceDeletionCheckBox.Text = "Force deletion (if Relationships)";
             ForceDeletionCheckBox.UseVisualStyleBackColor = true;
@@ -318,9 +365,10 @@
             VerboseCheckBox.AutoSize = true;
             VerboseCheckBox.Checked = true;
             VerboseCheckBox.CheckState = CheckState.Checked;
-            VerboseCheckBox.Location = new Point(31, 312);
+            VerboseCheckBox.Location = new Point(53, 624);
+            VerboseCheckBox.Margin = new Padding(5, 6, 5, 6);
             VerboseCheckBox.Name = "VerboseCheckBox";
-            VerboseCheckBox.Size = new Size(87, 19);
+            VerboseCheckBox.Size = new Size(148, 34);
             VerboseCheckBox.TabIndex = 27;
             VerboseCheckBox.Text = "Verbose log";
             VerboseCheckBox.UseVisualStyleBackColor = true;
@@ -329,9 +377,10 @@
             // GenerateTwinsOnlyCheckBox
             // 
             GenerateTwinsOnlyCheckBox.AutoSize = true;
-            GenerateTwinsOnlyCheckBox.Location = new Point(325, 245);
+            GenerateTwinsOnlyCheckBox.Location = new Point(557, 490);
+            GenerateTwinsOnlyCheckBox.Margin = new Padding(5, 6, 5, 6);
             GenerateTwinsOnlyCheckBox.Name = "GenerateTwinsOnlyCheckBox";
-            GenerateTwinsOnlyCheckBox.Size = new Size(131, 19);
+            GenerateTwinsOnlyCheckBox.Size = new Size(225, 34);
             GenerateTwinsOnlyCheckBox.TabIndex = 28;
             GenerateTwinsOnlyCheckBox.Text = "Generate Twins only";
             GenerateTwinsOnlyCheckBox.UseVisualStyleBackColor = true;
@@ -339,9 +388,10 @@
             // 
             // MainForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(12F, 30F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1584, 761);
+            BackColor = SystemColors.Window;
+            ClientSize = new Size(2715, 1522);
             Controls.Add(GenerateTwinsOnlyCheckBox);
             Controls.Add(VerboseCheckBox);
             Controls.Add(ForceDeletionCheckBox);
@@ -372,6 +422,7 @@
             Controls.Add(AdtInstanceURL);
             Controls.Add(TestButton);
             FormBorderStyle = FormBorderStyle.FixedSingle;
+            Margin = new Padding(5, 6, 5, 6);
             MaximizeBox = false;
             Name = "MainForm";
             Text = "ADT Graph Generator";

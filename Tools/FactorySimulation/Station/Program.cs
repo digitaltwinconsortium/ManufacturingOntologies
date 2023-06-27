@@ -348,6 +348,7 @@ namespace Station.Simulation
                     if ((timeNow >= shift.Item2) && (timeNow <= shift.Item3))
                     {
                         productionShouldBeRunning = true;
+                        break;
                     }
                 }
 

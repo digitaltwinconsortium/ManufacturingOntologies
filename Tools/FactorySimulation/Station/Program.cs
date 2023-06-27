@@ -57,7 +57,9 @@ namespace Station.Simulation
 
         private static Timer m_timer = null;
 
-        private static AzureFileStorage _storage = new AzureFileStorage();
+        private static AzureFileStorage _storage = new();
+
+        private static List<Tuple<string, TimeOnly, TimeOnly>> m_shiftTimes = new();
 
         public static double PowerConsumption { get; set; }
 
@@ -95,6 +97,18 @@ namespace Station.Simulation
                 if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ProductionLineName")))
                 {
                     throw new ArgumentException("You must specify the ProductionLineName environment variable!");
+                }
+
+                // load shift times
+                string shiftTimesFilePath = Path.Combine(Directory.GetCurrentDirectory(), "ShiftTimes.csv");
+                string[] shiftTimesFileContent = File.ReadAllLines(shiftTimesFilePath);
+                foreach (string line in shiftTimesFileContent)
+                {
+                    string[] parts = line.Split(',');
+                    if (parts.Length == 3)
+                    {
+                        m_shiftTimes.Add(new Tuple<string, TimeOnly, TimeOnly>(parts[0], TimeOnly.Parse(parts[1]), TimeOnly.Parse(parts[2])));
+                    }
                 }
 
                 ApplicationInstance.MessageDlg = new ApplicationMessageDlg();
@@ -325,8 +339,25 @@ namespace Station.Simulation
         {
             try
             {
+                // check if the production line is supposed to be running right now
+                bool productionShouldBeRunning = false;
+                foreach (Tuple<string, TimeOnly, TimeOnly> shift in m_shiftTimes)
+                {
+                    // checked in local time!
+                    TimeOnly timeNow = TimeOnly.FromDateTime(DateTime.Now);
+                    if ((timeNow >= shift.Item2) && (timeNow <= shift.Item3))
+                    {
+                        productionShouldBeRunning = true;
+                    }
+                }
+
                 lock (m_mesStatusLock)
                 {
+                    if (!productionShouldBeRunning)
+                    {
+                        m_lastActivity = DateTime.UtcNow;
+                        return;
+                    }
 
                     // when the assembly station is done and the test station is ready
                     // move the serial number (the product) to the test station and call

@@ -113,6 +113,13 @@ The simulation is configured to include 2 production lines. The default configur
 | Munich | 6 |
 | Seattle |	10 |
 
+| Shift Name | Start | End |
+| --- | --- | --- |
+| Morning | 07:00 | 14:00 |
+| Afternoon | 15:00 | 22:00 |
+| Night | 23:00 | 06:00 |
+
+
 ### OPC UA Node IDs of Station OPC UA Server
 
 The following OPC UA Node IDs are used in the Station OPC UA Server for telemetry to the cloud

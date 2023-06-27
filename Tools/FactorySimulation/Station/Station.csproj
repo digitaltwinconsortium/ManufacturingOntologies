@@ -26,6 +26,7 @@
     <None Remove="Opc.Ua.MES.Config.xml" />
     <None Remove="Opc.Ua.MES.Endpoints.xml" />
     <None Remove="Opc.Ua.Station.Config.xml" />
+    <None Remove="ShiftTimes.csv" />
     <None Remove="Station.NodeSet2.xml" />
   </ItemGroup>
 
@@ -38,6 +39,9 @@
     </Content>
     <Content Include="Opc.Ua.Station.Config.xml">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ShiftTimes.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Station.NodeSet2.xml">

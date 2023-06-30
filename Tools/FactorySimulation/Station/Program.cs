@@ -59,7 +59,7 @@ namespace Station.Simulation
 
         private static AzureFileStorage _storage = new();
 
-        private static List<Tuple<string, TimeOnly, TimeOnly>> m_shiftTimes = new();
+        private static List<Tuple<string, string, string>> m_shiftTimes = new();
 
         public static double PowerConsumption { get; set; }
 
@@ -107,7 +107,7 @@ namespace Station.Simulation
                     string[] parts = line.Split(',');
                     if (parts.Length == 3)
                     {
-                        m_shiftTimes.Add(new Tuple<string, TimeOnly, TimeOnly>(parts[0], TimeOnly.Parse(parts[1]), TimeOnly.Parse(parts[2])));
+                        m_shiftTimes.Add(new Tuple<string, string, string>(parts[0], parts[1], parts[2]));
                     }
                 }
 
@@ -341,11 +341,20 @@ namespace Station.Simulation
             {
                 // check if the production line is supposed to be running right now
                 bool productionShouldBeRunning = false;
-                foreach (Tuple<string, TimeOnly, TimeOnly> shift in m_shiftTimes)
+                foreach (Tuple<string, string, string> shift in m_shiftTimes)
                 {
                     // checked in local time!
-                    TimeOnly timeNow = TimeOnly.FromDateTime(DateTime.Now);
-                    if ((timeNow >= shift.Item2) && (timeNow <= shift.Item3))
+                    DateTime shiftStart = DateTime.Parse(shift.Item2);
+                    DateTime shiftEnd = DateTime.Parse(shift.Item3);
+                    DateTime now = DateTime.Now;
+
+                    // check if the shift goes into the next day
+                    if (shiftEnd < shiftStart)
+                    {
+                        shiftStart = shiftStart.AddDays(-1);
+                    }
+
+                    if ((now >= shiftStart) && (now <= shiftEnd))
                     {
                         productionShouldBeRunning = true;
                         break;

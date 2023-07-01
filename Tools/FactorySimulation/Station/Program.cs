@@ -351,7 +351,15 @@ namespace Station.Simulation
                     // check if the shift goes into the next day
                     if (shiftEnd < shiftStart)
                     {
-                        shiftStart = shiftStart.AddDays(-1);
+                        // check if we are before midnight
+                        if (now > shiftStart)
+                        {
+                            shiftEnd = shiftEnd.AddDays(1);
+                        }
+                        else
+                        {
+                            shiftStart = shiftStart.AddDays(-1);
+                        }
                     }
 
                     if ((now >= shiftStart) && (now <= shiftEnd))

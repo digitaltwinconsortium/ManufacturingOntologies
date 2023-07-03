@@ -299,7 +299,7 @@ To see how you can use the Azure Data Explorer time-series data as a data source
 
 Microsoft provides a connector to on-premsises SAP systems in combination with an on-premises data gateway for Azure Logic Apps. Azure Logic Apps is a no-code Azure service to orchistrate workflows that can trigger actions in e.g. Azure Digital Twins service. To connect your on-premises SAP systems to Azure Logic Apps and Azure Digital Twins service, follow these steps:
 
-1. Deploy an instace of Azure Logic Apps in the same region you picked during deployment of this reference solution. Select the consumption-based version.
+1. Deploy an instance of Azure Logic Apps in the same region you picked during deployment of this reference solution. Select the consumption-based version.
 1. Install the on-premises data gateway by following the instructions [here](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-gateway-install).
 1. Setup the SAP connector for Azure Logic Apps by following the instructions [here](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-using-sap-connector?tabs=consumption).
 1. Create an SAP workflow in your Azure Logic Apps instance by following the instructions [here](https://learn.microsoft.com/en-us/azure/logic-apps/sap-create-example-scenario-workflows?tabs=consumption).

@@ -299,11 +299,11 @@ To see how you can use the Azure Data Explorer time-series data as a data source
 
 Microsoft provides a connector to on-premsises SAP systems in combination with an on-premises data gateway for Azure Logic Apps. Azure Logic Apps is a no-code Azure service to orchistrate workflows that can trigger actions in e.g. Azure Digital Twins. To connect your on-premises SAP systems to Azure Logic Apps, follow these steps:
 
-1. Deploy an instace of Azure Logic Apps in the same region you picked during deployment of this reference solution. Select the comsumption-based version.
-1. Install the on-premsises data gateway by following the instructions [here](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-gateway-install).
+1. Deploy an instace of Azure Logic Apps in the same region you picked during deployment of this reference solution. Select the consumption-based version.
+1. Install the on-premises data gateway by following the instructions [here](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-gateway-install).
 1. Setup the SAP connector for Azure Logic Apps by following the instructions [here](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-using-sap-connector?tabs=consumption).
-1. Create a workflow in your Azure Logic Apps instance by following the instructions [here](https://learn.microsoft.com/en-us/azure/logic-apps/sap-create-example-scenario-workflows?tabs=consumption).
-1. To connect your Azure Logic Apps workflow to the Azure Digital Twins instance deployed in this reference solution, see [here](https://learn.microsoft.com/en-us/azure/digital-twins/how-to-use-power-platform-logic-apps-connector).
+1. Create an SAP workflow in your Azure Logic Apps instance by following the instructions [here](https://learn.microsoft.com/en-us/azure/logic-apps/sap-create-example-scenario-workflows?tabs=consumption).
+1. Connect your Azure Logic Apps workflow to the Azure Digital Twins instance deployed in this reference solution by following the instructions [here](https://learn.microsoft.com/en-us/azure/digital-twins/how-to-use-power-platform-logic-apps-connector).
 
 
 ## Replacing the Production Line Simulation with a Real Production Line

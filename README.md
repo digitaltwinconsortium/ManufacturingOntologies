@@ -313,10 +313,10 @@ Microsoft provides a connector to on-premsises SAP systems in combination with a
 
 <img src="Docs/gateway.png" alt="gateway" width="900" />
 
-To create a a new workflow using the SAP Connector, follow these steps:
+To create a a new workflow using the SAP connector, follow these steps:
 
 1. Create a new Blank Logic App in the Azure Logic Apps Designer in the Azure Portal.
-1. In the `Search for connectors and triggers`, enter `SAP` and select the SAP Connector when the search completes.
+1. In the `Search for connectors and triggers`, enter `SAP` and select the SAP connector when the search completes.
 1. Setup the SAP connector by following the instructions [here](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-using-sap-connector?tabs=consumption). Under `Connection Gateway`, select the name of your gateway you setup earlier.
 1. Create an SAP workflow in your Azure Logic Apps instance by following the instructions [here](https://learn.microsoft.com/en-us/azure/logic-apps/sap-create-example-scenario-workflows?tabs=consumption).
 1. Connect your Azure Logic Apps workflow to the Azure Digital Twins instance deployed in this reference solution by following the instructions [here](https://learn.microsoft.com/en-us/azure/digital-twins/how-to-use-power-platform-logic-apps-connector).

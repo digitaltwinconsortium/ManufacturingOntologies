@@ -304,8 +304,18 @@ To see how you can use the Azure Data Explorer time-series data as a data source
 Microsoft provides a connector to on-premsises SAP systems in combination with an on-premises data gateway for Azure Logic Apps. Azure Logic Apps is a no-code Azure service to orchestrate workflows that can trigger actions in e.g. Azure Digital Twins service. To connect your on-premises SAP systems to Azure Logic Apps and Azure Digital Twins service, follow these steps:
 
 1. Deploy an instance of Azure Logic Apps in the same region you picked during deployment of this reference solution. Select the consumption-based version.
-1. Install the on-premises data gateway by following the instructions [here](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-gateway-install).
-1. Setup the SAP connector for Azure Logic Apps by following the instructions [here](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-using-sap-connector?tabs=consumption).
+1. Install the on-premises data gateway by following the instructions [here](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-gateway-install). Pay special attention to the [prerequisits](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-gateway-install#prerequisites)! For example, if your Azure account has access to more than one Azure subscription, you need a different Azure account to install the the gateway and create the accompanying on-premises data gateway Azure Resource. Simply create a new user in your Azure Active Directory if this is the case and use it instead.
+1. Download and install the Visual Studio 2010 (VC++ 10.0) redistributables from [here](https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x64.exe).
+1. Download and install the SAP Connector for Microsoft .NET 3.0 for Windows x64 from [here](https://support.sap.com/en/product/connectors/msnet.html?anchorId=section_512604546). SAP Download Access via their portal is required.
+1. Copy the 4 libraries libicudecnumber.dll, rscp4n.dll, sapnco.dll and sapnco_utils.dll from the SAP Connector's installation location (by default this is C:\Program Files\SAP\SAP_DotNetConnector3_Net40_x64\) to the installation location of the data gateway (by default this is C:\Program Files\On-premises data gateway\).
+1. Restart the data gateway through the `On-premises data gateway` config tool.
+1. Create the on-presmises data gateway Azure resource in the same Azure region as selected during data gateway installation in the previous step and select the name of your data gateway under `Installation Name`. The status of your on-premises data gateway now looks like this:
+
+<img src="Docs/gateway.png" alt="gateway" width="900" />
+
+1. Create a new Blank Logic App in the Azure Logic Apps Designer in the Azure Portal.
+1. In the `Search for connectors and triggers`, enter `SAP` and select the SAP Connector when the search completes.
+1. Setup the SAP connector by following the instructions [here](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-using-sap-connector?tabs=consumption). Under `Connection Gateway`, select the name of your gateway you setup earlier.
 1. Create an SAP workflow in your Azure Logic Apps instance by following the instructions [here](https://learn.microsoft.com/en-us/azure/logic-apps/sap-create-example-scenario-workflows?tabs=consumption).
 1. Connect your Azure Logic Apps workflow to the Azure Digital Twins instance deployed in this reference solution by following the instructions [here](https://learn.microsoft.com/en-us/azure/digital-twins/how-to-use-power-platform-logic-apps-connector).
 

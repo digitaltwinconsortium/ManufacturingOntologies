@@ -121,6 +121,8 @@ The simulation is configured to include 2 production lines. The default configur
 | Afternoon | 15:00 | 22:00 |
 | Night | 23:00 | 06:00 |
 
+Note: Shift times are in local time, i.e. the time zone the VM hosting the production line simulation is set to!
+
 
 ### OPC UA Node IDs of Station OPC UA Server
 

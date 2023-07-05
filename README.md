@@ -317,7 +317,8 @@ To create a new Azure Logic Apps workflow from your on-premises SAP system to yo
 1. Create a new Blank Logic App in the Azure Logic App Designer.
 1. Add the trigger `When a message is received from SAP` to your workflow by following the instructions [here](https://learn.microsoft.com/en-us/azure/logic-apps/sap-create-example-scenario-workflows?tabs=consumption#receive-messages-from-sap). Under `Connection Gateway`, select the name of your gateway you setup earlier.
 1. Add the template `Receive batch or packet of IDOCs from SAP and enumerate them` to your workflow. This will de-batch the data received from SAP into individual IDOCs.
-1. Add the action `Add Twin` from the list of Azure Digital Twins actions available to your workflow, specify the host name of your Azure Digital Twins service instance deployed in this reference solution and enter `dtmi:digitaltwins:isa95:JobOrder;1` for the digital twin id.
+1. Open the control action called `For each` and delete the action that starts with `Replace this...`.
+1. Within the control action, add the action `Add Twin` from the list of Azure Digital Twins actions available to your workflow, specify the host name of your Azure Digital Twins service instance deployed in this reference solution and enter `dtmi:digitaltwins:isa95:JobOrder;1` for the digital twin id.
 1. Open the Azure Digital Twins Explorer from the Azure Digital Twins service instance planel in the Azure Portal and check that new job order digital twins are created.
 
 Your completed Azure Logic Apps workflow should now look like this:

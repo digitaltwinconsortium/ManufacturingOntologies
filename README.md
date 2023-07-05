@@ -311,7 +311,7 @@ To connect your on-premises SAP systems to Azure, follow these steps:
 1. If not already installed, download and install the Visual Studio 2010 (VC++ 10.0) redistributables from [here](https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x64.exe).
 1. Copy the 4 libraries libicudecnumber.dll, rscp4n.dll, sapnco.dll and sapnco_utils.dll from the `./Deployment/SAP` directory of the extracted repository downloaded ealier to the installation location of the data gateway (by default this is C:\Program Files\On-premises data gateway\).
 1. Restart the data gateway through the `On-premises data gateway` configuration tool installed earlier.
-1. Create the on-presmises data gateway Azure resource in the same Azure region as selected during the data gateway installation in the previous step and select the name of your data gateway under `Installation Name`. 
+1. Create the on-premises data gateway Azure resource in the same Azure region as selected during the data gateway installation in the previous step and select the name of your data gateway under `Installation Name`. 
 1. Create a new RFC Destination for Azure in your SAP system by entering SM59 from the SAP system's search box, which will bring up the `Configuration of RFC Connections`. Select `Edit`->`Create`, enter `Azure` in the `Destination` field and select `RFC connection to external program using TCP/IP` in the `Connection Type` dropdown. Enter `Azure` under `Description`. Under `Technical Settings`, select `Registered Server Program` under `Activation Type` and enter `Azure` under `Program ID`. Click the `Save` button.
 
 The status of your on-premises data gateway should now look like this:

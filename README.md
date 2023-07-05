@@ -307,22 +307,24 @@ Note: If you want to simply try this out before connecting your real SAP system,
 
 To connect your on-premises SAP systems to Azure, follow these steps:
 
-1. Download and install the on-premises data gateway from [here](https://aka.ms/on-premises-data-gateway-installer). Pay special attention to the [prerequisits](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-gateway-install#prerequisites)! For example, if your Azure account has access to more than one Azure subscription, you need to use a different Azure account to install the gateway and create the accompanying on-premises data gateway Azure Resource later on. Simply create a new user in your Azure Active Directory if this is the case.
+1. Download and install the on-premises data gateway from [here](https://aka.ms/on-premises-data-gateway-installer). Pay special attention to the [prerequisits](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-gateway-install#prerequisites)! For example, if your Azure account has access to more than one Azure subscription, you need to use a different Azure account to install the gateway and to create the accompanying on-premises data gateway Azure resource. Simply create a new user in your Azure Active Directory if this is the case.
 1. If not already installed, download and install the Visual Studio 2010 (VC++ 10.0) redistributables from [here](https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x64.exe).
 1. Copy the 4 libraries libicudecnumber.dll, rscp4n.dll, sapnco.dll and sapnco_utils.dll from the `./Deployment/SAP` directory of the extracted repository downloaded ealier to the installation location of the data gateway (by default this is C:\Program Files\On-premises data gateway\).
 1. Restart the data gateway through the `On-premises data gateway` configuration tool installed earlier.
-1. Create the on-presmises data gateway Azure resource in the same Azure region as selected during the data gateway installation in the previous step and select the name of your data gateway under `Installation Name`. The status of your on-premises data gateway should now look like this:
+1. Create the on-presmises data gateway Azure resource in the same Azure region as selected during the data gateway installation in the previous step and select the name of your data gateway under `Installation Name`. 
+1. Create a new RFC Destination for Azure in your SAP system by entering SM59 from the SAP System's search box, which will bring up the `Configuration of RFC Connections`. Select `Edit`->`Create`, enter `Azure` in the `Destination` field and select `RFC connection to external program using TCP/IP` in the `Connection Type` dropdown. Enter `Azure` under `Description`. Under `Technical Settings`, select `Registered Server Program` under `Activation Type` and enter `Azure` under `Program ID`. Click the `Save` button.
+
+The status of your on-premises data gateway should now look like this:
 
 <img src="Docs/gateway.png" alt="gateway" width="500" />
 
 To create a new Azure Logic Apps workflow from your on-premises SAP system to your Azure Digital Twins service instance deployed in this reference solution, follow these steps:
 
 1. Deploy an instance of Azure Logic Apps in the same region you picked during deployment of this reference solution via the Azure Portal. Select the consumption-based version.
-1. Create a new Blank Logic App in the Azure Logic App Designer.
-1. Add the trigger `When a message is received from SAP` to your workflow by following the instructions [here](https://learn.microsoft.com/en-us/azure/logic-apps/sap-create-example-scenario-workflows?tabs=consumption#receive-messages-from-sap). Under `Connection Gateway`, select the name of your gateway you setup earlier.
-1. Add the template `Receive batch or packet of IDOCs from SAP and enumerate them` to your workflow. This will de-batch the data received from SAP into individual IDOCs.
-1. Open the control action called `For each` and delete the action that starts with `Replace this...`.
-1. Within the control action, add the action `Add Twin` from the list of Azure Digital Twins actions available to your workflow, specify the host name of your Azure Digital Twins service instance deployed in this reference solution and enter `dtmi:digitaltwins:isa95:JobOrder;1` for the digital twin id.
+1. From the Azure Logic App Designer, use the template `Receive batch or packet of IDOCs from SAP and enumerate them`.
+1. Create the trigger `SAP` in your workflow by following the instructions [here](https://learn.microsoft.com/en-us/azure/logic-apps/sap-create-example-scenario-workflows?tabs=consumption#receive-messages-from-sap). Under `Connection Gateway`, select the name of your gateway you setup earlier. The `GatewayHost` is the IP address of your SAP system, the `GatewayService` is the RFC TCP/IP port of your SAP system (usually 3300) and the `ProgramId` is `Azure`.
+1. Open the control action called `For each` and delete the action that starts with `Replace this step...`.
+1. Within the control action, add the action `Add Twin` from the list of Azure Digital Twins actions available to your workflow, specify the ADT instance (host) name of your Azure Digital Twins service instance deployed in this reference solution. Click on the `Digital twin id` field and select `Current item` from the dynamic content flyout. Then select `Add new parameter` and select `Request`. In the new Request field, enter  `{"$metadata":{"$model":"dtmi:digitaltwins:isa95:JobOrder;1"},"description":{"$metadata":{}},"tags":{"$metadata":{}}}`.
 1. Open the Azure Digital Twins Explorer from the Azure Digital Twins service instance planel in the Azure Portal and check that new job order digital twins are created.
 
 Your completed Azure Logic Apps workflow should now look like this:

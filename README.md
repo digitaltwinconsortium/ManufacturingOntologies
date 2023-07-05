@@ -307,17 +307,22 @@ Microsoft provides a connector to on-premsises SAP systems in combination with a
 1. If not already installed, download and install the Visual Studio 2010 (VC++ 10.0) redistributables from [here](https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x64.exe).
 1. Copy the 4 libraries libicudecnumber.dll, rscp4n.dll, sapnco.dll and sapnco_utils.dll from the `./Deployment/SAP` directory of the extracted repository downloaded ealier to the installation location of the data gateway (by default this is C:\Program Files\On-premises data gateway\).
 1. Restart the data gateway through the `On-premises data gateway` configuration tool installed earlier.
-1. Create the on-presmises data gateway Azure resource in the same Azure region as selected during the data gateway installation in the previous step and select the name of your data gateway under `Installation Name`. The status of your on-premises data gateway should now looks like this:
+1. Create the on-presmises data gateway Azure resource in the same Azure region as selected during the data gateway installation in the previous step and select the name of your data gateway under `Installation Name`. The status of your on-premises data gateway should now look like this:
 
 <img src="Docs/gateway.png" alt="gateway" width="900" />
 
 To create a new Azure Logic Apps workflow from your on-premises SAP system to your Azure Digital Twins service instance deployed in this reference solution, follow these steps:
 
 1. Deploy an instance of Azure Logic Apps in the same region you picked during deployment of this reference solution via the Azure Portal. Select the consumption-based version.
-1. Create a new Blank Logic App in the Azure Logic Apps Designer.
-1. In the `Search for connectors and triggers`, enter `SAP` and select the SAP connector when the search completes.
-1. Add an SAP `trigger` to your workflow by following the instructions [here](https://learn.microsoft.com/en-us/azure/logic-apps/sap-create-example-scenario-workflows?tabs=consumption#receive-messages-from-sap). Under `Connection Gateway`, select the name of your gateway you setup earlier.
-1. Add an Azure Digital Twins `action` to your workflow by following the instructions [here](https://learn.microsoft.com/en-us/azure/digital-twins/how-to-use-power-platform-logic-apps-connector).
+1. Create a new Blank Logic App in the Azure Logic App Designer.
+1. Add the trigger `When a message is received from SAP` to your workflow by following the instructions [here](https://learn.microsoft.com/en-us/azure/logic-apps/sap-create-example-scenario-workflows?tabs=consumption#receive-messages-from-sap). Under `Connection Gateway`, select the name of your gateway you setup earlier.
+1. Add the template `Receive batch or packet of IDOCs from SAP and enumerate them` to your workflow. This will de-batch the data received from SAP into individual IDOCs.
+1. Add the action `Add Twin` from the list of Azure Digital Twins actions available to your workflow, specify the host name of your Azure Digital Twins service instance deployed in this reference solution and enter `dtmi:digitaltwins:isa95:JobOrder;1` for the digital twin id.
+1. Open the Azure Digital Twins Explorer from the Azure Digital Twins service instance planel in the Azure Portal and check that new job order digital twins are created.
+
+Your completed Azure Logic Apps workflow should now look like this:
+
+<img src="Docs/workflow.png" alt="workflow" width="900" />
 
 
 ## Replacing the Production Line Simulation with a Real Production Line

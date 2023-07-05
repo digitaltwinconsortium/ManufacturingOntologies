@@ -301,7 +301,11 @@ To see how you can use the Azure Data Explorer time-series data as a data source
 
 ## Connecting the Reference Solution to On-Premises SAP Systems
 
-Microsoft provides a connector to on-premsises SAP systems in combination with an on-premises data gateway for Azure Logic Apps. Azure Logic Apps is a no-code Azure service to orchestrate workflows that can trigger actions in e.g. Azure Digital Twins service. To connect your on-premises SAP systems to Azure, follow these steps:
+Microsoft provides a connector to on-premsises SAP systems in combination with an on-premises data gateway for Azure Logic Apps. Azure Logic Apps is a no-code Azure service to orchestrate workflows that can trigger actions in e.g. Azure Digital Twins service.
+
+Note: If you want to simply try this out before connecting your real SAP system, you can deploy an `SAP S/4 HANA Fully-Activated Appliance` to Azure from [here](https://cal.sap.com/catalog#/applianceTemplates) and use that instead.
+
+To connect your on-premises SAP systems to Azure, follow these steps:
 
 1. Download and install the on-premises data gateway from [here](https://aka.ms/on-premises-data-gateway-installer). Pay special attention to the [prerequisits](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-gateway-install#prerequisites)! For example, if your Azure account has access to more than one Azure subscription, you need to use a different Azure account to install the gateway and create the accompanying on-premises data gateway Azure Resource later on. Simply create a new user in your Azure Active Directory if this is the case.
 1. If not already installed, download and install the Visual Studio 2010 (VC++ 10.0) redistributables from [here](https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x64.exe).

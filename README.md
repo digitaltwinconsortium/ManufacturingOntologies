@@ -309,7 +309,7 @@ Microsoft provides a connector to on-premsises SAP systems in combination with a
 1. Restart the data gateway through the `On-premises data gateway` configuration tool installed earlier.
 1. Create the on-presmises data gateway Azure resource in the same Azure region as selected during the data gateway installation in the previous step and select the name of your data gateway under `Installation Name`. The status of your on-premises data gateway should now look like this:
 
-<img src="Docs/gateway.png" alt="gateway" width="900" />
+<img src="Docs/gateway.png" alt="gateway" width="500" />
 
 To create a new Azure Logic Apps workflow from your on-premises SAP system to your Azure Digital Twins service instance deployed in this reference solution, follow these steps:
 
@@ -322,7 +322,7 @@ To create a new Azure Logic Apps workflow from your on-premises SAP system to yo
 
 Your completed Azure Logic Apps workflow should now look like this:
 
-<img src="Docs/workflow.png" alt="workflow" width="900" />
+<img src="Docs/workflow.png" alt="workflow" width="500" />
 
 
 ## Replacing the Production Line Simulation with a Real Production Line

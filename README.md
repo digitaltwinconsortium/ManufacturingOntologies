@@ -12,8 +12,8 @@
 * [Digital Feedback Loop with UA Cloud Commander and UA Cloud Action](https://github.com/digitaltwinconsortium/ManufacturingOntologies#digital-feedback-loop-with-ua-cloud-commander-and-ua-cloud-action)
 * [Installation of Production Line Simulation and Cloud Services](https://github.com/digitaltwinconsortium/ManufacturingOntologies#installation-of-production-line-simulation-and-cloud-services)
 * [Running the Production Line Simulation](https://github.com/digitaltwinconsortium/ManufacturingOntologies#running-the-production-line-simulation)
-* [View Digital Twins in Azure Digital Twins Explorer](https://github.com/digitaltwinconsortium/ManufacturingOntologies#view-digital-twins-in-azure-digital-twins-explorer)
-* [Generate a Digital Twins Graph with the ADT Generator Tool](https://github.com/digitaltwinconsortium/ManufacturingOntologies#generate-a-digital-twins-graph-with-the-adt-generator-tool)
+* [Viewing Digital Twins in Azure Digital Twins Explorer](https://github.com/digitaltwinconsortium/ManufacturingOntologies#view-digital-twins-in-azure-digital-twins-explorer)
+* [Generating a Digital Twins Graph with the ADT Generator Tool](https://github.com/digitaltwinconsortium/ManufacturingOntologies#generate-a-digital-twins-graph-with-the-adt-generator-tool)
 * [Condition Monitoring, Calculating OEE, Detecting Anomalies and Making Predictions in Azure Data Explorer](https://github.com/digitaltwinconsortium/ManufacturingOntologies#condition-monitoring-calculating-oee-detecting-anomalies-and-making-predictions-in-azure-data-explorer)
 * [Using Azure Managed Grafana Service](https://github.com/digitaltwinconsortium/ManufacturingOntologies#using-azure-managed-grafana-service)
 * [Using 3D Scenes Studio](https://github.com/digitaltwinconsortium/ManufacturingOntologies#using-3d-scenes-studio)
@@ -244,14 +244,14 @@ Note: On first run, a tool to copy files to Azure Storage needs to be installed.
 Note: In this solution, the OPC UA application certificate store for UA Cloud Publisher, as well as the simulated production line's MES and individual machines' store, is located in the cloud in the deployed Azure Storage account.
 
 
-## View Digital Twins in Azure Digital Twins Explorer
+## Viewing Digital Twins in Azure Digital Twins Explorer
 
 You can use [Azure Digital Twins Explorer](https://learn.microsoft.com/en-us/azure/digital-twins/concepts-azure-digital-twins-explorer) to monitor twin property updates and add more relationships to the digital twins that are created. For example, you might want to add *Next* and *Previous* relationships between machines on each production line to add more context to your solution.
 
 To access Azure Digital Twins Explorer, first make sure you have the [Azure Digital Twins Data Owner role](https://learn.microsoft.com/en-us/azure/digital-twins/how-to-set-up-instance-portal#assign-the-role-using-azure-identity-management-iam) on your Azure Digital Twins instance. Then [open the explorer](https://learn.microsoft.com/en-us/azure/digital-twins/quickstart-azure-digital-twins-explorer#open-instance-in-azure-digital-twins-explorer).
 
 
-## Generate a Digital Twins Graph with the ADT Generator Tool
+## Generating a Digital Twins Graph with the ADT Generator Tool
 
 You can use [ADT Generator](https://github.com/digitaltwinconsortium/ManufacturingOntologies/blob/main/Tools/ADTGenerator/Readme.md) to simplify the creation of a digital twin graph, based on the ISA95 models provided in this repository.
 

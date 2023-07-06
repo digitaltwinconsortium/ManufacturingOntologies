@@ -1,5 +1,31 @@
 # Manufacturing Ontologies
 
+## Table of Contents
+
+* [Introduction](https://github.com/digitaltwinconsortium/ManufacturingOntologies#introduction)
+* [Reference Solution Architecture](https://github.com/digitaltwinconsortium/ManufacturingOntologies#reference-solution-architecture)
+* [UA Cloud Twin](https://github.com/digitaltwinconsortium/ManufacturingOntologies#ua-cloud-twin)
+* [A Cloud-based OPC UA Certificate Store and Persisted Storage](https://github.com/digitaltwinconsortium/ManufacturingOntologies#a-cloud-based-opc-ua-certificate-store-and-persisted-storage)
+* [UA Cloud Library](https://github.com/digitaltwinconsortium/ManufacturingOntologies#ua-cloud-library)
+* [Production Line Simulation](https://github.com/digitaltwinconsortium/ManufacturingOntologies#production-line-simulation)
+* [Calculating the Product Carbon Footprint (PCF)](https://github.com/digitaltwinconsortium/ManufacturingOntologies#calculating-the-product-carbon-footprint-pcf)
+* [Digital Feedback Loop with UA Cloud Commander and UA Cloud Action](https://github.com/digitaltwinconsortium/ManufacturingOntologies#digital-feedback-loop-with-ua-cloud-commander-and-ua-cloud-action)
+* [Installation of Production Line Simulation and Cloud Services](https://github.com/digitaltwinconsortium/ManufacturingOntologies#installation-of-production-line-simulation-and-cloud-services)
+* [Running the Production Line Simulation](https://github.com/digitaltwinconsortium/ManufacturingOntologies#running-the-production-line-simulation)
+* [View Digital Twins in Azure Digital Twins Explorer](https://github.com/digitaltwinconsortium/ManufacturingOntologies#view-digital-twins-in-azure-digital-twins-explorer)
+* [Generate a Digital Twins Graph with the ADT Generator Tool](https://github.com/digitaltwinconsortium/ManufacturingOntologies#generate-a-digital-twins-graph-with-the-adt-generator-tool)
+* [Condition Monitoring, Calculating OEE, Detecting Anomalies and Making Predictions in Azure Data Explorer](https://github.com/digitaltwinconsortium/ManufacturingOntologies#condition-monitoring-calculating-oee-detecting-anomalies-and-making-predictions-in-azure-data-explorer)
+* [Using Azure Managed Grafana Service](https://github.com/digitaltwinconsortium/ManufacturingOntologies#using-azure-managed-grafana-service)
+* [Using 3D Scenes Studio](https://github.com/digitaltwinconsortium/ManufacturingOntologies#using-3d-scenes-studio)
+* [Onboarding the Kubernetes Instance for Management via Azure Arc](https://github.com/digitaltwinconsortium/ManufacturingOntologies#onboarding-the-kubernetes-instance-for-management-via-azure-arc)
+* [Enabling the Product Carbon Footprint Calculation (PCF) in the Asset Admin Shell (AAS) Repository](https://github.com/digitaltwinconsortium/ManufacturingOntologies#enabling-the-product-carbon-footprint-calculation-pcf-in-the-asset-admin-shell-aas-repository)
+* [Connecting the Reference Solution to Microsoft Power BI](https://github.com/digitaltwinconsortium/ManufacturingOntologies#connecting-the-reference-solution-to-microsoft-power-bi)
+* [Connecting the Reference Solution to Microsoft Fabric](https://github.com/digitaltwinconsortium/ManufacturingOntologies#connecting-the-reference-solution-to-microsoft-fabric)
+* [Connecting the Reference Solution to On-Premises SAP Systems](https://github.com/digitaltwinconsortium/ManufacturingOntologies#connecting-the-reference-solution-to-on-premises-sap-systems)
+* [Replacing the Production Line Simulation with a Real Production Line](https://github.com/digitaltwinconsortium/ManufacturingOntologies#replacing-the-production-line-simulation-with-a-real-production-line)
+* [License](https://github.com/digitaltwinconsortium/ManufacturingOntologies#license)
+
+
 ## Introduction
 
 An ontology defines the language used to describe a system. In the manufacturing domain, these systems can represent a factory or plant but also enterprise applications or supply chains. There are several established ontologies in the manufacturing domain. Most of them have long been standardized. In this repository, we have focused on two of these ontologies, namely ISA95 to describe a factory ontology and IEC 63278 Asset Administration Shell to describe a manufacturing supply chain. Furthermore, we have included a factory simulation and an end-to-end solution architecture for you to try out the ontologies, leveraging IEC 62541 OPC UA and the Microsoft Azure Cloud.

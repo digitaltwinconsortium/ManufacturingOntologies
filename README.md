@@ -342,6 +342,8 @@ To connect your on-premises SAP systems to Azure, follow these steps:
 1. Create a new RFC Destination for Azure in your SAP system by entering `SM59` from the SAP system's search box, which will bring up the `Configuration of RFC Connections`. Select `Edit`->`Create`, enter `Azure` in the `Destination` field and select `RFC connection to external program using TCP/IP` in the `Connection Type` dropdown. Enter `Azure` under `Description`. Under `Technical Settings`, select `Registered Server Program` under `Activation Type` and enter `Azure` under `Program ID`. Click the `Save` button.
 1. Create a new security info entry for your Azure Logic App in your SAP system by entering `SMGW` from the SAP system's search box, which will bring up the `Active Connections` of the `Gateway Monitor`. Select `Goto`->`Expert Functions`->`External Security`->`Maintenance of ACL Files`. In the `Secinfo` file, click the `Insert Line` button and select `Standard`. Fill in the entry mask with the following info: `P/D`=`P`, `TP`=`LOGICAPP`, `USER`=`*` (other systems call this `ACCESS`=`*`), `USER-HOST`=`*`, `HOST`=`<IP address of your Data Gateway>`. Click the green check button. Click the `Save` button.
 
+Note: If you run into errors with the Data Gateway or the SAP Connector, you can enable debug tracing by following [these steps](https://learn.microsoft.com/en-us/archive/blogs/david_burgs_blog/enable-sap-nco-library-loggingtracing-for-azure-on-premises-data-gateway-and-the-sap-connector).
+
 The status of your on-premises data gateway should now look like this:
 
 <img src="Docs/gateway.png" alt="gateway" width="500" />

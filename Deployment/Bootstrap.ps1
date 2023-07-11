@@ -5,12 +5,17 @@ Start-Transcript "C:\Temp\Bootstrap.log"
 
 $ErrorActionPreference = "SilentlyContinue"
 
-# Installing tools
-Start-Process -Wait msiexec /i https://aka.ms/installazurecliwindows /qn
-Start-Process -Wait msiexec /i https://aka.ms/aks-edge/k8s-msi /qn
+# Install AZ CLI and AKS-EE
+msiexec /i https://aka.ms/installazurecliwindows /qn
+msiexec /i https://aka.ms/aks-edge/k8s-msi /qn
 
-# Enable VirtualMachinePlatform feature, the vm reboot will be done in DSC extension
-Enable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform -NoRestart
+# Enable Hyper-V feature
+Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All -NoRestart
+
+# Download and expand Manufacturing Ontologies repo
+invoke-webrequest -Uri https://github.com/digitaltwinconsortium/ManufacturingOntologies/archive/refs/heads/main.zip -OutFile C:\Manufacturing.zip
+expand-archive -Path C:\Manufacturing.zip -DestinationPath C:\
+del C:\Manufacturing.zip
 
 # Disable Microsoft Edge sidebar
 $RegistryPath = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'

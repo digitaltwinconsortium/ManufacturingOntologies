@@ -447,7 +447,7 @@
         }
       },
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/extensions', parameters('resourcesName'), '-VM', 'Bootstrap')]"
+        "[resourceId('Microsoft.Compute/virtualMachines/extensions', concat(parameters('resourcesName'), '-VM'), 'Bootstrap')]"
       ]
     },
     {

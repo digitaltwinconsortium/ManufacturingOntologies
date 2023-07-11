@@ -421,7 +421,7 @@
         "autoUpgradeMinorVersion": true,
         "protectedSettings": {
           "fileUris": [
-            "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment', 'Bootstrap.ps1')]"
+            "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'Bootstrap.ps1')]"
           ],
           "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File Bootstrap.ps1"
         }
@@ -440,7 +440,7 @@
         "settings": {
           "wmfVersion": "latest",
           "configuration": {
-            "url": "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment', 'DSCInstallWindowsFeatures.zip')]",
+            "url": "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'DSCInstallWindowsFeatures.zip')]",
             "script": "DSCInstallWindowsFeatures.ps1",
             "function": "InstallWindowsFeatures"
           }

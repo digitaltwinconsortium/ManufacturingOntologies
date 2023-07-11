@@ -6,8 +6,10 @@ Start-Transcript "C:\Temp\Bootstrap.log"
 $ErrorActionPreference = "SilentlyContinue"
 
 # Install AZ CLI and AKS-EE
-msiexec /i https://aka.ms/installazurecliwindows /qn
-msiexec /i https://aka.ms/aks-edge/k8s-msi /qn
+$azcli = Start-Job {msiexec /i https://aka.ms/installazurecliwindows /qn}
+Wait-Job $azcli
+$k8s = Start-Job {msiexec /i https://aka.ms/aks-edge/k8s-msi /qn}
+Wait-Job $k8s
 
 # Enable Hyper-V feature
 Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All -NoRestart

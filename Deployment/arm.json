@@ -360,7 +360,11 @@
         "osProfile": {
           "computerName": "[parameters('resourcesName')]",
           "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
+          "adminPassword": "[parameters('adminPassword')]",
+          "windowsConfiguration": {
+            "provisionVMAgent": true,
+            "enableAutomaticUpdates": false
+          }
         },
         "storageProfile": {
           "imageReference": {
@@ -397,6 +401,53 @@
       "dependsOn": [
         "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('resourcesName'), '-IF'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', concat(parameters('resourcesName'), 'storage'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(parameters('resourcesName'), '-VM','/Bootstrap')]",
+      "apiVersion": "2022-11-01",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('resourcesName'), '-VM')]"
+      ],
+      "tags": {
+        "displayName": "Run Bootstrap"
+      },
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.10",
+        "autoUpgradeMinorVersion": true,
+        "protectedSettings": {
+          "fileUris": [
+            "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment', 'Bootstrap.ps1')]"
+          ],
+          "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File Bootstrap.ps1"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2022-11-01",
+      "name": "[concat(parameters('resourcesName'), '-VM','/InstallWindowsFeatures')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publisher": "Microsoft.Powershell",
+        "type": "DSC",
+        "typeHandlerVersion": "2.77",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "wmfVersion": "latest",
+          "configuration": {
+            "url": "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment', 'DSCInstallWindowsFeatures.zip')]",
+            "script": "DSCInstallWindowsFeatures.ps1",
+            "function": "InstallWindowsFeatures"
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('resourcesName'), '-VM', 'Bootstrap')]"
       ]
     },
     {

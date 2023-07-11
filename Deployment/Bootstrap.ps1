@@ -6,39 +6,8 @@ Start-Transcript "C:\Temp\Bootstrap.log"
 $ErrorActionPreference = "SilentlyContinue"
 
 # Installing tools
-workflow ClientTools_01
-{
-    $chocolateyAppList = 'azure-cli'
-    #Run commands in parallel.
-    Parallel {
-            InlineScript {
-                param (
-                    [string]$chocolateyAppList
-                )
-                if ([string]::IsNullOrWhiteSpace($using:chocolateyAppList) -eq $false)
-                {
-                    try{
-                        choco config get cacheLocation
-                    }catch{
-                        Write-Output "Chocolatey not detected, trying to install now"
-                        Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-                    }
-                }
-                if ([string]::IsNullOrWhiteSpace($using:chocolateyAppList) -eq $false){
-                    Write-Host "Chocolatey Apps Specified"
-
-                    $appsToInstall = $using:chocolateyAppList -split "," | ForEach-Object { "$($_.Trim())" }
-
-                    foreach ($app in $appsToInstall)
-                    {
-                        Write-Host "Installing $app"
-                        & choco install $app /y -Force| Write-Output
-                    }
-                }
-            }
-    }
-}
-ClientTools_01 | Format-Table
+Start-Process -Wait msiexec /i https://aka.ms/installazurecliwindows /qn
+Start-Process -Wait msiexec /i https://aka.ms/aks-edge/k8s-msi /qn
 
 # Enable VirtualMachinePlatform feature, the vm reboot will be done in DSC extension
 Enable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform -NoRestart

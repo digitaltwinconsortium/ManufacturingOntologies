@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A2784944-F23E-4528-B46F-4D258835BABA}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\Deployment\arm.json = ..\..\..\Deployment\arm.json
+		..\..\..\Deployment\Bootstrap.ps1 = ..\..\..\Deployment\Bootstrap.ps1
 		..\..\ADXQueries\CalculateOEEForLine.kql = ..\..\ADXQueries\CalculateOEEForLine.kql
 		..\..\ADXQueries\CalculateOEEForStation.kql = ..\..\ADXQueries\CalculateOEEForStation.kql
 		..\..\ADXQueries\dashboard-ontologies.json = ..\..\ADXQueries\dashboard-ontologies.json

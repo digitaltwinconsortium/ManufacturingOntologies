@@ -203,20 +203,20 @@ Note: To save cost, the deployment deploys just a single Windows 11 Enterprise V
 Once the deployment completes, follow these steps to setup a single-node Edge Kubernetes cluster and finish configuring the simulation:
 
 1. Connect to the deployed Windows VM with an RDP (remote desktop) connection. You can download the RDP file in the [Azure portal](https://portal.azure.com) page for the VM, under the **Connect** options. Sign in using the credentials you provided during deployment.
-1. From the VM, open a **Windows command prompt**, navigate to the `C:\ManufacturingOntologies-main\AKSEdgeTools` directory and run `AksEdgePrompt`. This will open a PowerShell window:
+1. From the deployed VM, open a **Windows command prompt**, navigate to the `C:\ManufacturingOntologies-main\AKSEdgeTools` directory and run `AksEdgePrompt`. This will open a PowerShell window:
 
     <img src="Docs/akspowershell.png" alt="AKS" width="900" />
 
 1. Run `New-AksEdgeDeployment -JsonConfigFilePath .\aksedge-config.json` from the PowerShell window.
 
-Once the script is finished, your Kubernetes installation is complete and you can start deploying workloads.
+Once the script is finished, close all command prompt windows. Your Kubernetes installation is now complete and you can start deploying workloads.
 
 Note: To get logs from all your Kubernetes workloads and services at any time, simply run `Get-AksEdgeLogs` from the Powershell window that can be opened via `AksEdgePrompt`.
 
 
 ## Running the Production Line Simulation
 
-On the deployed VM, navigate to the `./Tools/FactorySimulation` directory of the extracted repository downloaded ealier and run the **StartSimulation** command from a **Windows command prompt** by supplying the following parameters:
+From the deployed VM, open a **Windows command prompt**, navigate to the `C:\ManufacturingOntologies-main\Tools\FactorySimulation` directory and run the **StartSimulation** command by supplying the following parameters:
 
 Syntax:
 

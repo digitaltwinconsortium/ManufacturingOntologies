@@ -40,3 +40,6 @@ If (-NOT (Test-Path $RegistryPath)) {
 New-ItemProperty -Path $RegistryPath -Name $Name -Value $Value -PropertyType DWORD -Force
 
 Stop-Transcript
+
+# Restart for Hyper-V to become operational
+Restart-Computer

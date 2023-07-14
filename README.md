@@ -23,7 +23,7 @@
 * [Connecting the Reference Solution to Microsoft Fabric](https://github.com/digitaltwinconsortium/ManufacturingOntologies#connecting-the-reference-solution-to-microsoft-fabric)
 * [Connecting the Reference Solution to On-Premises SAP Systems](https://github.com/digitaltwinconsortium/ManufacturingOntologies#connecting-the-reference-solution-to-on-premises-sap-systems)
 * [Replacing the Production Line Simulation with a Real Production Line](https://github.com/digitaltwinconsortium/ManufacturingOntologies#replacing-the-production-line-simulation-with-a-real-production-line)
-* [Enabling Automatic Asset Onboarding with Azure OpenAI Service](https://github.com/digitaltwinconsortium/ManufacturingOntologies#enabling-automatic-asset-onboarding-with-azure-openAI-service)
+* [Enabling Automatic Asset Onboarding with Azure OpenAI Service](https://github.com/digitaltwinconsortium/ManufacturingOntologies#enabling-automatic-asset-onboarding-with-azure-openai-service)
 * [License](https://github.com/digitaltwinconsortium/ManufacturingOntologies#license)
 
 

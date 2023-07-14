@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ua-edgetranslator-namespace
+spec:
+  finalizers:
+  - kubernetes
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ua-edgetranslator
+  namespace: ua-edgetranslator-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ua-edgetranslator
+  template:
+    metadata:
+      labels:
+        app: ua-edgetranslator
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: ua-edgetranslator
+        image: ghcr.io/opcfoundation/ua-edgetranslator:main
+        ports:
+        - containerPort: 4840
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ua-edgetranslator
+  namespace: ua-edgetranslator-namespace
+spec:
+  type: LoadBalancer
+  ports:
+  - targetPort: 4840
+    port: 4840
+  selector:
+    app: ua-edgetranslator

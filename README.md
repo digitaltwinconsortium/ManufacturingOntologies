@@ -23,6 +23,7 @@
 * [Connecting the Reference Solution to Microsoft Fabric](https://github.com/digitaltwinconsortium/ManufacturingOntologies#connecting-the-reference-solution-to-microsoft-fabric)
 * [Connecting the Reference Solution to On-Premises SAP Systems](https://github.com/digitaltwinconsortium/ManufacturingOntologies#connecting-the-reference-solution-to-on-premises-sap-systems)
 * [Replacing the Production Line Simulation with a Real Production Line](https://github.com/digitaltwinconsortium/ManufacturingOntologies#replacing-the-production-line-simulation-with-a-real-production-line)
+* [Enabling Automatic Asset Onboarding with Azure OpenAI Service](https://github.com/digitaltwinconsortium/ManufacturingOntologies#enabling-automatic-asset-onboarding-with-azure-openAI-sService)
 * [License](https://github.com/digitaltwinconsortium/ManufacturingOntologies#license)
 
 
@@ -60,6 +61,7 @@ Here are the components involved in this solution:
 | Industrial Assets | A set of simulated OPC-UA enabled production lines hosted in Docker containers |
 | [UA Cloud Publisher](https://github.com/barnstee/ua-cloudpublisher) | This edge application converts OPC UA Client/Server requests into OPC UA PubSub cloud messages. It's hosted in a Docker container. |
 | [UA Cloud Commander](https://github.com/opcfoundation/ua-cloudcommander) | This edge application converts messages sent to an MQTT or Kafka broker (possibly in the cloud) into OPC UA Client/Server requests for a connected OPC UA server. It's hosted in a Docker container. |
+| [UA Edge Translator](https://github.com/OPCFoundation/UA-EdgeTranslator) | This industrial connectivity edge application translates from proprietary asset interfaces to OPC UA leveraging W3C Web of Things (WoT) Thing Descriptions as the schema to describe the industrial asset interface. |
 | [Data Gateway](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-gateway-install#how-the-gateway-works) | This gateway connects your on-premises data sources (like SAP) to Azure Logic Apps in the cloud. |
 | [AKS Edge Essentials](https://learn.microsoft.com/en-us/azure/aks/hybrid/aks-edge-overview) | This Kubernetes implementation (both K3S and K8S are supported) runs at the Edge and provides single- and multi-node Kubernetes clusters for a fault-tolerant Edge configuration on embedded or PC-class hardware, like an industrial gateway. |
 | [Azure Event Hubs](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-about) | The cloud message broker that receives OPC UA PubSub messages from edge gateways and stores them until they're retrieved by subscribers like the UA Cloud Twin. |
@@ -78,6 +80,7 @@ Here are the components involved in this solution:
 | [UA Cloud Metaverse](https://github.com/OPCFoundation/UA-CloudMetaverse) | This Industrial Metaverse app allows you to view digital twins of our manufacturing assets via Augmented Reality or Virtual Reality headsets. Work in progress! |
 | [Microsoft Sustainability Manager](https://github.com/digitaltwinconsortium/ManufacturingOntologies/blob/main/Tools/MicrosoftSustainabilityManager/configuremsm.md) | Microsoft Sustainability Manager is an extensible solution that unifies data intelligence and provides comprehensive, integrated, and automated sustainability management for organizations at any stage of their sustainability journey. It automates manual processes, enabling organizations to more efficiently record, report, and reduce their emissions. |
 | [Azure Managed Grafana](https://learn.microsoft.com/en-us/azure/managed-grafana/overview) | Azure Managed Grafana is a data visualization platform built on top of the Grafana software by Grafana Labs. It's built as a fully managed Azure service operated and supported by Microsoft. |
+| [Azure OpenAI Service](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/overview) | Azure OpenAI Service provides REST API access to OpenAI's powerful language models including the GPT-4, GPT-35-Turbo, and Embeddings model series. |
 | [UA Cloud Library](https://github.com/OPCFoundation/UA-CloudLibrary) | The UA Cloud Library is an online store of OPC UA Information Models, hosted by the OPC Foundation [here](https://uacloudlibrary.opcfoundation.org/). |
 | [WattTime Service](https://www.watttime.org/api-documentation/#introduction) | The WattTime service can be used to get the carbon intensity for a unit of electrical energy consumed during a manufacturing process, specific to a particular geographic coordinate passed into the service. |
 | [Microsoft Power BI](https://learn.microsoft.com/en-us/power-bi/fundamentals/power-bi-overview) | Microsoft Power BI is a collection of software services, apps, and connectors that work together to turn your unrelated sources of data into coherent, visually immersive, and interactive insights. |
@@ -379,7 +382,7 @@ Note: To check for IDoc message processing errors, entering `SM58` from the SAP 
 
 Once you are ready to connect your own production line, simply delete the VM from the Azure Portal.
 
-1. Edit the UA-CloudPublisher.yaml file provided in the `Deployment` folder of this repository, replacing [yourstorageaccountname] with the name of your Azure Storage Account and [key] with the key1 of your Azure Storage Account. You can access this information from the Azure Portal on your deployed Azure Storage Account under Access keys.
+1. Edit the UA-CloudPublisher.yaml file provided in the `Deployment` folder of this repository, replacing [yourstorageaccountname] with the name of your Azure Storage Account and [key] with the key of your Azure Storage Account. You can access this information from the Azure Portal on your deployed Azure Storage Account under Access keys.
 1. Run UA Cloud Publisher with the following command. The edge PC hosting UA Cloud Publisher needs Kubernetes support and Internet access (via port 9093) and needs to be able to connect to your OPC UA-enabled machines in your production line:
 
         kubectl apply -f UA-CloudPublisher.yaml
@@ -422,6 +425,17 @@ Note: UA Cloud Publisher stores its configuration and persistency files in the c
 Note: You can check what is currently being published by selecting the Publishes Nodes tab.
 
 Note: You can see diagnostics information from UA Cloud Publisher on the Diagnostics tab.
+
+
+## Enabling Automatic Asset Onboarding with Azure OpenAI Service
+
+For your real production line, you can enable automatic asset onboarding for your industrial assets with a fixed data model (e.g. energy meters, valves, pumps etc.) via Azure OpenAI Service, UA Edge Translator and UA Cloud Publisher, by following these steps:
+
+1. Deploy an instance of Azure OpenAI Service in the Azure Portal.
+1. Deploy a Large Language Model to your Azure Open AI Service instance, GPT-4 is recommended for best results.
+1. Configure UA Cloud Publisher deployed for your own production line to use your Azure OpenAI instance via its built-in user interface.
+1. Deploy UA Edge Translator on a PC with Kubernetes support located in the same network as your industrial asset and UA Cloud Publisher. You can use the UA-EdgeTranslator.yaml file from the `Deployment` folder of this repository by calling `kubectl apply -f UA-EdgeTranslator.yaml`.
+1. Create a Web of Things (WoT) Thing Description using the Azure OpenAI Service via the UA Cloud Publisher's user interface and send it to UA Edge Translator.
 
 
 ## License

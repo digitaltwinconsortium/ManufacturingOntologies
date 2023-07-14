@@ -437,6 +437,8 @@ For your real production line, you can enable automatic asset onboarding for you
 1. Deploy UA Edge Translator on a PC with Kubernetes support located in the same network as your industrial asset and UA Cloud Publisher. You can use the UA-EdgeTranslator.yaml file from the `Deployment` folder of this repository by calling `kubectl apply -f UA-EdgeTranslator.yaml`.
 1. Create a Web of Things (WoT) Thing Description using the Azure OpenAI Service via the UA Cloud Publisher's user interface and send it to UA Edge Translator.
 
+<img src="Docs/translator.jpeg" alt="translator" width="900" />
+
 
 ## License
 

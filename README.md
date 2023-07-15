@@ -326,6 +326,8 @@ Note: Alternatively, you can also create a Kusto Query Language (KQL) database, 
 
 <img src="Docs/kql.png" alt="kql" width="900" />
 
+Note: For the tables and OPC UA PubSub data processing functions to set up within the KQL database, have a look at the ADX cluster and database deployed in this reference solution.
+
 
 ## Connecting the Reference Solution to On-Premises SAP Systems
 

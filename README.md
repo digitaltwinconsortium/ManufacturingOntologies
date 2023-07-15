@@ -318,9 +318,13 @@ To see how you can use the Azure Data Explorer time-series data as a data source
 
 1. You can start a Microsoft Fabric trial from [here](https://learn.microsoft.com/en-us/fabric/get-started/fabric-trial).
 1. Once you are logged into Microsoft Fabric, open the Azure Portal, navigate to your Azure Event Hubs Namespace and create a new `fabic` consumer group in both the data and metadata Event Hubs. Also, take a note of the primary key associated with your `RootManageSharedAccessKey` Shared Access Policy of your Event Hubs Namespace. You will need it later in Microsoft Fabric as username and password to connect to the Event Hubs.
-1. Follow the steps described [here](https://learn.microsoft.com/en-us/fabric/real-time-analytics/event-streams/overview) to create Event Streams for both the OPC UA PubSub telemetry data as well as for the OPC UA PubSub metadata, directly from the solution's Event Hubs.
+1. To create a Lakehouse database, follow the steps described [here](https://learn.microsoft.com/en-us/fabric/real-time-analytics/event-streams/overview) to create Event Streams for both the OPC UA PubSub telemetry data as well as for the OPC UA PubSub metadata, directly from the solution's Event Hubs.
 
 <img src="Docs/fabric.png" alt="fabric" width="900" />
+
+Note: Alternatively, you can also create a Kusto Query Language (KQL) database, which is the Microsoft Fabric name for Azure Data Explorer, and connect it to your Event Hubs deployed in this reference solution. The connection to Event Hubs is called "Real-Time Analytics Data stream" in Microsoft Fabric.
+
+<img src="Docs/kql.png" alt="kql" width="900" />
 
 
 ## Connecting the Reference Solution to On-Premises SAP Systems

@@ -381,7 +381,7 @@ To try out your SAP to Azure Logic App workflow, follow these steps:
 
 Enter `WE19` from the SAP system's search box, which will bring up the `Configuration of RFC Connections` screen. Select the `Using message type` radio button and enter `/ISDFPS/CREMAS`. Click on the `Create` button. Click on the `EDICC` field. In the `Edit Control Record Fields` dialog, enter `LOGICAPP` for `Receiver Port` and `SAPLAPP` for `Sender Port`. Click the green check button. Click on the `Standard Outbound Processing` button. In the `Outbound Processing of IDoc` dialog, click the green check button to start the IDoc message processing.
 
-Note: To check for IDoc message processing errors, entering `SM58` from the SAP system's search box, which will bring up the `Transactional RFC` screen.
+Note: To check for IDoc message processing errors, entering `WE09` from the SAP system's search box, select a time range and click the `execute` button. This will bring up the `IDoc Search for Business Content` screen.
 
 
 ## Replacing the Production Line Simulation with a Real Production Line

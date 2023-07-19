@@ -1,0 +1,16 @@
+.create-or-alter function  CalculateOEEForLine(location:string,idealCycleTime:int,shiftStartTime:datetime,shiftEndTime:datetime) {
+let ADTInstance = "TODO: Update with your ADT endpoint, e.g. https://erichbtest3-ADT.api.eus2.digitaltwins.azure.net";
+let ADTQueryPublisherID = strcat("SELECT T FROM digitaltwins T where T.ID = 'publisher.", location, "'");
+let publisherId = toscalar(evaluate azure_digital_twins_query_request(ADTInstance, ADTQueryPublisherID)
+| project tostring(T.$dtId));
+let ADTQueryStations = strcat("SELECT T, CT FROM DIGITALTWINS T JOIN CT RELATED T.isMadeUpOf WHERE T.$dtId = '", publisherId, "'");
+let stations = evaluate azure_digital_twins_query_request(ADTInstance, ADTQueryStations)
+| project station = tostring(CT.ID);
+let oeeForStations = stations
+| partition hint.strategy=legacy by station
+(
+  extend oee = toscalar(CalculateOEEForStation(station, location, idealCycleTime, shiftStartTime, shiftEndTime))
+)
+| summarize min(oee);
+toscalar(oeeForStations)
+}

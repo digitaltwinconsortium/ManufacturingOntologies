@@ -315,9 +315,8 @@ The Asset Admin Shell (AAS) Repository is automatically configured during deploy
 
 1. You need access to a Power BI subscription.
 1. Install the Power BI Desktop app from [here](https://go.microsoft.com/fwlink/?LinkId=2240819&clcid=0x409).
-1. Login to Power BI Desktop app from an Azure user account with access to just a single Azure subscription, i.e. the subscription used for your deployed instance of this reference solution. Create a new user in Azure Active Directory if you have to.
-1. From the Azure Portal, navigate to your Azure Data Explorer cluster instance and add `ClusterAllDatabasesAdmin` permissions to the user you are using for Power BI.
-1. From the Azure Portal, navigate to your Azure Data Explorer database instance (`ontologies`) and add `Database Admin` permissions to the user you are using for Power BI. 
+1. Login to Power BI Desktop app using the user with access to the Power BI subscription.
+1. From the Azure Portal, navigate to your Azure Data Explorer database instance (`ontologies`) and add `Database Admin` permissions to an Azure Active Directory user with access to just a **single** Azure subscription, i.e. the subscription used for your deployed instance of this reference solution. Create a new user in Azure Active Directory if you have to.
 1. From Power BI, create a new report and select Azure Data Explorer time-series data as a data source via `Get data` -> `Azure` -> `Azure Data Explorer (Kusto)`.
 1. In the popup window, enter the Azure Data Explorer endpoint of your instance (e.g. `https://erichbtest3adx.eastus2.kusto.windows.net`), the database name (`ontologies`) and the following query:
 
@@ -334,6 +333,7 @@ The Asset Admin Shell (AAS) Repository is automatically configured during deploy
         | project Timestamp, NodeValue
 
 1. Click `Load`. This will import the actual cycle time of the Assembly station of the Munich production line for the last hour.
+1. When prompted, log into Azure Data Explorer using the Azure Active Directory user you gave permission to access the Azure Data Explorer database earlier.
 1. From the `Data view`, select the NodeValue column and select `Don't summarize` in the `Summarization` menu item.
 1. Switch to the `Report view`.
 1. Under `Visualizations`, select the `Line Chart` visualization.

@@ -260,7 +260,7 @@ To use the ADT Generator tool, first make sure you have Microsoft Excel installe
 
 ## Condition Monitoring, Calculating OEE, Detecting Anomalies and Making Predictions in Azure Data Explorer
 
-You can also visit the [Azure Data Explorer documentation](https://learn.microsoft.com/en-us/azure/synapse-analytics/data-explorer/data-explorer-overview) to learn how to create no-code dashboards for condition monitoring, yield or maintenance predictions, or anomaly detection. We have provided a sample dashboard in the `./Tools/FactorySimulation/ADXQueries` folder for you to deploy to the ADX Dashboard by following the steps outlined [here](https://learn.microsoft.com/en-us/azure/data-explorer/azure-data-explorer-dashboards#to-create-new-dashboard-from-a-file). After import, you need to update the dashboard's data source by specifying the HTTPS endpoint of your ADX server cluster instance in the format `https://ADXInstanceName.AzureRegion.kusto.windows.net/` in the top-right-hand corner of the dashboard. 
+You can also visit the [Azure Data Explorer documentation](https://learn.microsoft.com/en-us/azure/synapse-analytics/data-explorer/data-explorer-overview) to learn how to create no-code dashboards for condition monitoring, yield or maintenance predictions, or anomaly detection. We have provided a sample dashboard in the `./Tools/ADXQueries` folder for you to deploy to the ADX Dashboard by following the steps outlined [here](https://learn.microsoft.com/en-us/azure/data-explorer/azure-data-explorer-dashboards#to-create-new-dashboard-from-a-file). After import, you need to update the dashboard's data source by specifying the HTTPS endpoint of your ADX server cluster instance in the format `https://ADXInstanceName.AzureRegion.kusto.windows.net/` in the top-right-hand corner of the dashboard. 
 
 Note: There is also an alternative calculation function for the OEE of the production line calculation provided in that folder. You should overwrite the default CalculateOEEForLine function with this one when the USE_ISA95_EQUIPMENT_MODELS environment variable is used in UA Cloud Twin.
 
@@ -313,8 +313,33 @@ The Asset Admin Shell (AAS) Repository is automatically configured during deploy
 
 ## Connecting the Reference Solution to Microsoft Power BI
 
-To see how you can use the Azure Data Explorer time-series data as a data source for Power BI, see [here](https://learn.microsoft.com/en-us/azure/data-explorer/power-bi-data-connector). Once the data connection is made, you can create Power BI reports and dashboards by following the instructions [here](https://learn.microsoft.com/en-us/power-bi/create-reports/).
+1. You need access to a Power BI subscription.
+1. Install the Power BI Desktop app from [here](https://go.microsoft.com/fwlink/?LinkId=2240819&clcid=0x409).
+1. Login to Power BI Desktop app from an Azure user account with access to just a single Azure subscription, i.e. the subscription used for your deployed instance of this reference solution. Create a new user in Azure Active Directory if you have to.
+1. From the Azure Portal, navigate to your Azure Data Explorer cluster instance and add `ClusterAllDatabasesAdmin` permissions to the user you are using for Power BI.
+1. From the Azure Portal, navigate to your Azure Data Explorer database instance (`ontologies`) and add `Database Admin` permissions to the user you are using for Power BI. 
+1. From Power BI, create a new report and select Azure Data Explorer time-series data as a data source via `Get data` -> `Azure` -> `Azure Data Explorer (Kusto)`.
+1. In the popup window, enter the Azure Data Explorer endpoint of your instance (e.g. `https://erichbtest3adx.eastus2.kusto.windows.net`), the database name (`ontologies`) and the following query:
 
+        let _startTime = ago(1h);
+        let _endTime = now();
+        opcua_metadata_lkv
+        | where Name contains "assembly"
+        | where Name contains "munich"
+        | join kind=inner (opcua_telemetry
+            | where Name == "ActualCycleTime"
+            | where Timestamp > _startTime and Timestamp < _endTime
+        ) on DataSetWriterID
+        | extend NodeValue = todouble(Value)
+        | project Timestamp, NodeValue
+
+1. Click `Load`. This will import the actual cycle time of the Assembly station of the Munich production line for the last hour.
+1. From the `Data view`, select the NodeValue column and select `Don't summarize` in the `Summarization` menu item.
+1. Switch to the `Report view`.
+1. Under `Visualizations`, select the `Line Chart` visualization.
+1. Under `Visualizations`, move the `Timestamp` from the `Data` source to the `X-axis`, click on it and select `Timestamp`.
+1. Under `Visualizations`, move the `NodeValue` from the `Data` source to the `Y-axis`, click on it and select `Median`.
+ 
 
 ## Connecting the Reference Solution to Microsoft Fabric
 

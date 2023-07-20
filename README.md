@@ -339,7 +339,12 @@ The Asset Admin Shell (AAS) Repository is automatically configured during deploy
 1. Under `Visualizations`, select the `Line Chart` visualization.
 1. Under `Visualizations`, move the `Timestamp` from the `Data` source to the `X-axis`, click on it and select `Timestamp`.
 1. Under `Visualizations`, move the `NodeValue` from the `Data` source to the `Y-axis`, click on it and select `Median`.
- 
+1. Save your new report.
+
+Note: You can add other data from Azure Data Explorer to your report similarily.
+
+<img src="Docs/powerbi.png" alt="powerbi" width="900" />
+
 
 ## Connecting the Reference Solution to Microsoft Fabric
 

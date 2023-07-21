@@ -20,7 +20,7 @@
 * [Onboarding the Kubernetes Instance for Management via Azure Arc](https://github.com/digitaltwinconsortium/ManufacturingOntologies#onboarding-the-kubernetes-instance-for-management-via-azure-arc)
 * [Enabling the Product Carbon Footprint Calculation (PCF) in the Asset Admin Shell (AAS) Repository](https://github.com/digitaltwinconsortium/ManufacturingOntologies#enabling-the-product-carbon-footprint-calculation-pcf-in-the-asset-admin-shell-aas-repository)
 * [Connecting the Reference Solution to Microsoft Power BI](https://github.com/digitaltwinconsortium/ManufacturingOntologies#connecting-the-reference-solution-to-microsoft-power-bi)
-* [Connecting the Reference Solution to Microsoft Fabric](https://github.com/digitaltwinconsortium/ManufacturingOntologies#connecting-the-reference-solution-to-microsoft-fabric)
+* [A turn-key alternative: Microsoft Fabric](https://github.com/digitaltwinconsortium/ManufacturingOntologies#microsoft-fabric)
 * [Connecting the Reference Solution to On-Premises SAP Systems](https://github.com/digitaltwinconsortium/ManufacturingOntologies#connecting-the-reference-solution-to-on-premises-sap-systems)
 * [Replacing the Production Line Simulation with a Real Production Line](https://github.com/digitaltwinconsortium/ManufacturingOntologies#replacing-the-production-line-simulation-with-a-real-production-line)
 * [Enabling Automatic Asset Onboarding with Azure OpenAI Service](https://github.com/digitaltwinconsortium/ManufacturingOntologies#enabling-automatic-asset-onboarding-with-azure-openai-service)
@@ -84,7 +84,6 @@ Here are the components involved in this solution:
 | [UA Cloud Library](https://github.com/OPCFoundation/UA-CloudLibrary) | The UA Cloud Library is an online store of OPC UA Information Models, hosted by the OPC Foundation [here](https://uacloudlibrary.opcfoundation.org/). |
 | [WattTime Service](https://www.watttime.org/api-documentation/#introduction) | The WattTime service can be used to get the carbon intensity for a unit of electrical energy consumed during a manufacturing process, specific to a particular geographic coordinate passed into the service. |
 | [Microsoft Power BI](https://learn.microsoft.com/en-us/power-bi/fundamentals/power-bi-overview) | Microsoft Power BI is a collection of software services, apps, and connectors that work together to turn your unrelated sources of data into coherent, visually immersive, and interactive insights. |
-| [Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/get-started/microsoft-fabric-overview) | Microsoft Fabric is an all-in-one analytics solution for enterprises that covers everything from data movement to data science, Analytics, and business intelligence. It offers a comprehensive suite of services, including data lake, data engineering, and data integration, all in one place. |
 
 :exclamation: In a real-world deployment, something as critical as opening a pressure relief valve would of course be done on-premises and this is just a simple example of how to achieve the digital feedback loop.
 
@@ -346,19 +345,95 @@ Note: You can add other data from Azure Data Explorer to your report similarily.
 <img src="Docs/powerbi.png" alt="powerbi" width="900" />
 
 
-## Connecting the Reference Solution to Microsoft Fabric
+## Microsoft Fabric
 
-1. You can start a Microsoft Fabric trial from [here](https://learn.microsoft.com/en-us/fabric/get-started/fabric-trial).
-1. Once you are logged into Microsoft Fabric, open the Azure Portal, navigate to your Azure Event Hubs Namespace and create a new `fabic` consumer group in both the data and metadata Event Hubs. Also, take a note of the primary key associated with your `RootManageSharedAccessKey` Shared Access Policy of your Event Hubs Namespace. You will need it later in Microsoft Fabric as username and password to connect to the Event Hubs.
-1. To create a Lakehouse database, follow the steps described [here](https://learn.microsoft.com/en-us/fabric/real-time-analytics/event-streams/overview) to create Event Streams for both the OPC UA PubSub telemetry data as well as for the OPC UA PubSub metadata, directly from the solution's Event Hubs.
+[Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/get-started/microsoft-fabric-overview) is an all-in-one analytics solution that covers everything from data movement to data science, analytics, and business intelligence. It offers a comprehensive suite of services, including data lake, data engineering, and data integration, all in one place. You don't even need an Azure subscription for it, let alone deploy or manage any apps or services. As a simpler alternative to the reference solution provided in this repository, you can get started with Microsoft Fabric [here](https://learn.microsoft.com/en-us/fabric/get-started/fabric-trial).
 
 <img src="Docs/fabric.png" alt="fabric" width="900" />
 
-Note: Alternatively, you can also create a Kusto Query Language (KQL) database, which is the Microsoft Fabric name for Azure Data Explorer, and connect it to your Event Hubs deployed in this reference solution. The connection to Event Hubs is called "Real-Time Analytics Data stream" in Microsoft Fabric.
+To configure Microsoft Fabric for production line data, follow these steps:
 
-<img src="Docs/kql.png" alt="kql" width="900" />
+1. Log into Microsoft Fabric [here](https://fabric.microsoft.com).
+1. Create a `KQL Database` by clicking `Create` -> `See all` -> `KQL Database` and give it a name, e.g. `kql_db_opcua`. Click `Create`.
+1. Under `Database details`, edit the `OneLake folder` setting and set it to `Active`. This will enable sharing your OPC UA time-series data from your production line within your organization via [OneLake](https://learn.microsoft.com/en-us/fabric/onelake/onelake-overview). Click `Done`.
+1. Create the tables we need for ingesting the OPC UA PubSub production line data by clicking `Check your data`, deleting the sample data in the text box and by entering the following Kusto command, one at a time and then clicking `Run` for each line:
 
-Note: For the tables and OPC UA PubSub data processing functions to set up within the KQL database, have a look at the ADX cluster and database deployed in this reference solution.
+        .create table opcua_raw(payload: dynamic)
+
+        .create table opcua_metadata_raw (payload: dynamic) 
+
+        .create table opcua_raw ingestion json mapping "opcua_mapping" @'[{"column":"payload","path":"$","datatype":"dynamic"}]'
+
+        .create table opcua_metadata_raw ingestion json mapping "opcua_metadata_mapping" @'[{"column":"payload","path":"$","datatype":"dynamic"}]'
+
+        .create table opcua_intermediate(DataSetWriterID: string, Timestamp: datetime, Payload: dynamic)
+
+        .create table opcua_telemetry (DataSetWriterID: string, Timestamp: datetime, Name: string, Value: dynamic)
+
+        .create table opcua_metadata (DataSetWriterID: string, Name: string) 
+
+1. Create the OPC UA PubSub production line data parsing functions, by entering the following function definitions, one at a time, clicking `Run` for each line:
+
+        .create-or-alter function OPCUARawExpand() {
+            opcua_raw
+            |mv-expand records = payload.Messages
+            | where records != ''
+            |project 
+              DataSetWriterID = tostring(records["DataSetWriterId"]),
+              Timestamp = todatetime(records["Timestamp"]),
+              Payload = todynamic(records["Payload"])
+         }
+
+         .create-or-alter function OPCUADatasetExpand() {
+            opcua_intermediate
+            | mv-apply Payload on (
+                extend key = tostring(bag_keys(Payload)[0])
+                | extend p = Payload[key]
+                | project Name = key, Value = todynamic(p.Value)
+            )
+        }
+
+        .create-or-alter function OPCUAMetaDataExpand() {
+            opcua_metadata_raw
+            | project DataSetWriterId = tostring(payload.DataSetWriterId), Name = tostring(payload.MetaData.Name)
+        }
+
+1. Apply the OPC UA PubSub parsing functions to your tables, by entering the following policy updates, one at a time, clicking `Run` for each line:
+ 
+        .alter table opcua_intermediate policy update @'[{"Source": "opcua_raw", "Query": "OPCUARawExpand()", "IsEnabled": "True"}]'
+
+        .alter table opcua_telemetry policy update @'[{"Source": "opcua_intermediate", "Query": "OPCUADatasetExpand()", "IsEnabled": "True"}]'
+
+        .alter table opcua_metadata policy update @'[{"Source": "opcua_metadata_raw", "Query": "OPCUAMetaDataExpand()", "IsEnabled": "True"}]'
+
+1. Create a "Last Known Value" OPC UA PubSub metadata table to make sure you always use the latest metadata available, by entering the following materialized view definition and clicking `Run`:
+
+        .create materialized-view opcua_metadata_lkv on table opcua_metadata
+        {
+            opcua_metadata
+            | extend iTime = ingestion_time()
+            | summarize arg_max(iTime, *) by Name, DataSetWriterID
+        }
+
+1. Create an `Eventstream` by clicking `Create` -> `See all` -> `Eventstream` and give it a name, e.g. `eventstream_opcua`. Click `Create`. This component will receive the OPC UA PubSub production line data and send it to your KQL database.
+1. Click `New source` and select `Custom App` and give it a name (e.g. `opcua_telemetry`). Click `Add`. In the `Information` box, click on `Connection string-primary key` and copy it. You will need it soon when configuring UA Cloud Publisher.
+1. Click the green + button at the front of your `eventstream_opcua` and select `Custom App` and give it a name (e.g. `opcua_metadata`). Click `Add`. In the `Information` box, click on `Connection string-primary key` and copy it. You will need it soon when configuring UA Cloud Publisher.
+1. Now configure UA Cloud Publisher. You can either follow the steps for connecting your own production line described [here]() or you can modify the configuration of the UA Cloud Publisher setup in the production line simulation provided in this repository, for example for the Munich production line. For the latter, follow these steps:
+1.1. Log into the VM deployed with this reference solution, open a **Powershell** window and run `Get-AksEdgeNodeAddr` as well as `kubectl get services -n munich`.
+1.1. Open a browser on the VM and enter the IP address and port retrieved for UA Cloud Publisher in the previous step in the address field (e.g. `http://192.168.0.2:30356`) to access the UA Cloud Publisher UI.
+1.1. In the UA Cloud Publisher UI, click `Configuration` and enter the `Connection string-primary key` from the `opcua_metadata` custom app you copied earlier into the `Broker Password` field, the `EntityPath` into the `Broker Message Topic` and `Broker Metadata Topic` fields (the entity path is contained at the end of the connection string and starts with "es_") and the name of your custom app into the `Broker URL` field (the custom app name is contained within the connection string and starts with `eventstream-` and ends with `.servicebus.windows.net`). Click `Update` at the bottom of the configuration page.
+1.1. In the UA Cloud Publisher UI, click `Diagnostics` and verify that you have a connection to Microsoft Fabric (`Connected to broker` is set to `True`).
+1. Back in Microsoft Fabric, select your workspace, click on your event stream and select `Open Eventsteam`.
+1. Click `New destination` and select `KQL Database` and give it a name (e.g. `kql_db_opcua_telemetry`). Under `Workspace`, select you Fabric workspace (e.g. `My workspace`) and under `KQL Database`, select your KQL database you setup earlier. Click `Add and configure`.
+1. In the `Ingest data` popup window, under `Table`, select `Existing table`, select `opcua_raw` and click `Next: Source`. Leave everything the way it is and click `Next: Schema`. Wait a few seconds for the ingested data to be made available. Under `Data format`, select `JSON`. Under `Mapping name`, select `Use existing mapping` and select `opcua_mapping`. Click `Next: Summary`. Click `Close`.
+1. Click the green + button at the back of your `eventstream_opcua` and select `KQL Database` and give it a name (e.g. `kql_db_opcua_metadata`). Under `Workspace`, select you Fabric workspace (e.g. `My workspace`) and under `KQL Database`, select your KQL database you setup earlier. Click `Add and configure`.
+1. In the `Ingest data` popup window, under `Table`, select `Existing table`, select `opcua_raw_metadata` and click `Next: Source`. Under `Data connection name` enter a name (e.g. `kql-db-opcua-eventstream-opcua_metadata`) and click `Next: Schema`. Wait a few seconds for the ingested data to be made available. Under `Data format`, select `JSON`. Under `Mapping name`, select `Use existing mapping` and select `opcua_metadata_mapping`. Click `Next: Summary`. Click `Close`.
+1. To share your OPC UA data via OneLake, create a `Lakehouse` by clicking `Create` -> `See all` -> `Lakehouse` and give it a name, e.g. `opcua_lake`. Click `Create`.
+1. Click `New shortcut`, select `Microsoft OneLake`, select your KQL database, expand the `Tables` and select `opcua_telemetry`.
+1. Click `New shortcut`, select `Microsoft OneLake`, select your KQL database, expand the `Tables` and select `opcua_metadata`.
+1. Click on your workspace, select `Lineage view` to see the entire flow of OPC UA data you have just setup in Microsoft Fabric:
+
+<img src="Docs/fabricflow.png" alt="fabricflow" width="900" />
 
 
 ## Connecting the Reference Solution to On-Premises SAP Systems
@@ -425,9 +500,9 @@ Once you are ready to connect your own production line, simply delete the VM fro
 
         kubectl apply -f UA-CloudPublisher.yaml
 
-Note: On Azure Kubernetes Services Edge Essentials, you can get the IP address of your Kubernetes cluster via `Get-AksEdgeNodeAddr`.
+Note: On Azure Kubernetes Services Edge Essentials, you can get the IP address of your Kubernetes cluster by running `Get-AksEdgeNodeAddr` from a **Powershell** window.
 
-Note: You can query for the external Kubernetes port of your UA Cloud Publisher service via `kubectl get services -n <namespace>`.
+Note: You can query for the external Kubernetes port of your UA Cloud Publisher service by running `kubectl get services -n <namespace>` from a **Powershell** window.
 
 <img src="Docs/publisher.png" alt="publisher" width="900" />
 

@@ -1,9 +1,15 @@
 {
+  "UACertThumbprint": null,
   "PublisherName": "publisher.seattle",
   "BrokerUrl": "[myeventhubsnamespace].servicebus.windows.net",
   "BrokerPort": 9093,
   "BrokerUsername": "$ConnectionString",
   "BrokerPassword": "[myeventhubsnamespaceprimarykeyconnectionstring]",
+  "UseAltBrokerForMetadata": false,
+  "AltBrokerUrl": null,
+  "AltBrokerPort": 8883,
+  "AltBrokerUsername": null,
+  "AltBrokerPassword": null,
   "BrokerMessageTopic": "data",
   "BrokerMetadataTopic": "metadata",
   "SendUAMetadata": true,
@@ -13,6 +19,7 @@
   "BrokerMessageSize": 262144,
   "CreateBrokerSASToken": false,
   "UseTLS": false,
+  "UseCertAuth": false,
   "InternalQueueCapacity": 1000,
   "DefaultSendIntervalSeconds": 1,
   "DiagnosticsLoggingInterval": 30,
@@ -20,5 +27,8 @@
   "DefaultOpcPublishingInterval": 1000,
   "UAStackTraceMask": 645,
   "ReversiblePubSubEncoding": false,
-  "AutoLoadPersistedNodes": true
+  "AutoLoadPersistedNodes": true,
+  "AzureOpenAIAPIEndpoint": null,
+  "AzureOpenAIAPIKey": null,
+  "AzureOpenAIDeploymentName": null
 }

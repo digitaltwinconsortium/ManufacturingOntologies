@@ -439,6 +439,26 @@ To configure Microsoft Fabric for production line data, follow these steps:
 
 <img src="Docs/fabricflow.png" alt="fabricflow" width="900" />
 
+1. Give it a few minutes to process the OPC UA data from the production line. Then click on our KQL Database and select `Open KQL Database` followed by `Check your data`. Delete the sample queries and enter the following query in the text box:
+
+         let _startTime = ago(1h);
+         let _endTime = now();
+         opcua_metadata_lkv
+         | where Name contains "assembly"
+         | where Name contains "munich"
+         | join kind=inner (opcua_telemetry
+             | where Name == "ActualCycleTime"
+             | where Timestamp > _startTime and Timestamp < _endTime
+         ) on DataSetWriterID
+         | extend NodeValue = todouble(Value)
+         | project Timestamp, NodeValue
+         | sort by Timestamp desc 
+         | render linechart 
+
+This will result in is a line graph rendered directly in Fabric:
+
+<img src="Docs/kqlrender.png" alt="kqlrender" width="900" />
+
 
 ## Connecting the Reference Solution to On-Premises SAP Systems
 

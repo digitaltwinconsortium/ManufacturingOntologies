@@ -351,7 +351,7 @@ Note: You can add other data from Azure Data Explorer to your report similarily.
 
 <img src="Docs/fabric.png" alt="fabric" width="900" />
 
-To configure Microsoft Fabric for production line data, follow these steps:
+To configure Microsoft Fabric for production line data, you need at least 1 OPC UA server integrated into your produciton line that support OPC UA PubSub. Alternatively, you can use an OPC UA Client/Server to OPC UA PubSub adapter app like UA Cloud Publisher used in this reference solution. Then follow these steps:
 
 1. Log into Microsoft Fabric [here](https://fabric.microsoft.com).
 1. Create a `KQL Database` by clicking `Create` -> `See all` -> `KQL Database` and give it a name, e.g. `kql_db_opcua`. Click `Create`.

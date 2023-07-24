@@ -507,7 +507,7 @@ To create a new Azure Logic Apps workflow from your on-premises SAP system to Az
 
 Your completed Azure Logic Apps workflow should now look like this:
 
-<img src="Docs/workflow.png" alt="workflow" width="500" />
+<img src="Docs/workflow.png" alt="workflow" width="900" />
 
 Copy the `HTTP GET URL` from your HTTP trigger in your workflow. You will need it when configuring SAP in the next step.
 

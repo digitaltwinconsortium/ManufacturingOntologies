@@ -426,7 +426,7 @@ To configure Microsoft Fabric for production line data, follow these steps:
    1. Select the checkbox `Use Alternative Broker For OPC UA Metadata Messages` and enter the `Connection string-primary key` from the `opcua_metadata` custom app you copied earlier into the `Alternative Broker Password` field, enter `9093` in the `Alternative Broker Port` field, enter `$ConnectionString` into the `Alternative Broker Username` field, enter the `EntityPath` into the `Broker Metadata Topic` (the entity path is contained at the end of the connection string and starts with "es_") and the name of your custom app into the `Alternative Broker URL` field (the custom app name is contained within the connection string and starts with `eventstream-` and ends with `.servicebus.windows.net`).
    1. Set the `Metadata Send Interval in Seconds` to `3000`.
 
-    <img src="Docs/publisherconfig.png" alt="publisherconfig" width="900" />
+        <img src="Docs/publisherconfig.png" alt="publisherconfig" width="900" />
 
    1. Click `Apply` at the top of the configuration page. 
    1. In the UA Cloud Publisher UI, click `Diagnostics` and verify that you have a connection to Microsoft Fabric (`Connected to broker(s)` is set to `True`).
@@ -441,7 +441,7 @@ To configure Microsoft Fabric for production line data, follow these steps:
 1. Click `New shortcut`, select `Microsoft OneLake`, select your KQL database, expand the `Tables` and select `opcua_metadata`.
 1. Click on your workspace, select `Lineage view` to see the entire flow of OPC UA data you have just setup in Microsoft Fabric:
 
-    <img src="Docs/fabricflow.png" alt="fabricflow" width="900" />
+        <img src="Docs/fabricflow.png" alt="fabricflow" width="900" />
 
 1. Click on our KQL Database and select `Open KQL Database` followed by `Check your data`. Delete the sample queries and enter the following query in the text box:
 

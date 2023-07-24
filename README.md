@@ -443,7 +443,7 @@ To configure Microsoft Fabric for production line data, follow these steps:
 
     <img src="Docs/fabricflow.png" alt="fabricflow" width="900" />
 
- 1. Click on our KQL Database and select `Open KQL Database` followed by `Check your data`. Delete the sample queries and enter the following query in the text box:
+1. Click on our KQL Database and select `Open KQL Database` followed by `Check your data`. Delete the sample queries and enter the following query in the text box:
 
          let _startTime = ago(1h);
          let _endTime = now();

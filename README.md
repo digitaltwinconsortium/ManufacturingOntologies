@@ -441,7 +441,7 @@ To configure Microsoft Fabric for production line data, you need at least 1 OPC 
 1. Click `New shortcut`, select `Microsoft OneLake`, select your KQL database, expand the `Tables` and select `opcua_metadata`.
 1. Click on your workspace, select `Lineage view` to see the entire flow of OPC UA data you have just setup in Microsoft Fabric:
 
-<img src="Docs/fabricflow.png" alt="fabricflow" width="900" />
+    <img src="Docs/fabricflow.png" alt="fabricflow" width="900" />
 
 1. Click on our KQL Database and select `Open KQL Database` followed by `Check your data`. Delete the sample queries and enter the following query in the text box:
 

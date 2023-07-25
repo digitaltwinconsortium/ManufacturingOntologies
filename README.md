@@ -470,29 +470,6 @@ Note: If you want to simply try out SAP connectivity before connecting your real
 
 The Azure services handling connectivity to your on-premises SAP systems is called Azure Logic Apps. Azure Logic Apps is a no-code Azure service to orchestrate workflows that can trigger actions in e.g. Azure Digital Twins service.
 
-
-### Microsoft On-Premises Data Gateway
-
-Microsoft provides an on-premises data gateway for sending data **to** on-premises SAP systems from Azure Logic Apps.
-
-Note: To receive data **from** on-premises SAP systems to Azure Logic Apps in the cloud, the SAP connector and on-premises data gateway is **not** required.
-
-To install the on-premises data gateway, follow these steps:
-
-1. Download and install the on-premises data gateway from [here](https://aka.ms/on-premises-data-gateway-installer). Pay special attention to the [prerequisits](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-gateway-install#prerequisites)! For example, if your Azure account has access to more than one Azure subscription, you need to use a different Azure account to install the gateway and to create the accompanying on-premises data gateway Azure resource. Simply create a new user in your Azure Active Directory if this is the case.
-1. If not already installed, download and install the Visual Studio 2010 (VC++ 10.0) redistributables from [here](https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x64.exe).
-1. Download and install the SAP Connector for Microsoft .NET 3.0 for Windows x64 from [here](https://support.sap.com/en/product/connectors/msnet.html?anchorId=section_512604546). SAP download access for the SAP portal is required. Contact SAP support if you don't have this.
-1. Copy the 4 libraries libicudecnumber.dll, rscp4n.dll, sapnco.dll and sapnco_utils.dll from the SAP Connector's installation location (by default this is `C:\Program Files\SAP\SAP_DotNetConnector3_Net40_x64`) to the installation location of the data gateway (by default this is `C:\Program Files\On-premises data gateway`).
-1. Restart the data gateway through the `On-premises data gateway` configuration tool that came with the on-premsis data gateway installer package installed earlier.
-1. Create the on-premises data gateway Azure resource in the same Azure region as selected during the data gateway installation in the previous step and select the name of your data gateway under `Installation Name`.
-
-<img src="Docs/gateway.png" alt="gateway" width="500" />
-
-Note: Further background info regarding the configuration steps can be accessed [here](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-using-sap-connector?tabs=consumption).
-
-Note: If you run into errors with the Data Gateway or the SAP Connector, you can enable debug tracing by following [these steps](https://learn.microsoft.com/en-us/archive/blogs/david_burgs_blog/enable-sap-nco-library-loggingtracing-for-azure-on-premises-data-gateway-and-the-sap-connector).
-
-
 ### Configuring Azure Logic Apps to Receive Data From On-Premises SAP Systems
 
 To create a new Azure Logic Apps workflow from your on-premises SAP system to Azure Logic Apps and further on to your Azure Digital Twins service instance and also store the data sent from SAP in your Azure Storage Account deployed in this reference solution, follow these steps:
@@ -514,28 +491,43 @@ Copy the `HTTP GET URL` from your HTTP trigger in your workflow. You will need i
 
 ### Configuring Your On-Premises SAP System to Send Data to Azure Logic Apps
 
-TODO: This section needs to be updated from RFC to HTTP!
-1. Create a new *RFC Connection* for your Azure Logic App in your SAP system by entering `SM59` from the SAP system's search box, which will bring up the `Configuration of RFC Connections` screen. Select `Edit`->`Create`, enter `LOGICAPP` in the `Destination` field and select `RFC connection to external program using TCP/IP` in the `Connection Type` dropdown. Click the green check button. Enter `LOGICAPP` under `Description`. Under `Technical Settings`, select `Registered Server Program` under `Activation Type` and enter `LOGICAPP` under `Program ID`. Click the `Save` button.
-1. Create a new *ABAP Connection* for your Azure Logic App in your SAP system by entering `SM59` from the SAP system's search box, which will bring up the `Configuration of RFC Connections` screen. Select `Edit`->`Create`, enter `LOGICAPP2` in the `Destination` field and select `RFC connection to ABAP system` in the `Connection Type` dropdown. Click the green check button. Enter `LOGICAPP` under `Description`. Click the `Save` button.
-1. Create a new *security info entry* for your Azure Logic App in your SAP system by entering `SMGW` from the SAP system's search box, which will bring up the `Active Connections` of the `Gateway Monitor` screen. Select `Goto`->`Expert Functions`->`External Security`->`Maintain ACL Files`. In the `Secinfo` file, click the `Insert Line` button and select `Standard`. Fill in the entry mask with the following info: `P/D`=`P`, `TP`=`LOGICAPP`, `USER`=`*`, `USER-HOST`=`*`, `HOST`=`<IP address of your Data Gateway>`. Click the green check button. Click the `Save` button.
-1. Create a new *registry info entry* for your Azure Logic App in your SAP system by entering `SMGW` from the SAP system's search box, which will bring up the `Active Connections` of the `Gateway Monitor` screen. Select `Goto`->`Expert Functions`->`External Security`->`Maintain ACL Files`. In the `Reginfo` file, click the `Insert Line` button and select `Standard`. Fill in the entry mask with the following info: `P/D`=`P`, `TP`=`LOGICAPP`, `HOST`=`<IP address of your Data Gateway>`, `ACCESS`=`*`, `Cancel`=`*`. Click the green check button. Click the `Save` button.
-1. Create a new *receiver port* for your Azure Logic App in your SAP system by entering `WE21` from the SAP system's search box, which will bring up the `Ports in IDoc processing` screen. Select the `Transactional RFC` folder. Click on the `Create` button. In the settings box that opens, select `Own port name`. Enter `LOGICAPP`. Click the green check button. In the settings for your new receiver port, for `Description`, enter `LOGICAPP` and for `RFC destination`, enter `LOGICAPP`. Click the `Save` button.
-1. Create a new *sender port* for your Azure Logic App in your SAP system by entering `WE21` from the SAP system's search box, which will bring up the `Ports in IDoc processing` screen. Select the `Transactional RFC` folder. Click on the `Create` button. In the settings box that opens, select `Own port name`. Enter `SAPLAPP`. Click the green check button. In the settings for your new receiver port, for `Description`, enter `LOGICAPP2` and for `RFC destination`, enter `LOGICAPP2`. Click the `Save` button.
-1. Create a *logical system partner* for your Azure Logic App in your SAP system by entering `BD54` from the SAP system's search box, which will bring up the `Change View "Logical Systems" Overview` screen. Click the green check button to get past the inital warning. Click on the `New Entries` button. For `Log.System` enter `LA`. For `Name of Logical System` enter `LOGICAPP`. Click the `Save` button. In the `Prompt for workbench request` dialog, click the `Create` button. In the `Create request` dialog, enter `LOGICAPP` for `Short Description`. Click the `Save` button. Click the green check button.
-1. Create *partner profiles* for your Azure Logic App in your SAP system by entering `WE20` from the SAP system's search box, which will bring up the `Partner profiles` screen. Expand the `Partner Profiles` folder and select the `Partner Type LS` (Logical System) folder. Click on the `Create` button. For `Partner No.` enter `LA`. For `Partn.Type` enter `LS`. In the `Post Processing: Valid Processors` tab, for `Ty.` enter `US` and for `Agent` enter your SAP username. Click the `Save` button. Click on the `Create Outbound Parameter` button. In the `Partner Profiles: Outbound Parameters` dialog, enter `/ISDFPS/CREMAS` for `Message Type` (or another message type you choose). In the `Outbound Options` tab, enter `LOGICAPP` for `Receiver port`. Select the `Pass IDoc Immediately` radio button. For '`Basic type` enter `/ISDFPS/CREMAS04` (or another basic type you choose). Click the `Save` button.
-1. Enter `SM59` from the SAP system's search box, which will bring up the `Configuration of RFC Connections`. Expand `TCP/IP Connections`, double-click your `LOGICAPP` entry. Select `Utilities`->`Test`->`Connection Test`. If the test is successfull, it will display a logon action result in msec.
-1. Enter `SM59` from the SAP system's search box, which will bring up the `Configuration of RFC Connections`. Expand `ABAP Connections`, double-click your `LOGICAPP2` entry. Select `Utilities`->`Test`->`Connection Test`. If the test is successfull, it will display a logon action result in msec.
+1. Create a new HTTP connection for your Azure Logic App in your SAP system by entering `SM59` from the SAP system's search box, which will bring up the `Configuration of RFC Connections` screen. Select `Edit`->`Create`, enter `LOGICAPP` in the `Destination` field and select `HTTP Connection to external server` in the `Connection Type` dropdown. Click the green check button. Enter `LOGICAPP` under `Description`. Under `Technical Settings` enter the **hostname** of your Logic App `HTTP GET URL` copied earlier (e.g. `prod-51.northeurope.logic.azure.com`), under `Port` enter `443` and under `Path Prefix` enter the rest of your `HTTP GET URL` copied earlier starting with `/workflows/...`. In the `Logon & Security` tab, scroll down to `Security Options` and set `SSL` to `Active`. Click the `Save` button, followed by the `Connection Test` button. Accept the warning popup and then you should see a response code of `202` from your Azure Logic App.
+1. Create a new port for your Azure Logic App in your SAP system by entering `WE21` from the SAP system's search box, which will bring up the `Ports in IDoc processing` screen. Select the `XML HTTP` folder. Click on the `Create` button. In the `Port` field enter `LOGICAPP`. In the `RFC destination` select `LOGICAPP`. Click the `Save` button.
+1. Create a logical system partner for your Azure Logic App in your SAP system by entering `BD54` from the SAP system's search box, which will bring up the `Change View "Logical Systems" Overview` screen. Click the green check button to get past the inital warning. Click on the `New Entries` button. For `Log.System` enter `LA`. For `Name of Logical System` enter `LOGICAPP`. Click the `Save` button. In the `Prompt for workbench request` dialog, click the `Create` button. In the `Create request` dialog, enter `LOGICAPP` for `Short Description`. Under `Owner` enter your SAP username. Click the `Save` button. Click the green check button.
+1. Create a partner profile for your Azure Logic App in your SAP system by entering `WE20` from the SAP system's search box, which will bring up the `Partner profiles` screen. Expand the `Partner Profiles` folder and select the `Partner Type LS` (Logical System) folder. Click on the `Create` button. For `Partner No.` enter `LA`. For `Partn.Type` enter `LS`. In the `Post Processing: Valid Processors` tab, for `Ty.` enter `US` and for `Agent` enter your SAP username. Click the `Save` button. Click on the `Create Outbound Parameter` button. In the `Partner Profiles: Outbound Parameters` dialog, enter `/ISDFPS/CREMAS` for `Message Type` (or another message type you choose). In the `Outbound Options` tab, enter `LOGICAPP` for `Receiver port`. Select the `Pass IDoc Immediately` radio button. For '`Basic type` enter `/ISDFPS/CREMAS04` (or another basic type you choose). Click the `Save` button.
 
 
 ### Testing your SAP to Azure Logic App Workflow
 
 To try out your SAP to Azure Logic App workflow, follow these steps:
 
-Enter `WE19` from the SAP system's search box, which will bring up the `Configuration of RFC Connections` screen. Select the `Using message type` radio button and enter `/ISDFPS/CREMAS`. Click on the `Create` button. Click on the `EDICC` field. In the `Edit Control Record Fields` dialog, enter `LOGICAPP` for `Receiver Port` and `SAPLAPP` for `Sender Port`. Click the green check button. Click on the `Standard Outbound Processing` button. In the `Outbound Processing of IDoc` dialog, click the green check button to start the IDoc message processing.
+Enter `WE19` from the SAP system's search box, which will bring up the `Configuration of RFC Connections` screen. Select the `Using message type` radio button and enter `/ISDFPS/CREMAS`. Click on the `Create` button. Click on the `EDICC` field. In the `Edit Control Record Fields` dialog, enter `LOGICAPP` for `Receiver Port`. Click the green check button. Click on the `Standard Outbound Processing` button. In the `Outbound Processing of IDoc` dialog, click the green check button to start the IDoc message processing.
 
 Open the Azure Digital Twins Explorer from the Azure Digital Twins service instance planel in the Azure Portal and check that new job order digital twins are created.
 
 Note: To check for IDoc message processing errors, entering `WE09` from the SAP system's search box, select a time range and click the `execute` button. This will bring up the `IDoc Search for Business Content` screen.
+
+
+### Microsoft On-Premises Data Gateway
+
+Microsoft provides an on-premises data gateway for sending data **to** on-premises SAP systems from Azure Logic Apps.
+
+Note: To receive data **from** on-premises SAP systems to Azure Logic Apps in the cloud, the SAP connector and on-premises data gateway is **not** required.
+
+To install the on-premises data gateway, follow these steps:
+
+1. Download and install the on-premises data gateway from [here](https://aka.ms/on-premises-data-gateway-installer). Pay special attention to the [prerequisits](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-gateway-install#prerequisites)! For example, if your Azure account has access to more than one Azure subscription, you need to use a different Azure account to install the gateway and to create the accompanying on-premises data gateway Azure resource. Simply create a new user in your Azure Active Directory if this is the case.
+1. If not already installed, download and install the Visual Studio 2010 (VC++ 10.0) redistributables from [here](https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x64.exe).
+1. Download and install the SAP Connector for Microsoft .NET 3.0 for Windows x64 from [here](https://support.sap.com/en/product/connectors/msnet.html?anchorId=section_512604546). SAP download access for the SAP portal is required. Contact SAP support if you don't have this.
+1. Copy the 4 libraries libicudecnumber.dll, rscp4n.dll, sapnco.dll and sapnco_utils.dll from the SAP Connector's installation location (by default this is `C:\Program Files\SAP\SAP_DotNetConnector3_Net40_x64`) to the installation location of the data gateway (by default this is `C:\Program Files\On-premises data gateway`).
+1. Restart the data gateway through the `On-premises data gateway` configuration tool that came with the on-premsis data gateway installer package installed earlier.
+1. Create the on-premises data gateway Azure resource in the same Azure region as selected during the data gateway installation in the previous step and select the name of your data gateway under `Installation Name`.
+
+<img src="Docs/gateway.png" alt="gateway" width="500" />
+
+Note: Further background info regarding the configuration steps can be accessed [here](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-using-sap-connector?tabs=consumption).
+
+Note: If you run into errors with the Data Gateway or the SAP Connector, you can enable debug tracing by following [these steps](https://learn.microsoft.com/en-us/archive/blogs/david_burgs_blog/enable-sap-nco-library-loggingtracing-for-azure-on-premises-data-gateway-and-the-sap-connector).
 
 
 ## Replacing the Production Line Simulation with a Real Production Line

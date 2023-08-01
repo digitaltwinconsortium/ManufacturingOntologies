@@ -502,7 +502,7 @@ To try out your SAP to Azure Logic App workflow, follow these steps:
 
 Enter `WE19` from the SAP system's search box, which will bring up the `Test Tool for IDoc Processing` screen. Select the `Using message type` radio button and enter `INTERNAL_ORDER`. Click on the `Create` button. Click on the `EDICC` field. In the `Edit Control Record Fields` dialog, enter `LOGICAPP` for `Receiver Port`, `S4HCLNT100` for `Receiver Partner No.` and `LS` for `Receiver Part. Type`. Similarily, enter `SAPS4H` for `Sender Port`, `S4HCLNT100` for `Sender Partner No.` and `LS` for `Sender Part. Type`. Click the green check button. Click on the `Standard Outbound Processing` button. In the `Outbound Processing of IDoc` dialog, click the green check button to start the IDoc message processing.
 
-Open the Azure Digital Twins Explorer from the Azure Digital Twins service instance planel in the Azure Portal and check that new job order digital twin called `sap` is created. Similarily, you can open the Storage browser of your Azure Storage Account, select Files shares and check that a new `IDoc.xml` file was created in the `sap` folder.
+Open the Azure Digital Twins Explorer from the Azure Digital Twins service instance planel in the Azure Portal and check that a new job order digital twin called `sap` is created. Similarily, you can open the Storage browser of your Azure Storage Account, select Files shares and check that a new `IDoc.xml` file was created in the `sap` folder.
 
 Note: To check for IDoc message processing errors, entering `WE09` from the SAP system's search box, select a time range and click the `execute` button. This will bring up the `IDoc Search for Business Content` screen and you can select each IDoc for processing errors in the table displayed.
 

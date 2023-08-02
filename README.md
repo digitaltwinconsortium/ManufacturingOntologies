@@ -12,8 +12,8 @@
 * [Digital Feedback Loop with UA Cloud Commander and UA Cloud Action](https://github.com/digitaltwinconsortium/ManufacturingOntologies#digital-feedback-loop-with-ua-cloud-commander-and-ua-cloud-action)
 * [Installation of Production Line Simulation and Cloud Services](https://github.com/digitaltwinconsortium/ManufacturingOntologies#installation-of-production-line-simulation-and-cloud-services)
 * [Running the Production Line Simulation](https://github.com/digitaltwinconsortium/ManufacturingOntologies#running-the-production-line-simulation)
-* [Viewing Digital Twins in Azure Digital Twins Explorer](https://github.com/digitaltwinconsortium/ManufacturingOntologies#view-digital-twins-in-azure-digital-twins-explorer)
-* [Generating a Digital Twins Graph with the ADT Generator Tool](https://github.com/digitaltwinconsortium/ManufacturingOntologies#generate-a-digital-twins-graph-with-the-adt-generator-tool)
+* [Viewing Digital Twins in Azure Digital Twins Explorer](https://github.com/digitaltwinconsortium/ManufacturingOntologies#viewing-digital-twins-in-azure-digital-twins-explorer)
+* [Generating a Digital Twins Graph with the ADT Generator Tool](https://github.com/digitaltwinconsortium/ManufacturingOntologies#generating-a-digital-twins-graph-with-the-adt-generator-tool)
 * [Condition Monitoring, Calculating OEE, Detecting Anomalies and Making Predictions in Azure Data Explorer](https://github.com/digitaltwinconsortium/ManufacturingOntologies#condition-monitoring-calculating-oee-detecting-anomalies-and-making-predictions-in-azure-data-explorer)
 * [Using Azure Managed Grafana Service](https://github.com/digitaltwinconsortium/ManufacturingOntologies#using-azure-managed-grafana-service)
 * [Using 3D Scenes Studio](https://github.com/digitaltwinconsortium/ManufacturingOntologies#using-3d-scenes-studio)
@@ -345,7 +345,7 @@ Note: You can add other data from Azure Data Explorer to your report similarily.
 <img src="Docs/powerbi.png" alt="powerbi" width="900" />
 
 
-## Microsoft Fabric
+## A Turn-Key Alternative: Microsoft Fabric
 
 [Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/get-started/microsoft-fabric-overview) is an all-in-one analytics solution that covers everything from data movement to data science, analytics, and business intelligence. It offers a comprehensive suite of services, including data lake, data engineering, and data integration, all in one place. You don't even need an Azure subscription for it, let alone deploy or manage any apps or services. As a simpler alternative to the reference solution provided in this repository, you can get started with Microsoft Fabric [here](https://learn.microsoft.com/en-us/fabric/get-started/fabric-trial).
 

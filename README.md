@@ -20,7 +20,7 @@
 * [Onboarding the Kubernetes Instance for Management via Azure Arc](https://github.com/digitaltwinconsortium/ManufacturingOntologies#onboarding-the-kubernetes-instance-for-management-via-azure-arc)
 * [Enabling the Product Carbon Footprint Calculation (PCF) in the Asset Admin Shell (AAS) Repository](https://github.com/digitaltwinconsortium/ManufacturingOntologies#enabling-the-product-carbon-footprint-calculation-pcf-in-the-asset-admin-shell-aas-repository)
 * [Connecting the Reference Solution to Microsoft Power BI](https://github.com/digitaltwinconsortium/ManufacturingOntologies#connecting-the-reference-solution-to-microsoft-power-bi)
-* [A turn-key alternative: Microsoft Fabric](https://github.com/digitaltwinconsortium/ManufacturingOntologies#microsoft-fabric)
+* [A turn-key alternative: Microsoft Fabric](https://github.com/digitaltwinconsortium/ManufacturingOntologies#a-turn-key-alternative-microsoft-fabric)
 * [Connecting the Reference Solution to On-Premises SAP Systems](https://github.com/digitaltwinconsortium/ManufacturingOntologies#connecting-the-reference-solution-to-on-premises-sap-systems)
 * [Replacing the Production Line Simulation with a Real Production Line](https://github.com/digitaltwinconsortium/ManufacturingOntologies#replacing-the-production-line-simulation-with-a-real-production-line)
 * [Enabling Automatic Asset Onboarding with Azure OpenAI Service](https://github.com/digitaltwinconsortium/ManufacturingOntologies#enabling-automatic-asset-onboarding-with-azure-openai-service)

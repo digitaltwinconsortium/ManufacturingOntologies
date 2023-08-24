@@ -7,12 +7,12 @@
     },
     "Arc": {
         "ClusterName": "ontologies_cluster",
-        "Location": null,
-        "ResourceGroupName": null,
-        "SubscriptionId": null,
-        "TenantId": null,
-        "ClientId": null,
-        "ClientSecret": null
+        "Location": "",
+        "ResourceGroupName": "",
+        "SubscriptionId": "",
+        "TenantId": "",
+        "ClientId": "",
+        "ClientSecret": ""
     },
   "Network": {
     "NetworkPlugin": "calico",

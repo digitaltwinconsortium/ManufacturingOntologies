@@ -205,15 +205,11 @@ Note: To save cost, the deployment deploys just a single Windows 11 Enterprise V
 Once the deployment completes, follow these steps to setup a single-node Edge Kubernetes cluster and finish configuring the simulation:
 
 1. Connect to the deployed Windows VM with an RDP (remote desktop) connection. You can download the RDP file in the [Azure portal](https://portal.azure.com) page for the VM, under the **Connect** options. Sign in using the credentials you provided during deployment.
-1. From the deployed VM, open a **Windows command prompt**, navigate to the `C:\ManufacturingOntologies-main\AKSEdgeTools` directory and run `AksEdgePrompt`. This will open a PowerShell window:
+1. From the deployed VM, open a **Powershell window**, navigate to the `C:\ManufacturingOntologies-main\Deployment` directory and run `New-AksEdgeDeployment -JsonConfigFilePath .\aksedge-config.json`.
 
-    <img src="Docs/akspowershell.png" alt="AKS" width="900" />
+Once the command is finished, your Kubernetes installation is complete and you can start deploying workloads.
 
-1. Run `New-AksEdgeDeployment -JsonConfigFilePath .\aksedge-config.json` from the PowerShell window.
-
-Once the script is finished, close all command prompt windows. Your Kubernetes installation is now complete and you can start deploying workloads.
-
-Note: To get logs from all your Kubernetes workloads and services at any time, simply run `Get-AksEdgeLogs` from the Powershell window that can be opened via `AksEdgePrompt`.
+Note: To get logs from all your Kubernetes workloads and services at any time, simply run `Get-AksEdgeLogs` from a **Powershell window**.
 
 
 ## Running the Production Line Simulation
@@ -285,20 +281,21 @@ If you want to add a 3D viewer to the simulation, you can follow the steps to co
 
 ## Onboarding the Kubernetes Instance for Management via Azure Arc
 
-1. On your virtual machine, From a **Windows PowerShell window**, navigate to the `AKSEdgeTools` directory.
-1. Run `notepad aide-userconfig.json` and provide the following information:
+1. On your virtual machine, open a **PowerShell window**, navigate to the `C:\ManufacturingOntologies-main\Deployment` directory and create a new Azure Service Principal by following the instructions outlined [here](https://learn.microsoft.com/en-us/azure/aks/hybrid/system-requirements?tabs=allow-table#optional-create-a-new-service-principal).
+1. Run `notepad aksedge-config.json` and provide the following information:
 
     | Attribute | Description |
     | --- | --- |
-    | SubscriptionName	| The name of your Azure subscription. You can find this in the Azure portal under Subscriptions. |
+    | Location | The Azure location of your resource group (no spaces!). You can find this in the Azure portal under the resource group which was deployed for this solution. |
     | SubscriptionId | Your subscription ID. In the Azure portal, click on the subscription you're using and copy/paste the subscription ID. |
     | TenantId | Your tenant ID. In the Azure portal, click on Azure Active Directory and copy/paste the tenant ID. |
     | ResourceGroupName | The name of the Azure resource group which was deployed for this solution. |
-    | ServicePrincipalName | The name of the Azure Service Principal to use as credentials. AKS uses this service principal to connect your cluster to Arc. Set this to the same name as your ResourceGroupName for simplicity. |
+    | ClientId | The name of the Azure Service Principal previously created. AKS uses this service principal to connect your cluster to Arc. |
+    | ClientSecret | The password for the Azure Service Principal. |
 
-1. Save the file, and run `SetupArc` from the PowerShell window.
+1. Save the file, and run `SetupArc`.
 
-You can now manage your Kubernetes cluster from the cloud via the newly deployed Azure Arc instance. In the Azure Portal, browse to the Azure Arc instance and select Workloads. The required service token can be retrieved via `Get-AideArcKubernetesServiceToken` from the `AksEdgePrompt` on your virtual machine.
+You can now manage your Kubernetes cluster from the cloud via the newly deployed Azure Arc instance. In the Azure Portal, browse to the Azure Arc instance and select Workloads. The required service token can be retrieved via `Get-AksEdgeManagedServiceToken` from a **Powershell window** on your virtual machine.
 
 <img src="Docs/arc.png" alt="arc" width="900" />
 
@@ -420,7 +417,7 @@ To configure Microsoft Fabric for production line data, you need at least 1 OPC 
 1. Create another `Eventstream` by clicking `Create` -> `See all` -> `Eventstream` and give it a name (e.g. `eventstream_opcua_metadata`). Click `Create`. This component will receive the OPC UA PubSub production line metadata and send it to your KQL database.
 1. Click `New source` and select `Custom App` and give it a name (e.g. `opcua_metadata`). Click `Add`. In the `Information` box, click on `Connection string-primary key` and copy it. You will need it soon when configuring UA Cloud Publisher.
 1. Now configure UA Cloud Publisher. You can either follow the steps for connecting your own production line described [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies#replacing-the-production-line-simulation-with-a-real-production-line) or you can modify the configuration of the UA Cloud Publisher setup in the production line simulation provided in this repository, for example for the Munich production line. For the latter, follow these steps:
-   1. Log into the VM deployed with this reference solution, open a **Powershell** window and run `Get-AksEdgeNodeAddr` as well as `kubectl get services -n munich`.
+   1. Log into the VM deployed with this reference solution, open a **Powershell window** and run `Get-AksEdgeNodeAddr` as well as `kubectl get services -n munich`.
    1. Open a browser on the VM and enter the IP address and port retrieved for UA Cloud Publisher in the previous step in the address field (e.g. `http://192.168.0.2:30356`) to access the UA Cloud Publisher UI.
    1. In the UA Cloud Publisher UI, click `Configuration` and enter the `Connection string-primary key` from the `opcua_telemetry` custom app you copied earlier into the `Broker Password` field, enter `$ConnectionString` into the `Broker Username` field, enter the `EntityPath` into the `Broker Message Topic` (the entity path is contained at the end of the connection string and starts with "es_") and the name of your custom app into the `Broker URL` field (the custom app name is contained within the connection string and starts with `eventstream-` and ends with `.servicebus.windows.net`).
    1. Select the checkbox `Use Alternative Broker For OPC UA Metadata Messages` and enter the `Connection string-primary key` from the `opcua_metadata` custom app you copied earlier into the `Alternative Broker Password` field, enter `9093` in the `Alternative Broker Port` field, enter `$ConnectionString` into the `Alternative Broker Username` field, enter the `EntityPath` into the `Broker Metadata Topic` (the entity path is contained at the end of the connection string and starts with "es_") and the name of your custom app into the `Alternative Broker URL` field (the custom app name is contained within the connection string and starts with `eventstream-` and ends with `.servicebus.windows.net`).
@@ -538,9 +535,9 @@ Once you are ready to connect your own production line, simply delete the VM fro
 
         kubectl apply -f UA-CloudPublisher.yaml
 
-Note: On Azure Kubernetes Services Edge Essentials, you can get the IP address of your Kubernetes cluster by running `Get-AksEdgeNodeAddr` from a **Powershell** window.
+Note: On Azure Kubernetes Services Edge Essentials, you can get the IP address of your Kubernetes cluster by running `Get-AksEdgeNodeAddr` from a **Powershell window**.
 
-Note: You can query for the external Kubernetes port of your UA Cloud Publisher service by running `kubectl get services -n <namespace>` from a **Powershell** window.
+Note: You can query for the external Kubernetes port of your UA Cloud Publisher service by running `kubectl get services -n <namespace>` from a **Powershell window**.
 
 <img src="Docs/publisher.png" alt="publisher" width="900" />
 

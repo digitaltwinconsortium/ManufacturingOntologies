@@ -6,7 +6,7 @@
         "ServiceIPRangeSize": 0
     },
     "Arc": {
-        "ClusterName": null,
+        "ClusterName": "ontologies_cluster",
         "Location": null,
         "ResourceGroupName": null,
         "SubscriptionId": null,

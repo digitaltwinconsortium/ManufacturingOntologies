@@ -293,7 +293,7 @@ If you want to add a 3D viewer to the simulation, you can follow the steps to co
     | ClientId | The name of the Azure Service Principal previously created. AKS uses this service principal to connect your cluster to Arc. |
     | ClientSecret | The password for the Azure Service Principal. |
 
-1. Save the file, close the Powershell window, open a new **Powershell window** and run `SetupArc`.
+1. Save the file, close the Powershell window, open a new **Powershell window**, navigate back to the `C:\ManufacturingOntologies-main\Deployment` directory and run `SetupArc`.
 
 You can now manage your Kubernetes cluster from the cloud via the newly deployed Azure Arc instance. In the Azure Portal, browse to the Azure Arc instance and select Workloads. The required service token can be retrieved via `Get-AksEdgeManagedServiceToken` from a **Powershell window** on your virtual machine.
 

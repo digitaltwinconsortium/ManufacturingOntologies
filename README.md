@@ -281,7 +281,7 @@ If you want to add a 3D viewer to the simulation, you can follow the steps to co
 
 ## Onboarding the Kubernetes Instance for Management via Azure Arc
 
-1. On your virtual machine, open a **PowerShell window**, navigate to the `C:\ManufacturingOntologies-main\Deployment` directory and create a new Azure Service Principal by following the instructions outlined [here](https://learn.microsoft.com/en-us/azure/aks/hybrid/system-requirements?tabs=allow-table#optional-create-a-new-service-principal).
+1. On your virtual machine, open a **PowerShell window**, navigate to the `C:\ManufacturingOntologies-main\Deployment` directory and run `CreateServicePrincipal`. The two parameters `subscriptionID` and `tenantID` can be retrieved from the Azure Portal.
 1. Run `notepad aksedge-config.json` and provide the following information:
 
     | Attribute | Description |
@@ -293,7 +293,7 @@ If you want to add a 3D viewer to the simulation, you can follow the steps to co
     | ClientId | The name of the Azure Service Principal previously created. AKS uses this service principal to connect your cluster to Arc. |
     | ClientSecret | The password for the Azure Service Principal. |
 
-1. Save the file, and run `SetupArc`.
+1. Save the file, close the Powershell window, open a new **Powershell window** and run `SetupArc`.
 
 You can now manage your Kubernetes cluster from the cloud via the newly deployed Azure Arc instance. In the Azure Portal, browse to the Azure Arc instance and select Workloads. The required service token can be retrieved via `Get-AksEdgeManagedServiceToken` from a **Powershell window** on your virtual machine.
 

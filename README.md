@@ -537,7 +537,7 @@ Copy the `HTTP GET URL` from your HTTP trigger in your workflow. You will need i
 
 To try out your SAP to Azure Logic App workflow, follow these steps:
 
-1.	In the main app, search for `WE19`. This should bring up the `Test Tool for IDoc Processing` screen. 
+1.	In the main app, search for `WE19`. This should bring up the `Test Tool for IDoc Processing` screen.  
 2.	Select `Using message type` and enter `INTERNAL_ORDER` 
 3.	Click `Create` at the top left corner of the screen. 
 4.	Click the `EDICC` field. 

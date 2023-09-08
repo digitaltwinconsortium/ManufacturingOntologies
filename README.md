@@ -488,16 +488,69 @@ Copy the `HTTP GET URL` from your HTTP trigger in your workflow. You will need i
 
 ### Configuring Your On-Premises SAP System to Send Data to Azure Logic Apps
 
-1. Create a new HTTP connection for your Azure Logic App in your SAP system by entering `SM59` from the SAP system's search box, which will bring up the `Configuration of RFC Connections` screen. Select `Edit`->`Create`, enter `LOGICAPP` in the `Destination` field and select `HTTP Connection to external server` in the `Connection Type` dropdown. Click the green check button. Enter `LOGICAPP` under `Description`. Under `Technical Settings` enter the hostname of your Logic App `HTTP GET URL` copied earlier (e.g. `prod-51.northeurope.logic.azure.com`), under `Port` enter `443` and under `Path Prefix` enter the rest of your `HTTP GET URL` copied earlier starting with `/workflows/...`. In the `Logon & Security` tab, scroll down to `Security Options` and set `SSL` to `Active`. Click the `Save` button.
-1. Create a new port for your Azure Logic App in your SAP system by entering `WE21` from the SAP system's search box, which will bring up the `Ports in IDoc processing` screen. Select the `XML HTTP` folder. Click on the `Create` button. In the `Port` field enter `LOGICAPP`. In the `RFC destination` select `LOGICAPP`. Click the `Save` button.
-1. Create a partner profile for your Azure Logic App in your SAP system by entering `WE20` from the SAP system's search box, which will bring up the `Partner profiles` screen. Expand the `Partner Profiles` folder and select the `Partner Type LS` (Logical System) folder. Click on the `S4HCLNT100` partner profile. Click on the `Create Outbound Parameter` button below the `Outbound` table. In the `Partner Profiles: Outbound Parameters` dialog, enter `INTERNAL_ORDER` for `Message Type`. In the `Outbound Options` tab, enter `LOGICAPP` for `Receiver port`. Select the `Pass IDoc Immediately` radio button. For `Basic type` enter `INTERNAL_ORDER01`. Click the `Save` button.
+1.	Log into the SAP windows VM
+2.	Once at the VM desktop, Click on `SAP Logon` 
+3.	Click `Log On` in the top left conner of the app
 
+<img src="Docs/LogOn.png" alt="workflow" width="900" />
+
+4.	Log on with the `BPINST` user name, and `Welcome1` password
+5.	In the top right conner search for `SM59`. This should bring up the `Configuration of RFC Connections` screen. 
+
+<img src="Docs/SM95Search.png" alt="workflow" width="900" />
+
+6.	Click on `Edit` and `Create` at the top of the app. 
+7.	Enter `LOGICAPP` in the `Destination` field
+8.	From the `Connection Type` dropdown select `HTTP Connection to external server`
+9.	Click The green check at the bottom of the window. 
+
+<img src="Docs/ConnectionLOGICAPP.png" alt="workflow" width="900" />
+
+10.	In the `Description 1` box put `LOGICAPP`
+11.	Click the `Technical Settings` tab and fill in the `Host` field with the `HTTP GET URL` from the logic app you copied from above (e.g. prod-51.northeurope.logic.azure.com) . In `Port` put `443`. And in `Path Prefix` enter the rest of the `HTTP GET URL` starting with `/workflows/...`
+
+<img src="Docs/AddgetURL.png" alt="workflow" width="900" />
+
+12.	Click the `Login & Security` tab. 
+13.	Scroll down to `Security Options`  and set `SSL` to `Active`
+14.	Click `Save`
+15.	In the main app from step 5, search for `WE21`. This will bring up the `Ports in IDoc processing`.
+16.	Select the `XML HTTP` folder and click `Create`. 
+17.	In the `Port` field input `LOGICAPP`
+18.	In the `RFC destination` select `LOGICAPP`. 
+19.	Click `Green Check` to `Save`
+
+<img src="Docs/PortSelectLOGICAPP.png" alt="workflow" width="900" />
+
+20. Create a partner profile for your Azure Logic App in your SAP system by entering `WE20` from the SAP system's search box, which will bring up the `Partner profiles` screen. 
+21. Expand the `Partner Profiles` folder and select the `Partner Type LS` (Logical System) folder. 
+21. Click on the `S4HCLNT100` partner profile. 
+23. Click on the `Create Outbound Parameter` button below the `Outbound` table. 
+
+<img src="Docs/Outbound.png" alt="workflow" width="900" />
+
+24. In the `Partner Profiles: Outbound Parameters` dialog, enter `INTERNAL_ORDER` for `Message Type`. In the `Outbound Options` tab, enter `LOGICAPP` for `Receiver port`. Select the `Pass IDoc Immediately` radio button. For `Basic type` enter `INTERNAL_ORDER01`. Click the `Save` button.
+
+<img src="Docs/OutboundParams.png" alt="workflow" width="900" />
 
 ### Testing your SAP to Azure Logic App Workflow
 
 To try out your SAP to Azure Logic App workflow, follow these steps:
 
-Enter `WE19` from the SAP system's search box, which will bring up the `Test Tool for IDoc Processing` screen. Select the `Using message type` radio button and enter `INTERNAL_ORDER`. Click on the `Create` button. Click on the `EDICC` field. In the `Edit Control Record Fields` dialog, enter `LOGICAPP` for `Receiver Port`, `S4HCLNT100` for `Receiver Partner No.` and `LS` for `Receiver Part. Type`. Similarily, enter `SAPS4H` for `Sender Port`, `S4HCLNT100` for `Sender Partner No.` and `LS` for `Sender Part. Type`. Click the green check button. Click on the `Standard Outbound Processing` button. In the `Outbound Processing of IDoc` dialog, click the green check button to start the IDoc message processing.
+1.	In the main app, search for `WE19`. This should bring up the `Test Tool for IDoc Processing` screen. 
+2.	Select `Using message type` and enter `INTERNAL_ORDER` 
+3.	Click `Create` at the top left corner of the screen. 
+4.	Click the `EDICC` field. 
+5.	A `Edit Control Record Fields`  screen should open up. 
+6.	In the `Receiver` section: `PORT` enter `LOGICAPP`, `Partner No.` enter `S4HCLNT100`, `Part. Type` enter `LS`
+7.	In the `Sender` section: `PORT` enter `SAPS4H`, `Partner No.` enter `S4HCLNT100`, `Part. Type` enter `LS`
+8.	Click the green check at the bottom of the window. 
+
+<img src="Docs/Testing2.png" alt="workflow" width="900" />
+
+9.	Click `Standard Outbound Processing` tab at the top of the screen. 
+10.	In the `Outbound Processing of IDoc` dialog, click the green check button to start the IDoc message processing
+
 
 Open the Azure Digital Twins Explorer from the Azure Digital Twins service instance planel in the Azure Portal and check that a new job order digital twin called `sap` is created. Similarily, you can open the Storage browser of your Azure Storage Account, select Files shares and check that a new `IDoc.xml` file was created in the `sap` folder.
 

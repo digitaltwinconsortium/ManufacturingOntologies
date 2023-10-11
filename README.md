@@ -97,7 +97,7 @@ Here are the data flow steps:
 
 ## UA Cloud Twin
 
-The simulation makes use of the UA Cloud Twin also available from the Digital Twin Consortium [here](https://github.com/digitaltwinconsortium/UA-CloudTwin). It automatically detects OPC UA assets from the OPC UA telemetry messages sent to the cloud and registers ISA95-compatible digital twins in Azure Digital Twins service for you.
+The solution makes use of the UA Cloud Twin also available from the Digital Twin Consortium [here](https://github.com/digitaltwinconsortium/UA-CloudTwin). It automatically detects OPC UA assets from the OPC UA PubSub metadata messages sent to the cloud and registers ISA95-compatible digital twins in Azure Digital Twins service for you.
 
 <img src="Docs/twingraph.png" alt="twingraph" width="900" />
 
@@ -113,6 +113,7 @@ UA Cloud Twin takes the OPC UA Publisher ID and creates ISA95 Area digital twin 
 ## A Cloud-based OPC UA Certificate Store and Persisted Storage
 
 When running OPC UA applications, their OPC UA configuration files, keys and certificates must be persisted. While Kubernetes has the ability to persist these files in volumes, a safer place for them is the cloud, especially on single-node clusters where the volume would be lost when the node fails. This is why the OPC UA applications used in this solution (i.e. the UA Cloud Publisher, the MES and the simulated machines/production line stations) store their configuration files, keys and certificates in the cloud. This also has the advantage of providing a single location for mutually trusted certificates for all OPC UA applications.
+
 
 ## UA Cloud Library
 
@@ -132,7 +133,7 @@ The Asset Admin Shell Repository used in this reference solution reads OPC UA In
 
 ## Production Line Simulation
 
-The solution leverages a production line simulation made up of several Stations, leveraging an OPC UA information model, as well as a simple Manufacturing Execution System (MES). Both the Stations and the MES are containerized for easy deployment.
+The solution leverages a production line simulation made up of several stations, leveraging an OPC UA information model, as well as a simple Manufacturing Execution System (MES). Both the Stations and the MES are containerized for easy deployment.
 
 ### Default Simulation Configuration
 

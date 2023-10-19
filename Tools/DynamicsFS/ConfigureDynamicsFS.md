@@ -17,29 +17,29 @@ Let's start with uploading assets from the Manufacturing Ontologies into Dynamic
 
 1. Go to the Azure Portal and create a new Logic App as shown below:
 
-![Create Logic App](img/createlogicapp.png)
+  ![Create Logic App](img/createlogicapp.png)
 
 1. Give the Azure Logic App a name, place it in the same resource group as the Manufacturing Ontologies reference solution.
 
-![Configure Logic App](img/configurelogicapp.png)
+  ![Configure Logic App](img/configurelogicapp.png)
 
 1. Click on 'Workflows':
 
-![Navigate to flow](img/createlogicappflow.png)
+  ![Navigate to flow](img/createlogicappflow.png)
 
 1. Give your workflow a name - for this scenario we will use the stateful state type, because assets are not flows of data.
 
-![Give flow a name](img/createlogicappflow2.png)
+  ![Give flow a name](img/createlogicappflow2.png)
 
 1. Create a new trigger. We will start with creating a 'Recurrence' tigger. This will check the database every day if new assets are created. Of course, you can change this to happen more often.
 
-![Create Recurrence](img/flow2scheduler.png)
+  ![Create Recurrence](img/flow2scheduler.png)
 
 1. In actions, search for 'Azure Data Explorer' and select the 'Run KQL query' command. Within this query we will check what kind of assets we have. Use the following query to get assets and paste it in the query field:
 
-```TEXT
-let ADTInstance =  "PLACE YOUR ADT URL";let ADTQuery = "SELECT T.OPCUAApplicationURI as AssetName, T.$metadata.OPCUAApplicationURI.lastUpdateTime as UpdateTime FROM DIGITALTWINS T WHERE IS_OF_MODEL(T , 'dtmi:digitaltwins:opcua:nodeset;1') AND T.$metadata.OPCUAApplicationURI.lastUpdateTime > 'PLACE DATE'";evaluate azure_digital_twins_query_request(ADTInstance, ADTQuery)
-```
+  ```TEXT
+  let ADTInstance =  "PLACE YOUR ADT URL";let ADTQuery = "SELECT T.OPCUAApplicationURI as AssetName, T.$metadata.OPCUAApplicationURI.lastUpdateTime as UpdateTime FROM DIGITALTWINS T WHERE IS_OF_MODEL(T , 'dtmi:digitaltwins:opcua:nodeset;1') AND T.$metadata.OPCUAApplicationURI.lastUpdateTime > 'PLACE DATE'";evaluate azure_digital_twins_query_request(ADTInstance, ADTQuery)
+  ```
 
 ![Connect Kusto](img/designerkqlquery2.png)
 
@@ -52,7 +52,7 @@ let ADTInstance =  "PLACE YOUR ADT URL";let ADTQuery = "SELECT T.OPCUAApplicati
 
 1. Save your workflow and run it. You will see in a few seconds later that new assets are created in Dynamics 365 Field Service.
 
-![Run](img/runflow.png)
+  ![Run](img/runflow.png)
 
 ### Create Azure Logic App to create Alerts in Dynamics 365 Field Service
 
@@ -60,35 +60,35 @@ This workflow will create alerts in Dynamics 365 Field Service, specifically whe
 
 1. We first need to create an Azure Data Explorer function to get the right data. Go to your Azure Data Explorer query panel in the Azure Portal and run the following code to create a FaultyFieldAssets function:
 
-![Create function ADX](img/adxquery.png)
+  ![Create function ADX](img/adxquery.png)
 
-```TEXT
-.create-or-alter function  FaultyFieldAssets() {  
-let Lw_start = ago(3d);
-opcua_telemetry
-| where Name == 'FaultyTime'
-and Value > 0
-and Timestamp between (Lw_start .. now())
-| join kind=inner (
-    opcua_metadata
-    | extend AssetList =split (Name, ';')
-    | extend AssetName=AssetList[0]
-    ) on DataSetWriterID
-| project AssetName, Name, Value, Timestamp}
-```
+   ```TEXT
+   .create-or-alter function  FaultyFieldAssets() {  
+   let Lw_start = ago(3d);
+   opcua_telemetry
+   | where Name == 'FaultyTime'
+   and Value > 0
+   and Timestamp between (Lw_start .. now())
+   | join kind=inner (
+       opcua_metadata
+       | extend AssetList =split (Name, ';')
+       | extend AssetName=AssetList[0]
+       ) on DataSetWriterID
+   | project AssetName, Name, Value, Timestamp}
+   ```
 
 1. Create a new workflow in Azure Logic App. Create a 'Recurrance' trigger to start - every 3 minutes. Create as action 'Azure Data Explorer' and select the Run KQL Query.
 
-![Run KQL Query](img/flow2kqleury.png)
+  ![Run KQL Query](img/flow2kqleury.png)
 
 1. Enter your Azure Data Explorer Cluster URL, then select your database and use the function name created in step 1 as the query.
 
-![Alt text](img/flow2adx.png)
+  ![Alt text](img/flow2adx.png)
 
 1. Select Microsoft Dataverse as action and put the below configuration in the fields:
 
-![Configure FS](img/flow2fieldservices.png)
+  [Configure FS](img/flow2fieldservices.png)
 
 1. Run the workflow and to see new alerts being generated in your Dynamics 365 Field Service dashboard:
 
-![View your alerts in Dynamics365 FS](img/dynamicsiotalerts.png)
+  ![View your alerts in Dynamics365 FS](img/dynamicsiotalerts.png)

@@ -60,12 +60,12 @@ let ADTInstance =  "PLACE YOUR ADT URL";let ADTQuery = "SELECT T.OPCUAApplicati
 
 This workflow will create IoT Alerts into Dynamics365 FS when a certain threshold of FaultyTime will be reached. I have used the same logic as the previous flow.
 
-1; Because there are some limitations in the connector, we first need to create an Azure Data Explorer function to get this working. Go to your Azure Data Explorer query webpage and run the following code to create a FaultyFieldServices function.
+1; Because there are some limitations in the connector, we first need to create an Azure Data Explorer function to get this working. Go to your Azure Data Explorer query webpage and run the following code to create a FaultyFieldAssets function.
 
 ![Create function ADX](img/adxquery.png)
 
 ```TEXT
-.create-or-alter function  FaultyFieldServices() {  
+.create-or-alter function  FaultyFieldAssets() {  
 let Lw_start = ago(3d);
 opcua_telemetry
 | where Name == 'FaultyTime'

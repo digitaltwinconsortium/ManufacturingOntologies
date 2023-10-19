@@ -5,13 +5,13 @@ The aim of this integration is to showcase the following scenarios:
 - Create Assets from the manufacturing ontologies into Dynamics Field Services Assets.
 - Create IoT Alerts in Dynamics Field Services when a certain threshold has been reached.
 
-This configuration cannot be used for production situations, but it just to showcase hoe both solutions can be connected.
+This configuration cannot be used for production situations, but it just to showcase how both solutions can be connected.
 
 For the integration we have used Azure Logics Apps. With Logic Apps you can connect bussiness-critcal apps and services without writing a single line of code. We will fetch information from the Azure Data Explorer database to store into Dynamics365 Field Services.
 
 ## Setup the standard services
 
-First of all you need to activate a trial for Dynamics Field Services. You can do this [here](https://dynamics.microsoft.com/en-us/field-service/field-service-management-software/free-trial) and you will get a 30 days trial. Important to remeber is to use the same Azure Entra ID (Azure Active Directory) as the manufacturing ontologies, else you need to configure cross tenant authentication. That is not part of this manual. If you have activated your trial, you are good to go!
+First of all you need to activate a trial for Dynamics Field Services. You can do this [here](https://dynamics.microsoft.com/en-us/field-service/field-service-management-software/free-trial) and you will get a 30 days trial. Important to remember is to use the same Azure Entra ID (former Azure Active Directory) as the manufacturing ontologies, else you need to configure cross tenant authentication. That is not part of this manual. If you have activated your trial, you are good to go!
 
 ### Create Azure Logic App to create assets in Dynamics365 Field Services
 

@@ -10,7 +10,7 @@ The integration leverages Azure Logics Apps. With Logic Apps bussiness-critcal a
 First, if you are not already a Dynamics 365 Field Service customer, activate a 30 day trial [here](https://dynamics.microsoft.com/en-us/field-service/field-service-management-software/free-trial). Remember is to use the same Azure Entra ID (formerly Azure Active Directory) used while deploying the Manufacturing Ontologies reference solution. Otherwise, you would need to configure cross tenant authentication which is not part of these instructions!
 
 
-### Create an Azure Logic App to create assets in Dynamics 365 Field Service
+### Create an Azure Logic App Workflow to create assets in Dynamics 365 Field Service
 
 Let's start with uploading assets from the Manufacturing Ontologies into Dynamics 365 Field Service:
 
@@ -54,7 +54,7 @@ Let's start with uploading assets from the Manufacturing Ontologies into Dynamic
   ![Run](img/runflow.png)
 
 
-### Create Azure Logic App to create Alerts in Dynamics 365 Field Service
+### Create an Azure Logic App Workflow to create Alerts in Dynamics 365 Field Service
 
 This workflow will create alerts in Dynamics 365 Field Service, specifically when a certain threshold of FaultyTime on an asset of the Manufacturing Ontologies reference solution is reached.
 

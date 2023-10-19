@@ -346,7 +346,7 @@ Note: You can add other data from Azure Data Explorer to your report similarily.
 
 ## Connecting the Reference Solution to Microsoft Dynamics 365 Field Service
 
-[Dynamics 365 Field Service](https://learn.microsoft.com/en-us/dynamics365/field-service/overview) is a turnkey SaaS solution for managing field service requests. The integration is documented [here](https://github.com/digitaltwinconsortium/tree/main/Tools/DynamicsFS/ConfigureDynamicsFS.md).
+[Dynamics 365 Field Service](https://learn.microsoft.com/en-us/dynamics365/field-service/overview) is a turnkey SaaS solution for managing field service requests. The integration is documented [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/blob/main/Tools/DynamicsFS/ConfigureDynamicsFS.md).
 
 
 ## A Turn-Key Alternative: Microsoft Fabric

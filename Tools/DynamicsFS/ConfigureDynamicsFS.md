@@ -1,43 +1,41 @@
-# Configure Dynamics365 Field Services Integration
+# Configure Dynamics 365 Field Service
 
-The aim of this integration is to showcase the following scenarios:
+This integration showcases the following scenarios:
 
-- Create Assets from the manufacturing ontologies into Dynamics Field Services Assets.
-- Create IoT Alerts in Dynamics Field Services when a certain threshold has been reached.
+- Uploading assets from the Manufacturing Ontologies reference solution to Dynamics 365 Field Service.
+- Create alerts in Dynamics 365 Field Service when a certain threshold on Manufacturing Ontologies reference solution telemetry data is reached.
 
-This configuration cannot be used for production situations, but it just to showcase how both solutions can be connected.
+The integration leverages Azure Logics Apps. With Logic Apps bussiness-critcal apps and services can be connected via no-code workflows. We will fetch information from Azure Data Explorer and trigger actions in Dynamics 365 Field Service.
 
-For the integration we have used Azure Logics Apps. With Logic Apps you can connect bussiness-critcal apps and services without writing a single line of code. We will fetch information from the Azure Data Explorer database to store into Dynamics365 Field Services.
+## Setup
 
-## Setup the standard services
+First, if you are not already a Dynamics 365 Field Service customer, activate a 30 day trial [here](https://dynamics.microsoft.com/en-us/field-service/field-service-management-software/free-trial). Remember is to use the same Azure Entra ID (formerly Azure Active Directory) used while deploying the Manufacturing Ontologies reference solution. Otherwise, you would need to configure cross tenant authentication which is not part of these instructions!
 
-First of all you need to activate a trial for Dynamics Field Services. You can do this [here](https://dynamics.microsoft.com/en-us/field-service/field-service-management-software/free-trial) and you will get a 30 days trial. Important to remember is to use the same Azure Entra ID (former Azure Active Directory) as the manufacturing ontologies, else you need to configure cross tenant authentication. That is not part of this manual. If you have activated your trial, you are good to go!
+### Create an Azure Logic App to create assets in Dynamics 365 Field Service
 
-### Create Azure Logic App to create assets in Dynamics365 Field Services
-
-Let's start with getting the assets from the manufacturing ontologies into Dynamics365 FS. For that we will use an Azure Logic App.
+Let's start with uploading assets from the Manufacturing Ontologies into Dynamics 365 Field Service:
 
 1; Go to the Azure Portal and create a new Logic App as shown below:
 
 ![Create Logic App](img/createlogicapp.png)
 
-2; Give the Azure Logic App a name, place it in the right resource group.
+2; Give the Azure Logic App a name, place it in the same resource group as the Manufacturing Ontologies reference solution.
 
 ![Configure Logic App](img/configurelogicapp.png)
 
-3; Click in the left navigation bar on 'Workflows':
+3; Click on 'Workflows':
 
 ![Navigate to flow](img/createlogicappflow.png)
 
-4; Give your flow a name - for this scenario we will use the stateful state type, because assets are not flows of data.
+4; Give your workflow a name - for this scenario we will use the stateful state type, because assets are not flows of data.
 
 ![Give flow a name](img/createlogicappflow2.png)
 
-5; Create a new trigger. We will start with creating a 'Recurrence' tigger. This will check the database every day if new assets are created. Off course you can change this more often.
+5; Create a new trigger. We will start with creating a 'Recurrence' tigger. This will check the database every day if new assets are created. Of course, you can change this to happen more often.
 
 ![Create Recurrence](img/flow2scheduler.png)
 
-6; In the next action, search for 'Azure Data Explorer' and select the 'Run KQL query' command. Within this query we will search the Azure Digital Twins what kind of assets the twin has. Uw the following query to get your assets and paste it in the query field:
+6; In actions, search for 'Azure Data Explorer' and select the 'Run KQL query' command. Within this query we will check what kind of assets we have. Use the following query to get assets and paste it in the query field:
 
 ```TEXT
 let ADTInstance =  "PLACE YOUR ADT URL";let ADTQuery = "SELECT T.OPCUAApplicationURI as AssetName, T.$metadata.OPCUAApplicationURI.lastUpdateTime as UpdateTime FROM DIGITALTWINS T WHERE IS_OF_MODEL(T , 'dtmi:digitaltwins:opcua:nodeset;1') AND T.$metadata.OPCUAApplicationURI.lastUpdateTime > 'PLACE DATE'";evaluate azure_digital_twins_query_request(ADTInstance, ADTQuery)
@@ -45,22 +43,22 @@ let ADTInstance =  "PLACE YOUR ADT URL";let ADTQuery = "SELECT T.OPCUAApplicati
 
 ![Connect Kusto](img/designerkqlquery2.png)
 
-7; To get your data into Dynamics365 Field Services you need to connect to the Microsoft Dataverse. Connect to your Dynamics365 FS instance and use the following configuration:
+7; To get your asset data into Dynamics 365 Field Service, you need to connect to Microsoft Dataverse. Connect to your Dynamics 365 Field Service instance and use the following configuration:
 
 - Use the 'Customer Assets' Table Name
-- But the 'AssetName' into the Name field
+- Put the 'AssetName' into the Name field
 
 ![Configure Dataverse](img/designerkqlquery3.png)
 
-8; Save your workflow and run it! You will see in several seconds new assets will be created in Dynamics365 FS.
+8; Save your workflow and run it. You will see in a few seconds later that new assets are created in Dynamics 365 Field Service.
 
 ![Run](img/runflow.png)
 
-### Create Azure Logic App to create IoT Alerts in Dynamics365 Field Services
+### Create Azure Logic App to create Alerts in Dynamics 365 Field Service
 
-This workflow will create IoT Alerts into Dynamics365 FS when a certain threshold of FaultyTime will be reached. I have used the same logic as the previous flow.
+This workflow will create alerts in Dynamics 365 Field Service, specifically when a certain threshold of FaultyTime on an asset of the Manufacturing Ontologies reference solution is reached.
 
-1; Because there are some limitations in the connector, we first need to create an Azure Data Explorer function to get this working. Go to your Azure Data Explorer query webpage and run the following code to create a FaultyFieldAssets function.
+1; We first need to create an Azure Data Explorer function to get the right data. Go to your Azure Data Explorer query panel in the Azure Portal and run the following code to create a FaultyFieldAssets function:
 
 ![Create function ADX](img/adxquery.png)
 
@@ -79,18 +77,18 @@ and Timestamp between (Lw_start .. now())
 | project AssetName, Name, Value, Timestamp}
 ```
 
-2; Create a new workflow in the Azure Logic App. Create a 'Recurrance' trigger to start - every 3 minutes. Create as action 'Azure Data Explorer' and select the Run KQL Query.
+2; Create a new workflow in Azure Logic App. Create a 'Recurrance' trigger to start - every 3 minutes. Create as action 'Azure Data Explorer' and select the Run KQL Query.
 
 ![Run KQL Query](img/flow2kqleury.png)
 
-3; Put your cluster URL, select your database and use the Function name created in step 1 as Query.
+3; Enter your Azure Data Explorer Cluster URL, then select your database and use the function name created in step 1 as the query.
 
 ![Alt text](img/flow2adx.png)
 
-4; Select Microsoft Dataverse as next action and put the below configuration in the fields.
+4; Select Microsoft Dataverse as action and put the below configuration in the fields:
 
 ![Configure FS](img/flow2fieldservices.png)
 
-5; Run the workflow and you should see new IoT Alerts in your Dynamics365 FS dashboard!
+5; Run the workflow and to see new alerts being generated in your Dynamics 365 Field Service dashboard:
 
 ![View your alerts in Dynamics365 FS](img/dynamicsiotalerts.png)

@@ -20,6 +20,7 @@
 * [Onboarding the Kubernetes Instance for Management via Azure Arc](https://github.com/digitaltwinconsortium/ManufacturingOntologies#onboarding-the-kubernetes-instance-for-management-via-azure-arc)
 * [Enabling the Product Carbon Footprint Calculation (PCF) in the Asset Admin Shell (AAS) Repository](https://github.com/digitaltwinconsortium/ManufacturingOntologies#enabling-the-product-carbon-footprint-calculation-pcf-in-the-asset-admin-shell-aas-repository)
 * [Connecting the Reference Solution to Microsoft Power BI](https://github.com/digitaltwinconsortium/ManufacturingOntologies#connecting-the-reference-solution-to-microsoft-power-bi)
+* [Connecting the Reference Solution to Microsoft Dynamics 365 Field Service](https://github.com/digitaltwinconsortium/ManufacturingOntologies#connecting-the-reference-solution-to-microsoft-dynamics-365-field-service)
 * [A turn-key alternative: Microsoft Fabric](https://github.com/digitaltwinconsortium/ManufacturingOntologies#a-turn-key-alternative-microsoft-fabric)
 * [Connecting the Reference Solution to On-Premises SAP Systems](https://github.com/digitaltwinconsortium/ManufacturingOntologies#connecting-the-reference-solution-to-on-premises-sap-systems)
 * [Replacing the Production Line Simulation with a Real Production Line](https://github.com/digitaltwinconsortium/ManufacturingOntologies#replacing-the-production-line-simulation-with-a-real-production-line)
@@ -341,6 +342,11 @@ The Asset Admin Shell (AAS) Repository is automatically configured during deploy
 Note: You can add other data from Azure Data Explorer to your report similarily.
 
 <img src="Docs/powerbi.png" alt="powerbi" width="900" />
+
+
+## Connecting the Reference Solution to Microsoft Dynamics 365 Field Service
+
+[Dynamics 365 Field Service](https://learn.microsoft.com/en-us/dynamics365/field-service/overview) is a turnkey SaaS solution for managing field service requests. The integration is documented [here](https://github.com/digitaltwinconsortium/tree/main/Tools/DynamicsFS/ConfigureDynamicsFS.md).
 
 
 ## A Turn-Key Alternative: Microsoft Fabric

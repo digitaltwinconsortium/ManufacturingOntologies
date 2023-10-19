@@ -7,9 +7,8 @@ This integration showcases the following scenarios:
 
 The integration leverages Azure Logics Apps. With Logic Apps bussiness-critcal apps and services can be connected via no-code workflows. We will fetch information from Azure Data Explorer and trigger actions in Dynamics 365 Field Service.
 
-## Setup
-
 First, if you are not already a Dynamics 365 Field Service customer, activate a 30 day trial [here](https://dynamics.microsoft.com/en-us/field-service/field-service-management-software/free-trial). Remember is to use the same Azure Entra ID (formerly Azure Active Directory) used while deploying the Manufacturing Ontologies reference solution. Otherwise, you would need to configure cross tenant authentication which is not part of these instructions!
+
 
 ### Create an Azure Logic App to create assets in Dynamics 365 Field Service
 
@@ -19,40 +18,41 @@ Let's start with uploading assets from the Manufacturing Ontologies into Dynamic
 
   ![Create Logic App](img/createlogicapp.png)
 
-1. Give the Azure Logic App a name, place it in the same resource group as the Manufacturing Ontologies reference solution.
+2. Give the Azure Logic App a name, place it in the same resource group as the Manufacturing Ontologies reference solution.
 
   ![Configure Logic App](img/configurelogicapp.png)
 
-1. Click on 'Workflows':
+3. Click on 'Workflows':
 
   ![Navigate to flow](img/createlogicappflow.png)
 
-1. Give your workflow a name - for this scenario we will use the stateful state type, because assets are not flows of data.
+4. Give your workflow a name - for this scenario we will use the stateful state type, because assets are not flows of data.
 
   ![Give flow a name](img/createlogicappflow2.png)
 
-1. Create a new trigger. We will start with creating a 'Recurrence' tigger. This will check the database every day if new assets are created. Of course, you can change this to happen more often.
+5. Create a new trigger. We will start with creating a 'Recurrence' tigger. This will check the database every day if new assets are created. Of course, you can change this to happen more often.
 
   ![Create Recurrence](img/flow2scheduler.png)
 
-1. In actions, search for 'Azure Data Explorer' and select the 'Run KQL query' command. Within this query we will check what kind of assets we have. Use the following query to get assets and paste it in the query field:
+6. In actions, search for 'Azure Data Explorer' and select the 'Run KQL query' command. Within this query we will check what kind of assets we have. Use the following query to get assets and paste it in the query field:
 
   ```TEXT
   let ADTInstance =  "PLACE YOUR ADT URL";let ADTQuery = "SELECT T.OPCUAApplicationURI as AssetName, T.$metadata.OPCUAApplicationURI.lastUpdateTime as UpdateTime FROM DIGITALTWINS T WHERE IS_OF_MODEL(T , 'dtmi:digitaltwins:opcua:nodeset;1') AND T.$metadata.OPCUAApplicationURI.lastUpdateTime > 'PLACE DATE'";evaluate azure_digital_twins_query_request(ADTInstance, ADTQuery)
   ```
 
-![Connect Kusto](img/designerkqlquery2.png)
+  ![Connect Kusto](img/designerkqlquery2.png)
 
-1. To get your asset data into Dynamics 365 Field Service, you need to connect to Microsoft Dataverse. Connect to your Dynamics 365 Field Service instance and use the following configuration:
+7. To get your asset data into Dynamics 365 Field Service, you need to connect to Microsoft Dataverse. Connect to your Dynamics 365 Field Service instance and use the following configuration:
 
-- Use the 'Customer Assets' Table Name
-- Put the 'AssetName' into the Name field
+  - Use the 'Customer Assets' Table Name
+  - Put the 'AssetName' into the Name field
 
-![Configure Dataverse](img/designerkqlquery3.png)
+  ![Configure Dataverse](img/designerkqlquery3.png)
 
-1. Save your workflow and run it. You will see in a few seconds later that new assets are created in Dynamics 365 Field Service.
+8. Save your workflow and run it. You will see in a few seconds later that new assets are created in Dynamics 365 Field Service.
 
   ![Run](img/runflow.png)
+
 
 ### Create Azure Logic App to create Alerts in Dynamics 365 Field Service
 
@@ -77,18 +77,18 @@ This workflow will create alerts in Dynamics 365 Field Service, specifically whe
    | project AssetName, Name, Value, Timestamp}
    ```
 
-1. Create a new workflow in Azure Logic App. Create a 'Recurrance' trigger to start - every 3 minutes. Create as action 'Azure Data Explorer' and select the Run KQL Query.
+2. Create a new workflow in Azure Logic App. Create a 'Recurrance' trigger to start - every 3 minutes. Create as action 'Azure Data Explorer' and select the Run KQL Query.
 
   ![Run KQL Query](img/flow2kqleury.png)
 
-1. Enter your Azure Data Explorer Cluster URL, then select your database and use the function name created in step 1 as the query.
+3. Enter your Azure Data Explorer Cluster URL, then select your database and use the function name created in step 1 as the query.
 
   ![Alt text](img/flow2adx.png)
 
-1. Select Microsoft Dataverse as action and put the below configuration in the fields:
+4. Select Microsoft Dataverse as action and put the below configuration in the fields:
 
   [Configure FS](img/flow2fieldservices.png)
 
-1. Run the workflow and to see new alerts being generated in your Dynamics 365 Field Service dashboard:
+5. Run the workflow and to see new alerts being generated in your Dynamics 365 Field Service dashboard:
 
   ![View your alerts in Dynamics365 FS](img/dynamicsiotalerts.png)

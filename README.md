@@ -84,7 +84,8 @@ Here are the components involved in this solution:
 | [Azure OpenAI Service](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/overview) | Azure OpenAI Service provides REST API access to OpenAI's powerful language models including the GPT-4, GPT-35-Turbo, and Embeddings model series. |
 | [UA Cloud Library](https://github.com/OPCFoundation/UA-CloudLibrary) | The UA Cloud Library is an online store of OPC UA Information Models, hosted by the OPC Foundation [here](https://uacloudlibrary.opcfoundation.org/). |
 | [WattTime Service](https://www.watttime.org/api-documentation/#introduction) | The WattTime service can be used to get the carbon intensity for a unit of electrical energy consumed during a manufacturing process, specific to a particular geographic coordinate passed into the service. |
-| [Microsoft Power BI](https://learn.microsoft.com/en-us/power-bi/fundamentals/power-bi-overview) | Microsoft Power BI is a collection of software services, apps, and connectors that work together to turn your unrelated sources of data into coherent, visually immersive, and interactive insights. |
+| [Microsoft Power BI](https://learn.microsoft.com/en-us/power-bi/fundamentals/power-bi-overview) | Microsoft Power BI is a collection of SaaS software services, apps, and connectors that work together to turn your unrelated sources of data into coherent, visually immersive, and interactive insights. |
+| [Microsoft Dynamics 365 Field Service](https://learn.microsoft.com/en-us/dynamics365/field-service/overview) | Microsoft Dynamics 365 Field Service is a turnkey SaaS solution for managing field service requests. |
 
 :exclamation: In a real-world deployment, something as critical as opening a pressure relief valve would of course be done on-premises and this is just a simple example of how to achieve the digital feedback loop.
 
@@ -346,7 +347,7 @@ Note: You can add other data from Azure Data Explorer to your report similarily.
 
 ## Connecting the Reference Solution to Microsoft Dynamics 365 Field Service
 
-[Dynamics 365 Field Service](https://learn.microsoft.com/en-us/dynamics365/field-service/overview) is a turnkey SaaS solution for managing field service requests. The integration is documented [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/blob/main/Tools/DynamicsFS/ConfigureDynamicsFS.md).
+The integration is documented [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/blob/main/Tools/DynamicsFS/ConfigureDynamicsFS.md).
 
 
 ## A Turn-Key Alternative: Microsoft Fabric

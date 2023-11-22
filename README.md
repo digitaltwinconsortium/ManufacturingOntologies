@@ -208,11 +208,11 @@ Note: To save cost, the deployment deploys just a single Windows 11 Enterprise V
 Once the deployment completes, follow these steps to setup a single-node Edge Kubernetes cluster and finish configuring the simulation:
 
 1. Connect to the deployed Windows VM with an RDP (remote desktop) connection. You can download the RDP file in the [Azure portal](https://portal.azure.com) page for the VM, under the **Connect** options. Sign in using the credentials you provided during deployment.
-1. From the deployed VM, open a **Powershell window**, navigate to the `C:\ManufacturingOntologies-main\Deployment` directory and run `New-AksEdgeDeployment -JsonConfigFilePath .\aksedge-config.json`.
+1. From the deployed VM, open an **Administrator Powershell window**, navigate to the `C:\ManufacturingOntologies-main\Deployment` directory and run `New-AksEdgeDeployment -JsonConfigFilePath .\aksedge-config.json`.
 
 Once the command is finished, your Kubernetes installation is complete and you can start deploying workloads.
 
-Note: To get logs from all your Kubernetes workloads and services at any time, simply run `Get-AksEdgeLogs` from a **Powershell window**.
+Note: To get logs from all your Kubernetes workloads and services at any time, simply run `Get-AksEdgeLogs` from an **Administrator Powershell window**.
 
 
 ## Running the Production Line Simulation
@@ -284,7 +284,7 @@ If you want to add a 3D viewer to the simulation, you can follow the steps to co
 
 ## Onboarding the Kubernetes Instance for Management via Azure Arc
 
-1. On your virtual machine, open a **PowerShell window**, navigate to the `C:\ManufacturingOntologies-main\Deployment` directory and run `CreateServicePrincipal`. The two parameters `subscriptionID` and `tenantID` can be retrieved from the Azure Portal.
+1. On your virtual machine, open an **Administrator PowerShell window**, navigate to the `C:\ManufacturingOntologies-main\Deployment` directory and run `CreateServicePrincipal`. The two parameters `subscriptionID` and `tenantID` can be retrieved from the Azure Portal.
 1. Run `notepad aksedge-config.json` and provide the following information:
 
     | Attribute | Description |
@@ -296,9 +296,9 @@ If you want to add a 3D viewer to the simulation, you can follow the steps to co
     | ClientId | The name of the Azure Service Principal previously created. AKS uses this service principal to connect your cluster to Arc. |
     | ClientSecret | The password for the Azure Service Principal. |
 
-1. Save the file, close the Powershell window, open a new **Powershell window**, navigate back to the `C:\ManufacturingOntologies-main\Deployment` directory and run `SetupArc`.
+1. Save the file, close the Powershell window, open a new **Administrator Powershell window**, navigate back to the `C:\ManufacturingOntologies-main\Deployment` directory and run `SetupArc`.
 
-You can now manage your Kubernetes cluster from the cloud via the newly deployed Azure Arc instance. In the Azure Portal, browse to the Azure Arc instance and select Workloads. The required service token can be retrieved via `Get-AksEdgeManagedServiceToken` from a **Powershell window** on your virtual machine.
+You can now manage your Kubernetes cluster from the cloud via the newly deployed Azure Arc instance. In the Azure Portal, browse to the Azure Arc instance and select Workloads. The required service token can be retrieved via `Get-AksEdgeManagedServiceToken` from an **Administrator Powershell window** on your virtual machine.
 
 <img src="Docs/arc.png" alt="arc" width="900" />
 
@@ -425,7 +425,7 @@ To configure Microsoft Fabric for production line data, you need at least 1 OPC 
 1. Create another `Eventstream` by clicking `Create` -> `See all` -> `Eventstream` and give it a name (e.g. `eventstream_opcua_metadata`). Click `Create`. This component will receive the OPC UA PubSub production line metadata and send it to your KQL database.
 1. Click `New source` and select `Custom App` and give it a name (e.g. `opcua_metadata`). Click `Add`. In the `Information` box, click on `Connection string-primary key` and copy it. You will need it soon when configuring UA Cloud Publisher.
 1. Now configure UA Cloud Publisher. You can either follow the steps for connecting your own production line described [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies#replacing-the-production-line-simulation-with-a-real-production-line) or you can modify the configuration of the UA Cloud Publisher setup in the production line simulation provided in this repository, for example for the Munich production line. For the latter, follow these steps:
-   1. Log into the VM deployed with this reference solution, open a **Powershell window** and run `Get-AksEdgeNodeAddr` as well as `kubectl get services -n munich`.
+   1. Log into the VM deployed with this reference solution, open an **Administrator Powershell window** and run `Get-AksEdgeNodeAddr` as well as `kubectl get services -n munich`.
    1. Open a browser on the VM and enter the IP address and port retrieved for UA Cloud Publisher in the previous step in the address field (e.g. `http://192.168.0.2:30356`) to access the UA Cloud Publisher UI.
    1. In the UA Cloud Publisher UI, click `Configuration` and enter the `Connection string-primary key` from the `opcua_telemetry` custom app you copied earlier into the `Broker Password` field, enter `$ConnectionString` into the `Broker Username` field, enter the `EntityPath` into the `Broker Message Topic` (the entity path is contained at the end of the connection string and starts with "es_") and the name of your custom app into the `Broker URL` field (the custom app name is contained within the connection string and starts with `eventstream-` and ends with `.servicebus.windows.net`).
    1. Select the checkbox `Use Alternative Broker For OPC UA Metadata Messages` and enter the `Connection string-primary key` from the `opcua_metadata` custom app you copied earlier into the `Alternative Broker Password` field, enter `9093` in the `Alternative Broker Port` field, enter `$ConnectionString` into the `Alternative Broker Username` field, enter the `EntityPath` into the `Broker Metadata Topic` (the entity path is contained at the end of the connection string and starts with "es_") and the name of your custom app into the `Alternative Broker URL` field (the custom app name is contained within the connection string and starts with `eventstream-` and ends with `.servicebus.windows.net`).
@@ -596,9 +596,9 @@ Once you are ready to connect your own production line, simply delete the VM fro
 
         kubectl apply -f UA-CloudPublisher.yaml
 
-Note: On Azure Kubernetes Services Edge Essentials, you can get the IP address of your Kubernetes cluster by running `Get-AksEdgeNodeAddr` from a **Powershell window**.
+Note: On Azure Kubernetes Services Edge Essentials, you can get the IP address of your Kubernetes cluster by running `Get-AksEdgeNodeAddr` from an **Administrator Powershell window**.
 
-Note: You can query for the external Kubernetes port of your UA Cloud Publisher service by running `kubectl get services -n <namespace>` from a **Powershell window**.
+Note: You can query for the external Kubernetes port of your UA Cloud Publisher service by running `kubectl get services -n <namespace>` from an **Administrator Powershell window**.
 
 <img src="Docs/publisher.png" alt="publisher" width="900" />
 

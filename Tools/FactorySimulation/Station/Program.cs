@@ -141,6 +141,7 @@ namespace Station.Simulation
                 // create OPC UA cert validator
                 application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
                 application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(OPCUAClientCertificateValidationCallback);
+                application.ApplicationConfiguration.CertificateValidator.Update(application.ApplicationConfiguration.SecurityConfiguration).GetAwaiter().GetResult();
 
                 // replace the production line name in the list of endpoints to connect to.
                 string endpointsFilePath = Path.Combine(Directory.GetCurrentDirectory(), application.ConfigSectionName + ".Endpoints.xml");
@@ -768,6 +769,7 @@ namespace Station.Simulation
             // create OPC UA cert validator
             application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
             application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(OPCUAClientCertificateValidationCallback);
+            application.ApplicationConfiguration.CertificateValidator.Update(application.ApplicationConfiguration.SecurityConfiguration).GetAwaiter().GetResult();
 #endif
             // start the server.
             await application.Start(new FactoryStationServer());

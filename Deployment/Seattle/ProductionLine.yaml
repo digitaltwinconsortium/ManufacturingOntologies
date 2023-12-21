@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: seattle
+  name: seattle.contoso
 spec:
   finalizers:
   - kubernetes

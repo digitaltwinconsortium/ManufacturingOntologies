@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: munich
+  name: munich.contoso
 spec:
   finalizers:
   - kubernetes
@@ -9,8 +9,8 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: assembly
-  namespace: munich
+  name: assembly.line1.building1
+  namespace: munich.contoso
 spec:
   replicas: 1
   selector:
@@ -46,8 +46,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: assembly
-  namespace: munich
+  name: assembly.line1.building1
+  namespace: munich.contoso
 spec:
   ports:
   - targetPort: 4840
@@ -58,8 +58,8 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: test
-  namespace: munich
+  name: test.line1.building1
+  namespace: munich.contoso
 spec:
   replicas: 1
   selector:
@@ -95,8 +95,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: test
-  namespace: munich
+  name: test.line1.building1
+  namespace: munich.contoso
 spec:
   ports:
   - targetPort: 4840
@@ -107,8 +107,8 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: packaging
-  namespace: munich
+  name: packaging.line1.building1
+  namespace: munich.contoso
 spec:
   replicas: 1
   selector:
@@ -144,8 +144,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: packaging
-  namespace: munich
+  name: packaging.line1.building1
+  namespace: munich.contoso
 spec:
   ports:
   - targetPort: 4840

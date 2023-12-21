@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: seattle
+  name: seattle.contoso
 spec:
   finalizers:
   - kubernetes
@@ -9,8 +9,8 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mes
-  namespace: seattle
+  name: mes.line1.building1
+  namespace: seattle.contoso
 spec:
   replicas: 1
   selector:

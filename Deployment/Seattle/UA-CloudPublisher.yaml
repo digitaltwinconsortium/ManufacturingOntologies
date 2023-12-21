@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: seattle
+  name: seattle.contoso
 spec:
   finalizers:
   - kubernetes
@@ -9,8 +9,8 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ua-cloudpublisher
-  namespace: seattle
+  name: ua-cloudpublisher.line1.building1
+  namespace: seattle.contoso
 spec:
   replicas: 1
   selector:
@@ -41,8 +41,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ua-cloudpublisher
-  namespace: seattle
+  name: ua-cloudpublisher.line1.building1
+  namespace: seattle.contoso
 spec:
   type: LoadBalancer
   ports:

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: munich
+  name: munich.contoso
 spec:
   finalizers:
   - kubernetes
@@ -9,8 +9,8 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mes
-  namespace: munich
+  name: mes.line1.building1
+  namespace: munich.contoso
 spec:
   replicas: 1
   selector:

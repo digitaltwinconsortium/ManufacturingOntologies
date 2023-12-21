@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: munich.contoso
+  name: munich
 spec:
   finalizers:
   - kubernetes
@@ -9,8 +9,8 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: assembly.line1.building1
-  namespace: munich.contoso
+  name: assembly
+  namespace: munich
 spec:
   replicas: 1
   selector:
@@ -30,7 +30,7 @@ spec:
         - name: StationType
           value: "assembly"
         - name: StationURI
-          value: "opc.tcp://assembly.line1.building1.munich.contoso/"
+          value: "opc.tcp://assembly.munich/"
         - name: PowerConsumption
           value: "200"
         - name: CycleTime
@@ -46,8 +46,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: assembly.line1.building1
-  namespace: munich.contoso
+  name: assembly
+  namespace: munich
 spec:
   ports:
   - targetPort: 4840
@@ -58,8 +58,8 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: test.line1.building1
-  namespace: munich.contoso
+  name: test
+  namespace: munich
 spec:
   replicas: 1
   selector:
@@ -79,7 +79,7 @@ spec:
         - name: StationType
           value: "test"
         - name: StationURI
-          value: "opc.tcp://test.line1.building1.munich.contoso/"
+          value: "opc.tcp://test.munich/"
         - name: PowerConsumption
           value: "100"
         - name: CycleTime
@@ -95,8 +95,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: test.line1.building1
-  namespace: munich.contoso
+  name: test
+  namespace: munich
 spec:
   ports:
   - targetPort: 4840
@@ -107,8 +107,8 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: packaging.line1.building1
-  namespace: munich.contoso
+  name: packaging
+  namespace: munich
 spec:
   replicas: 1
   selector:
@@ -128,7 +128,7 @@ spec:
         - name: StationType
           value: "packaging"
         - name: StationURI
-          value: "opc.tcp://packaging.line1.building1.munich.contoso/"
+          value: "opc.tcp://packaging.munich/"
         - name: PowerConsumption
           value: "100"
         - name: CycleTime
@@ -144,8 +144,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: packaging.line1.building1
-  namespace: munich.contoso
+  name: packaging
+  namespace: munich
 spec:
   ports:
   - targetPort: 4840

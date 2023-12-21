@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: munich.contoso
+  name: munich
 spec:
   finalizers:
   - kubernetes
@@ -10,7 +10,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ua-cloudcommander
-  namespace: munich.contoso
+  namespace: munich
 spec:
   replicas: 1
   selector:

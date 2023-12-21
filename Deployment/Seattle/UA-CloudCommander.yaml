@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: seattle.contoso
+  name: seattle
 spec:
   finalizers:
   - kubernetes
@@ -9,8 +9,8 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ua-cloudcommander.line1.building1
-  namespace: seattle.contoso
+  name: ua-cloudcommander
+  namespace: seattle
 spec:
   replicas: 1
   selector:

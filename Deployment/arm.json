@@ -234,7 +234,7 @@
             "BROKER_PASSWORD": "[listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString]",
             "TOPIC": "commander.command",
             "RESPONSE_TOPIC": "commander.response",
-            "UA_SERVER_ENDPOINT": "opc.tcp://assembly.line1.building1.seattle.contoso/",
+            "UA_SERVER_ENDPOINT": "opc.tcp://assembly.seattle/",
             "UA_SERVER_METHOD_ID": "ns=2;i=435",
             "UA_SERVER_OBJECT_ID": "ns=2;i=424",
             "UA_SERVER_APPLICATION_NAME": "assembly",

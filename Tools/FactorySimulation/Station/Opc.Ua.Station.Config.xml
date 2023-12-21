@@ -5,7 +5,7 @@
   schemaLocation="./Schema/ApplicationConfiguration.xsd"
 >
   <ApplicationName>UndefinedStationName</ApplicationName>
-  <ApplicationUri>urn:UndefinedStationName</ApplicationUri>
+  <ApplicationUri>urn:UndefinedStationUri</ApplicationUri>
   <ProductUri>http://opcfoundation.org/UA/Station</ProductUri>
   <ApplicationType>Server_0</ApplicationType>
 

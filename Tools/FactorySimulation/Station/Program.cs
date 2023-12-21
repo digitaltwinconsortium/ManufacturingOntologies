@@ -725,11 +725,13 @@ namespace Station.Simulation
             application.ConfigSectionName = "Opc.Ua.Station";
             application.ApplicationType = ApplicationType.Server;
 
+            string applicationUri = application.ApplicationName.Insert(application.ApplicationName.IndexOf("."), ".line1.building1") + ".contoso";
+
             LoadCertsFromCloud(application.ApplicationName);
 
             // replace the certificate subject name in the configuration
             string configFilePath = Path.Combine(Directory.GetCurrentDirectory(), application.ConfigSectionName + ".Config.xml");
-            string configFileContent = File.ReadAllText(configFilePath).Replace("UndefinedStationName", application.ApplicationName);
+            string configFileContent = File.ReadAllText(configFilePath).Replace("UndefinedStationName", application.ApplicationName).Replace("UndefinedStationUri", applicationUri);
             File.WriteAllText(configFilePath, configFileContent);
 
             // load the application configuration.

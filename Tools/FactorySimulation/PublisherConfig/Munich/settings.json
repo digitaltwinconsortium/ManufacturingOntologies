@@ -1,6 +1,6 @@
 {
   "UACertThumbprint": null,
-  "PublisherName": "publisher.munich",
+  "PublisherName": "publisher.line1.building1.munich.contoso",
   "BrokerUrl": "[myeventhubsnamespace].servicebus.windows.net",
   "BrokerPort": 9093,
   "BrokerUsername": "$ConnectionString",

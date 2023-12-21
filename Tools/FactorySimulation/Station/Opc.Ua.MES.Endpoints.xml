@@ -7,7 +7,7 @@
   <ua:Endpoints>
     <ua:ConfiguredEndpoint>
       <ua:Endpoint>
-        <EndpointUrl>opc.tcp://assembly.munich/</EndpointUrl>
+        <EndpointUrl>opc.tcp://assembly.line1.building1.munich.contoso/</EndpointUrl>
         <SecurityMode>SignAndEncrypt_3</SecurityMode>
         <SecurityPolicyUri>http://opcfoundation.org/UA/SecurityPolicy#Basic128Rsa15</SecurityPolicyUri>
         <UserIdentityTokens>
@@ -22,7 +22,7 @@
     </ua:ConfiguredEndpoint>
     <ua:ConfiguredEndpoint>
       <ua:Endpoint>
-        <EndpointUrl>opc.tcp://test.munich/</EndpointUrl>
+        <EndpointUrl>opc.tcp://test.line1.building1.munich.contoso/</EndpointUrl>
         <SecurityMode>SignAndEncrypt_3</SecurityMode>
         <SecurityPolicyUri>http://opcfoundation.org/UA/SecurityPolicy#Basic128Rsa15</SecurityPolicyUri>
         <UserIdentityTokens>
@@ -37,7 +37,7 @@
     </ua:ConfiguredEndpoint>
     <ua:ConfiguredEndpoint>
       <ua:Endpoint>
-        <EndpointUrl>opc.tcp://packaging.munich/</EndpointUrl>
+        <EndpointUrl>opc.tcp://packaging.line1.building1.munich.contoso/</EndpointUrl>
         <SecurityMode>SignAndEncrypt_3</SecurityMode>
         <SecurityPolicyUri>http://opcfoundation.org/UA/SecurityPolicy#Basic128Rsa15</SecurityPolicyUri>
         <UserIdentityTokens>

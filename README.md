@@ -140,7 +140,7 @@ Then, simply run the following Azure Data Explorer query from the Azure Portal:
 
 You need to provide two things in the query above:
 
-1. The Information Model’s unique ID from the UA Cloud Library and enter it into the <insert information model identifier from cloud library here> field of the ADX query.
+1. The Information Model's unique ID from the UA Cloud Library and enter it into the <insert information model identifier from cloud library here> field of the ADX query.
 1. Your UA Cloud Library credentials (generated during registration) basic authorization header hash and insert it into the <insert your cloud library credentials hash here> field of the ADX query. Use tools like https://www.debugbear.com/basic-auth-header-generator to generate this.
 
 

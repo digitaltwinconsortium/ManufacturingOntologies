@@ -2,30 +2,30 @@
 
 ## Table of Contents
 
-* [Introduction](https://github.com/digitaltwinconsortium/ManufacturingOntologies#introduction)
-* [Reference Solution Architecture](https://github.com/digitaltwinconsortium/ManufacturingOntologies#reference-solution-architecture)
-* [UA Cloud Twin](https://github.com/digitaltwinconsortium/ManufacturingOntologies#ua-cloud-twin)
-* [A Cloud-based OPC UA Certificate Store and Persisted Storage](https://github.com/digitaltwinconsortium/ManufacturingOntologies#a-cloud-based-opc-ua-certificate-store-and-persisted-storage)
-* [UA Cloud Library](https://github.com/digitaltwinconsortium/ManufacturingOntologies#ua-cloud-library)
-* [Production Line Simulation](https://github.com/digitaltwinconsortium/ManufacturingOntologies#production-line-simulation)
-* [Calculating the Product Carbon Footprint (PCF)](https://github.com/digitaltwinconsortium/ManufacturingOntologies#calculating-the-product-carbon-footprint-pcf)
-* [Digital Feedback Loop with UA Cloud Commander and UA Cloud Action](https://github.com/digitaltwinconsortium/ManufacturingOntologies#digital-feedback-loop-with-ua-cloud-commander-and-ua-cloud-action)
-* [Installation of Production Line Simulation and Cloud Services](https://github.com/digitaltwinconsortium/ManufacturingOntologies#installation-of-production-line-simulation-and-cloud-services)
-* [Running the Production Line Simulation](https://github.com/digitaltwinconsortium/ManufacturingOntologies#running-the-production-line-simulation)
-* [Viewing Digital Twins in Azure Digital Twins Explorer](https://github.com/digitaltwinconsortium/ManufacturingOntologies#viewing-digital-twins-in-azure-digital-twins-explorer)
-* [Generating a Digital Twins Graph with the ADT Generator Tool](https://github.com/digitaltwinconsortium/ManufacturingOntologies#generating-a-digital-twins-graph-with-the-adt-generator-tool)
-* [Condition Monitoring, Calculating OEE, Detecting Anomalies and Making Predictions in Azure Data Explorer](https://github.com/digitaltwinconsortium/ManufacturingOntologies#condition-monitoring-calculating-oee-detecting-anomalies-and-making-predictions-in-azure-data-explorer)
-* [Using Azure Managed Grafana Service](https://github.com/digitaltwinconsortium/ManufacturingOntologies#using-azure-managed-grafana-service)
-* [Using 3D Scenes Studio](https://github.com/digitaltwinconsortium/ManufacturingOntologies#using-3d-scenes-studio)
-* [Onboarding the Kubernetes Instance for Management via Azure Arc](https://github.com/digitaltwinconsortium/ManufacturingOntologies#onboarding-the-kubernetes-instance-for-management-via-azure-arc)
-* [Enabling the Product Carbon Footprint Calculation (PCF) in the Asset Admin Shell (AAS) Repository](https://github.com/digitaltwinconsortium/ManufacturingOntologies#enabling-the-product-carbon-footprint-calculation-pcf-in-the-asset-admin-shell-aas-repository)
-* [Connecting the Reference Solution to Microsoft Power BI](https://github.com/digitaltwinconsortium/ManufacturingOntologies#connecting-the-reference-solution-to-microsoft-power-bi)
-* [Connecting the Reference Solution to Microsoft Dynamics 365 Field Service](https://github.com/digitaltwinconsortium/ManufacturingOntologies#connecting-the-reference-solution-to-microsoft-dynamics-365-field-service)
-* [A turn-key alternative: Microsoft Fabric](https://github.com/digitaltwinconsortium/ManufacturingOntologies#a-turn-key-alternative-microsoft-fabric)
-* [Connecting the Reference Solution to On-Premises SAP Systems](https://github.com/digitaltwinconsortium/ManufacturingOntologies#connecting-the-reference-solution-to-on-premises-sap-systems)
-* [Replacing the Production Line Simulation with a Real Production Line](https://github.com/digitaltwinconsortium/ManufacturingOntologies#replacing-the-production-line-simulation-with-a-real-production-line)
-* [Enabling Automatic Asset Onboarding with Azure OpenAI Service](https://github.com/digitaltwinconsortium/ManufacturingOntologies#enabling-automatic-asset-onboarding-with-azure-openai-service)
-* [License](https://github.com/digitaltwinconsortium/ManufacturingOntologies#license)
+* [Introduction](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#introduction)
+* [Reference Solution Architecture](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#reference-solution-architecture)
+* [UA Cloud Twin](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#ua-cloud-twin)
+* [A Cloud-based OPC UA Certificate Store and Persisted Storage](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#a-cloud-based-opc-ua-certificate-store-and-persisted-storage)
+* [UA Cloud Library](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#ua-cloud-library)
+* [Production Line Simulation](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#production-line-simulation)
+* [Calculating the Product Carbon Footprint (PCF)](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#calculating-the-product-carbon-footprint-pcf)
+* [Digital Feedback Loop with UA Cloud Commander and UA Cloud Action](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#digital-feedback-loop-with-ua-cloud-commander-and-ua-cloud-action)
+* [Installation of Production Line Simulation and Cloud Services](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#installation-of-production-line-simulation-and-cloud-services)
+* [Running the Production Line Simulation](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#running-the-production-line-simulation)
+* [Viewing Digital Twins in Azure Digital Twins Explorer](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#viewing-digital-twins-in-azure-digital-twins-explorer)
+* [Generating a Digital Twins Graph with the ADT Generator Tool](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#generating-a-digital-twins-graph-with-the-adt-generator-tool)
+* [Condition Monitoring, Calculating OEE, Detecting Anomalies and Making Predictions in Azure Data Explorer](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#condition-monitoring-calculating-oee-detecting-anomalies-and-making-predictions-in-azure-data-explorer)
+* [Using Azure Managed Grafana Service](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#using-azure-managed-grafana-service)
+* [Using 3D Scenes Studio](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#using-3d-scenes-studio)
+* [Onboarding the Kubernetes Instance for Management via Azure Arc](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#onboarding-the-kubernetes-instance-for-management-via-azure-arc)
+* [Enabling the Product Carbon Footprint Calculation (PCF) in the Asset Admin Shell (AAS) Repository](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#enabling-the-product-carbon-footprint-calculation-pcf-in-the-asset-admin-shell-aas-repository)
+* [Connecting the Reference Solution to Microsoft Power BI](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#connecting-the-reference-solution-to-microsoft-power-bi)
+* [Connecting the Reference Solution to Microsoft Dynamics 365 Field Service](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#connecting-the-reference-solution-to-microsoft-dynamics-365-field-service)
+* [A turn-key alternative: Microsoft Fabric](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#a-turn-key-alternative-microsoft-fabric)
+* [Connecting the Reference Solution to On-Premises SAP Systems](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#connecting-the-reference-solution-to-on-premises-sap-systems)
+* [Replacing the Production Line Simulation with a Real Production Line](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#replacing-the-production-line-simulation-with-a-real-production-line)
+* [Enabling Automatic Asset Onboarding with Azure OpenAI Service](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#enabling-automatic-asset-onboarding-with-azure-openai-service)
+* [License](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#license)
 
 
 ## Introduction
@@ -121,7 +121,7 @@ When running OPC UA applications, their OPC UA configuration files, keys and cer
 
 The Asset Admin Shell Repository used in this reference solution reads OPC UA Information Models referenced by products described within Asset Admin Shells from the UA Cloud Library automatically. You can also read OPC UA Information Models directly from Azure Data Explorer (also used in this reference solution) and import the OPC UA nodes defined in the OPC UA Information Model into a table for lookup of additional metadata within queries. 
 
-First, configure an Azure Data Explorer callout policy for the UA Cloud Library by running the following query on your ADX cluster (make sure you are an ADX cluster administrator, configurable under Permissions in the ADX tab in Azure Portal):
+First, configure an Azure Data Explorer callout policy for the UA Cloud Library by running the following query on your ADX cluster (make sure you are an ADX cluster administrator, configurable under Permissions in the ADX tab in the Azure Portal):
 
         .alter cluster policy callout @'[{"CalloutType": "webapi","CalloutUriRegex": "uacloudlibrary.opcfoundation.org","CanCall": true}]'
 
@@ -137,6 +137,11 @@ Then, simply run the following Azure Data Explorer query from the Azure Portal:
         | extend NodeId = UAVariable.['@NodeId'], DisplayName = tostring(UAVariable.DisplayName.['#text']), BrowseName = tostring(UAVariable.['@BrowseName']), DataType = tostring(UAVariable.['@DataType'])
         | project-away UAVariable
         | take 100
+
+You need to provide two things in the query above:
+
+1. The Information Model’s unique ID from the UA Cloud Library and enter it into the <insert information model identifier from cloud library here> field of the ADX query.
+1. Your UA Cloud Library credentials (generated during registration) basic authorization header hash and insert it into the <insert your cloud library credentials hash here> field of the ADX query. Use tools like https://www.debugbear.com/basic-auth-header-generator to generate this.
 
 
 ## Production Line Simulation

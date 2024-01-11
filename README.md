@@ -119,9 +119,15 @@ When running OPC UA applications, their OPC UA configuration files, keys and cer
 
 ## UA Cloud Library
 
-The Asset Admin Shell Repository used in this reference solution reads OPC UA Information Models referenced by products described within Asset Admin Shells from the UA Cloud Library automatically. You can also read OPC UA Information Models directly from Azure Data Explorer (also used in this reference solution) and import the OPC UA nodes defined in the OPC UA Information Model into a table for lookup of additional metadata within queries. Simply run the following Azure Data Explorer query:
+The Asset Admin Shell Repository used in this reference solution reads OPC UA Information Models referenced by products described within Asset Admin Shells from the UA Cloud Library automatically. You can also read OPC UA Information Models directly from Azure Data Explorer (also used in this reference solution) and import the OPC UA nodes defined in the OPC UA Information Model into a table for lookup of additional metadata within queries. 
 
-        let uri='https://uacloudlibrary.opcfoundation.org/infomodel/download/<insert information model identifier from cloud library here>';
+First, configure an Azure Data Explorer callout policy for the UA Cloud Library by running the following query on your ADX cluster (make sure you are an ADX cluster administrator, configurable under Permissions in the ADX tab in Azure Portal):
+
+        .alter cluster policy callout @'[{"CalloutType": "webapi","CalloutUriRegex": "uacloudlibrary.opcfoundation.org","CanCall": true}]'
+
+Then, simply run the following Azure Data Explorer query from the Azure Portal:
+
+        let uri='https://uacloudlibrary.opcfoundation.org/infomodel/download/<insert information model identifier from the UA Cloud Library here>';
         let headers=dynamic({'accept':'text/plain'});
         let options=dynamic({'Authorization':'Basic <insert your cloud library credentials hash here>'});
         evaluate http_request(uri, headers, options)

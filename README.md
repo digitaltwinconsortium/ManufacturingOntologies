@@ -136,7 +136,7 @@ Then, simply run the following Azure Data Explorer query from the Azure Portal:
         | project-away nodeset
         | extend NodeId = UAVariable.['@NodeId'], DisplayName = tostring(UAVariable.DisplayName.['#text']), BrowseName = tostring(UAVariable.['@BrowseName']), DataType = tostring(UAVariable.['@DataType'])
         | project-away UAVariable
-        | take 100
+        | take 10000
 
 You need to provide two things in the query above:
 

@@ -1,0 +1,72 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:OperationsEventProperty;1",
+  "description": "Properties of an operations event shall be defined as operations event properties. An operations event shall be further characterized through zero or more operations event properties. Operations event properties may contain nested operations event properties",
+  "title": "Operations event property",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5192552+01:00",
+  "modified": "2024-01-17T15:53:51.5192765+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsEventDefinitionProperty;1",
+      "rel": "dtdl:mapsTo",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Maps to",
+      "dtdl:description": "The operations event(s) supports the operations definition. The operations event definition property(s) is applied in this operations event property(s). This operations event property maps to the corresponding operations event definition property. If the same ID exists in an operations event definition property, the attributes of the property will be the same",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsEventProperty;1",
+      "rel": "dtdl:contains",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The nested operations event property(s) makes up part of this operations event property as the whole"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Additional information about the operations event property"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "propertyType": {
+      "title": "Property type",
+      "description": "Defines the type of the property.",
+      "oneOf": [
+        {
+          "const": "classType",
+          "title": "Class Type",
+          "description": "The property value is defined for the class and there is no value associated with an instance"
+        },
+        {
+          "const": "instanceType",
+          "title": "Instance Type",
+          "description": "the property value of the class is undefined"
+        },
+        {
+          "const": "defaultType",
+          "title": "Default Type",
+          "description": "The property value is defined for the class as the default instance value, but individual instances of the class may redefine specific values."
+        }
+      ],
+      "type": "string"
+    },
+    "value": {
+      "title": "Value",
+      "description": "The value, set of values, or range of the property.",
+      "type": "string"
+    },
+    "valueUnitOfMeasure": {
+      "title": "Value unit of measure",
+      "description": "The unit of measure of the associated property value",
+      "type": "string"
+    }
+  }
+}

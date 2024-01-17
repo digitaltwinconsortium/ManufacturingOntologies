@@ -1,0 +1,106 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:ProcessSegmentDependency;1",
+  "description": "Process dependencies that are independent of any particular product or operations task shall be presented as segment dependencies.",
+  "title": "Segment dependency",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.493625+01:00",
+  "modified": "2024-01-17T15:53:51.4936318+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:ProcessSegment;1",
+      "rel": "dtdl:processSegmentFrom",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Has an execution dependency on",
+      "dtdl:description": "The source process segment(s) that the target process segment(s) are dependent. Process segment has an association class relationship with segment dependency"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:ProcessSegment;1",
+      "rel": "dtdl:processSegmentTo",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Has an execution dependency on",
+      "dtdl:description": "The target process segment(s) that are dependent on source process segment(s).Process segment has an association class relationship with segment dependency"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Contains additional information"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "dependencyType": {
+      "title": "Dependency Type",
+      "description": "Defines the execution dependency constraints of one segment to another segment.as the type of the execution or dependency factor between the segments",
+      "oneOf": [
+        {
+          "const": "atStart",
+          "title": "At start",
+          "description": "start B at A start"
+        },
+        {
+          "const": "afterStart",
+          "title": "After start",
+          "description": "start B after A start"
+        },
+        {
+          "const": "afterEnd",
+          "title": "After end",
+          "description": "start B after A end"
+        },
+        {
+          "const": "notFollow",
+          "title": "Not follow",
+          "description": "B cannot follow A;"
+        },
+        {
+          "const": "possibleParallel",
+          "title": "Possible parallel",
+          "description": "B may run in parallel to A"
+        },
+        {
+          "const": "notInParallel",
+          "title": "Not in parallel",
+          "description": "B may not run in parallel to A"
+        },
+        {
+          "const": "noLaterAfterStart",
+          "title": "No later after start",
+          "description": "start B no later than dependency factor after A start"
+        },
+        {
+          "const": "noEarlierAfterStart",
+          "title": "No earlier after start",
+          "description": "start B no earlier than dependency factor after A start"
+        },
+        {
+          "const": "noLaterAfterEnd",
+          "title": "No later after end",
+          "description": "start B no later than dependency factor after A end"
+        },
+        {
+          "const": "noEarlierAfterEnd",
+          "title": "No earlier after end",
+          "description": " B no earlier than dependency factor after A end"
+        }
+      ],
+      "type": "string"
+    },
+    "dependencyFactor": {
+      "title": "Dependency factor",
+      "description": "Factor used by dependency",
+      "type": "string"
+    },
+    "dependencyFactorUnitOfMeasure": {
+      "title": "Dependency factor unit of measure",
+      "description": "The units of measure of the dependency factor",
+      "type": "string"
+    }
+  }
+}

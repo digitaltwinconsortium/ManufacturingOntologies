@@ -1,0 +1,34 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:ResourceProperty;1",
+  "description": "Abstract model for all resource property models (person, equipment, physical asset, material definition, material lot, material sublot, work master, process segment, operation definition, operational location, operations segment, test specification, test result)",
+  "title": "Resource property",
+  "created": "2024-01-17T15:53:51.253042+01:00",
+  "modified": "2024-01-17T15:53:51.2530429+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Additional information about the resource property."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "value": {
+      "title": "Value",
+      "description": "The value, set of values, or range of the property.",
+      "type": "string"
+    },
+    "valueUnitOfMeasure": {
+      "title": "Value unit of measure",
+      "description": "The unit of measure of the associated property value",
+      "type": "string"
+    }
+  }
+}

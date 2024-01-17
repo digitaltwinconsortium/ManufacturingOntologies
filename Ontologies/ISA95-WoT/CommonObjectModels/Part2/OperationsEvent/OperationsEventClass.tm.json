@@ -1,0 +1,60 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:OperationsEventClass;1",
+  "description": "An operations event class is a representation of groupings of operations event definitions",
+  "title": "Operations event class",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5104659+01:00",
+  "modified": "2024-01-17T15:53:51.5104742+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsEventClass;1",
+      "rel": "dtdl:isAssembledFrom",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is assembled from",
+      "dtdl:description": "The nested operations event class(s) makes up part of this operations event class as the whole"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsEventClass;1",
+      "rel": "dtdl:includesPropertiesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Includes properties of",
+      "dtdl:description": "This operations event class(s) include properties of the operations event class",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsEventClassProperty;1",
+      "rel": "dtdl:hasPropertiesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Has properties of",
+      "dtdl:description": "The operations event class property(s) of this operations event class"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsEventClassRecordSpecification;1",
+      "rel": "dtdl:hasRecordSpecificationOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Has record specification of",
+      "dtdl:description": "The operations event class record specification(s) related to this operations event class"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Additional information and description about the operations event class"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "extension": {
+      "title": "Extension",
+      "description": "Defines constraints on the inclusion of the respective operations event class in a hierarchy",
+      "comment": "Defined value are - sealed: no entry can use this entry as its parent; - (No entry): no entry allows any entry to represent this entry as its parent /ancestor. NOTE 1 Extension can contain a set of entries of other operations event classes who represent this entry in their parent",
+      "type": "string"
+    }
+  }
+}

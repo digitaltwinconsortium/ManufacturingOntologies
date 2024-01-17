@@ -1,0 +1,10 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:aas:DataSpecificationContent;1",
+  "description": "Created from Data specification content DTDL model",
+  "title": "Data specification content",
+  "$comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "created": "2024-01-17T15:53:51.3636073+01:00",
+  "modified": "2024-01-17T15:53:51.3636086+01:00"
+}

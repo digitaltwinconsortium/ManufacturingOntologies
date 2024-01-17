@@ -1,0 +1,15 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:ResourceClass;1",
+  "description": "Abstract model for all resource class models (person class, equipment class, physical asset class, material class)",
+  "title": "Resource class",
+  "created": "2024-01-17T15:53:51.2350698+01:00",
+  "modified": "2024-01-17T15:53:51.2350705+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

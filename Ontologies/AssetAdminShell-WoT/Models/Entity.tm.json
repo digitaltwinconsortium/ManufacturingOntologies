@@ -1,0 +1,61 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:aas:Entity;1",
+  "description": "An entity is a submodel element that is used to model entities",
+  "title": "Entity",
+  "$comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "created": "2024-01-17T15:53:51.2665601+01:00",
+  "modified": "2024-01-17T15:53:51.2665612+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:aas:SubmodelElement;1",
+      "rel": "dtdl:statement",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "applicable statement",
+      "dtdl:description": "Describes statements applicable to the entity by a set of submodel elements, typically with a qualified value.",
+      "dtdl:writable": true
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Reference;1",
+      "rel": "dtdl:globalAssetId",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Global Asset Id",
+      "dtdl:description": "Reference to the asset the entity is representing.",
+      "dtdl:writable": true,
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:SpecificAssetId;1",
+      "rel": "dtdl:specificAssetId",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "specified by",
+      "dtdl:description": "Additional domain specific specific, typically proprietary Identifier for the asset like e.g. serial number etc",
+      "dtdl:writable": true
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:SubmodelElement;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "entityType": {
+      "title": "Entity type",
+      "description": "Describes whether the entity is a comanaged entity or a self-managed entity.",
+      "comment": "AAS type: EntityType - Mandatory",
+      "oneOf": [
+        {
+          "const": "CoManagedEntity",
+          "title": "Co managed entity",
+          "description": "For co-managed entities there is no separate AAS. Co-managed entities need to be part of a self-managed entity."
+        },
+        {
+          "const": "SelfManagedEntity",
+          "title": "self managed entity",
+          "description": "Self-Managed Entities have their own AAS but can be part of the bill of material of a composite self-managed entity."
+        }
+      ],
+      "type": "string"
+    }
+  }
+}

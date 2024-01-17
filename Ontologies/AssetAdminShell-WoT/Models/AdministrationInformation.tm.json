@@ -1,0 +1,22 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:aas:AdministrationInformation;1",
+  "description": "Administrative metainformation for an element like version information.",
+  "title": "Administration Information",
+  "$comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "created": "2024-01-17T15:53:51.2833661+01:00",
+  "modified": "2024-01-17T15:53:51.2833672+01:00",
+  "properties": {
+    "version": {
+      "title": "Version",
+      "description": "Version of the element.",
+      "type": "string"
+    },
+    "revision": {
+      "title": "Revision",
+      "description": "Revision of the element.",
+      "type": "string"
+    }
+  }
+}

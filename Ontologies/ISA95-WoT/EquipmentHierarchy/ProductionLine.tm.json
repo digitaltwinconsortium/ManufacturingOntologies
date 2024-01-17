@@ -1,0 +1,16 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:ProductionLine;1",
+  "description": "Production lines and work cells are the lowest levels of equipment typically scheduled by the Level 4 or Level 3 functions for discrete manufacturing processes. ",
+  "title": "Production line",
+  "$comment": "According to ANSI/ISA-95.00.01-2010 (IEC 62264-1 Mod) Enterprise-Control System Integration − Part 1: Models and Terminology - Approved 13 May 2010",
+  "created": "2024-01-17T15:53:51.2343492+01:00",
+  "modified": "2024-01-17T15:53:51.23435+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkCenter;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:aas:HasSemantics;1",
+  "description": "Element that can have a semantic definition. Abstract interface",
+  "title": "Has Semantics",
+  "$comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "created": "2024-01-17T15:53:51.2836383+01:00",
+  "modified": "2024-01-17T15:53:51.2836394+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:aas:Reference;1",
+      "rel": "dtdl:semanticId",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Semantic Id",
+      "dtdl:description": "Identifier of the semantic definition of the element. It is called semantic id of the element.",
+      "x-jsonschema:$comment": "Kind: aggregation, Cardinality: 0..1",
+      "dtdl:writable": true,
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Reference;1",
+      "rel": "dtdl:supplementalSemanticId",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Supplemental semantic Id",
+      "dtdl:description": "Identifier of a supplemental semantic definition of the element. It is called supplemental semantic ID of the element.",
+      "dtdl:writable": true
+    }
+  ],
+  "properties": {
+    "semanticIdValue": {
+      "title": "Semantic Id value",
+      "description": "String serialized semantic id value according to Spec 9.2.3 Serialization of Values of Type “Reference”",
+      "comment": "Not part of the AAS Spec. Use alternatively for 'semanticId'",
+      "type": "string"
+    }
+  }
+}

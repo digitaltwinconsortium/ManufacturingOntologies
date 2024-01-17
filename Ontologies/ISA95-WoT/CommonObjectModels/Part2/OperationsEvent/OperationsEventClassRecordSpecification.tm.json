@@ -1,0 +1,23 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:OperationsEventClassRecordSpecification;1",
+  "description": "Operations event classes define common structures of operations event definitions using operations event class record specifications. Operations event definitions as members of an operations event class that contain operations event class record specifications must support the record specification entries indicated in the operations event class. The structure and semantics of the operations event class record specification is the same as the operations event definition record specification",
+  "title": "Operations event class record specification",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5064637+01:00",
+  "modified": "2024-01-17T15:53:51.5064808+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsEventDefinitionRecordSpecification;1",
+      "rel": "dtdl:contains",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "This parent operations event definition record specification is whole of the child operations event definition record specification(s) as the part"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

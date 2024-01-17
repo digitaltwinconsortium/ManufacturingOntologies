@@ -1,0 +1,25 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:BaseModel;1",
+  "description": "Abstract base model for all ISA-95 models",
+  "title": "Base ISA-95 model",
+  "$comment": "Not part of the ISA-95 standard",
+  "created": "2024-01-17T15:53:51.2523993+01:00",
+  "modified": "2024-01-17T15:53:51.2524005+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:ext:Tags;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "tags",
+      "x-jsonschema:$comment": "Not part of the ISA-95 standard. Makes querying easier. See https://docs.microsoft.com/en-us/azure/digital-twins/how-to-use-tags"
+    }
+  ],
+  "properties": {
+    "ID": {
+      "description": "Objects in the information model which require unique identifications contain an ID attribute, which are unique within the scope of the exchanged information",
+      "comment": "According to 4.5.5.1 Object identification in ANSI/ISA-95.00.02-2018",
+      "type": "string"
+    }
+  }
+}

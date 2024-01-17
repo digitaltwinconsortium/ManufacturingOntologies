@@ -1,0 +1,80 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:OperationsRecordTemplate;1",
+  "description": "The bundle of operations record entry template objects pertinent to a specified real-world manufacturing recording activity shall be defined as an operations record template",
+  "title": "Operations record template",
+  "$comment": "Abstract - According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.525016+01:00",
+  "modified": "2024-01-17T15:53:51.5250264+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsRecordEntryTemplate;1",
+      "rel": "dtdl:recordsActionOn",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Records action on",
+      "dtdl:description": "This operations record template acts as a container for operations record entry template (s) applying a common action for each operations record template",
+      "x-jsonschema:$comment": "Cardiniality is 1..*"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsRecordSpecificationTemplate;1",
+      "rel": "dtdl:specifiedBy",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Specified by",
+      "dtdl:description": "The operations record specification template defines the information object(s) allowed to be contained within an operations record entry template in this operation record template. The specified action must match the value in the attribute, action, in this operations record template",
+      "x-jsonschema:$comment": "Mandatory",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsRecordTemplate;1",
+      "rel": "dtdl:contains",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "This parent operations record template is whole of the child operations record template(s) as the part"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Contains additional information and description of the operations record template"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "action": {
+      "title": "Action",
+      "description": "The action performed on the operations record entry template(s) within the operations record template. Defined values are added, changed, deleted and observed",
+      "oneOf": [
+        {
+          "const": "added"
+        },
+        {
+          "const": "changed"
+        },
+        {
+          "const": "deleted"
+        },
+        {
+          "const": "observed"
+        }
+      ],
+      "type": "string"
+    },
+    "effectiveTimestamp": {
+      "title": "Effective timestamp",
+      "description": "The date and time that the operations record entry template was/is effective as the time of the real-world event’s recording. If no effective timestamp is provided with operations record entry template, the effective timestamp is represented by the effective timestamp attribute in the operations record template",
+      "type": "string",
+      "format": "date-time"
+    },
+    "recordTimestamp": {
+      "title": "Record timestamp",
+      "description": "The date and time the publisher recorded/transacted the action. Record timestamp explicitly states the time that the publisher took the action of the operations record template",
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:WorkflowSpecificationNodeProperty;1",
+  "description": "A property of a workflow specification node shall be defined as a workflow specification node property.",
+  "title": "Workflow specification node property",
+  "$comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5872007+01:00",
+  "modified": "2024-01-17T15:53:51.5872056+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkflowSpecificationNodeProperty;1",
+      "rel": "dtdl:contains",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The child workflow specification node properties of this workflow specification node property."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkflowSpecificationNodeTypeProperty;1",
+      "rel": "dtdl:mapsTo",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Maps to",
+      "dtdl:description": "If the workflow specification node supports a workflow specification node type, the workflow specification node type property is applied in this workflow specification node property(s).",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Contains additional information"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "value": {
+      "title": "Value",
+      "description": "The value, set of values, or range of the property.",
+      "type": "string"
+    },
+    "valueUnitOfMeasure": {
+      "title": "Value unit of measure",
+      "description": "The unit of measure of the associated property value",
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:ToResourceReferenceProperty;1",
+  "description": "A 'to' reference to a resource shall be defined as a to resource reference.",
+  "title": "To resource reference property",
+  "$comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5613653+01:00",
+  "modified": "2024-01-17T15:53:51.5613674+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:ToResourceReferenceProperty;1",
+      "rel": "dtdl:contains",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The nested 'to' resource reference properties of this 'to' resource reference property."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:ResourceClassProperty;1",
+      "rel": "dtdl:mapsToClassProperty",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Maps To",
+      "dtdl:description": "A cross-model association to element in the [resource] model as explained in Clause 3.3.8."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:ResourceProperty;1",
+      "rel": "dtdl:mapsToProperty",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Maps To",
+      "dtdl:description": "A cross-model association to element in the [resource] model as explained in Clause 3.3.8."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "value": {
+      "title": "Value",
+      "description": "The value, set of values, or range of the property.",
+      "type": "string"
+    },
+    "valueUnitOfMeasure": {
+      "title": "Value unit of measure",
+      "description": "The unit of measure of the associated property value",
+      "type": "string"
+    }
+  }
+}

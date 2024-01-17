@@ -1,0 +1,40 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:aas:Extension;1",
+  "description": "Single extension of an element",
+  "title": "Extension",
+  "$comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "created": "2024-01-17T15:53:51.2845984+01:00",
+  "modified": "2024-01-17T15:53:51.2845994+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:aas:Referable;1",
+      "rel": "dtdl:refersTo",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Refers to",
+      "dtdl:description": "Reference to an element the extension refers to.",
+      "x-jsonschema:$comment": "Type ModelReference<Referable> according to specification",
+      "dtdl:writable": true
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:HasSemantics;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "name": {
+      "description": "An extension of the element.  Constraint AASd-077: The name of an extension within HasExtensions needs to be unique.",
+      "type": "string"
+    },
+    "valueType": {
+      "description": "Type of the value of the extension.",
+      "type": "string"
+    },
+    "value": {
+      "title": "Value",
+      "description": "Value of the extension",
+      "type": "string"
+    }
+  }
+}

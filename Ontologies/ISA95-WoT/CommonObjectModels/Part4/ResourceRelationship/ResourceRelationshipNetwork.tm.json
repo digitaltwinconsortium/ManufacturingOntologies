@@ -1,0 +1,69 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:ResourceRelationshipNetwork;1",
+  "description": "A resource relationship network shall be a composition of one or more resource network connections.",
+  "title": "Resource relationship network",
+  "$comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5603028+01:00",
+  "modified": "2024-01-17T15:53:51.5603144+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:ResourceNetworkConnection;1",
+      "rel": "dtdl:isACollectionOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is a collection of",
+      "dtdl:description": "The resource network connections related to this resource relationship network as a whole."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:ResourceRelationshipNetworkProperty;1",
+      "rel": "dtdl:hasPropertiesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Has properties of",
+      "dtdl:description": "The resource relationship network property(s) of this resource relationship network."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Contains additional information and descriptions"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "relationshipType": {
+      "title": "Relationship Type",
+      "description": "Defines the type of relationship. ",
+      "oneOf": [
+        {
+          "const": "physical",
+          "$comment": "the elements of the relationship are physically connected or in the same area"
+        },
+        {
+          "const": "logical",
+          "$comment": "the elements of the relationship are not necessarily physically connected or in the same area. "
+        }
+      ],
+      "type": "string"
+    },
+    "relationshipForm": {
+      "title": "Relationship Form",
+      "description": "Defines the form of the relationships.  ",
+      "oneOf": [
+        {
+          "const": "permanent",
+          "$comment": "the relationship is not intended to be split or changed during operations processes;"
+        },
+        {
+          "const": "transient",
+          "$comment": "the elements of the relationship are not necessarily physically connected or in the same area. "
+        }
+      ],
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:WorkUnit;1",
+  "description": "A work unit is any element of the equipment hierarchy under a work center. Work units are the lowest form of elements in an equipment hierarchy that are typically scheduled by Level 3 functions.",
+  "title": "Work unit",
+  "$comment": "According to ANSI/ISA-95.00.01-2010 (IEC 62264-1 Mod) Enterprise-Control System Integration − Part 1: Models and Terminology - Approved 13 May 2010",
+  "created": "2024-01-17T15:53:51.234884+01:00",
+  "modified": "2024-01-17T15:53:51.2348846+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:SiteAsset;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

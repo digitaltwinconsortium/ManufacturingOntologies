@@ -1,0 +1,135 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:WorkRecord;1",
+  "description": "The work record shall be defined as a subset of the execution and business information that is retained based upon business requirements identified by a work record specification.",
+  "title": "Work record",
+  "$comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5532394+01:00",
+  "modified": "2024-01-17T15:53:51.5532542+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkRecordSpecification;1",
+      "rel": "dtdl:definedBy",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Defined by",
+      "dtdl:description": "The work record specification defines the information object(s) allowed to be contained within a work record entry in this work record.",
+      "x-jsonschema:$comment": "Mandatory - Cardinality 1",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkRecord;1",
+      "rel": "dtdl:contains",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "This parent work record is whole of the child work record(s) as the part."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkRecordEntry;1",
+      "rel": "dtdl:recordsActionOn",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Records action on",
+      "dtdl:description": "This work record acts as a container for work record entry (s) applying a common action attribute for each work record."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+      "rel": "dtdl:hierarchyScopeRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits hierarchy scope",
+      "dtdl:description": "Optional relationship to hierarchy.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Additional information about the work record"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "hierarchyScope": {
+      "title": "Hierarchy scope",
+      "description": "Identifies where the exchanged information fits within the role based equipment hierarchy. Optionally, hierarchy scope defines the scope of the equipment class, such as the site or area where it is defined.",
+      "type": "string"
+    },
+    "creationDate": {
+      "title": "Creation date",
+      "description": "The date of the work record was created.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "lastChangedDate": {
+      "title": "Last changed date",
+      "description": "The date of the work record was last changed.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "changeIndication": {
+      "title": "Change indication",
+      "description": "An indication enabling detection that the work record has not been altered.",
+      "comment": "Also, the change indication enables detection that a work record has been altered, although may not identify the specific alterations.",
+      "type": "string"
+    },
+    "recordStatus": {
+      "title": "Record status",
+      "description": "Current status of the work record. This reflects the current position in a work record’s life cycle.",
+      "type": "string"
+    },
+    "expiration": {
+      "title": "Expiration date",
+      "description": "Date and time at which the work record is no longer relevant.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "version": {
+      "title": "Version",
+      "description": "The current version of the work record.",
+      "type": "string"
+    },
+    "campaignID": {
+      "title": "Campaign id",
+      "description": "The list of IDs of the campaigns associated with the work record.",
+      "type": "string"
+    },
+    "lotID": {
+      "title": "Lot id",
+      "description": "The list of IDs of the lots associated with the work record.",
+      "comment": "This is a roll up of detailed information about produced and consumed material lots that are included in other work record entries.",
+      "type": "string"
+    },
+    "batchID": {
+      "title": "Batch id",
+      "description": "The list of IDs of the batches associated with the work record.",
+      "comment": "This is a roll up of detailed information about produced and consumed material lots that are included in other work record entries.",
+      "type": "string"
+    },
+    "materialDefinitionID": {
+      "title": "Material definition id",
+      "description": "The list of IDs of the products associated with the work record.",
+      "comment": "This is a roll up of detailed information about produced and consumed material lots that are included in other work record entries.",
+      "type": "string"
+    },
+    "equipmentID": {
+      "title": "Equipment id",
+      "description": "The list of equipment associated with work record.",
+      "comment": "This is a roll up of detailed information that may be included in other work record entries.",
+      "type": "string"
+    },
+    "delimiter": {
+      "title": "Delimiter",
+      "description": "Defines the character set to be used in delimiting elements in equipment IDs and procedural element reference.",
+      "type": "string"
+    },
+    "language": {
+      "title": "Language",
+      "description": "The language used in the work record should be identified.",
+      "type": "string"
+    }
+  }
+}

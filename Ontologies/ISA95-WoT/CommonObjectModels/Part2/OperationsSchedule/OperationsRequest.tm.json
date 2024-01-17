@@ -1,0 +1,154 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:OperationsRequest;1",
+  "description": "A request for an element of an operation schedule shall be presented as an operations request.",
+  "title": "Operations request",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.3798347+01:00",
+  "modified": "2024-01-17T15:53:51.3798364+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:RequestedSegmentResponse;1",
+      "rel": "dtdl:isMadeUpOfResponse",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is made up of",
+      "dtdl:description": "The requested information to be returned in segment responses during the processing / execution of this this operations request."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsDefinition;1",
+      "rel": "dtdl:correspondsToDefinition",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "The operations definition reference that corresponds to this operations request."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsSegment;1",
+      "rel": "dtdl:correspondsToSegment",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "The associated operations segments reference that corresponds to this operations request. If the operations segment reference is insufficient to identify the operations segment, then the segment requirement should also identify the operations definition reference."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:SegmentRequirement;1",
+      "rel": "dtdl:isMadeUpOfRequirement",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is made up of",
+      "dtdl:description": "The segment requirements related to this operations request."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+      "rel": "dtdl:hierarchyScopeRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits hierarchy scope",
+      "dtdl:description": "Optional relationship to hierarchy.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Contains additional information"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "operationsType": {
+      "title": "Operations type",
+      "description": "Describes the category of the activity",
+      "comment": "Required attribute. Possible values are: production, maintenance, quality, inventory, or mixed",
+      "oneOf": [
+        {
+          "const": "production",
+          "title": "Production"
+        },
+        {
+          "const": "maintenance",
+          "title": "Maintenance"
+        },
+        {
+          "const": "quality",
+          "title": "Quality"
+        },
+        {
+          "const": "inventory",
+          "title": "Inventory"
+        },
+        {
+          "const": "mixed",
+          "title": "Mixed",
+          "$comment": " can be used when the activity contains several categories of process segments"
+        }
+      ],
+      "type": "string"
+    },
+    "startTime": {
+      "title": "Start Time",
+      "description": "When operation is to be started.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "endTime": {
+      "title": "End Time",
+      "description": "When operation is to be completed.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "priority": {
+      "title": "Priority",
+      "description": "The priority of the request.",
+      "comment": "examples: {Lowest, Low, Medium, High, Highest}",
+      "type": "string"
+    },
+    "hierarchyScope": {
+      "title": "Hierarchy scope",
+      "description": "Identifies where the exchanged information fits within the role based equipment hierarchy. ",
+      "type": "string"
+    },
+    "requestState": {
+      "title": "Request state",
+      "description": "Indicates the state of the operations request.",
+      "oneOf": [
+        {
+          "const": "forecast"
+        },
+        {
+          "const": "released"
+        },
+        {
+          "const": "cancelled"
+        },
+        {
+          "const": "waiting"
+        },
+        {
+          "const": "ready"
+        },
+        {
+          "const": "running"
+        },
+        {
+          "const": "completed"
+        },
+        {
+          "const": "aborted"
+        },
+        {
+          "const": "held"
+        },
+        {
+          "const": "suspended"
+        },
+        {
+          "const": "closed"
+        }
+      ],
+      "type": "string"
+    }
+  }
+}

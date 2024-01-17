@@ -1,0 +1,27 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:MaterialClassProperty;1",
+  "description": "Properties of a material class shall be presented as material class properties. A material class may define zero or more material class properties. A material class property may be tested to the evaluated property in a test specification where the measured results may be recorded in a property measurement attribute in a test result.",
+  "title": "Material class property",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.4815359+01:00",
+  "modified": "2024-01-17T15:53:51.4815382+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:MaterialClassProperty;1",
+      "rel": "dtdl:contains",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The nested material class property(s) makes up part of this material class property as the whole"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:ResourceClassProperty;1",
+      "rel": "tm:extends"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:TestableObjectProperty;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

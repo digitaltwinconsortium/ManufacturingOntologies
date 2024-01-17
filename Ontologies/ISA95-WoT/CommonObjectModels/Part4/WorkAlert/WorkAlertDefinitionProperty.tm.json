@@ -1,0 +1,42 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:WorkAlertDefinitionProperty;1",
+  "description": "The work alert definition property shall be defined as property on a work alert definition property.",
+  "title": "Work alert definition property",
+  "$comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5811826+01:00",
+  "modified": "2024-01-17T15:53:51.5811843+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkAlertDefinitionProperty;1",
+      "rel": "dtdl:contains",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The child work alert definition properties of this work alert definition property."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Additional information and description about the operations event class property"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "value": {
+      "title": "Value",
+      "description": "The value, set of values, or range of the property.",
+      "type": "string"
+    },
+    "valueUnitOfMeasure": {
+      "title": "Value unit of measure",
+      "description": "The unit of measure of the associated property value",
+      "type": "string"
+    }
+  }
+}

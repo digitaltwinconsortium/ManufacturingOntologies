@@ -1,0 +1,68 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:WorkMaster;1",
+  "description": "The resources and instructions required to perform a unit of work without reference to a specific job order shall be defined as a work master",
+  "title": "Work master",
+  "$comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5948776+01:00",
+  "modified": "2024-01-17T15:53:51.5948831+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkMaster;1",
+      "rel": "dtdl:includesPropertiesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Includes properties of",
+      "dtdl:description": "This work master(s) includes properties of the parent work master."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:ProcessSegment;1",
+      "rel": "dtdl:correspondsToProcess",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "The process segment(s) associated to this work master"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:operationDefinition;1",
+      "rel": "dtdl:correspondsToDefinition",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "The operations defintion(s) associated to this work master"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsSegment;1",
+      "rel": "dtdl:correspondsToOperations",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "The operations segment(s) associated to this work master"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkflowSpecification;1",
+      "rel": "dtdl:hasA",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Has A",
+      "dtdl:description": "This work master defined in part by the workflow specification(s)"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkDefinition;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "definitionType": {
+      "title": "Definition type",
+      "description": "Defines the type of the work master.",
+      "oneOf": [
+        {
+          "const": "pattern",
+          "$comment": "a work master used as a template for other work masters."
+        },
+        {
+          "const": "instance",
+          "$comment": ": a work master directly scheduled, dispatched and executed."
+        }
+      ],
+      "type": "string"
+    }
+  }
+}

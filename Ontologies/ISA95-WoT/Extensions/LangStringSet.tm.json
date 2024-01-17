@@ -1,0 +1,20 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:LangStringSet;1",
+  "description": "A set of strings, each annotated by the language of the string. The meaning of the string in each language shall be the same.",
+  "title": "Language String Set",
+  "$comment": "Not part of the ISA95 standard. But enables multi language strings",
+  "created": "2024-01-17T15:53:51.2297047+01:00",
+  "modified": "2024-01-17T15:53:51.2297084+01:00",
+  "properties": {
+    "langString": {
+      "description": "A set of strings, each annotated by the language of the string. The meaning of the stringin each language shall be the same.",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "type": "object",
+      "@type": "dtdl:Map"
+    }
+  }
+}

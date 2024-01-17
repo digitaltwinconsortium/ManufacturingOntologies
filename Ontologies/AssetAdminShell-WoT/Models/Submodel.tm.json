@@ -1,0 +1,59 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:aas:Submodel;1",
+  "description": "Created from Submodel DTDL model",
+  "title": "Submodel",
+  "$comment": "Attention: Due to DTDL v2 limitations of max 2 extends for an interface, the remaining 3 superinterfaces from the AAS specification were inlined",
+  "created": "2024-01-17T15:53:51.2659497+01:00",
+  "modified": "2024-01-17T15:53:51.2659505+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:aas:SubmodelElement;1",
+      "rel": "dtdl:submodelElement",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "contains",
+      "dtdl:description": "A submodel consists of zero or more submodel elements."
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Reference;1",
+      "rel": "dtdl:semanticId",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Semantic Id",
+      "dtdl:description": "Identifier of the semantic definition of the element. It is called semantic id of the element.",
+      "x-jsonschema:$comment": "Kind: aggregation, Cardinality: 0..1 Attention: Inlined from interface HasSemantics to reduce number of extended interfaces",
+      "dtdl:writable": true,
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:DataSpecificationContent;1",
+      "rel": "dtdl:dataSpecification",
+      "@type": "dtdl:Relationship",
+      "x-jsonschema:$comment": "Attention: Inlined from interface HasDataSpecification to reduce number of extended interfaces",
+      "dtdl:writable": true
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:HasKind;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "kind",
+      "dtdl:description": "An element with a kind is an element that can either represent a template or an instance.",
+      "x-jsonschema:$comment": "Attention: Inlined from interface HasKind to reduce number of extended interfaces"
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Identifiable;1",
+      "rel": "tm:extends"
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Qualifiable;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "semanticIdValue": {
+      "title": "Semantic Id value",
+      "description": "String serialized semantic id value according to Spec 9.2.3 Serialization of Values of Type “Reference”",
+      "comment": "Not part of the AAS Spec. Use alternatively for 'semanticId'",
+      "type": "string"
+    }
+  }
+}

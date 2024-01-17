@@ -1,0 +1,72 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:aas:ReferenceElement;1",
+  "description": "A reference element is a data element that defines a logical reference to another element within the same or another AAS or a reference to an external object or entity.",
+  "title": "Reference Element",
+  "$comment": "Since DTDLv2 doesn't support Components cascading, the complete contents of the Reference model is embedded in this model",
+  "created": "2024-01-17T15:53:51.2824682+01:00",
+  "modified": "2024-01-17T15:53:51.2824702+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:aas:Referable;1",
+      "rel": "dtdl:referredElement",
+      "@type": "dtdl:Relationship",
+      "x-jsonschema:$comment": "Optional. Can be used to link to a Referable inside the same DT graph",
+      "dtdl:writable": true,
+      "dtdl:minMultiplicity": 0
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Key;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "key1",
+      "dtdl:description": "First key. Unique reference in its namespace."
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Key;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "key2",
+      "dtdl:description": "Second key. Unique reference in its namespace."
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Key;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "key3",
+      "dtdl:description": "Third key. Unique reference in its namespace."
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Key;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "key4",
+      "dtdl:description": "Fourth key. Unique reference in its namespace."
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Key;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "key5",
+      "dtdl:description": "Fifth key. Unique reference in its namespace."
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Key;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "key6",
+      "dtdl:description": "Fifth key. Unique reference in its namespace."
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Key;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "key7",
+      "dtdl:description": "Fifth key. Unique reference in its namespace."
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Key;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "key8",
+      "dtdl:description": "Fifth key. Unique reference in its namespace."
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:DataElement;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

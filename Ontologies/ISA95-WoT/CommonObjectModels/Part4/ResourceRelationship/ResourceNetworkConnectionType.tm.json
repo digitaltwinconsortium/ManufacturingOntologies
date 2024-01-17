@@ -1,0 +1,37 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:ResourceNetworkConnectionType;1",
+  "description": "A definition of a type of a resource network connection shall be defined as a resource network connection type.",
+  "title": "Resource network connection type",
+  "$comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5619691+01:00",
+  "modified": "2024-01-17T15:53:51.5619706+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:ResourceNetworkConnectionTypeProperty;1",
+      "rel": "dtdl:hasPropertiesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Has properties of",
+      "dtdl:description": "The resource network connection type property(s) related to this resource network connection type."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Contains additional information and descriptions"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "type",
+      "dtdl:displayName": "Type",
+      "dtdl:description": "The connection type"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

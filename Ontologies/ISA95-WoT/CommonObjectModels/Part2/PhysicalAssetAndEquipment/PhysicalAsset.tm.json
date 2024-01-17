@@ -1,0 +1,113 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:PhysicalAsset;1",
+  "description": "A physical piece of equipment shall be presented as a physical asset.",
+  "title": "Physical Asset",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5299438+01:00",
+  "modified": "2024-01-17T15:53:51.5299501+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:PhysicalAssetClass;1",
+      "rel": "dtdl:definedBy",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Defined by",
+      "dtdl:description": "Physical asset classes supported by this physical asset. This physical asset supports the physical asset class property(s) associated with the physical asset class.",
+      "x-jsonschema:$comment": "Relationship type: Association"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PhysicalAssetProperty;1",
+      "rel": "dtdl:hasValuesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Has values of",
+      "dtdl:description": "The physical asset property values of this physical asset."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PhysicalAsset;1",
+      "rel": "dtdl:isMadeUpOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is made up of",
+      "dtdl:description": "The related object(s) makes up part of this physical asset as the whole."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+      "rel": "dtdl:hierarchyScopeRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits hierarchy scope",
+      "dtdl:description": "Optional relationship to hierarchy.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationalLocation;1",
+      "rel": "dtdl:physicalLocationRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits physical location",
+      "dtdl:description": "Optional relationship to physical location.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Additional information about the physical asset"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:SpatialDefinition;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "spatialDefinition",
+      "dtdl:displayName": "Spatial definition",
+      "dtdl:description": "Spatially defines the physical asset as a zero-dimensional point, one-dimensional line, or two-dimensional shape or three dimensional solid."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:Resource;1",
+      "rel": "tm:extends"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:TestableObject;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "hierarchyScope": {
+      "title": "Hierarchy scope",
+      "description": "Identifies where the exchanged information fits within the role based equipment hierarchy. Optionally, hierarchy scopedefines the scope of the physical asset class, such as the site or area where it is defined.",
+      "type": "string"
+    },
+    "fixedAssetID": {
+      "title": "Fixed asset ID",
+      "description": "Contains a unique identification for financial tracking as required by laws or regulations",
+      "type": "string"
+    },
+    "vendorID": {
+      "title": "Vendor ID",
+      "description": "Contains a vendors serial number",
+      "type": "string"
+    },
+    "physicalLocation": {
+      "title": "Physical location",
+      "description": "Contains a vendors serial number",
+      "type": "string"
+    },
+    "physicalLocationType": {
+      "title": "Physical location type",
+      "description": "Indicates whether the physical location attribute refers to an operational location object or contains a description of the physical location. Mandatory where a physical location attribute is specified. Defined values are operational location: physical location attribute references an operational location; description: physical location attribute contains a description of the physical location, such as a street address.",
+      "oneOf": [
+        {
+          "const": "operationalLocation",
+          "title": "Operational Location",
+          "description": "physical location attribute references an operational location"
+        },
+        {
+          "const": "description",
+          "title": "Description",
+          "description": " physical location attribute contains a description of the physical location, such as a street address."
+        }
+      ],
+      "type": "string"
+    }
+  }
+}

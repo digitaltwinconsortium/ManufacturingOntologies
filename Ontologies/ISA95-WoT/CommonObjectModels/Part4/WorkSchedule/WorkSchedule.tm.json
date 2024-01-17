@@ -1,0 +1,134 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:WorkSchedule;1",
+  "description": "A request for work shall be listed as a work schedule. A work schedule shall be made up of one or more work requests.",
+  "title": "Work schedule",
+  "$comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5668995+01:00",
+  "modified": "2024-01-17T15:53:51.5669089+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkSchedule;1",
+      "rel": "dtdl:isMadeUpOfSchedule",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is made up of",
+      "dtdl:description": "The related object(s), work schedule, makes up part of this work schedule as the whole"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkRequest;1",
+      "rel": "dtdl:isMadeUpOfRequest",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is made up of",
+      "dtdl:description": "The work request(s) that make up this work schedule."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+      "rel": "dtdl:hierarchyScopeRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits hierarchy scope",
+      "dtdl:description": "Optional relationship to hierarchy.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Contains additional information"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "hierarchyScope": {
+      "title": "Hierarchy scope",
+      "description": "Identifies where the exchanged information fits within the role based equipment hierarchy. Optionally, hierarchy scope defines the scope of the equipment class, such as the site or area where it is defined.",
+      "type": "string"
+    },
+    "workType": {
+      "title": "Work type",
+      "description": "Describes the category of work.",
+      "oneOf": [
+        {
+          "const": "production"
+        },
+        {
+          "const": "maintenance"
+        },
+        {
+          "const": "quality"
+        },
+        {
+          "const": "inventory"
+        },
+        {
+          "const": "mixed",
+          "$comment": " can be used when the activity contains several categories"
+        }
+      ],
+      "type": "string"
+    },
+    "startTime": {
+      "title": "Start Time",
+      "description": "The starting time for the associated work schedule.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "endTime": {
+      "title": "End Time",
+      "description": "The ending time for the associated work schedule.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "publishedDate": {
+      "title": "Published Date",
+      "description": "The date and time on which the work master or work directive was published or generated",
+      "type": "string",
+      "format": "date-time"
+    },
+    "scheduleState": {
+      "title": "Schedule state",
+      "description": "Indicates the state of the operations schedule.",
+      "oneOf": [
+        {
+          "const": "forecast"
+        },
+        {
+          "const": "released"
+        },
+        {
+          "const": "cancelled"
+        },
+        {
+          "const": "waiting"
+        },
+        {
+          "const": "ready"
+        },
+        {
+          "const": "running"
+        },
+        {
+          "const": "completed"
+        },
+        {
+          "const": "aborted"
+        },
+        {
+          "const": "held"
+        },
+        {
+          "const": "suspended"
+        },
+        {
+          "const": "closed"
+        }
+      ],
+      "type": "string"
+    }
+  }
+}

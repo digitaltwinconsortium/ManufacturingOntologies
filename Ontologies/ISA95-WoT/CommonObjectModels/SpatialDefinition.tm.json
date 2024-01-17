@@ -1,0 +1,31 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:SpatialDefinition;1",
+  "description": "The spatial definition provides a means of communicating zero-dimensional point, one-dimensional line, or two-dimensional shape or three-dimensional solid geospatial location data for planning/scheduling, actuals, resources, and analytics.",
+  "title": "Spatial definition",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.2528134+01:00",
+  "modified": "2024-01-17T15:53:51.2528146+01:00",
+  "properties": {
+    "value": {
+      "title": "Value",
+      "description": "A string to uniquely identify a spatial definition. EXAMPLE 1 UN/CEFACT CCTS: TextType) of the geospatial information in the format indicated in the format attribute.",
+      "type": "string"
+    },
+    "format": {
+      "title": "Format",
+      "description": "An enumerator that determines the format of the value attribute. E.g. GPX, WKT, ...",
+      "type": "string"
+    },
+    "SRID": {
+      "description": "SRID is the Spatial Reference Identifier which identifies the coordinate reference system to identify a predefined coordinate",
+      "type": "string"
+    },
+    "SRIDauthority": {
+      "title": "SRID authority",
+      "description": "The SRID authority identifies the authority that defines the coordinate reference system identified by the SRID. ",
+      "type": "string"
+    }
+  }
+}

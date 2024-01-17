@@ -1,0 +1,168 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:OperationsSegmentCapability;1",
+  "description": "Other information related to the capability operations made shall be presented as segment data.",
+  "title": "Operations segment capability",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.4433255+01:00",
+  "modified": "2024-01-17T15:53:51.4433457+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsSegment;1",
+      "rel": "dtdl:correspondsTo",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds To",
+      "dtdl:description": "The operations segment related to this operations segment capability."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsSegmentCapability;1",
+      "rel": "dtdl:isMadeUpOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is made up of",
+      "dtdl:description": "The nested operations segment capability(s) makes up part of this operations segment capability as the whole."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PersonnelCapability;1",
+      "rel": "dtdl:isACollectionOfPersonnel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is a collection of",
+      "dtdl:description": "The personnel capability(s) related to this operations segment capability."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:EquipmentCapability;1",
+      "rel": "dtdl:isACollectionOfEquipment",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is a collection of",
+      "dtdl:description": "The equipment capability(s) related to this operations segment capability."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PhysicalAssetCapability;1",
+      "rel": "dtdl:isACollectionOfPhysicalAsset",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is a collection of",
+      "dtdl:description": "The physical asset capability(s) related to this operations segment capability."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:MaterialCapability;1",
+      "rel": "dtdl:isACollectionOfMaterial",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is a collection of",
+      "dtdl:description": "The material capability(s) related to this operations segment capability."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+      "rel": "dtdl:hierarchyScopeRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits hierarchy scope",
+      "dtdl:description": "Optional relationship to hierarchy.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Contains additional information"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "operationsType": {
+      "title": "Operations type",
+      "description": "Describes the category of the activity",
+      "comment": "Required attribute. Possible values are: production, maintenance, quality, inventory, or mixed",
+      "oneOf": [
+        {
+          "const": "production",
+          "title": "Production"
+        },
+        {
+          "const": "maintenance",
+          "title": "Maintenance"
+        },
+        {
+          "const": "quality",
+          "title": "Quality"
+        },
+        {
+          "const": "inventory",
+          "title": "Inventory"
+        },
+        {
+          "const": "mixed",
+          "title": "Mixed",
+          "$comment": " can be used when the activity contains several categories of process segments"
+        }
+      ],
+      "type": "string"
+    },
+    "operationsSegment": {
+      "title": "Operations segment",
+      "description": "Identifies the operations segment.",
+      "type": "string"
+    },
+    "capabilityType": {
+      "title": "Capability type",
+      "description": "Defines the type of capability. ",
+      "oneOf": [
+        {
+          "const": "committed",
+          "$comment": ": capacity that is committed for future productive use."
+        },
+        {
+          "const": "unattainable",
+          "$comment": "capacity that is not attainable for future productive use given the equipment condition, equipment utilization, personnel availability or material availability."
+        },
+        {
+          "const": "available",
+          "$comment": "capacity that is available for additional future productive use."
+        },
+        {
+          "const": "used",
+          "$comment": "a historical value that defines the portion of the capacity with acceptable quality."
+        },
+        {
+          "const": "unused",
+          "$comment": " a historical value that defines the portion of the capacity that was not used or had unacceptable quality."
+        },
+        {
+          "const": "total",
+          "$comment": "the sum of used and unused capability or the sum of available, unattainable and committed capability."
+        }
+      ],
+      "type": "string"
+    },
+    "reason": {
+      "title": "Reason",
+      "description": "Defines the reason for the capability type.",
+      "type": "string"
+    },
+    "confidenceFactor": {
+      "title": "Confidence Factor",
+      "description": "Measure of the confidence of the ability to obtain the capacity value.",
+      "type": "string"
+    },
+    "startTime": {
+      "title": "Start Time",
+      "description": "The starting time of this capability type.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "endTime": {
+      "title": "End Time",
+      "description": "The ending time of this capability type.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "hierarchyScope": {
+      "title": "Hierarchy scope",
+      "description": "Identifies where the exchanged information fits within the role based equipment hierarchy. ",
+      "type": "string"
+    }
+  }
+}

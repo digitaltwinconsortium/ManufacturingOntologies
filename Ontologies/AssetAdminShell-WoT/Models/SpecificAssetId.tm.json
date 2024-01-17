@@ -1,0 +1,37 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:aas:SpecificAssetId;1",
+  "description": "A specific asset ID describes a generic supplementary identifying attribute of the asset. The specific asset ID is not necessarily globally unique.",
+  "title": "Specific asset Id",
+  "$comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "created": "2024-01-17T15:53:51.2842042+01:00",
+  "modified": "2024-01-17T15:53:51.2842051+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:aas:Reference;1",
+      "rel": "dtdl:externalSubjectId",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "External subject Id",
+      "dtdl:description": "The (external) subject the specific asset id belongs to or has meaning to",
+      "dtdl:writable": true,
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:HasSemantics;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "name": {
+      "title": "Name",
+      "description": "Name of the identifier",
+      "type": "string"
+    },
+    "value": {
+      "title": "Value",
+      "description": "The value of the identifier with the corresponding name.",
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:TestSpecificationCriteria;1",
+  "description": "The test specification criteria object defines the set of criterion to evaluate and the test result to be reported when a testable object satisfies those criteria.",
+  "title": "Test specification criteria",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.3876179+01:00",
+  "modified": "2024-01-17T15:53:51.3876257+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:EvaluatedProperty;1",
+      "rel": "dtdl:references",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "References",
+      "dtdl:description": "This test specification criteria used to evaluate the evaluated property of a testable object property"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Description of the test specification criteria"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "sequence": {
+      "title": "Sequence",
+      "description": "Specifies the sequence of evaluation of test specification criteria. The sequence shall be executed lowest first. Duplicate sequence values shall be executed in parallel with worst case result reported if both criteria are evaluated as true",
+      "type": "integer",
+      "@type": "xsd:int"
+    },
+    "expression": {
+      "title": "Expression",
+      "description": "An expression of the test specification criteria to be evaluated. If the expression is empty, then the test specification criteria represents the else criterion",
+      "type": "string"
+    },
+    "result": {
+      "title": "Result",
+      "description": "The value to be given to the result of the test if the test specification criteria expression is evaluated as true",
+      "oneOf": [
+        {
+          "const": "pass",
+          "title": "Pass"
+        },
+        {
+          "const": "fail",
+          "title": "Fail"
+        },
+        {
+          "const": "warm",
+          "title": "Warn"
+        },
+        {
+          "const": "other",
+          "title": "Other",
+          "$comment": "See additional property 'otherResult'"
+        }
+      ],
+      "type": "string"
+    },
+    "otherResult": {
+      "title": "Other result",
+      "description": "Not part of the Standard. But makes 'result' property value list extensible",
+      "type": "string"
+    }
+  }
+}

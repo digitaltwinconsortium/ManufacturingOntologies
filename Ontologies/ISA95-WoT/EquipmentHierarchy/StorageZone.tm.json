@@ -1,0 +1,16 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:StorageZone;1",
+  "description": "Storage zones and storage units are the lowest level of material movement equipment typically scheduled by the Level 4 and Level 3 functions for discrete, batch and continuous manufacturing processes. A storage zone is a type of work center and a storage unit is a type of work unit that is organized as elements within an area. These are the lower-level elements of an equipment hierarchy used in material storage and movement activities. ",
+  "title": "Storage zone",
+  "$comment": "According to ANSI/ISA-95.00.01-2010 (IEC 62264-1 Mod) Enterprise-Control System Integration − Part 1: Models and Terminology - Approved 13 May 2010",
+  "created": "2024-01-17T15:53:51.231259+01:00",
+  "modified": "2024-01-17T15:53:51.23126+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkCenter;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:EvaluatedProperty;1",
+  "description": "The evaluated property object identifies the set of testable object / testable object property pairs to be measured and the applicable test method to obtain a property measurement",
+  "title": "Evaluated property",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.3880277+01:00",
+  "modified": "2024-01-17T15:53:51.3880304+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:TestableObjectProperty;1",
+      "rel": "dtdl:correspondsTo",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "The testable object property ID which is to be measured by this test specification"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkDefinition;1",
+      "rel": "dtdl:measuredWithMethodOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Measured with method of",
+      "dtdl:description": "The work master ID or work directive ID which is applied test method to obtain the measurement of this evaluated property for test specification of the testable object property ID",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:TestSpecificationCriteria;1",
+      "rel": "dtdl:references",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "References",
+      "dtdl:description": "This test specification criteria used to evaluate the evaluated property of a testable object property"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Description of the evaluated property"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

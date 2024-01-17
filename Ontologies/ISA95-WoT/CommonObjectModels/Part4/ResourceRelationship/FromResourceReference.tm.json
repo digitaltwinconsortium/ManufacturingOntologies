@@ -1,0 +1,97 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:FromResourceReference;1",
+  "description": "A 'from' reference to a resource shall be defined as a from resource reference.",
+  "title": "From resource reference",
+  "$comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5571786+01:00",
+  "modified": "2024-01-17T15:53:51.5571925+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:FromResourceReferenceProperty;1",
+      "rel": "dtdl:hasPropertiesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Has properties of",
+      "dtdl:description": "The to resource reference property(s) defines in part this to resource reference property"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:ResourceClass;1",
+      "rel": "dtdl:correspondsToResourceClass",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds To",
+      "dtdl:description": "A cross-model association to element in the [resource] model as explained in Clause 3.3.8."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:Resource;1",
+      "rel": "dtdl:correspondsToResource",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds To",
+      "dtdl:description": "A cross-model association to element in the [resource] model as explained in Clause 3.3.8."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "resourceType": {
+      "title": "resourceType",
+      "description": "The type of the resource. ",
+      "oneOf": [
+        {
+          "const": "personnel class"
+        },
+        {
+          "const": "person"
+        },
+        {
+          "const": "equipment class"
+        },
+        {
+          "const": "equipment"
+        },
+        {
+          "const": "physical asset class"
+        },
+        {
+          "const": "physical asset"
+        },
+        {
+          "const": "material class"
+        },
+        {
+          "const": "material definition"
+        },
+        {
+          "const": "material lot"
+        },
+        {
+          "const": "material sublot"
+        },
+        {
+          "const": "work master"
+        },
+        {
+          "const": "process segment"
+        },
+        {
+          "const": "operation definition"
+        },
+        {
+          "const": "operational location"
+        },
+        {
+          "const": "operations segment"
+        },
+        {
+          "const": "test specification"
+        },
+        {
+          "const": "test result"
+        }
+      ],
+      "type": "string"
+    }
+  }
+}

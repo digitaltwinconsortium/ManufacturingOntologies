@@ -1,0 +1,176 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:PhysicalAssetRequirement;1",
+  "description": "Physical asset resources that are required for a operations segment shall be presented as physical asset specifications",
+  "title": "Physical Asset requirement",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.3838608+01:00",
+  "modified": "2024-01-17T15:53:51.3838651+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:PhysicalAssetRequirement;1",
+      "rel": "dtdl:isMadeUpOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is made up of",
+      "dtdl:description": "The related object(s) makes up part of this physical asset requirement as the whole"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PhysicalAssetRequirementProperty;1",
+      "rel": "dtdl:hasValuesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "has values of",
+      "dtdl:description": "The values in the physical asset requirement property are for this physical asset requirement."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PhysicalAssetClass;1",
+      "rel": "dtdl:correspondsToPhysicalAssetClass",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "A cross-model association to element in the physical asset model as explained in Clause 3.3.8. Identifies the associated physical asset class or set of physical asset classes of the specification for a specific process segment"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PhysicalAsset;1",
+      "rel": "dtdl:correspondsToPhysicalAsset",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "A cross-model association to element in the physical asset model as explained in Clause 3.3.8. Identifies the associated physical asset or set of physical assets of the specification for a specific process segment. Typically, either physical asset class or physical asset is specified, but not both"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+      "rel": "dtdl:hierarchyScopeRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits hierarchy scope",
+      "dtdl:description": "Optional relationship to hierarchy.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationalLocation;1",
+      "rel": "dtdl:physicalLocationRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits physical location",
+      "dtdl:description": "Optional relationship to physical location.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Contains additional information and descriptions"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:SpatialDefinition;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "spatialDefinition",
+      "dtdl:displayName": "Spatial definition",
+      "dtdl:description": "Spatially defines the equipment as a zero-dimensional point, one dimensional line, or two dimensional shape or three dimensional solid."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsTestRequirement;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "hierarchyScope": {
+      "title": "Hierarchy scope",
+      "description": "Identifies where the exchanged information fits within the role based equipment hierarchy. ",
+      "type": "string"
+    },
+    "physicalLocation": {
+      "title": "Physical location",
+      "description": "Identifies the physical location of the physical asset(s) specified by this physical asset segment specification",
+      "type": "string"
+    },
+    "physicalLocationType": {
+      "title": "Physical location type",
+      "description": "Indicates whether the physical location attribute refers to an operational location object or contains a description of the physical location. Mandatory where a physical location attribute is specified",
+      "oneOf": [
+        {
+          "const": "operationalLocation",
+          "title": "Operational Location",
+          "description": "physical location attribute references an operational location"
+        },
+        {
+          "const": "description",
+          "title": "Description",
+          "description": " physical location attribute contains a description of the physical location, such as a street address."
+        }
+      ],
+      "type": "string"
+    },
+    "physicalAssetUse": {
+      "title": "Physical asset use",
+      "description": "Defines the expected use of the physical asset class or physical asset in the context of the process segment",
+      "type": "string"
+    },
+    "quantity": {
+      "title": "Quantity",
+      "description": "Specifies the amount of resources required",
+      "type": "number",
+      "@type": "xsd:double"
+    },
+    "quantityUnitOfMeasure": {
+      "title": "Quantity unit of measure",
+      "description": "The unit of measure of the associated quantity",
+      "type": "string"
+    },
+    "equipmentLevel": {
+      "title": "Equipment level",
+      "description": "An identification of the level in the role-based equipment hierarchy",
+      "oneOf": [
+        {
+          "const": "Enterprise"
+        },
+        {
+          "const": "Site"
+        },
+        {
+          "const": "Area"
+        },
+        {
+          "const": "Work Center",
+          "title": "Work Center"
+        },
+        {
+          "const": "Work Unit",
+          "title": "Work Unit"
+        },
+        {
+          "const": "Process Cell",
+          "title": "Process Cell"
+        },
+        {
+          "const": "Unit"
+        },
+        {
+          "const": "Production Line",
+          "title": "Production Line"
+        },
+        {
+          "const": "Production Unit",
+          "title": "Production Unit"
+        },
+        {
+          "const": "Work Cell",
+          "title": "Work Cell"
+        },
+        {
+          "const": "Storage Zone",
+          "title": "Storage Zone"
+        },
+        {
+          "const": "Storage Unit",
+          "title": "Storage Unit"
+        }
+      ],
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:aas:Reference;1",
+  "description": "Reference to either a model element of the same or another AAs or to an external entity. A reference is an ordered list of keys, each key referencing an element. The complete list of keys may for example be concatenated to a path that then gives unique access to an element or entity.",
+  "title": "Reference",
+  "$comment": "Since DTDLv2 doesn't support arrays for properties, multiple key components, actually 8, are used here. According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "created": "2024-01-17T15:53:51.3642392+01:00",
+  "modified": "2024-01-17T15:53:51.3642406+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:aas:Reference;1",
+      "rel": "dtdl:referredSemanticId",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Referred semantic Id",
+      "dtdl:description": "SemanticId of the referenced model element (Reference/type=ModelReference). For global references there typically is no semantic ID. It is recommended to use a global reference",
+      "dtdl:writable": true,
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Referable;1",
+      "rel": "dtdl:referredElement",
+      "@type": "dtdl:Relationship",
+      "x-jsonschema:$comment": "Optional. Can be used to link to a Referable inside the same DT graph",
+      "dtdl:writable": true,
+      "dtdl:minMultiplicity": 0
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Key;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "key1",
+      "dtdl:description": "First key. Unique reference in its namespace."
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Key;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "key2",
+      "dtdl:description": "Second key. Unique reference in its namespace."
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Key;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "key3",
+      "dtdl:description": "Third key. Unique reference in its namespace."
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Key;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "key4",
+      "dtdl:description": "Fourth key. Unique reference in its namespace."
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Key;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "key5",
+      "dtdl:description": "Fifth key. Unique reference in its namespace."
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Key;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "key6",
+      "dtdl:description": "Fifth key. Unique reference in its namespace."
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Key;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "key7",
+      "dtdl:description": "Fifth key. Unique reference in its namespace."
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Key;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "key8",
+      "dtdl:description": "Fifth key. Unique reference in its namespace."
+    }
+  ],
+  "properties": {
+    "type": {
+      "title": "Type",
+      "description": "Type of the reference. Denotes, whether reference is a global reference or a model reference.",
+      "oneOf": [
+        {
+          "const": "GlobalReference",
+          "description": "A global reference is a reference to an external entity."
+        },
+        {
+          "const": "ModelReference",
+          "description": "A model reference is an ordered list of keys, each key referencing an element. The complete list of keys may for example be concatenated to a path that then gives unique access to an element"
+        }
+      ],
+      "type": "string"
+    }
+  }
+}

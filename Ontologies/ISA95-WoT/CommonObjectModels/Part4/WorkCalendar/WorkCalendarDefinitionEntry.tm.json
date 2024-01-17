@@ -1,0 +1,59 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:WorkCalendarDefinitionEntry;1",
+  "description": "The work calendar shall be defined as a set of start, duration, and recurrence rules that can be used to create work calendar entries of a specific type.",
+  "title": "Work calendar definition entry",
+  "$comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5713604+01:00",
+  "modified": "2024-01-17T15:53:51.5713684+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkCalendarDefinitionEntry;1",
+      "rel": "dtdl:isMadeUpOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is made up of",
+      "dtdl:description": "The related object(s) makes up part of this work calendar definition entry as the whole."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkCalendarDefinitionEntryProperty;1",
+      "rel": "dtdl:hasPropertiesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Has properties of",
+      "dtdl:description": "The work calendar definition entry property(s) defines in part this work calendar definition entry."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Additional information and description"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "startRule": {
+      "title": "Start rule",
+      "description": "Defines the starting date and time for the work calendar definition entry in ISO 8601 format for a date and time.",
+      "type": "string"
+    },
+    "recurrenceTimeIntervalRule": {
+      "title": "Recurrence time interval rule",
+      "description": "Defines the rule for recurrence of the entry in ISO 8601 format for recurrences.",
+      "type": "string"
+    },
+    "durationRule": {
+      "title": "Duration rule",
+      "description": "Defines the duration of the work calendar definition entry in ISO 8601 format for durations.",
+      "type": "string"
+    },
+    "entryType": {
+      "title": "Entry type",
+      "description": "Defines the type of work calendar definition entry. There are no standard entry types defined.",
+      "type": "string"
+    }
+  }
+}

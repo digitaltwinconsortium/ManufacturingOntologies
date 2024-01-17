@@ -1,0 +1,52 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:aas:RelationshipElement;1",
+  "description": "A relationship element is used to define a relationship between two referable elements",
+  "title": "Relationship Element",
+  "$comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "created": "2024-01-17T15:53:51.2657383+01:00",
+  "modified": "2024-01-17T15:53:51.2657391+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:aas:Reference;1",
+      "rel": "dtdl:first",
+      "@type": "dtdl:Relationship",
+      "dtdl:description": "Reference to the first element in the relationship taking the role of the subject.",
+      "x-jsonschema:$comment": "AAS type: Reference - Mandatory",
+      "dtdl:writable": true,
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Referable;1",
+      "rel": "dtdl:firstModelRef",
+      "@type": "dtdl:Relationship",
+      "dtdl:description": "Direct model reference to the first element in the relationship taking the role of the subject.",
+      "x-jsonschema:$comment": "Optional - To simplify graph by avoiding additional node and relationship",
+      "dtdl:writable": true,
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Reference;1",
+      "rel": "dtdl:second",
+      "@type": "dtdl:Relationship",
+      "dtdl:description": "Reference to the second element in the relationship taking the role of the subject.",
+      "x-jsonschema:$comment": "AAS type: Reference - Mandatory",
+      "dtdl:writable": true,
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Referable;1",
+      "rel": "dtdl:secondModelRef",
+      "@type": "dtdl:Relationship",
+      "dtdl:description": "Direct model reference to the second element in the relationship taking the role of the subject.",
+      "x-jsonschema:$comment": "Optional - To simplify graph by avoiding additional node and relationship",
+      "dtdl:writable": true,
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:SubmodelElement;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

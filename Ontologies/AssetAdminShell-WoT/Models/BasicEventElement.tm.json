@@ -1,0 +1,90 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:aas:BasicEventElement;1",
+  "description": "A basic event element.",
+  "title": "Basic Event Element",
+  "$comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "created": "2024-01-17T15:53:51.2831097+01:00",
+  "modified": "2024-01-17T15:53:51.2831113+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:aas:Referable;1",
+      "rel": "dtdl:observed",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Observed",
+      "dtdl:description": "Reference to the Referable, which defines the scope of the event. Can be AAS, Submodel or SubmodelElement. Reference to a referable, e.g. a data element or a submodel, that is being observed.",
+      "x-jsonschema:$comment": "Mandatory",
+      "dtdl:writable": true,
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Referable;1",
+      "rel": "dtdl:messageBroker",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Message broker",
+      "dtdl:description": "Information, which outer message infrastructure shall handle messages for the EventElement. Refers to a Submodel,SubmodelElementList, SubmodelElementCollection or Entity, which contains DataElements describing the proprietary specification for the message broker.Note: for different message infrastructure, e.g. OPC UA or MQTT or AMQP, this proprietary specification could be standardized by having respective Submodels.",
+      "dtdl:writable": true,
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:EventElement;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "direction": {
+      "title": "Direction",
+      "description": "Direction of event",
+      "oneOf": [
+        {
+          "const": "input",
+          "description": "Input direction"
+        },
+        {
+          "const": "output",
+          "description": "Output direction"
+        }
+      ],
+      "type": "string"
+    },
+    "state": {
+      "title": "State",
+      "description": "State of the event",
+      "oneOf": [
+        {
+          "const": "on",
+          "description": "Event is on"
+        },
+        {
+          "const": "off",
+          "description": "Event is off"
+        }
+      ],
+      "type": "string"
+    },
+    "messageTopic": {
+      "title": "Message topic",
+      "description": "Information for the outer message infrastructure for scheduling the event to the respective communication channel. ",
+      "type": "string"
+    },
+    "lastUpdate": {
+      "title": "Last updated at",
+      "description": "Timestamp in UTC, when the last event was received (input direction) or sent (output direction).",
+      "type": "string",
+      "format": "date-time"
+    },
+    "minInterval": {
+      "title": "Minimum interval",
+      "description": "For input direction, reports on the maximum frequency, the software entity behind the respective Referable can handle input events. For output events, specifies the maximum frequency of outputting this event to an outer infrastructure. Might be not specified, that is, there is no minimum interval",
+      "type": "string",
+      "format": "date-time"
+    },
+    "maxInterval": {
+      "title": "Maximum interval",
+      "description": "For input direction: not applicable. For output direction: maximum interval in time, the respective Referable shall send an update of the status of the event, even if no other trigger condition for the event was not met. Might be not specified, that is, there is no maximum interval.",
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:WorkCalendarEntry;1",
+  "description": "The work calendar entry shall be defined as a calendar entry with a start date and time, a finish date and time, and an entry type.",
+  "title": "Work calendar entry",
+  "$comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5734928+01:00",
+  "modified": "2024-01-17T15:53:51.573503+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkCalendarDefinitionEntry;1",
+      "rel": "dtdl:mapsTo",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Maps to",
+      "dtdl:description": "The work calendar definition entry that defines this work calendar entry.",
+      "x-jsonschema:$comment": "Mandatory - Cardinality 1",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkCalendarEntry;1",
+      "rel": "dtdl:isMadeUpOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is made up of",
+      "dtdl:description": "The work calendar entry(s) makes up part of this work calendar entry as the whole"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkCalendarEntryProperty;1",
+      "rel": "dtdl:hasValuesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Has values of",
+      "dtdl:description": "The work calendar entry property(s) in part defines this work calendar entry."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Additional information and description"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "startTime": {
+      "title": "Start time",
+      "description": "Defines the starting date and time of the work calendar entry.",
+      "comment": "the spec declared this field 'Start datetime' we renamed as 'Start time' to align with other models in Part2.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "endTime": {
+      "title": "End time",
+      "description": "Defines the finishing date and time of the work calendar entry.",
+      "comment": "the spec declared this field 'Finish datetime' we renamed as 'end time' to align with other models in Part2.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "entryType": {
+      "title": "Entry type",
+      "description": "Defines the type of work calendar definition entry. There are no standard entry types defined.",
+      "type": "string"
+    }
+  }
+}

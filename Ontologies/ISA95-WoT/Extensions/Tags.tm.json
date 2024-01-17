@@ -1,0 +1,28 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:ext:Tags;1",
+  "description": "You can use the concept of tags to further identify and categorize your digital twins",
+  "title": "Tags",
+  "$comment": "Not part of the AAS meta model. Makes querying easier. See https://docs.microsoft.com/en-us/azure/digital-twins/how-to-use-tags",
+  "created": "2024-01-17T15:53:51.2130292+01:00",
+  "modified": "2024-01-17T15:53:51.2204341+01:00",
+  "properties": {
+    "markers": {
+      "description": "A marker tag is a simple string that is used to mark or categorize a digital twin, such as 'blue' or 'red'. This string is the tag's name, and marker tags have no meaningful value—the tag is significant just by its presence (or absence).",
+      "additionalProperties": {
+        "type": "boolean"
+      },
+      "type": "object",
+      "@type": "dtdl:Map"
+    },
+    "values": {
+      "description": "A value tag is a key-value pair that is used to give each tag a value, such as 'color': 'blue' or 'color': 'red'. Once a value tag is created, it can also be used as a marker tag by ignoring the tag's value.",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "type": "object",
+      "@type": "dtdl:Map"
+    }
+  }
+}

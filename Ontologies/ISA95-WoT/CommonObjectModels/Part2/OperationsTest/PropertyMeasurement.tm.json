@@ -1,0 +1,63 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:PropertyMeasurement;1",
+  "description": "The measurement obtained during execution of work master (defined in Part 4 of this standard) shall be presented as a property measurement. A property measurement reports the measurement obtained for a single testable object property corresponding to an evaluated property of a test specification for a specific person, equipment, physical asset, material lot or material sublot",
+  "title": "Property measurement",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.4038943+01:00",
+  "modified": "2024-01-17T15:53:51.4039001+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:TestableObjectProperty;1",
+      "rel": "dtdl:recordsMeasurementOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Records measurement of",
+      "dtdl:description": "The testable object property ID for which this property measurement is records the measurement result",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkDefinition;1",
+      "rel": "dtdl:measuredWithMethodOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Measured with method of",
+      "dtdl:description": "The work master ID or work directive ID which is applied test method to obtain the measurement of this property measurement for test specification of the testable object property ID",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Additional information about the property measurement"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "measurementDate": {
+      "title": "Measurement date",
+      "description": "The date and time when the measurement was obtained",
+      "type": "string",
+      "format": "date-time"
+    },
+    "value": {
+      "title": "Value",
+      "description": "The measured value for the testable object property",
+      "type": "string"
+    },
+    "valueUnitOfMeasure": {
+      "title": "Value unit of measure",
+      "description": "The unit of measure of the measured value, if applicable",
+      "type": "string"
+    },
+    "expiration": {
+      "title": "Expiration",
+      "description": "The date of the expiration of the property measurement",
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

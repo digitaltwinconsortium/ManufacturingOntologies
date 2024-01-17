@@ -1,0 +1,24 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:aas:ext:IntegerProperty;1",
+  "description": "Extension of AAS Property model for Integer primitive schema of DTDL",
+  "title": "Integer property",
+  "$comment": "Not part of the AAS meta model. Enables querying with primitive schemas for Properties",
+  "created": "2024-01-17T15:53:51.2540523+01:00",
+  "modified": "2024-01-17T15:53:51.2540534+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:aas:Property;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "intValue": {
+      "title": "Integer value",
+      "description": "Value as int - A signed 4-byte integer",
+      "type": "integer",
+      "@type": "xsd:int"
+    }
+  }
+}

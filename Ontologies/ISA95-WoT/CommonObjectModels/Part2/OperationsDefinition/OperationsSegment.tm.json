@@ -1,0 +1,164 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:OperationsSegment;1",
+  "description": "The information needed to quantify a segment for a specific operation shall be presented as an operations segment. An operations segment identifies, references, or corresponds to a process segment. ",
+  "title": "Operations segment",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.4190427+01:00",
+  "modified": "2024-01-17T15:53:51.4190452+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:ProcessSegment;1",
+      "rel": "dtdl:correspondsTo",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds To",
+      "dtdl:description": "The process segments correspond to this operations segment. I"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsSegment;1",
+      "rel": "dtdl:isMadeUpOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is made up of",
+      "dtdl:description": "This parent operations segment is whole of the child operations segment(s) as the part"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsSegment;1",
+      "rel": "dtdl:hasAnExecutionDependencyOn",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Has an execution dependency on",
+      "dtdl:description": "Operations segment has an association class relationship with operations dependency. The operations segment(s) applying the ordering / sequencing rules from the segment dependency related to the operations segment execution"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsSegment;1",
+      "rel": "dtdl:includesPropertiesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Includes properties of",
+      "dtdl:description": "This operations segment class(s) include properties of the operations segment class",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsSegmentDependency;1",
+      "rel": "dtdl:hasAnExecutionDependencyOnSegment",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Has an execution dependency on",
+      "dtdl:description": "Operations segment has an association class relationship with segment dependency. The ordering / sequencing rules related to the operations segment execution"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:ParameterSpecification;1",
+      "rel": "dtdl:containsParameter",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The operations parameter specifications related to this operations segment"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PersonnelSpecification;1",
+      "rel": "dtdl:containsPersonnel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The personnel specification(s) defining part of this operations segment"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:EquipmentSpecification;1",
+      "rel": "dtdl:containsEquipment",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The equipment specification(s) defining part of this operations segment"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PhysicalAssetSpecification;1",
+      "rel": "dtdl:containsPhysicalAsset",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The physical asset specification(s) defining part of this operations segment"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:MaterialSpecification;1",
+      "rel": "dtdl:containsMaterial",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The material specification(s) defining part of this operations segment"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+      "rel": "dtdl:hierarchyScopeRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits hierarchy scope",
+      "dtdl:description": "Optional relationship to hierarchy.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Additional information about the process segment"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:Resource;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "operationsType": {
+      "title": "Operations type",
+      "description": "Describes the category of the activity",
+      "comment": "Required attribute. Possible values are: production, maintenance, quality, inventory, or mixed",
+      "oneOf": [
+        {
+          "const": "production",
+          "title": "Production"
+        },
+        {
+          "const": "maintenance",
+          "title": "Maintenance"
+        },
+        {
+          "const": "quality",
+          "title": "Quality"
+        },
+        {
+          "const": "inventory",
+          "title": "Inventory"
+        },
+        {
+          "const": "mixed",
+          "title": "Mixed",
+          "$comment": " can be used when the activity contains several categories of process segments"
+        }
+      ],
+      "type": "string"
+    },
+    "hierarchyScope": {
+      "title": "Hierarchy scope",
+      "description": "Identifies where the exchanged information fits within the role based equipment hierarchy. ",
+      "type": "string"
+    },
+    "definitionType": {
+      "title": "Definition type",
+      "description": "Defines the type of the process segment",
+      "oneOf": [
+        {
+          "const": "pattern",
+          "description": "a operations segment used as a template for other operations segments"
+        },
+        {
+          "const": "instance",
+          "description": "a operations segment that may be directly scheduled and tracked"
+        }
+      ],
+      "type": "string"
+    },
+    "duration": {
+      "title": "Duration",
+      "description": "Duration of process segment",
+      "type": "string"
+    },
+    "durationUnitOfMeasure": {
+      "title": "Duration unit of measure",
+      "description": "The units of measure of the duration",
+      "type": "string"
+    }
+  }
+}

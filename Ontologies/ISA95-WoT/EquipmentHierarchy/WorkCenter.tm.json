@@ -1,0 +1,24 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:WorkCenter;1",
+  "description": "Work centers are elements of the equipment hierarchy under an area. The term work center may be used when the specific type of the equipment element is not significant for the purpose of the discussion.",
+  "title": "Work center",
+  "$comment": "According to ANSI/ISA-95.00.01-2010 (IEC 62264-1 Mod) Enterprise-Control System Integration − Part 1: Models and Terminology - Approved 13 May 2010",
+  "created": "2024-01-17T15:53:51.2337376+01:00",
+  "modified": "2024-01-17T15:53:51.2337391+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkUnit;1",
+      "rel": "dtdl:workUnit",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "contains Work unit",
+      "dtdl:description": "Reference to a contained work unit of the work center",
+      "x-jsonschema:$comment": "Not part of the ISA-95 Standard. Just to make the graph easier to handle"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:SiteAsset;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

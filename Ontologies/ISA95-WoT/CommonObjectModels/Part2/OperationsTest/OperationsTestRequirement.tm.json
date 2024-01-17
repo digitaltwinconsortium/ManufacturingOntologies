@@ -1,0 +1,37 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:OperationsTestRequirement;1",
+  "description": "The operations test requirements are represented as abstract interface objects to simplify the operations test model diagram",
+  "title": "Operations test requirement",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.3897676+01:00",
+  "modified": "2024-01-17T15:53:51.3897717+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:TestSpecification;1",
+      "rel": "dtdl:specifies",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Specifies",
+      "dtdl:description": "The test specification(s) used to evaluate this operations test requirement"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:TestableObject;1",
+      "rel": "dtdl:correspondsToAnElementIn",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to an element in",
+      "dtdl:description": "A cross-model association to an element in the resource model for the testable object as explained in Clause 3.3.8. Identifies the associated testable object of this operations test requirement for a specific segment requirement"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:TestableObjectProperty;1",
+      "rel": "dtdl:mapsToAPropertyElementIn",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Maps to a property element in",
+      "dtdl:description": "A cross-model dependency to a property element in the resource model for the testable object property as explained in Clause 3.3.8"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

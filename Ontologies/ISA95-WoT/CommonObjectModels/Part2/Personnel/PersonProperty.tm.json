@@ -1,0 +1,36 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:PersonProperty;1",
+  "description": "Properties  of  a person shall  be  presented as person  properties. Each person shall  have  zero  or more person properties. These specify the current property values of the person for the associated personnel class property. ",
+  "title": "Person property",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.4222629+01:00",
+  "modified": "2024-01-17T15:53:51.4222671+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:PersonProperty;1",
+      "rel": "dtdl:contains",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "This nested person property(s)is part of the person property as the whole.",
+      "x-jsonschema:$comment": "Relationship type: Composition hierarchy"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PersonnelClassProperty;1",
+      "rel": "dtdl:mapsTo",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Maps to",
+      "dtdl:description": "If the person supports the parent personnel class,the personnel class property(s)is applied in this person property(s). ",
+      "x-jsonschema:$comment": "Relationship type: Dependency"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:ResourceProperty;1",
+      "rel": "tm:extends"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:TestableObjectProperty;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

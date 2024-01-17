@@ -1,0 +1,22 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:aas:AccessControlPolicyPoints;1",
+  "description": "Container for access control policy points.",
+  "title": "AccessControlPolicyPoints",
+  "$comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "created": "2024-01-17T15:53:51.3672517+01:00",
+  "modified": "2024-01-17T15:53:51.3672578+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:aas:AccessControl;1",
+      "rel": "dtdl:policyAdministrationPoint",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Policy administration Point",
+      "dtdl:description": "The access control administration policy point of the AAS.",
+      "x-jsonschema:$comment": "mandatory",
+      "dtdl:writable": true,
+      "dtdl:maxMultiplicity": 1
+    }
+  ]
+}

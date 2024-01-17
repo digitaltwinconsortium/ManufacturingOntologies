@@ -1,0 +1,59 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:MaterialDefinitionProperty;1",
+  "description": "Properties of a material definition shall be presented as material definition properties. A material definition may define zero or more material definition properties. A material definition property may be tested to the evaluated property in a test specification where the measured results may be recorded in a property measurement attribute in a test result.",
+  "title": "Material definition property",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.4846474+01:00",
+  "modified": "2024-01-17T15:53:51.4846551+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:MaterialDefinitionProperty;1",
+      "rel": "dtdl:contains",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The nested material definition property(s) makes up part of this material definition property as the whole."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:MaterialClassProperty;1",
+      "rel": "dtdl:mapsTo",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Maps to",
+      "dtdl:description": "If the parent material definition supports a material class, the material class property(s) is applied in the material definition property(s). This material definition property maps to the corresponding material class property.",
+      "x-jsonschema:$comment": "Relationship type: Dependency"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:ResourceProperty;1",
+      "rel": "tm:extends"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:TestableObjectProperty;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "propertyType": {
+      "title": "Property type",
+      "description": "Defines the type of the property.",
+      "oneOf": [
+        {
+          "const": "classType",
+          "title": "Class Type",
+          "description": "The property value is defined for the class and there is no value associated with an instance"
+        },
+        {
+          "const": "instanceType",
+          "title": "Instance Type",
+          "description": "the property value of the class is undefined"
+        },
+        {
+          "const": "defaultType",
+          "title": "Default Type",
+          "description": "The property value is defined for the class as the default instance value, but individual instances of the class may redefine specific values."
+        }
+      ],
+      "type": "string"
+    }
+  }
+}

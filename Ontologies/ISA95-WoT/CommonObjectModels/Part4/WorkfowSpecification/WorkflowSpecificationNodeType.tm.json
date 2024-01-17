@@ -1,0 +1,30 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:WorkflowSpecificationNodeType;1",
+  "description": "A workflow specification node type defines the properties that can be associated with a specific workflow specification node.",
+  "title": "Workflow specification node type",
+  "$comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5875744+01:00",
+  "modified": "2024-01-17T15:53:51.5875772+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkflowSpecificationNodeTypeProperty;1",
+      "rel": "dtdl:hasPropertiesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Has properties of",
+      "dtdl:description": "The workflow specification node type property(s) defines in part this workflow specification node type.."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Contains additional information"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

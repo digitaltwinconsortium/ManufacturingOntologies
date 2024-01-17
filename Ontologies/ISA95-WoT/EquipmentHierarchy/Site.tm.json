@@ -1,0 +1,24 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:Site;1",
+  "description": "A site is a physical, geographical, or logical grouping determined by the enterprise. It may contain areas, production lines, process cells, and production units. The Level 4 functions at a site are involved in local site management and optimization. Site planning and scheduling may involve work centers or work units within the areas. ",
+  "title": "Site",
+  "$comment": "According to ANSI/ISA-95.00.01-2010 (IEC 62264-1 Mod) Enterprise-Control System Integration − Part 1: Models and Terminology - Approved 13 May 2010",
+  "created": "2024-01-17T15:53:51.2349906+01:00",
+  "modified": "2024-01-17T15:53:51.2349913+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:Area;1",
+      "rel": "dtdl:area",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "contains Area",
+      "dtdl:description": "Reference to a contained area of the site",
+      "x-jsonschema:$comment": "Not part of the ISA-95 Standard. Just to make the graph easier to handle"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:SiteAsset;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

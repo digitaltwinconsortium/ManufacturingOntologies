@@ -1,0 +1,34 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:aas:MultiLanguageProperty;1",
+  "description": "Created from Multi language property DTDL model",
+  "title": "Multi language property",
+  "$comment": "A property is a data element that has a multi-language value",
+  "created": "2024-01-17T15:53:51.3644938+01:00",
+  "modified": "2024-01-17T15:53:51.364495+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:aas:Reference;1",
+      "rel": "dtdl:valueId",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Value Id",
+      "dtdl:description": "Reference to the global unique id of a coded value.",
+      "x-jsonschema:$comment": "AAS type: Reference",
+      "dtdl:writable": true,
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "value",
+      "dtdl:displayName": "Value",
+      "dtdl:description": "The value of the property instance.",
+      "x-jsonschema:$comment": "AAS type: LangStringSet"
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:DataElement;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

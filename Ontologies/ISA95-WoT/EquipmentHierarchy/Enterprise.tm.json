@@ -1,0 +1,24 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:Enterprise;1",
+  "description": "An enterprise is a collection of sites and areas and represents the top level of a role based equipment hierarchy. The enterprise is responsible for determining what products will be manufactured, at which sites they will be manufactured, and in general how they will be manufactured. ",
+  "title": "Enterprise",
+  "$comment": "According to ANSI/ISA-95.00.01-2010 (IEC 62264-1 Mod) Enterprise-Control System Integration − Part 1: Models and Terminology - Approved 13 May 2010",
+  "created": "2024-01-17T15:53:51.2347476+01:00",
+  "modified": "2024-01-17T15:53:51.2347483+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:Site;1",
+      "rel": "dtdl:site",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "contains Site",
+      "dtdl:description": "Reference to a contained site of the enterprise",
+      "x-jsonschema:$comment": "Not part of the ISA-95 Standard. Just to make the graph easier to handle"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:SiteAsset;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

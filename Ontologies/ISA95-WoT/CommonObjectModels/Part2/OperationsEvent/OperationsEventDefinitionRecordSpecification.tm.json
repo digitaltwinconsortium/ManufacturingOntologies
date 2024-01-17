@@ -1,0 +1,31 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:OperationsEventDefinitionRecordSpecification;1",
+  "description": "Specification of the allowed content of operations event record shall be defined as the operations event definition record specification. Information object contents in an operations event vary depending on the process context of the operations event. The operations event definition record specification describes and specifies the information objects and associated actions that are allowed in the operations event occurrence. The publisher/sender shall follow this specification to construct the message",
+  "title": "Operations event definition record specification",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5097035+01:00",
+  "modified": "2024-01-17T15:53:51.5097153+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsEventClassRecordSpecification;1",
+      "rel": "dtdl:mapsTo",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Maps to",
+      "dtdl:description": "If the operations event supports an operations event class, the operations event class record specification(s) is applied in this operations event definition record specification. This operations event definition record specification maps to the corresponding operations event class record specification",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsEventDefinitionRecordSpecification;1",
+      "rel": "dtdl:contains",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "This parent operations event definition record specification is whole of the child operations event definition record specification (s) as the part"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

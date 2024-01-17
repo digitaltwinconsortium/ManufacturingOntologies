@@ -1,0 +1,22 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:aas:Blob;1",
+  "description": "Blob Data Element",
+  "title": "Blob",
+  "$comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "created": "2024-01-17T15:51:56.659824+01:00",
+  "modified": "2024-01-17T15:51:56.6598248+01:00",
+  "properties": {
+    "value": {
+      "title": "value",
+      "description": "Blob Type.",
+      "type": "string"
+    },
+    "mimeType": {
+      "title": "mimeType",
+      "description": "mimeType",
+      "type": "string"
+    }
+  }
+}

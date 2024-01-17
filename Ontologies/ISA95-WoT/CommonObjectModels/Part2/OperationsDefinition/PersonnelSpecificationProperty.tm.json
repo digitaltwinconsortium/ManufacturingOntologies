@@ -1,0 +1,67 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:PersonnelSpecificationProperty;1",
+  "description": "Specific properties that are required for personnel specifications shall be presented as personnel specification properties",
+  "title": "Personnel specification property",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.417977+01:00",
+  "modified": "2024-01-17T15:53:51.4179791+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:PersonnelSpecificationProperty;1",
+      "rel": "dtdl:contains",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The personnel specification property(s) of this personnel specification property"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PersonnelClassProperty;1",
+      "rel": "dtdl:mapsToClassProperty",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Maps to",
+      "dtdl:description": "A cross-model dependency to element in the personnel model as explained in Clause 3.3.8"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PersonProperty;1",
+      "rel": "dtdl:mapsToProperty",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Maps to",
+      "dtdl:description": "A cross-model dependency to element in the personnel model as explained in Clause 3.3.8"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Contains additional information and descriptions of the property"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "value": {
+      "title": "Value",
+      "description": "The value, set of values, or range of the property.",
+      "type": "string"
+    },
+    "valueUnitOfMeasure": {
+      "title": "Value unit of measure",
+      "description": "The unit of measure of the associated property value",
+      "type": "string"
+    },
+    "quantity": {
+      "title": "Quantity",
+      "description": "Specifies the personnel resource required for the parent process segment",
+      "type": "number",
+      "@type": "xsd:double"
+    },
+    "quantityUnitOfMeasure": {
+      "title": "Quantity unit of measure",
+      "description": "The unit of measure of the associated quantity",
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:WorkAlertDefinition;1",
+  "description": "A notification of a Level 3 event shall be defined as a work alert. Alert definition are the class of Wor Alert",
+  "title": "Work alert definition",
+  "$comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5818894+01:00",
+  "modified": "2024-01-17T15:53:51.5818909+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkAlertDefinitionProperty;1",
+      "rel": "dtdl:hasPropertiesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Has properties of",
+      "dtdl:description": "The work alert definition properties that are part of this work alert definition."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+      "rel": "dtdl:hierarchyScopeRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits hierarchy scope",
+      "dtdl:description": "Optional relationship to hierarchy.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Additional information and description"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "hierarchyScope": {
+      "title": "Hierarchy scope",
+      "description": "Identifies where the exchanged information fits within the role based equipment hierarchy. Optionally, hierarchy scope defines the scope of the equipment class, such as the site or area where it is defined.",
+      "type": "string"
+    },
+    "priority": {
+      "title": "Priority",
+      "description": "List of the priorities that act as a guide to the relative level of importance of an work alert",
+      "comment": "Production examples: {1,2,3}; Maintenance examples: {Low, Medium, High}",
+      "type": "string"
+    },
+    "category": {
+      "title": "Category",
+      "description": "General grouping associated with a work alert definition.",
+      "type": "string"
+    }
+  }
+}

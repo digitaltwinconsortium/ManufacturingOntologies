@@ -1,0 +1,42 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:WorkflowSpecificationConnectionType;1",
+  "description": "A workflow specification connection type defines the properties that can be associated with a specific workflow specification connection.",
+  "title": "Workflow specification connection type",
+  "$comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5851687+01:00",
+  "modified": "2024-01-17T15:53:51.5851756+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkflowSpecificationConnectionTypeProperty;1",
+      "rel": "dtdl:hasPropertiesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Has properties of",
+      "dtdl:description": "The workflow specification connection type property(s) defines in part this workflow specification connection type.."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Contains additional information"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "fromMultiplicity": {
+      "title": "From multiplicity",
+      "description": "Defines the multiplicity of the “from” connection:",
+      "type": "string"
+    },
+    "toMultiplicity": {
+      "title": "To multiplicity",
+      "description": "Defines the multiplicity of the “to” connection:",
+      "type": "string"
+    }
+  }
+}

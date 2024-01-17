@@ -1,0 +1,36 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:EquipmentProperty;1",
+  "description": "Properties of equipment shall be presented as equipment properties. An equipment shall have zero or more equipment properties. These specify the current property values of the equipment for the associated equipment class property.",
+  "title": "Equipment property",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5304705+01:00",
+  "modified": "2024-01-17T15:53:51.5304758+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:EquipmentProperty;1",
+      "rel": "dtdl:contains",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The nested equipment property(s) makes up part of this equipment property as the whole.",
+      "x-jsonschema:$comment": "Relationship type: Composition hierarchy"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:EquipmentClassProperty;1",
+      "rel": "dtdl:mapsTo",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Maps to",
+      "dtdl:description": "If the parent equipment supports an equipment class, the equipment class property(s) is applied in this equipment property(s).",
+      "x-jsonschema:$comment": "Relationship type: Dependency"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:ResourceProperty;1",
+      "rel": "tm:extends"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:TestableObjectProperty;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

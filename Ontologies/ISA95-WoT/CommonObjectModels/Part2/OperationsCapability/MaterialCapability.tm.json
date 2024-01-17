@@ -1,0 +1,271 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:MaterialCapability;1",
+  "description": "A representation of the capability of material that is committed, available, or unattainable for a specific time shall be presented as a material capability.",
+  "title": "Material capability",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.4393181+01:00",
+  "modified": "2024-01-17T15:53:51.4393269+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:MaterialCapability;1",
+      "rel": "dtdl:IsAssembledFrom",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is assembled from",
+      "dtdl:description": "The related object(s) makes up part of this material capability as the whole"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:MaterialSpecificationProperty;1",
+      "rel": "dtdl:hasValuesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "has values of",
+      "dtdl:description": "The values in the material capability property are for this material capability."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:MaterialClass;1",
+      "rel": "dtdl:correspondsToClass",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "A cross-model association to element in the material model as explained in Clause 3.3.8. Identifies the associated material class or set of material classes of the specification for a specific process segment"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:MaterialDefinition;1",
+      "rel": "dtdl:correspondsToDefinition",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "A cross-model association to element in the material model as explained in Clause 3.3.8. Identifies the associated material definition or set of material definition of the specification for a specific process segment"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:MaterialLot;1",
+      "rel": "dtdl:correspondsToLot",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "A cross-model association to element in the material model as explained in Clause 3.3.8. Identifies the associated material lot or set of material lot of the specification for a specific process segment"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:MaterialSublot;1",
+      "rel": "dtdl:correspondsToSublot",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "A cross-model association to element in the material model as explained in Clause 3.3.8. Identifies the associated material sublot or set of material sublot of the specification for a specific process segment. Typically, either a material class or material definition is specified"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+      "rel": "dtdl:hierarchyScopeRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits hierarchy scope",
+      "dtdl:description": "Optional relationship to hierarchy.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationalLocation;1",
+      "rel": "dtdl:storageLocationRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits storage location",
+      "dtdl:description": "Optional relationship to storage location.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Additional information about the process segment"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:SpatialDefinition;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "spatialDefinition",
+      "dtdl:displayName": "Spatial definition",
+      "dtdl:description": "Spatially defines the equipment as a zero-dimensional point, one dimensional line, or two dimensional shape or three dimensional solid."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "capabilityType": {
+      "title": "Capability type",
+      "description": "Defines the type of capability. ",
+      "oneOf": [
+        {
+          "const": "committed",
+          "$comment": ": capacity that is committed for future productive use."
+        },
+        {
+          "const": "unattainable",
+          "$comment": "capacity that is not attainable for future productive use given the equipment condition, equipment utilization, personnel availability or material availability."
+        },
+        {
+          "const": "available",
+          "$comment": "capacity that is available for additional future productive use."
+        },
+        {
+          "const": "used",
+          "$comment": "a historical value that defines the portion of the capacity with acceptable quality."
+        },
+        {
+          "const": "unused",
+          "$comment": " a historical value that defines the portion of the capacity that was not used or had unacceptable quality."
+        },
+        {
+          "const": "total",
+          "$comment": "the sum of used and unused capability or the sum of available, unattainable and committed capability."
+        }
+      ],
+      "type": "string"
+    },
+    "reason": {
+      "title": "Reason",
+      "description": "Defines the reason for the capability type.",
+      "type": "string"
+    },
+    "confidenceFactor": {
+      "title": "Confidence Factor",
+      "description": "Measure of the confidence of the ability to obtain the capacity value.",
+      "type": "string"
+    },
+    "hierarchyScope": {
+      "title": "Hierarchy scope",
+      "description": "Identifies where the exchanged information fits within the role based equipment hierarchy. ",
+      "type": "string"
+    },
+    "storageLocation": {
+      "title": "Storage location",
+      "description": "Identifies the storage location of  the material resource(s) specified by this material segment specification",
+      "type": "string"
+    },
+    "storageLocationType": {
+      "title": "Storage location type",
+      "description": "Indicates whether the storage location attribute refers to an operational location, equipment or physical asset object, or contains a description of the storage location",
+      "comment": "Mandatory where a storage location is specified",
+      "oneOf": [
+        {
+          "const": "operationalLocation",
+          "title": "Operational Location",
+          "$comment": "storage location attribute references an operational location"
+        },
+        {
+          "const": "equipment",
+          "title": "Operational Location",
+          "$comment": "storage location attribute references an equipment object"
+        },
+        {
+          "const": "physicalAsset",
+          "title": "Physical Asset",
+          "$comment": " storage location attribute references a physical asset"
+        },
+        {
+          "const": "description",
+          "title": "Description",
+          "$comment": "storage location attribute contains a description of the storage location, such as a street address"
+        }
+      ],
+      "type": "string"
+    },
+    "materialUse": {
+      "title": "Material use",
+      "description": "Defines the use of the material class, material definition, material lot, or material sublot in the context of the process segment.",
+      "oneOf": [
+        {
+          "const": "consumable",
+          "title": "Consumable"
+        },
+        {
+          "const": "materialConsumed",
+          "title": "Material consumed"
+        },
+        {
+          "const": "materialProduced",
+          "title": "Material produced"
+        },
+        {
+          "const": "byProductProduced",
+          "title": "By-Product produced"
+        },
+        {
+          "const": "coProductProduced",
+          "title": "Co-Product produced"
+        },
+        {
+          "const": "yieldProduced",
+          "title": "Yield produced"
+        },
+        {
+          "const": "destructiveSample",
+          "title": "Destructive sample"
+        },
+        {
+          "const": "returnedSample",
+          "title": "Returned sample"
+        },
+        {
+          "const": "retainedSample",
+          "title": "Retained sample"
+        },
+        {
+          "const": "inventoried",
+          "title": "Inventoried"
+        }
+      ],
+      "type": "string"
+    },
+    "startTime": {
+      "title": "Start Time",
+      "description": "The starting time associated with the material capability.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "endTime": {
+      "title": "End Time",
+      "description": "The ending time associated with the material capability.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "quantity": {
+      "title": "Quantity",
+      "description": "Specifies the amount of material produced or used by the parent segment.",
+      "type": "number",
+      "@type": "xsd:double"
+    },
+    "quantityUnitOfMeasure": {
+      "title": "Quantity unit of measure",
+      "description": "The unit of measure of the associated quantity",
+      "type": "string"
+    },
+    "assemblyType": {
+      "title": "Assembly type",
+      "description": "Defines the type of the assembly",
+      "oneOf": [
+        {
+          "const": "physical",
+          "description": "the components of the assembly are physically connected or in the same area"
+        },
+        {
+          "const": "logical",
+          "description": "the components of the assembly are not necessarily physically connected or in the same area"
+        }
+      ],
+      "type": "string"
+    },
+    "assemblyRelationship": {
+      "title": "Assembly relationship",
+      "description": "Defines the type of the relationships",
+      "oneOf": [
+        {
+          "const": "permanent",
+          "description": "an assembly that is not intended to be split during the production process"
+        },
+        {
+          "const": "transient",
+          "description": "a temporary assembly using during production, such as a pallet of different materials or a batch kit"
+        }
+      ],
+      "type": "string"
+    }
+  }
+}

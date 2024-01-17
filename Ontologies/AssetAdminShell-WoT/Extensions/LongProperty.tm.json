@@ -1,0 +1,24 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:aas:ext:LongProperty;1",
+  "description": "Extension of AAS Property model for Long primitive schema of DTDL",
+  "title": "Long integer property",
+  "$comment": "Not part of the AAS meta model. Enables querying with primitive schemas for Properties",
+  "created": "2024-01-17T15:53:51.2538392+01:00",
+  "modified": "2024-01-17T15:53:51.2538404+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:aas:Property;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "longValue": {
+      "title": "Long value",
+      "description": "Value as long - A signed 8-byte integer",
+      "type": "integer",
+      "@type": "xsd:long"
+    }
+  }
+}

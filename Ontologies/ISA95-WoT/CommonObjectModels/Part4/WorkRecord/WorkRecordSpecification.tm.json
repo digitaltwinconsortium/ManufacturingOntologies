@@ -1,0 +1,69 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:WorkRecordSpecification;1",
+  "description": "Specification of the allowed content of work record objects shall be defined as work record specifications.",
+  "title": "Work record specification",
+  "$comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5543842+01:00",
+  "modified": "2024-01-17T15:53:51.5543911+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkRecordSpecification;1",
+      "rel": "dtdl:contains",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "This parent work record specification is whole of the child work record specification(s) as the part."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Additional information and description"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "informationObjectModel": {
+      "title": "Information object model",
+      "description": "Permitted set of information objects allowed in the work record occurrence.",
+      "comment": "A work record entry contains the attributes to the information object for work record.",
+      "type": "string"
+    },
+    "informationObjectTypeMultiplicity": {
+      "title": "Information object type multiplicity",
+      "description": "The range of the information object(s) in work record entry allowed in the work record occurrence.",
+      "comment": "If no limit is explicitly specified, the unbounded keyword is specified.",
+      "type": "string"
+    },
+    "action": {
+      "title": "Action",
+      "description": "The permitted set of actions applied to the work record entry object in the work s record by the publisher.",
+      "oneOf": [
+        {
+          "const": "added"
+        },
+        {
+          "const": "changed"
+        },
+        {
+          "const": "deleted"
+        },
+        {
+          "const": "observed"
+        }
+      ],
+      "type": "string"
+    },
+    "actionMultiplicity": {
+      "title": "Action multiplicity",
+      "description": "The range of actions allowed to be represented in the work record occurrence.",
+      "comment": "If no limit is explicitly specified, the unbounded keyword is specified. If no multiplicity entry is specified, this is equivalent to no constraint.",
+      "type": "string"
+    }
+  }
+}

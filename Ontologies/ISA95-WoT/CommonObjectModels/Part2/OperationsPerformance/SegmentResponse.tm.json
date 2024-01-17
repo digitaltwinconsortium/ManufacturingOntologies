@@ -1,0 +1,197 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:SegmentResponse;1",
+  "description": "Information on a segment of an operations response shall be presented as a segment response.",
+  "title": "Segment response",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.4549013+01:00",
+  "modified": "2024-01-17T15:53:51.4549084+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsDefinition;1",
+      "rel": "dtdl:correspondsToDefinition",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds To",
+      "dtdl:description": "The operations definition reference that corresponds to this segment response"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsSegment;1",
+      "rel": "dtdl:correspondsToSegment",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds To",
+      "dtdl:description": "The associated operations segments that corresponds to this segment response"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:ProcessSegment;1",
+      "rel": "dtdl:correspondsToAProcessSegment",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds To a",
+      "dtdl:description": "An identification of the process segment associated with this segment response.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:SegmentRequirement;1",
+      "rel": "dtdl:correspondsToRequirement",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds To",
+      "dtdl:description": "The segments requirement(s) that corresponds to this segment response"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:SegmentResponse;1",
+      "rel": "dtdl:isMadeUpOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is made up of",
+      "dtdl:description": "The related object(s) makes up part of this segment response as the whole."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:SegmentData;1",
+      "rel": "dtdl:containsData",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The segment parameters related to this segment response"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PersonnelActual;1",
+      "rel": "dtdl:containsPersonnel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The personnel actual(s) related to this segment response"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:EquipmentActual;1",
+      "rel": "dtdl:containsEquipment",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The equipment actual(s) related to this segment response"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PhysicalAssetActual;1",
+      "rel": "dtdl:containsPhysicalAsset",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The physical asset actual(s) related to this segment response"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:MaterialActual;1",
+      "rel": "dtdl:containsMaterial",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The material actual(s) related to this segment response"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+      "rel": "dtdl:hierarchyScopeRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits hierarchy scope",
+      "dtdl:description": "Optional relationship to hierarchy.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Additional information about the process segment"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "operationsType": {
+      "title": "Operations type",
+      "description": "Describes the category of the activity",
+      "comment": "Required attribute. Possible values are: production, maintenance, quality, inventory, or mixed",
+      "oneOf": [
+        {
+          "const": "production",
+          "title": "Production"
+        },
+        {
+          "const": "maintenance",
+          "title": "Maintenance"
+        },
+        {
+          "const": "quality",
+          "title": "Quality"
+        },
+        {
+          "const": "inventory",
+          "title": "Inventory"
+        },
+        {
+          "const": "mixed",
+          "title": "Mixed",
+          "$comment": " can be used when the activity contains several categories of process segments"
+        }
+      ],
+      "type": "string"
+    },
+    "startTime": {
+      "title": "Start Time",
+      "description": "The actual start time of this segment response",
+      "type": "string",
+      "format": "date-time"
+    },
+    "endTime": {
+      "title": "End Time",
+      "description": "The actual end time of this segment response",
+      "type": "string",
+      "format": "date-time"
+    },
+    "postingDate": {
+      "title": "Posting Date",
+      "description": "The date and time used for posting resource actuals to supporting applications.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "hierarchyScope": {
+      "title": "Hierarchy scope",
+      "description": "Identifies where the exchanged information fits within the role based equipment hierarchy. ",
+      "type": "string"
+    },
+    "segmentState": {
+      "title": "Segment state",
+      "description": "Indicates the state of the segment response.",
+      "oneOf": [
+        {
+          "const": "forecast"
+        },
+        {
+          "const": "released"
+        },
+        {
+          "const": "cancelled"
+        },
+        {
+          "const": "waiting"
+        },
+        {
+          "const": "ready"
+        },
+        {
+          "const": "running"
+        },
+        {
+          "const": "completed"
+        },
+        {
+          "const": "aborted"
+        },
+        {
+          "const": "held"
+        },
+        {
+          "const": "suspended"
+        },
+        {
+          "const": "closed"
+        }
+      ],
+      "type": "string"
+    }
+  }
+}

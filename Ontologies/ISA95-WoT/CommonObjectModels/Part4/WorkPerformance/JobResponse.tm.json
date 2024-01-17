@@ -1,0 +1,174 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:JobResponse;1",
+  "description": "The responses from manufacturing that are associated with a job order shall be defined as a job response.",
+  "title": "Job response",
+  "$comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5369812+01:00",
+  "modified": "2024-01-17T15:53:51.537007+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkMaster;1",
+      "rel": "dtdl:correspondsToWorkMaster",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "The work master(s) related to this job response"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkDirective;1",
+      "rel": "dtdl:correspondsToWorkDirective",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "The work directive(s) related to this job response"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkflowSpecification;1",
+      "rel": "dtdl:correspondsToSpecification",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "The workflow specification(s) related to this job response"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkflowSpecificationNode;1",
+      "rel": "dtdl:correspondsToSpecificationNode",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "The workflow specification node(s) related to this job response"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:JobOrder;1",
+      "rel": "dtdl:correspondsToJobOrder",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "The job order(s) related to this job response"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:JobResponseData;1",
+      "rel": "dtdl:containsData",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "Data associated with this job response"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PersonnelActual;1",
+      "rel": "dtdl:containsPersonnel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The personnel actual(s) related to this job response"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:EquipmentActual;1",
+      "rel": "dtdl:containsEquipment",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The equipment actual(s) related to this job response"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PhysicalAssetActual;1",
+      "rel": "dtdl:containsPhysicalAsset",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The physical asset actual(s) related to this job response"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:MaterialActual;1",
+      "rel": "dtdl:containsMaterial",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The material actual(s) related to this job response"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+      "rel": "dtdl:hierarchyScopeRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits hierarchy scope",
+      "dtdl:description": "Optional relationship to hierarchy.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "workType": {
+      "title": "Work type",
+      "description": "Describes the category of work.",
+      "oneOf": [
+        {
+          "const": "production"
+        },
+        {
+          "const": "maintenance"
+        },
+        {
+          "const": "quality"
+        },
+        {
+          "const": "inventory"
+        },
+        {
+          "const": "mixed",
+          "$comment": " can be used when the activity contains several categories"
+        }
+      ],
+      "type": "string"
+    },
+    "jobOrder": {
+      "title": "Job order",
+      "description": "An identification of the associated job order.",
+      "comment": "Job responses may not relate to a job order, it may be a report on all work for a specific time or reported on by plant floor events. ",
+      "type": "string"
+    },
+    "startTime": {
+      "title": "Start Time",
+      "description": "The starting time of this job response.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "endTime": {
+      "title": "End Time",
+      "description": "The ending time of this job response.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "hierarchyScope": {
+      "title": "Hierarchy scope",
+      "description": "Identifies where the exchanged information fits within the role based equipment hierarchy. Optionally, hierarchy scope defines the scope of the equipment class, such as the site or area where it is defined.",
+      "type": "string"
+    },
+    "jobState": {
+      "title": "Job state",
+      "description": "Indicates the state of the work response.",
+      "oneOf": [
+        {
+          "const": "waiting"
+        },
+        {
+          "const": "ready"
+        },
+        {
+          "const": "running"
+        },
+        {
+          "const": "completed"
+        },
+        {
+          "const": "aborted"
+        },
+        {
+          "const": "held"
+        },
+        {
+          "const": "suspended"
+        },
+        {
+          "const": "closed"
+        }
+      ],
+      "type": "string"
+    }
+  }
+}

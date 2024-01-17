@@ -1,0 +1,87 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:JobList;1",
+  "description": "A job list shall be defined as a collection of job orders for a specific period of time and selected work centers or other resources",
+  "title": "Job list",
+  "$comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.57058+01:00",
+  "modified": "2024-01-17T15:53:51.5705932+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:JobOrder;1",
+      "rel": "dtdl:isMadeUpOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is made up of",
+      "dtdl:description": "The job orders contained by this job list."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+      "rel": "dtdl:hierarchyScopeRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits hierarchy scope",
+      "dtdl:description": "Optional relationship to hierarchy.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Contains additional information"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "hierarchyScope": {
+      "title": "Hierarchy scope",
+      "description": "Identifies where the exchanged information fits within the role based equipment hierarchy. Optionally, hierarchy scope defines the scope of the equipment class, such as the site or area where it is defined.",
+      "type": "string"
+    },
+    "workType": {
+      "title": "Work type",
+      "description": "Describes the category of work.",
+      "oneOf": [
+        {
+          "const": "production"
+        },
+        {
+          "const": "maintenance"
+        },
+        {
+          "const": "quality"
+        },
+        {
+          "const": "inventory"
+        },
+        {
+          "const": "mixed",
+          "$comment": " can be used when the activity contains several categories"
+        }
+      ],
+      "type": "string"
+    },
+    "startTime": {
+      "title": "Start Time",
+      "description": "The starting time for the associated job list.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "endTime": {
+      "title": "End Time",
+      "description": "The ending time for the associated job list.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "publishedDate": {
+      "title": "Published Date",
+      "description": "The date and time on which the work master or work directive was published or generated",
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

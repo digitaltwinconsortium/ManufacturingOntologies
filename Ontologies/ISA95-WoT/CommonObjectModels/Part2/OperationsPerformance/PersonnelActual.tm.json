@@ -1,0 +1,125 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:PersonnelActual;1",
+  "description": "An identification of a personnel capability used during a specified segment response shall be presented as personnel actual.",
+  "title": "Personnel actual",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.4534672+01:00",
+  "modified": "2024-01-17T15:53:51.4534724+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:PersonnelActual;1",
+      "rel": "dtdl:isMadeUpOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is made up of",
+      "dtdl:description": "The related object(s) makes up part of this personnel actual as the whole"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PersonnelActualProperty;1",
+      "rel": "dtdl:hasValuesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "has values of",
+      "dtdl:description": "The values in the personnel actual property are for this personnel actual."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PersonnelClass;1",
+      "rel": "dtdl:correspondsToPersonnelClass",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "A cross-model association to element in the personnel model as explained in Clause 3.3.8. Identifies the associated personnel class or set of personnel classes specified"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:Person;1",
+      "rel": "dtdl:correspondsToPerson",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "A cross-model association to element in the personnel model as explained in Clause 3.3.8. Identifies the associated person or set of persons specified. Typically, either personnel class or person is specified, but not both"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+      "rel": "dtdl:hierarchyScopeRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits hierarchy scope",
+      "dtdl:description": "Optional relationship to hierarchy.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationalLocation;1",
+      "rel": "dtdl:operationalLocationRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits operational location",
+      "dtdl:description": "Optional relationship to operational location.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Additional information about the process segment"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:SpatialDefinition;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "spatialDefinition",
+      "dtdl:displayName": "Spatial definition",
+      "dtdl:description": "Spatially defines the equipment as a zero-dimensional point, one dimensional line, or two dimensional shape or three dimensional solid."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:ResourceActual;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "hierarchyScope": {
+      "title": "Hierarchy scope",
+      "description": "Identifies where the exchanged information fits within the role based equipment hierarchy. ",
+      "type": "string"
+    },
+    "operationalLocation": {
+      "title": "Operational location",
+      "description": "Identifies the operational location of the personnel resource(s)  specified by this personnel segment specification",
+      "type": "string"
+    },
+    "operationalLocationType": {
+      "title": "Operational location type",
+      "description": "Indicates whether the operational location attribute refers to an operational location object or contains a description of the operational location. Mandatory where an operational location attribute is specified",
+      "oneOf": [
+        {
+          "const": "operationalLocation",
+          "title": "Operational Location",
+          "description": "operational location attribute references an operational location;"
+        },
+        {
+          "const": "description",
+          "title": "Description",
+          "description": "operational location attribute contains a description of the operational location, such as a street address."
+        }
+      ],
+      "type": "string"
+    },
+    "personnelUse": {
+      "title": "Personnel use",
+      "description": "Defines the actual use of the personnel class or personnel in the context of the parent segment",
+      "type": "string"
+    },
+    "quantity": {
+      "title": "Quantity",
+      "description": "Specifies the personnel resource used for the parent segment",
+      "type": "number",
+      "@type": "xsd:double"
+    },
+    "quantityUnitOfMeasure": {
+      "title": "Quantity unit of measure",
+      "description": "The unit of measure of the associated quantity",
+      "type": "string"
+    }
+  }
+}

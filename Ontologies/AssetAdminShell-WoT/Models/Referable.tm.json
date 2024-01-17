@@ -1,0 +1,53 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:aas:Referable;1",
+  "description": "An element that is referable by its idShort. This id is not globally unique. This id is unique within the name space of the element.",
+  "title": "Referable",
+  "$comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "created": "2024-01-17T15:53:51.280785+01:00",
+  "modified": "2024-01-17T15:53:51.2807888+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:aas:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "displayName",
+      "dtdl:displayName": "Display name",
+      "dtdl:description": "Display name. Can be provided in several languages."
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Description or comments on the element. The description can be provided in several languages."
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:ext:Tags;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "tags",
+      "x-jsonschema:$comment": "Not part of the AAS meta model. Makes querying easier. See https://docs.microsoft.com/en-us/azure/digital-twins/how-to-use-tags"
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:HasExtensions;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "idShort": {
+      "description": "In case of identifiables this attribute is a short name of the element. In case of referable this id is an identifying string of the element within its name space.",
+      "comment": "Optional",
+      "type": "string"
+    },
+    "category": {
+      "title": "Category",
+      "description": "The category is a value that gives further meta information w.r.t. to the class of the element. It affects the expected existence of attributes and the applicability of constraints.",
+      "type": "string"
+    },
+    "checksum": {
+      "title": "Checksum",
+      "description": "Checksum to be used to determine if an Referable (including its aggregated child elements) has changed.The checksum is calculated by the user’s tool environment. The checksum has no semantic meaning for an Asset Administration Shell model and there is no requirement for Asset Administration Shell tools to manage the checksum.",
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:Unit;1",
+  "description": "Units have well-defined processing capabilities and throughput capacities and these are used for Level 3 functions. T",
+  "title": "Unit",
+  "$comment": "According to ANSI/ISA-95.00.01-2010 (IEC 62264-1 Mod) Enterprise-Control System Integration − Part 1: Models and Terminology - Approved 13 May 2010",
+  "created": "2024-01-17T15:53:51.2307235+01:00",
+  "modified": "2024-01-17T15:53:51.2307251+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkUnit;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

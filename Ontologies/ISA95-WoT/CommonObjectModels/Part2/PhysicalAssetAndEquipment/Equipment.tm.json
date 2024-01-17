@@ -1,0 +1,136 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:Equipment;1",
+  "description": "A representation of the elements of the equipment hierarchy model shown in ISA-95.00.01 shall be presented as equipment. Equipment may be a listing of any of the following: enterprise, site, area, work center, work unit, process cell, unit, production line, production unit, work cell, storage zone, and storage unit.",
+  "title": "Equipment",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5324973+01:00",
+  "modified": "2024-01-17T15:53:51.5325024+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:EquipmentClass;1",
+      "rel": "dtdl:definedBy",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Defined by",
+      "dtdl:description": "Equipment classes supported by this equipment.",
+      "x-jsonschema:$comment": "Relationship type: Association"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:EquipmentProperty;1",
+      "rel": "dtdl:hasValuesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Has values of",
+      "dtdl:description": "The equipment property values of this equipment."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:Equipment;1",
+      "rel": "dtdl:isMadeUpOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is made up of",
+      "dtdl:description": "The related object(s) makes up part of this equipment as the whole."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PhysicalAsset;1",
+      "rel": "dtdl:implementedBy",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Implemented by",
+      "dtdl:description": "This equipment as role in a process segment is implemented by the physical asset.",
+      "x-jsonschema:$comment": "For Equipment asset mapping",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+      "rel": "dtdl:hierarchyScopeRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits hierarchy scope",
+      "dtdl:description": "Optional relationship to hierarchy.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Additional information about the equipment"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:SpatialDefinition;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "spatialDefinition",
+      "dtdl:displayName": "Spatial definition",
+      "dtdl:description": "Spatially defines the equipment as a zero-dimensional point, one dimensional line, or two dimensional shape or three dimensional solid."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:Resource;1",
+      "rel": "tm:extends"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:TestableObject;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "hierarchyScope": {
+      "title": "Hierarchy scope",
+      "description": "Identifies where the exchanged information fits within the role based equipment hierarchy. ",
+      "type": "string"
+    },
+    "equipmentLevel": {
+      "title": "Equipment level",
+      "description": "An identification of the level in the role-based equipment hierarchy",
+      "oneOf": [
+        {
+          "const": "enterprise",
+          "title": "Enterprise"
+        },
+        {
+          "const": "site",
+          "title": "Site"
+        },
+        {
+          "const": "area",
+          "title": "Area"
+        },
+        {
+          "const": "workCenter",
+          "title": "Work Center"
+        },
+        {
+          "const": "workUnit",
+          "title": "Work Unit"
+        },
+        {
+          "const": "processCell",
+          "title": "Process Cell"
+        },
+        {
+          "const": "unit",
+          "title": "Unit"
+        },
+        {
+          "const": "productionLine",
+          "title": "Production Line"
+        },
+        {
+          "const": "productionUnit",
+          "title": "Production Unit"
+        },
+        {
+          "const": "workCell",
+          "title": "Work Cell"
+        },
+        {
+          "const": "storageZone",
+          "title": "Storage Zone"
+        },
+        {
+          "const": "Storage Unit",
+          "title": "Storage Unit"
+        }
+      ],
+      "type": "string"
+    }
+  }
+}

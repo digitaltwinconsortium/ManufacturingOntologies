@@ -1,0 +1,174 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:PhysicalAssetCapability;1",
+  "description": "A representation of the capability of a physical asset or physical asset class that is committed, available, or unattainable for a specific time shall be presented as a physical asset capability. ",
+  "title": "Physical Asset capability",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.4409493+01:00",
+  "modified": "2024-01-17T15:53:51.4409614+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:PhysicalAssetCapability;1",
+      "rel": "dtdl:isMadeUpOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is made up of",
+      "dtdl:description": "The related object(s) makes up part of this physical asset capability as the whole"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:physicalAssetCapabilityProperty;1",
+      "rel": "dtdl:hasValuesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "has values of",
+      "dtdl:description": "The values in the physical asset capability property are for this physical asset capability."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PhysicalAssetClass;1",
+      "rel": "dtdl:correspondsToPhysicalAssetClass",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "A cross-model association to element in the physical asset model as explained in Clause 3.3.8. Identifies the associated physical asset class or set of physical asset classes of the specification for a specific process segment"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PhysicalAsset;1",
+      "rel": "dtdl:correspondsToPhysicalAsset",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "A cross-model association to element in the physical asset model as explained in Clause 3.3.8. Identifies the associated physical asset or set of physical assets of the specification for a specific process segment. Typically, either physical asset class or physical asset is specified, but not both"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+      "rel": "dtdl:hierarchyScopeRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits hierarchy scope",
+      "dtdl:description": "Optional relationship to hierarchy.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationalLocation;1",
+      "rel": "dtdl:physicalLocationRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits physical location",
+      "dtdl:description": "Optional relationship to physical location.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Contains additional information and descriptions"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:SpatialDefinition;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "spatialDefinition",
+      "dtdl:displayName": "Spatial definition",
+      "dtdl:description": "Spatially defines the equipment as a zero-dimensional point, one dimensional line, or two dimensional shape or three dimensional solid."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "capabilityType": {
+      "title": "Capability type",
+      "description": "Defines the type of capability. ",
+      "oneOf": [
+        {
+          "const": "committed",
+          "$comment": ": capacity that is committed for future productive use."
+        },
+        {
+          "const": "unattainable",
+          "$comment": "capacity that is not attainable for future productive use given the equipment condition, equipment utilization, personnel availability or material availability."
+        },
+        {
+          "const": "available",
+          "$comment": "capacity that is available for additional future productive use."
+        },
+        {
+          "const": "used",
+          "$comment": "a historical value that defines the portion of the capacity with acceptable quality."
+        },
+        {
+          "const": "unused",
+          "$comment": " a historical value that defines the portion of the capacity that was not used or had unacceptable quality."
+        },
+        {
+          "const": "total",
+          "$comment": "the sum of used and unused capability or the sum of available, unattainable and committed capability."
+        }
+      ],
+      "type": "string"
+    },
+    "reason": {
+      "title": "Reason",
+      "description": "Defines the reason for the capability type.",
+      "type": "string"
+    },
+    "confidenceFactor": {
+      "title": "Confidence Factor",
+      "description": "Measure of the confidence of the ability to obtain the capacity value.",
+      "type": "string"
+    },
+    "hierarchyScope": {
+      "title": "Hierarchy scope",
+      "description": "Identifies where the exchanged information fits within the role based equipment hierarchy. ",
+      "type": "string"
+    },
+    "physicalLocation": {
+      "title": "Physical location",
+      "description": "Identifies the physical location of the physical asset(s) specified by this physical asset segment specification",
+      "type": "string"
+    },
+    "physicalLocationType": {
+      "title": "Physical location type",
+      "description": "Indicates whether the physical location attribute refers to an operational location object or contains a description of the physical location. Mandatory where a physical location attribute is specified",
+      "oneOf": [
+        {
+          "const": "operationalLocation",
+          "title": "Operational Location",
+          "description": "physical location attribute references an operational location"
+        },
+        {
+          "const": "description",
+          "title": "Description",
+          "description": " physical location attribute contains a description of the physical location, such as a street address."
+        }
+      ],
+      "type": "string"
+    },
+    "physicalAssetUse": {
+      "title": "Physical asset use",
+      "description": "Defines the capability use of the physical asset class or physical asset in the context of the parent segment",
+      "type": "string"
+    },
+    "startTime": {
+      "title": "Start Time",
+      "description": "The starting time associated with the physical asset capability.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "endTime": {
+      "title": "End Time",
+      "description": "The ending time associated with the physical asset capability.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "quantity": {
+      "title": "Quantity",
+      "description": "Specifies the amount of resources used",
+      "type": "number",
+      "@type": "xsd:double"
+    },
+    "quantityUnitOfMeasure": {
+      "title": "Quantity unit of measure",
+      "description": "The unit of measure of the associated quantity",
+      "type": "string"
+    }
+  }
+}

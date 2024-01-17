@@ -1,0 +1,57 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:PersonnelClass;1",
+  "description": "A representation of a grouping of persons with similar characteristics for a definite purpose such as manufacturing operations definition, scheduling, capability and performance shall be presented as a personnel class. Any person may be a member of zero or more personnel classes. A personnel class may be defined as a specialization of zero or more personnel class. A personnel class may be made up of zero or more personnel class(s).",
+  "title": "Personnel class",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.4231837+01:00",
+  "modified": "2024-01-17T15:53:51.4231899+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:PersonnelClass;1",
+      "rel": "dtdl:includesPropertiesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Includes properties of",
+      "dtdl:description": "This personnel class(s)include properties of the personnel class."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PersonnelClassProperty;1",
+      "rel": "dtdl:hasPropertiesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Has properties of",
+      "dtdl:description": "The personnel class property(s)of this personnel class."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+      "rel": "dtdl:hierarchyScopeRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits hierarchy scope",
+      "dtdl:description": "Optional relationship to hierarchy.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Additional information and description about the personnel class."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:ResourceClass;1",
+      "rel": "tm:extends"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:TestableObject;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "hierarchyScope": {
+      "title": "Hierarchy scope",
+      "description": "Identifies where the exchanged information fits within the role based equipment hierarchy. Optionally, hierarchy scope defines the scope of the equipment class, such as the site or area where it is defined.",
+      "type": "string"
+    }
+  }
+}

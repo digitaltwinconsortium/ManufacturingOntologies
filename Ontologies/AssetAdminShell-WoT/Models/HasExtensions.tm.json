@@ -1,0 +1,20 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:aas:HasExtensions;1",
+  "description": "Element that can be extended by proprietary extensions. Abstract interface",
+  "title": "Has Extensions",
+  "$comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "created": "2024-01-17T15:53:51.3658344+01:00",
+  "modified": "2024-01-17T15:53:51.3658358+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:aas:Extension;1",
+      "rel": "dtdl:extensions",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "extended by",
+      "dtdl:description": "An extension of the element.",
+      "dtdl:writable": true
+    }
+  ]
+}

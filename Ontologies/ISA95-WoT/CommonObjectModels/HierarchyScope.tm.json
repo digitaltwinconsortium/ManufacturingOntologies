@@ -1,0 +1,81 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+  "description": "The hierarchy scope identifies where the exchanged information fits within the role-based equipment hierarchy. It defines the scope of the exchanged information, such as a site or area for ANSI/ISA-95.00.02-2018 – 19 –which the information is relevant. The hierarchy scope identifies the associated instance in the role-based equipment hierarchy. ",
+  "title": "Hierarchy scope",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.2518107+01:00",
+  "modified": "2024-01-17T15:53:51.2518125+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+      "rel": "dtdl:contains",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The child hierarchy scope(s) contained within this hierarchy scope."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "equipmentID": {
+      "title": "Equipment ID",
+      "description": " unique identification of an equipment element",
+      "type": "string"
+    },
+    "equipmentLevel": {
+      "title": "Equipment level",
+      "description": "An identification of the level in the role-based equipment hierarchy",
+      "oneOf": [
+        {
+          "const": "Enterprise"
+        },
+        {
+          "const": "Site"
+        },
+        {
+          "const": "Area"
+        },
+        {
+          "const": "Work Center",
+          "title": "Work Center"
+        },
+        {
+          "const": "Work Unit",
+          "title": "Work Unit"
+        },
+        {
+          "const": "Process Cell",
+          "title": "Process Cell"
+        },
+        {
+          "const": "Unit"
+        },
+        {
+          "const": "Production Line",
+          "title": "Production Line"
+        },
+        {
+          "const": "Production Unit",
+          "title": "Production Unit"
+        },
+        {
+          "const": "Work Cell",
+          "title": "Work Cell"
+        },
+        {
+          "const": "Storage Zone",
+          "title": "Storage Zone"
+        },
+        {
+          "const": "Storage Unit",
+          "title": "Storage Unit"
+        }
+      ],
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,194 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:JobOrder;1",
+  "description": "The unit of work requested for execution in a job list and a work request shall be defined as a job order. A job order references an associated work master.",
+  "title": "Job order",
+  "$comment": "According to ANSI/ISA-95.00.04-2018 Enterprise-Control System Integration − Part 4: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5653908+01:00",
+  "modified": "2024-01-17T15:53:51.5653976+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkMaster;1",
+      "rel": "dtdl:correspondsToWorkMaster",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "The work master applied to this job order."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:SegmentRequirement;1",
+      "rel": "dtdl:correspondsToRequirement",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to",
+      "dtdl:description": "The segment requirement(s) within the scope of an operations request that specifically relates to this job order."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:JobOrderParameter;1",
+      "rel": "dtdl:containsParameter",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The job order parameters related to this job order"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PersonnelRequirement;1",
+      "rel": "dtdl:containsPersonnel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The personnel requirement(s) related to this job order"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:EquipmentRequirement;1",
+      "rel": "dtdl:containsEquipment",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The equipment requirement(s) related to this job order"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PhysicalAssetRequirement;1",
+      "rel": "dtdl:containsPhysicalAsset",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The physical asset requirement(s) related to this job order"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:MaterialRequirement;1",
+      "rel": "dtdl:containsMaterial",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The material requirement(s) related to this job order"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+      "rel": "dtdl:hierarchyScopeRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits hierarchy scope",
+      "dtdl:description": "Optional relationship to hierarchy.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Additional information about the process segment"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "hierarchyScope": {
+      "title": "Hierarchy scope",
+      "description": "Identifies where the exchanged information fits within the role based equipment hierarchy. ",
+      "type": "string"
+    },
+    "workType": {
+      "title": "Work type",
+      "description": "Describes the category of the activity",
+      "comment": "Required attribute. Possible values are: production, maintenance, quality, inventory, or mixed",
+      "oneOf": [
+        {
+          "const": "production"
+        },
+        {
+          "const": "maintenance"
+        },
+        {
+          "const": "quality"
+        },
+        {
+          "const": "inventory"
+        },
+        {
+          "const": "mixed",
+          "$comment": " can be used when the activity contains several categories"
+        }
+      ],
+      "type": "string"
+    },
+    "workMasterID": {
+      "title": "Work master id",
+      "description": "Identifies the associated work master to be used",
+      "type": "string"
+    },
+    "workMasterVersion": {
+      "title": "Work master version",
+      "description": "Identifies the version of the associated work master to be used.",
+      "type": "string"
+    },
+    "segmentRequirementID": {
+      "title": "Segment requirement id",
+      "description": "A unique identification of the segment requirement within the scope of an operations request that specifically relates to the job order",
+      "type": "string"
+    },
+    "startTime": {
+      "title": "Start time",
+      "description": "When work is to be started.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "endTime": {
+      "title": "End time",
+      "description": "When work is to be completed.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "priority": {
+      "title": "Priority",
+      "description": "The priority of the job order. ",
+      "type": "string"
+    },
+    "dispatchStatus": {
+      "title": "Dispatch status",
+      "description": "Identifies the status of the entry from the perspective of the dispatch activity.",
+      "oneOf": [
+        {
+          "const": "forecast"
+        },
+        {
+          "const": "released"
+        },
+        {
+          "const": "cancelled"
+        },
+        {
+          "const": "waiting"
+        },
+        {
+          "const": "ready"
+        },
+        {
+          "const": "running"
+        },
+        {
+          "const": "completed"
+        },
+        {
+          "const": "aborted"
+        },
+        {
+          "const": "held"
+        },
+        {
+          "const": "suspended"
+        },
+        {
+          "const": "closed"
+        }
+      ],
+      "type": "string"
+    },
+    "command": {
+      "title": "Command",
+      "description": "Identifies the action the execution management activity is to perform on the job order.",
+      "type": "string"
+    },
+    "commandRule": {
+      "title": "Command rule",
+      "description": "Instruction to execution management activities specifying conditions to execute the command.",
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:aas:AccessPermissionRule;1",
+  "description": "Table that defines access permissions per authenticated subject for a set of objects (referable elements).",
+  "title": "Access Permission Rule",
+  "$comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "created": "2024-01-17T15:53:51.3692542+01:00",
+  "modified": "2024-01-17T15:53:51.3692554+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:aas:SubjectAttributes;1",
+      "rel": "dtdl:targetSubjectAttributes",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Target Subject Attributes",
+      "dtdl:description": "Target subject attributes that need to be fulfilled by the accessing subject to get the permissions defined by this rule.",
+      "x-jsonschema:$comment": "mandatory",
+      "dtdl:writable": true,
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:PermissionsPerObject;1",
+      "rel": "dtdl:permissionsPerObject",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Permissions Per Object",
+      "dtdl:description": "Target subject attributes that need to be fulfilled by the accessing subject to get the permissions defined by this rule.",
+      "dtdl:writable": true
+    },
+    {
+      "href": "dtmi:digitaltwins:aas:Formula;1",
+      "rel": "dtdl:constraint",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Constraint",
+      "dtdl:description": "Constraint that needs to be validated to true so that access permission rule holds.",
+      "dtdl:writable": true,
+      "dtdl:maxMultiplicity": 1
+    }
+  ]
+}

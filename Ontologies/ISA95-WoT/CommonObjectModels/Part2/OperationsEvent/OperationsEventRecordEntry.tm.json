@@ -1,0 +1,75 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:OperationsEventRecordEntry;1",
+  "description": "The operations event record entry object shall be a single information object and any third-party manufacturing operations message profile within an operations event record. There shall be one or more operations event record entry objects in an operations event record. The relationships and their roles in an operations event record entry are defined in the operations record specification",
+  "title": "Operations event record entry",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5181829+01:00",
+  "modified": "2024-01-17T15:53:51.518194+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsEventRecordEntry;1",
+      "rel": "dtdl:contains",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "This parent operations event record entry is whole of the child operations event record entry(s) as the part"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "dtdl:correspondsToAnEntryIn",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to an entry in",
+      "dtdl:description": "An embedded information object. If data is referenced in this operations event record entry, the attribute is not used. The format of the information object is specified in the operations event record specification",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "dtdl:correspondsToAnExternalEntryIn",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Corresponds to an entry in",
+      "dtdl:description": "The reference to external data (information object) which is stored external to this operations event record entry. If data is embedded in this operations event record entry, the attribute is not used. The format of the reference is specified in the operations event record specification",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Contains additional information and description of the operations event record"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "informationObject": {
+      "title": "Information object",
+      "description": "An embedded information object. If data is referenced in this operations event record entry, the attribute is not used. The format of the information object is specified in this operations record specification",
+      "type": "string"
+    },
+    "informationObjectID": {
+      "title": "Information object ID",
+      "description": "The reference to external data (information object) which is stored external to this operations event record entry. If data is embedded in this operations event record entry, the attribute is not used. The format of the reference is specified in this operations event record specification",
+      "type": "string"
+    },
+    "informationObjectType": {
+      "title": "Information object type",
+      "description": "Identifies the type of information object type that an operations event record entry is based upon. The allowed information object types are defined in the operations event record specification",
+      "type": "string"
+    },
+    "effectiveTimestamp": {
+      "title": "Effective timestamp",
+      "description": "The date and time that the operations event record entry was/is effective. If no effective timestamp is provided with operations event record entry, the effective timestamp is represented by the effective timestamp attribute in the operations event record",
+      "type": "string",
+      "format": "date-time"
+    },
+    "recordTimestamp": {
+      "title": "Record timestamp",
+      "description": "The date and time the publisher recorded / transacted the action. If no entry is provided, the record timestamp is the record timestamp attribute in the operations event record",
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

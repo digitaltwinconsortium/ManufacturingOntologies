@@ -1,0 +1,23 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:TestSpecificationProperty;1",
+  "description": "The test specification property object defines properties of the test specification. These properties are not the characteristics to be tested",
+  "title": "Test specification property",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.3844033+01:00",
+  "modified": "2024-01-17T15:53:51.384407+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:TestSpecificationProperty;1",
+      "rel": "dtdl:contains",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Contains",
+      "dtdl:description": "The child test specification property(s) of this test specification property"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:ResourceProperty;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

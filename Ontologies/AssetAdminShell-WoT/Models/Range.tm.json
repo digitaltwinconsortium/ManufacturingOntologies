@@ -1,0 +1,36 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:aas:Range;1",
+  "description": "A range data element is a data element that defines a range with min and max.",
+  "title": "Range",
+  "$comment": "According Platform Industrie 4.0. Details of Asset Administration Shell (Version 3.0) Part 1 Release Candidate 02",
+  "created": "2024-01-17T15:53:51.2667905+01:00",
+  "modified": "2024-01-17T15:53:51.2667915+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:aas:DataElement;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "valueType": {
+      "title": "Value type",
+      "description": "Data type of the min und max",
+      "comment": "AAS type: DataTypeDefXsd - Mandatory",
+      "type": "string"
+    },
+    "min": {
+      "title": "Minimum",
+      "description": "The minimum value of the range",
+      "comment": "AAS type: ValueDataType",
+      "type": "string"
+    },
+    "max": {
+      "title": "Maximum",
+      "description": "The maximum value of the range",
+      "comment": "AAS type: ValueDataType",
+      "type": "string"
+    }
+  }
+}

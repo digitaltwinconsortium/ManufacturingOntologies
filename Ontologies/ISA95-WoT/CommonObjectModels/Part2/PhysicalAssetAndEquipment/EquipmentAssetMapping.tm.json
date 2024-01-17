@@ -1,0 +1,67 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:EquipmentAssetMapping;1",
+  "description": "The relationship between a physical asset and an equipment shall be presented as an equipment asset mapping. The equipment asset mapping records the time period when one equipment object and one physical asset object were associated.",
+  "title": "Equipment asset mapping",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.5286301+01:00",
+  "modified": "2024-01-17T15:53:51.5286329+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:Equipment;1",
+      "rel": "dtdl:RecordsUseOfEquipment",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Records use of",
+      "dtdl:description": "The equipment performing the manufacturing function.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:PhysicalAsset;1",
+      "rel": "dtdl:RecordsUseOfPhysicalAsset",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Records use of",
+      "dtdl:description": "The physical asset that is associated  with the equipment if the physical asset associated with a manufacturing function",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+      "rel": "dtdl:hierarchyScopeRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits hierarchy scope",
+      "dtdl:description": "Optional relationship to hierarchy.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "Additional information about the mapping element."
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:BaseModel;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "hierarchyScope": {
+      "title": "Hierarchy scope",
+      "description": "Identifies where the exchanged information fits within the role based equipment hierarchy. Optionally, hierarchy scopedefines the scope of the physical asset class, such as the site or area where it is defined",
+      "type": "string"
+    },
+    "startTime": {
+      "title": "Start Time",
+      "description": "The starting time of the association.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "endTime": {
+      "title": "End Time",
+      "description": "The ending time of the association. ",
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

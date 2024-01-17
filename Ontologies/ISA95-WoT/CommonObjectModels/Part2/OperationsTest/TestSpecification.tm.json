@@ -1,0 +1,136 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:TestSpecification;1",
+  "description": "The test specification details the test specification criteria and the tested evaluated property(s) required for a testable object to match the quality or performance requirements of the business or particular customers",
+  "title": "Test specification",
+  "$comment": "According to ANSI/ISA-95.00.02-2018 Enterprise-Control System Integration − Part 2: Objects and Attributes for - Approved 24 May 2018",
+  "created": "2024-01-17T15:53:51.4063247+01:00",
+  "modified": "2024-01-17T15:53:51.4063428+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:TestSpecification;1",
+      "rel": "dtdl:isMadeUpOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is made up of",
+      "dtdl:description": "The child test specifications of this test specification"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:OperationsTestRequirement;1",
+      "rel": "dtdl:specifiesTestForOperations",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Specifies test for",
+      "dtdl:description": "The operations test requirement ID(s) evaluated by this test specification"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:TestSpecificationProperty;1",
+      "rel": "dtdl:hasValuesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Has values of",
+      "dtdl:description": "The test specification property values of this test specification"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:TestSpecificationCriteria;1",
+      "rel": "dtdl:isMadeUpOfCriteria",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Is made up of",
+      "dtdl:description": "The test specification criteria which is to be applied to determine the test outcome upon evaluation of the test specification"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:EvaluatedProperty;1",
+      "rel": "dtdl:evaluates",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Evaluates",
+      "dtdl:description": "The evaluated property(s) measured and evaluated by this test specification"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:TestableObject;1",
+      "rel": "dtdl:specifiesTestForObject",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "Specifies test for",
+      "dtdl:description": "The ID of the testable object tested by this test specification"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:HierarchyScope;1",
+      "rel": "dtdl:hierarchyScopeRel",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "fits hierarchy scope",
+      "dtdl:description": "Optional relationship to hierarchy.",
+      "x-jsonschema:$comment": "Not part of the Standard Specs.",
+      "dtdl:maxMultiplicity": 1
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:LangStringSet;1",
+      "rel": "tm:submodel",
+      "dtdl:name": "description",
+      "dtdl:displayName": "Description",
+      "dtdl:description": "A description of the test specification"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:Resource;1",
+      "rel": "tm:extends"
+    }
+  ],
+  "properties": {
+    "version": {
+      "title": "Version",
+      "description": "An identification of the version of the test specification",
+      "type": "string"
+    },
+    "effectiveStartDate": {
+      "title": "Effective start date",
+      "description": "The effective start date and time for use of the test specification or set of test specifications",
+      "type": "string",
+      "format": "date-time"
+    },
+    "effectiveEndDate": {
+      "title": "Effective end date",
+      "description": "The effective end date and time for use of the test specification or set of test specifications",
+      "type": "string",
+      "format": "date-time"
+    },
+    "publishedDate": {
+      "title": "Published date",
+      "description": "The date and time on which the test specification was published or generated",
+      "type": "string",
+      "format": "date-time"
+    },
+    "hierarchyScope": {
+      "title": "Hierarchy scope",
+      "description": "Identifies where the exchanged information fits within the role based equipment hierarchy. Optionally, hierarchy scope defines the scope of the equipment class, such as the site or area where it is defined.",
+      "type": "string"
+    },
+    "testSampleSize": {
+      "title": "Test sample size",
+      "description": "Sample size required to perform the test",
+      "type": "string"
+    },
+    "physicalSample": {
+      "title": "Physical sample",
+      "description": "Defines whether physical sampling is required to perform the test",
+      "oneOf": [
+        {
+          "const": "yes",
+          "title": "Yes",
+          "description": "physical samples are required"
+        },
+        {
+          "const": "no",
+          "title": "No",
+          "description": "physical samples are not required"
+        }
+      ],
+      "type": "string"
+    },
+    "recurrenceQuantity": {
+      "title": "Recurrence quantity",
+      "description": "The amount of operations activity required between samples",
+      "type": "string"
+    },
+    "recurrenceTimeInterval": {
+      "title": "Recurrence time interval",
+      "description": "The duration of operational activity required between samples",
+      "type": "string"
+    }
+  }
+}

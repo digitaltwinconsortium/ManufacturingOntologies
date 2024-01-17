@@ -1,0 +1,24 @@
+{
+  "@context": "https://www.w3.org/2019/wot/td/v1",
+  "@type": "tm:ThingModel",
+  "@id": "dtmi:digitaltwins:isa95:Area;1",
+  "description": "An area is a physical, geographical, or logical grouping determined by the site. It may contain work centers such as process cells, production units, production lines, and storage zones. Most Level 3 functions occur within the area. The main production capability and geographical location within a site usually identify areas. ",
+  "title": "Area",
+  "$comment": "According to ANSI/ISA-95.00.01-2010 (IEC 62264-1 Mod) Enterprise-Control System Integration − Part 1: Models and Terminology - Approved 13 May 2010",
+  "created": "2024-01-17T15:53:51.2342755+01:00",
+  "modified": "2024-01-17T15:53:51.2342766+01:00",
+  "links": [
+    {
+      "href": "dtmi:digitaltwins:isa95:WorkCenter;1",
+      "rel": "dtdl:workCenter",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "contains Work center",
+      "dtdl:description": "Reference to a contained work center of the area",
+      "x-jsonschema:$comment": "Not part of the ISA-95 Standard. Just to make the graph easier to handle"
+    },
+    {
+      "href": "dtmi:digitaltwins:isa95:SiteAsset;1",
+      "rel": "tm:extends"
+    }
+  ]
+}

@@ -38,7 +38,7 @@ The ontologies defined in this repository are described by leveraging the Digita
 
 ### W3C Web of Things
 
-The ontologies defined in this repository are also described by leveraging the W3C Web of Things (WoT), which is specified [here](https://www.w3.org/WoT/documentation/).
+The ontologies defined in this repository are also described by leveraging the W3C Web of Things (WoT), which is specified [here](https://www.w3.org/TR/wot-thing-description/).
 
 ### International Society of Automation 95 (ISA95/IEC 62264)
 

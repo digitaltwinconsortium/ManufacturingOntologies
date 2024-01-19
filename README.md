@@ -12,8 +12,6 @@
 * [Digital Feedback Loop with UA Cloud Commander and UA Cloud Action](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#digital-feedback-loop-with-ua-cloud-commander-and-ua-cloud-action)
 * [Installation of Production Line Simulation and Cloud Services](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#installation-of-production-line-simulation-and-cloud-services)
 * [Running the Production Line Simulation](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#running-the-production-line-simulation)
-* [Viewing Digital Twins in Azure Digital Twins Explorer](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#viewing-digital-twins-in-azure-digital-twins-explorer)
-* [Generating a Digital Twins Graph with the ADT Generator Tool](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#generating-a-digital-twins-graph-with-the-adt-generator-tool)
 * [Condition Monitoring, Calculating OEE, Detecting Anomalies and Making Predictions in Azure Data Explorer](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#condition-monitoring-calculating-oee-detecting-anomalies-and-making-predictions-in-azure-data-explorer)
 * [Using Azure Managed Grafana Service](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#using-azure-managed-grafana-service)
 * [Using 3D Scenes Studio](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#using-3d-scenes-studio)
@@ -46,7 +44,7 @@ ISA95 / IEC 62264 is one of the ontologies leveraged by this solution. It is a s
 
 ### IEC 63278 Asset Administration Shell (AAS)
 
-The IEC 63278 Asset Administration Shell (AAS) enables vendor-neutral, platform-independent data exchange along a manufacturing supply chain and leveraged by this solution. The standard is described [here](https://www.plattform-i40.de/IP/Redaktion/EN/Standardartikel/specification-administrationshell.html). A script to convert from Asset Administration Shell models to DTDL to manually upload AAS models to Azure Digital Twins service is provided [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/tree/main/Tools/AssetAdminShell). Furthermore, the reference solution provided in this repository also contains an AAS Repository service from the Digital Twin Consortium's reference implementation [here](https://github.com/digitaltwinconsortium/AAS-Repository). This service makes the Product Carbon Footprint (PCF) of the simulated products built by the simulated production lines available to customers. Please see below about how to enable this service.
+The IEC 63278 Asset Administration Shell (AAS) enables vendor-neutral, platform-independent data exchange along a manufacturing supply chain and leveraged by this solution. The standard is described [here](https://www.plattform-i40.de/IP/Redaktion/EN/Standardartikel/specification-administrationshell.html). The reference solution provided in this repository contains an AAS Repository service from the Digital Twin Consortium's reference implementation [here](https://github.com/digitaltwinconsortium/AAS-Repository). This service makes the Product Carbon Footprint (PCF) of the simulated products built by the simulated production lines available to customers. Please see below about how to enable this service.
 
 ### IEC 62541 Open Platform Communications Unified Architecture (OPC UA)
 
@@ -71,14 +69,11 @@ Here are the components involved in this solution:
 | [AKS Edge Essentials](https://learn.microsoft.com/en-us/azure/aks/hybrid/aks-edge-overview) | This Kubernetes implementation (both K3S and K8S are supported) runs at the Edge and provides single- and multi-node Kubernetes clusters for a fault-tolerant Edge configuration on embedded or PC-class hardware, like an industrial gateway. |
 | [Azure Event Hubs](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-about) | The cloud message broker that receives OPC UA PubSub messages from edge gateways and stores them until they're retrieved by subscribers like the UA Cloud Twin. |
 | [UA Cloud Twin](https://github.com/digitaltwinconsortium/UA-CloudTwin) | This cloud application converts OPC UA PubSub cloud messages into digital twin updates. It also creates digital twins automatically by processing the cloud messages. Twins are instantiated from models in ISA95-compatible DTDL ontology. It's hosted in a Docker container. |
-| [Azure Digital Twins](https://learn.microsoft.com/en-us/azure/digital-twins/overview) | The platform that enables the creation of a digital representation of real-world assets, places, business processes, and people. |
 | [Azure Data Explorer](https://learn.microsoft.com/en-us/azure/synapse-analytics/data-explorer/data-explorer-overview) | The time series database and front-end dashboard service for advanced cloud analytics, including built-in anomaly detection and predictions. |
 | [Azure Logic Apps](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-overview) | Azure Logic Apps is a cloud platform you can use to create and run automated workflows with little to no code. |
 | [UA Cloud Action](https://github.com/digitaltwinconsortium/UA-CloudAction) | This cloud application queries the Azure Data Explorer for a specific data value (the pressure in one of the simulated production line machines) and calls UA Cloud Commander via Azure Event Hubs when a certain threshold is reached (4000 mbar). UA Cloud Commander then calls the OpenPressureReliefValve method on the machine via OPC UA. |
 | [Azure Arc](https://learn.microsoft.com/en-us/azure/azure-arc/kubernetes/overview) | This cloud service is used to manage the on-premises Kubernetes cluster at the edge. New workloads can be deployed via Flux. |
 | [Azure Storage](https://learn.microsoft.com/en-us/azure/storage/common/storage-introduction) | This cloud service is used to manage the OPC UA certificate store and settings of the Edge Kubernetes workloads. |
-| [Azure 3D Scenes Studio](https://github.com/digitaltwinconsortium/ManufacturingOntologies#using-3d-scenes-studio) | This cloud app allows the creation of 3D immersive viewers for your manufacturing data. |
-| [Azure Digital Twins Explorer](https://github.com/digitaltwinconsortium/ManufacturingOntologies#view-digital-twins-in-azure-digital-twins-explorer) | This cloud app allows you to view your digital twins in an interactive UI. |
 | [Azure Data Explorer Dashboards](https://github.com/digitaltwinconsortium/ManufacturingOntologies#condition-monitoring-calculating-oee-detecting-anomalies-and-making-predictions-in-azure-data-explorer) | This cloud app allows the creation of 2D viewers for your manufacturing data. |
 | [Asset Admin Shell Repository](https://github.com/digitaltwinconsortium/AAS-Repository) | This REST web service and UI allows you to host Asset Administration Shells containing product information for your customers in a machine-readable format. |
 | [AASX Package Explorer](https://github.com/admin-shell-io/aasx-package-explorer) | This app allows you to view and modify Asset Administration Shells on your PC. |
@@ -96,14 +91,12 @@ Here are the components involved in this solution:
 Here are the data flow steps:
 
 1. The UA Cloud Publisher reads OPC UA data from each simulated factory, and forwards it via OPC UA PubSub to Azure Event Hubs. 
-1. The UA Cloud Twin reads and processes the OPC UA data from Azure Event Hubs, and forwards it to an Azure Digital Twins instance. 
-1. The UA Cloud Twin automatically creates digital twins in Azure Digital Twins in response, mapping each OPC UA element (publishers, servers, namespaces) to a separate digital twin.
-1. Azure Data Explorer also reads and processes the OPC UA data from Azure Event Hubs and generates time series data, which can be used for analytics, such as [OEE (Overall Equipment Effectiveness)](https://www.oee.com) calculation and predictive maintenance scenarios.
+1. Azure Data Explorer reads and processes the OPC UA data from Azure Event Hubs and generates time series data, which can be used for analytics, such as [OEE (Overall Equipment Effectiveness)](https://www.oee.com) calculation and predictive maintenance scenarios.
 
 
 ## UA Cloud Twin
 
-The solution makes use of the UA Cloud Twin also available from the Digital Twin Consortium [here](https://github.com/digitaltwinconsortium/UA-CloudTwin). It automatically detects OPC UA assets from the OPC UA PubSub metadata messages sent to the cloud and registers ISA95-compatible digital twins in Azure Digital Twins service for you.
+The solution makes use of the UA Cloud Twin also available from the Digital Twin Consortium [here](https://github.com/digitaltwinconsortium/UA-CloudTwin).
 
 <img src="Docs/twingraph.png" alt="twingraph" width="900" />
 
@@ -255,31 +248,11 @@ Note: If you have access to several Azure subscriptions, it is worth first loggi
 Note: In this solution, the OPC UA application certificate store for UA Cloud Publisher, as well as the simulated production line's MES and individual machines' store, is located in the cloud in the deployed Azure Storage account.
 
 
-## Viewing Digital Twins in Azure Digital Twins Explorer
-
-You can use [Azure Digital Twins Explorer](https://learn.microsoft.com/en-us/azure/digital-twins/concepts-azure-digital-twins-explorer) to monitor twin property updates and add more relationships to the digital twins that are created. For example, you might want to add *Next* and *Previous* relationships between machines on each production line to add more context to your solution.
-
-To access Azure Digital Twins Explorer, first make sure you have the [Azure Digital Twins Data Owner role](https://learn.microsoft.com/en-us/azure/digital-twins/how-to-set-up-instance-portal#assign-the-role-using-azure-identity-management-iam) on your Azure Digital Twins instance. Then [open the explorer](https://learn.microsoft.com/en-us/azure/digital-twins/quickstart-azure-digital-twins-explorer#open-instance-in-azure-digital-twins-explorer).
-
-
-## Generating a Digital Twins Graph with the ADT Generator Tool
-
-You can use [ADT Generator](https://github.com/digitaltwinconsortium/ManufacturingOntologies/blob/main/Tools/ADTGenerator/Readme.md) to simplify the creation of a digital twin graph, based on the ISA95 models provided in this repository.
-
-<img src="Docs/generator.png" alt="generator" width="900" />
-
-To use the ADT Generator tool, first make sure you have Microsoft Excel installed, you have the production line simluation running and you have the [Azure Digital Twins Data Owner role](https://learn.microsoft.com/en-us/azure/digital-twins/how-to-set-up-instance-portal#assign-the-role-using-azure-identity-management-iam) on your Azure Digital Twins instance.
-
-
 ## Condition Monitoring, Calculating OEE, Detecting Anomalies and Making Predictions in Azure Data Explorer
 
 You can also visit the [Azure Data Explorer documentation](https://learn.microsoft.com/en-us/azure/synapse-analytics/data-explorer/data-explorer-overview) to learn how to create no-code dashboards for condition monitoring, yield or maintenance predictions, or anomaly detection. We have provided a sample dashboard in the `./Tools/ADXQueries` folder for you to deploy to the ADX Dashboard by following the steps outlined [here](https://learn.microsoft.com/en-us/azure/data-explorer/azure-data-explorer-dashboards#to-create-new-dashboard-from-a-file). After import, you need to update the dashboard's data source by specifying the HTTPS endpoint of your ADX server cluster instance in the format `https://ADXInstanceName.AzureRegion.kusto.windows.net/` in the top-right-hand corner of the dashboard. 
 
-Note: There is also an alternative calculation function for the OEE of the production line calculation provided in that folder. You should overwrite the default CalculateOEEForLine function with this one when the USE_ISA95_EQUIPMENT_MODELS environment variable is used in UA Cloud Twin.
-
 <img src="Docs/dashboard.png" alt="dashboard" width="900" />
-
-Note: To calculate the OEE for the entire production lines, you need to set your ADT instance URL in the `CalculateOEEForLine` query. Also, you need to have the [Azure Digital Twins Data Owner role](https://learn.microsoft.com/en-us/azure/digital-twins/how-to-set-up-instance-portal#assign-the-role-using-azure-identity-management-iam) on your Azure Digital Twins instance.
 
 Note: If you want to display the OEE for a specific shift, select `Custom Time Range` in the `Time Range` drop down in the top-left hand corner of the ADX Dashboard and enter the date and time from start to end of the shift you are interested in. 
 
@@ -488,23 +461,18 @@ This will result in is a line graph rendered directly in Fabric:
 
 Note: If you want to simply try out SAP connectivity before connecting your real SAP system, you can deploy an `SAP S/4 HANA Fully-Activated Appliance` to Azure from [here](https://cal.sap.com/catalog#/applianceTemplates) and use that instead.
 
-The Azure services handling connectivity to your on-premises SAP systems is called Azure Logic Apps. Azure Logic Apps is a no-code Azure service to orchestrate workflows that can trigger actions in e.g. Azure Digital Twins service.
+The Azure services handling connectivity to your on-premises SAP systems is called Azure Logic Apps. Azure Logic Apps is a no-code Azure service to orchestrate workflows that can trigger actions.
 
 ### Configuring Azure Logic Apps to Receive Data From On-Premises SAP Systems
 
-To create a new Azure Logic Apps workflow from your on-premises SAP system to Azure Logic Apps and further on to your Azure Digital Twins service instance and also store the data sent from SAP in your Azure Storage Account deployed in this reference solution, follow these steps:
+To create a new Azure Logic Apps workflow from your on-premises SAP system to Azure Logic Apps and also store the data sent from SAP in your Azure Storage Account deployed in this reference solution, follow these steps:
 
 1. Deploy an instance of Azure Logic Apps in the same region you picked during deployment of this reference solution via the Azure Portal. Select the consumption-based version.
-1. Once deployed, go to the resource, select `Identity` and enable `System assigned`. Click on `Azure Role Assignments` -> `Add role assignment`. Select `Resource Group` for `Scope`, your subscription name for `Subscription`, the resource group you have picked during the deployment of this reference solution for `Resource Group` and `Azure Digital Twin Data Owner` for `Role`. Click `Save`.
 1. From the Azure Logic App Designer, select the trigger template `When a HTTP request is received`.
 1. Select `+ New step`, select `Azure File Storage` and select `Create file`. Give the connection a name and select the storage account name of the Azure Storage Account deployed for this reference solution. For `Folder path`, enter `sap`, for `File name` enter `IDoc.xml` and for `File content` select `Body` from the dynamic content. In the Azure Portal, navigate to your storage account deployed in this reference solution, select `Storage browser`, select `File shares` and select `Add file share`. Enter `sap` for the name and select `Create`.
-1. Hover over the arrow between your trigger and your create file action, select the `+` button and select `Add a parallel branch`. Select `Azure Digital Twins` and add the action `Add Twin` from the list of Azure Digital Twins actions available. Specify the ADT instance (host) name of your Azure Digital Twins service instance deployed in this reference solution. Click the `Connect with managed identity` field, give it a name, specify the ADT instance (host) name of your Azure Digital Twins service instance deployed in this reference solution in the `ADT Instance Name` field and make sure `System-assigned managed identity` is selected for `Managed identity`. Click `Create`. Click on the `Digital twin id` field and enter `sap`. Then select `Add new parameter` and select `Request`. In the new Request field, enter  `{ "$metadata": { "$model": "dtmi:digitaltwins:isa95:JobOrder;1" }, "description": { "$metadata": {} }, "tags": { "$metadata": {} } }`.
+1. Hover over the arrow between your trigger and your create file action, select the `+` button and select `Add a parallel branch`. Select `Azure Data Explorer` and add the action `Run KQL query` from the list of Azure Data Explorer actions available. Specify the ADX instance (Cluster URL) name and database name of your Azure Data Explorer service instance deployed in this reference solution. In the query field, enter `.create table SAP (name:string, label:string)`.
 1. Save your workflow.
 1. Select `Run Trigger` and wait for the run to complete. Verify that there are green check marks on all three components of your workflow. If you see any red exclamation marks, select the component for more info regardig the error.
-
-Your completed Azure Logic Apps workflow should now look like this:
-
-<img src="Docs/workflow.png" alt="workflow" width="900" />
 
 Copy the `HTTP GET URL` from your HTTP trigger in your workflow. You will need it when configuring SAP in the next step.
 
@@ -575,7 +543,7 @@ To try out your SAP to Azure Logic App workflow, follow these steps:
 10.	In the `Outbound Processing of IDoc` dialog, click the green check button to start the IDoc message processing
 
 
-Open the Azure Digital Twins Explorer from the Azure Digital Twins service instance planel in the Azure Portal and check that a new job order digital twin called `sap` is created. Similarily, you can open the Storage browser of your Azure Storage Account, select Files shares and check that a new `IDoc.xml` file was created in the `sap` folder.
+Open the Storage browser of your Azure Storage Account, select Files shares and check that a new `IDoc.xml` file was created in the `sap` folder.
 
 Note: To check for IDoc message processing errors, entering `WE09` from the SAP system's search box, select a time range and click the `execute` button. This will bring up the `IDoc Search for Business Content` screen and you can select each IDoc for processing errors in the table displayed.
 

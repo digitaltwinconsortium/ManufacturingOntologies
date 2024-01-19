@@ -34,7 +34,6 @@
     "azureRbacAzureDigitalTwinsDataOwner": "bcd981a7-7f74-457b-83e1-cceb9e632ffe",
     "adxClusterName": "[concat(parameters('resourcesName'), 'ADX')]",
     "adxDBName": "[concat(parameters('resourcesName'), '-DB')]",
-    "adtDataHistoryTableName": "[concat(parameters('resourcesName'), '-adt-table')]",
     "eventHubsNamespaceName": "[concat(parameters('resourcesName'), '-EventHubs')]"
   },
   "resources": [
@@ -155,7 +154,6 @@
             "ADX_DB": "ontologies",
             "AAD_APPLICATION_ID": "[reference(concat(parameters('resourcesName'), '-Identity')).clientId]",
             "CALCULATE_PCF": "1",
-            "ADT_HOSTNAME": "[concat('https://', reference(concat(parameters('resourcesName'), '-ADT')).hostName)]",
             "WATTTIME_USER": "",
             "WATTTIME_PASSWORD": "",
             "USE_JSON_SERIALIZATION": "1"

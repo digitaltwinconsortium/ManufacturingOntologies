@@ -1,9 +1,9 @@
 {
-  "$schema": "https://dataexplorer.azure.com/static/d/schema/39/dashboard.json",
-  "id": "7e2c8907-9a1f-4e17-a76b-fd767322ba28",
-  "eTag": "ff887b9c-2c17-4e15-9e97-869daefa131a",
-  "schema_version": "39",
-  "title": "ontologies",
+  "$schema": "https://dataexplorer.azure.com/static/d/schema/48/dashboard.json",
+  "id": "ee653da6-2830-4e03-bac2-19d08e70a7e0",
+  "eTag": "bb89180d-1374-4c70-bf59-ff254b4c6b55",
+  "schema_version": "48",
+  "title": "ontologies4",
   "autoRefresh": {
     "defaultInterval": "30s",
     "enabled": true,
@@ -23,6 +23,7 @@
         "width": 24,
         "height": 7
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -33,7 +34,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where Name contains \"assembly\"\n| where Name contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = toint(Value)\n| project Timestamp, NodeValue\n"
+        "text": "opcua_metadata_lkv\n| where Name contains \"assembly\"\n| where Name contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue\n"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -78,6 +79,7 @@
         "width": 24,
         "height": 8
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -88,7 +90,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where Name contains \"assembly\"\n| where Name contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"EnergyConsumption\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| order by Timestamp desc\n| make-series num=avg(todouble(Value)) on Timestamp from _startTime to _endTime step 1s \n| extend (anomalies, score, baseline) = series_decompose_anomalies(num, 0.5, -1, 'linefit')"
+        "text": "opcua_metadata_lkv\n| where Name contains \"assembly\"\n| where Name contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"EnergyConsumption\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| order by Timestamp1 desc\n| make-series num=avg(todouble(Value)) on Timestamp1 from _startTime to _endTime step 1s \n| extend (anomalies, score, baseline) = series_decompose_anomalies(num, 0.5, -1, 'linefit')"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -133,6 +135,7 @@
         "width": 24,
         "height": 8
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -143,7 +146,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "let horizon = (_endTime - _startTime) / 2;\nlet dt = 1m;\nopcua_metadata_lkv\n| where Name contains \"packaging\"\n| where Name contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"NumberOfManufacturedProducts\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| order by Timestamp desc\n| make-series actual=avg(toint(Value)) on Timestamp from _startTime to _endTime + horizon step dt\n| extend forecast = series_decompose_forecast(actual, toint(horizon/dt))"
+        "text": "let horizon = (_endTime - _startTime) / 2;\nlet dt = 1m;\nopcua_metadata_lkv\n| where Name contains \"packaging\"\n| where Name contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"NumberOfManufacturedProducts\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| order by Timestamp1 desc\n| make-series actual=avg(toint(Value)) on Timestamp1 from _startTime to _endTime + horizon step dt\n| extend forecast = series_decompose_forecast(actual, toint(horizon/dt))"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -188,6 +191,7 @@
         "width": 6,
         "height": 3
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -220,6 +224,7 @@
         "width": 6,
         "height": 3
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -252,6 +257,7 @@
         "width": 6,
         "height": 3
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -284,6 +290,7 @@
         "width": 8,
         "height": 3
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -316,6 +323,7 @@
         "width": 6,
         "height": 3
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -348,6 +356,7 @@
         "width": 12,
         "height": 10
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -387,6 +396,7 @@
         "width": 12,
         "height": 10
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -426,6 +436,7 @@
         "width": 24,
         "height": 7
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -436,7 +447,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where Name contains \"assembly\"\n| where Name contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Pressure\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = toint(Value)\n| project Timestamp, NodeValue\n\n"
+        "text": "opcua_metadata_lkv\n| where Name contains \"assembly\"\n| where Name contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Pressure\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue\n\n"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -489,6 +500,7 @@
         "width": 24,
         "height": 6
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -499,7 +511,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where Name contains \"assembly\"\n| where Name contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = todouble(Value)\n| project Timestamp, NodeValue"
+        "text": "opcua_metadata_lkv\n| where Name contains \"assembly\"\n| where Name contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -552,6 +564,7 @@
         "width": 6,
         "height": 3
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -584,6 +597,7 @@
         "width": 6,
         "height": 3
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -616,6 +630,7 @@
         "width": 6,
         "height": 3
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -648,6 +663,7 @@
         "width": 6,
         "height": 3
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -680,6 +696,7 @@
         "width": 8,
         "height": 3
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -712,6 +729,7 @@
         "width": 8,
         "height": 3
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -744,6 +762,7 @@
         "width": 8,
         "height": 3
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -776,6 +795,7 @@
         "width": 8,
         "height": 3
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -808,6 +828,7 @@
         "width": 8,
         "height": 3
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -840,6 +861,7 @@
         "width": 24,
         "height": 6
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -850,7 +872,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where Name contains \"test\"\n| where Name contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = todouble(Value)\n| project Timestamp, NodeValue\n"
+        "text": "opcua_metadata_lkv\n| where Name contains \"test\"\n| where Name contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue\n"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -899,6 +921,7 @@
         "width": 24,
         "height": 6
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -909,7 +932,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where Name contains \"packaging\"\n| where Name contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = todouble(Value)\n| project Timestamp, NodeValue\n"
+        "text": "opcua_metadata_lkv\n| where Name contains \"packaging\"\n| where Name contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue\n"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -958,6 +981,7 @@
         "width": 24,
         "height": 6
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -968,7 +992,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where Name contains \"assembly\"\n| where Name contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = todouble(Value)\n| project Timestamp, NodeValue"
+        "text": "opcua_metadata_lkv\n| where Name contains \"assembly\"\n| where Name contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1017,6 +1041,7 @@
         "width": 24,
         "height": 6
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -1027,7 +1052,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where Name contains \"test\"\n| where Name contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = todouble(Value)\n| project Timestamp, NodeValue"
+        "text": "opcua_metadata_lkv\n| where Name contains \"test\"\n| where Name contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1050,7 +1075,7 @@
           ],
           "showMultiplePanels": false
         },
-        "hideLegend": false,
+        "hideLegend": true,
         "xColumnTitle": "",
         "xColumn": null,
         "yColumns": null,
@@ -1076,6 +1101,7 @@
         "width": 24,
         "height": 6
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -1086,7 +1112,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where Name contains \"packaging\"\n| where Name contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = todouble(Value)\n| project Timestamp, NodeValue\n"
+        "text": "opcua_metadata_lkv\n| where Name contains \"packaging\"\n| where Name contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue\n"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1135,6 +1161,7 @@
         "width": 24,
         "height": 7
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -1145,7 +1172,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where Name contains \"test\"\n| where Name contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = toint(Value)\n| project Timestamp, NodeValue"
+        "text": "opcua_metadata_lkv\n| where Name contains \"test\"\n| where Name contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1190,6 +1217,7 @@
         "width": 24,
         "height": 7
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -1200,7 +1228,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where Name contains \"packaging\"\n| where Name contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = toint(Value)\n| project Timestamp, NodeValue\n"
+        "text": "opcua_metadata_lkv\n| where Name contains \"packaging\"\n| where Name contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue\n"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1245,6 +1273,7 @@
         "width": 24,
         "height": 7
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -1255,7 +1284,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where Name contains \"assembly\"\n| where Name contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = toint(Value)\n| project Timestamp, NodeValue\n"
+        "text": "opcua_metadata_lkv\n| where Name contains \"assembly\"\n| where Name contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue\n"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1300,6 +1329,7 @@
         "width": 24,
         "height": 8
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -1310,7 +1340,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where Name contains \"test\"\n| where Name contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = toint(Value)\n| project Timestamp, NodeValue"
+        "text": "opcua_metadata_lkv\n| where Name contains \"test\"\n| where Name contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1355,6 +1385,7 @@
         "width": 24,
         "height": 7
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -1365,7 +1396,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where Name contains \"packaging\"\n| where Name contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = toint(Value)\n| project Timestamp, NodeValue\n"
+        "text": "opcua_metadata_lkv\n| where Name contains \"packaging\"\n| where Name contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue\n"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1410,6 +1441,7 @@
         "width": 24,
         "height": 8
       },
+      "description": "",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -1420,7 +1452,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "let horizon = (_endTime - _startTime) / 2;\nlet dt = 1m;\nopcua_metadata_lkv\n| where Name contains \"packaging\"\n| where Name contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"NumberOfManufacturedProducts\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| order by Timestamp desc\n| make-series actual=avg(toint(Value)) on Timestamp from _startTime to _endTime + horizon step dt\n| extend forecast = series_decompose_forecast(actual, toint(horizon/dt))\n"
+        "text": "let horizon = (_endTime - _startTime) / 2;\nlet dt = 1m;\nopcua_metadata_lkv\n| where Name contains \"packaging\"\n| where Name contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"NumberOfManufacturedProducts\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on DataSetWriterID\n| order by Timestamp1 desc\n| make-series actual=avg(toint(Value)) on Timestamp1 from _startTime to _endTime + horizon step dt\n| extend forecast = series_decompose_forecast(actual, toint(horizon/dt))\n"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1460,6 +1492,7 @@
       "kind": "duration",
       "id": "a39aa2bf-5ca5-4387-8d75-6c927c7f6c5c",
       "displayName": "Time range",
+      "description": "",
       "beginVariableName": "_startTime",
       "endVariableName": "_endTime",
       "defaultValue": {
@@ -1476,7 +1509,7 @@
     {
       "id": "09ab8651-b041-4b8e-ba7b-347796f7911c",
       "name": "ontologies",
-      "clusterUri": "https://erichbtest2adx.northeurope.kusto.windows.net/",
+      "clusterUri": "https://testadx.westeurope.kusto.windows.net/",
       "database": "ontologies",
       "kind": "manual-kusto",
       "scopeId": "kusto"

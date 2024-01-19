@@ -98,7 +98,6 @@ Here are the data flow steps:
 
 The solution makes use of the UA Cloud Twin also available from the Digital Twin Consortium [here](https://github.com/digitaltwinconsortium/UA-CloudTwin).
 
-<img src="Docs/twingraph.png" alt="twingraph" width="900" />
 
 #### Mapping OPC UA Servers to the ISA95 Hierarchy Model
 

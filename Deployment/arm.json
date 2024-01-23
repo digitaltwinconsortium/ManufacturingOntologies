@@ -46,7 +46,7 @@
       "properties": {
         "tenantId": "[subscription().tenantId]",
         "accessPolicies": [],
-        "enableRbacAuthorization": "false",
+        "enableRbacAuthorization": false,
         "enableSoftDelete": true,
         "softDeleteRetentionInDays": "90",
         "sku": {

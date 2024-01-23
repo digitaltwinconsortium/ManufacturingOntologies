@@ -59,7 +59,8 @@
               "storage": [
                 "all"
               ]
-            }
+            },
+            "tenantId": "[subscription().tenantId]"
           }
         ],
         "enableRbacAuthorization": "false",

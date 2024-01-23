@@ -75,6 +75,7 @@ ECHO Subscription name: !arg15!
 
 CALL az login
 CALL az account set -s !arg15!
+CALL az extension add --name azure-iot-ops --allow-preview true
 
 ECHO .
 ECHO Copying Publisher config files...

@@ -39,32 +39,15 @@
   "resources": [
     {
       "type": "Microsoft.KeyVault/vaults",
-      "apiVersion": "2022-07-01",
+      "apiVersion": "2016-10-01",
       "name": "[concat(parameters('resourcesName'), '-KV')]",
       "location": "[resourceGroup().location]",
       "tags": {},
       "properties": {
-        "accessPolicies": [
-          {
-            "permissions": {
-              "keys": [
-                "all"
-              ],
-              "secrets": [
-                "all"
-              ],
-              "certificates": [
-                "all"
-              ],
-              "storage": [
-                "all"
-              ]
-            },
-            "tenantId": "[subscription().tenantId]"
-          }
-        ],
+        "tenantId": "[subscription().tenantId]",
+        "accessPolicies": [],
         "enableRbacAuthorization": "false",
-        "enableSoftDelete": "true",
+        "enableSoftDelete": true,
         "softDeleteRetentionInDays": "90",
         "sku": {
           "family": "A",

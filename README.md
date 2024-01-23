@@ -13,7 +13,7 @@
 * [Installation of Production Line Simulation and Cloud Services](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#installation-of-production-line-simulation-and-cloud-services)
 * [Running the Production Line Simulation](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#running-the-production-line-simulation)
 * [Enabling the Kubernetes Cluster for Management via Azure Arc](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#enabling-the-kubernetes-cluster-for-management-via-azure-arc)
-* [Deploy Azure IoT Operations on the Edge](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#deploy-azure-iot-operations-on-the-edge)
+* [Deploying Azure IoT Operations on the Edge](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#deploying-azure-iot-operations-on-the-edge)
 * [Condition Monitoring, Calculating OEE, Detecting Anomalies and Making Predictions in Azure Data Explorer](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#condition-monitoring-calculating-oee-detecting-anomalies-and-making-predictions-in-azure-data-explorer)
 * [Using Azure Managed Grafana Service](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#using-azure-managed-grafana-service)
 * [Enabling the Product Carbon Footprint Calculation (PCF) in the Asset Admin Shell (AAS) Repository](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#enabling-the-product-carbon-footprint-calculation-pcf-in-the-asset-admin-shell-aas-repository)
@@ -268,7 +268,7 @@ You can now manage your Kubernetes cluster from the cloud via the newly deployed
 <img src="Docs/arc.png" alt="arc" width="900" />
 
 
-## Deploy Azure IoT Operations on the Edge
+## Deploying Azure IoT Operations on the Edge
 
 Please make sure you have already started the production line simulation and enabled the Kubernetes Cluster for management via Azure Arc as described in the previous paragraph. Then, deploy Azure IoT Operations by following the instructions [here](https://learn.microsoft.com/en-us/azure/iot-operations/get-started/quickstart-deploy?tabs=windows#deploy-azure-iot-operations).
 

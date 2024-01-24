@@ -3,7 +3,7 @@
     "Version": "1.0",
     "DeploymentType": "SingleMachineCluster",
     "Init": {
-        "ServiceIPRangeSize": 0
+        "ServiceIPRangeSize": 10
     },
     "Arc": {
         "ClusterName": "ontologies_cluster",

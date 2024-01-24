@@ -55,6 +55,10 @@ This solution leverages IEC 62541 Open Platform Communications Unified Architect
 
 This repository contains a reference solution leveraging the ontologies described above with an implementation on Microsoft Azure. Other implementations can be easily added by implementing the open interface IDigitalTwin within the UA Cloud Twin application.
 
+<img src="Docs/architecturesimple.png" alt="architecture" width="900" />
+
+Detailed architecture:
+
 <img src="Docs/architecture.png" alt="architecture" width="900" />
 
 Here are the components involved in this solution:

@@ -183,6 +183,14 @@ kubectl apply -f UA-CloudPublisher.yaml
 
 ECHO .
 ECHO Production lines started.
+kubectl apply -f https://raw.githubusercontent.com/Azure/AKS-Edge/main/samples/storage/local-path-provisioner/local-path-storage.yaml
+az provider register -n "Microsoft.ExtendedLocation"
+az provider register -n "Microsoft.Kubernetes"
+az provider register -n "Microsoft.KubernetesConfiguration"
+az provider register -n "Microsoft.IoTOperationsOrchestrator"
+az provider register -n "Microsoft.IoTOperationsMQ"
+az provider register -n "Microsoft.IoTOperationsDataProcessor"
+az provider register -n "Microsoft.DeviceRegistry"
 EXIT /B 0
 
 :ReplaceEventHubName

@@ -258,7 +258,7 @@ Note: In this solution, the OPC UA application certificate store for UA Cloud Pu
 
     | Attribute | Description |
     | --- | --- |
-    | Location | The Azure location of your resource group (no spaces!). You can find this in the Azure portal under the resource group which was deployed for this solution. |
+    | Location | The Azure location of your resource group. You can find this in the Azure portal under the resource group which was deployed for this solution, but remove the spaces in the name! Currently supported regions are eastus, eastus2, westus, westus2, westus3, westeurope and northeurope. |
     | SubscriptionId | Your subscription ID. In the Azure portal, click on the subscription you're using and copy/paste the subscription ID. |
     | TenantId | Your tenant ID. In the Azure portal, click on Azure Active Directory and copy/paste the tenant ID. |
     | ResourceGroupName | The name of the Azure resource group which was deployed for this solution. |

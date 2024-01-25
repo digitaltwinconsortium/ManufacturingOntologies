@@ -66,6 +66,7 @@ Here are the components involved in this solution:
 | Component | Description |
 | --- | --- |
 | Industrial Assets | A set of simulated OPC-UA enabled production lines hosted in Docker containers |
+| [Azure IoT Operations](https://learn.microsoft.com/en-us/azure/iot-operations/get-started/overview-iot-operations) | Azure IoT Operations is a unified data plane for the edge. It's composed of a set of modular, scalable, and highly available data services that run on Azure Arc-enabled edge Kubernetes clusters. |
 | [UA Cloud Publisher](https://github.com/barnstee/ua-cloudpublisher) | This edge application converts OPC UA Client/Server requests into OPC UA PubSub cloud messages. It's hosted in a Docker container. |
 | [UA Cloud Commander](https://github.com/opcfoundation/ua-cloudcommander) | This edge application converts messages sent to an MQTT or Kafka broker (possibly in the cloud) into OPC UA Client/Server requests for a connected OPC UA server. It's hosted in a Docker container. |
 | [UA Edge Translator](https://github.com/OPCFoundation/UA-EdgeTranslator) | This industrial connectivity edge application translates from proprietary asset interfaces to OPC UA leveraging W3C Web of Things (WoT) Thing Descriptions as the schema to describe the industrial asset interface. |

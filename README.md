@@ -275,7 +275,7 @@ You can now manage your Kubernetes cluster from the cloud via the newly deployed
 
 ## Deploying Azure IoT Operations on the Edge
 
-Please make sure you have already started the production line simulation and enabled the Kubernetes Cluster for management via Azure Arc as described in the previous paragraph. Then, deploy Azure IoT Operations by following the instructions [here](https://learn.microsoft.com/en-us/azure/iot-operations/get-started/quickstart-deploy?tabs=windows#deploy-azure-iot-operations).
+Please make sure you have already started the production line simulation and enabled the Kubernetes Cluster for management via Azure Arc as described in the previous paragraphs. Then, deploy Azure IoT Operations by following the instructions [here](https://learn.microsoft.com/en-us/azure/iot-operations/get-started/quickstart-deploy?tabs=windows#deploy-azure-iot-operations).
 
 
 ## Condition Monitoring, Calculating OEE, Detecting Anomalies and Making Predictions in Azure Data Explorer

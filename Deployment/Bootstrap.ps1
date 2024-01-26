@@ -8,7 +8,7 @@ $ErrorActionPreference = "SilentlyContinue"
 # Install AZ CLI and AKS-EE
 msiexec /i https://aka.ms/installazurecliwindows /passive
 sleep 120
-msiexec /i https://aka.ms/aks-edge/k8s-msi /passive
+msiexec /i https://aka.ms/aks-edge/msi-k8s-1.2.414.0 /passive
 sleep 120
 
 # Enable Hyper-V feature

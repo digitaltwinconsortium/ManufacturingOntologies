@@ -226,6 +226,8 @@ Once the command is finished, your Kubernetes installation is complete and you c
 
 Note: To get logs from all your Kubernetes workloads and services at any time, simply run `Get-AksEdgeLogs` from an **Administrator Powershell window**.
 
+Note: To check the memory utilization of your Kubernetes cluster, simply run `Invoke-AksEdgeNodeCommand -Command "sudo cat /proc/meminfo"` from an **Administrator Powershell window**.
+
 
 ## Running the Production Line Simulation
 
@@ -278,7 +280,7 @@ You can now manage your Kubernetes cluster from the cloud via the newly deployed
 Please make sure you have already started the production line simulation and enabled the Kubernetes Cluster for management via Azure Arc as described in the previous paragraphs. Then, follow these steps:
 
 1. From the Azure Portal, navigate to the Key Vault deployed in this reference solution and add your own identity to the access policies by clicking `Access policies`, `Create`, select the `Keys, Secrets & Certificate Management` template, click `Next`, search for and select your own user identity, click `Next`, leave the Application section blank, click `Next` and finally `Create`.
-1. Enable custom locations for your Arc-connected kubernetes cluster (called ontologies_cluster) by first logging in to your Azure subscription via `az login` from an **Administrator PowerShell Window** and then running `az connectedk8s enable-features -n "ontologies_cluster" -g "<resourceGroupName>" --features cluster-connect custom-locations`, providing the `resourceGroupName` from the reference solution deployed.
+1. Enable custom locations for your Arc-connected Kubernetes cluster (called ontologies_cluster) by first logging in to your Azure subscription via `az login` from an **Administrator PowerShell Window** and then running `az connectedk8s enable-features -n "ontologies_cluster" -g "<resourceGroupName>" --features cluster-connect custom-locations`, providing the `resourceGroupName` from the reference solution deployed.
 1. From the Azure Portal, deploy Azure IoT Operations by navigating to your Arc-connected kubernetes cluster, click on `Extensions`, `Add`, select `Azure IoT Operations` and click `Create`. On the Basic page, leave everything as-in. On the Configuration page, set the MQ mode to `Auto`. You don't need to deploy a simulated PLC, as this reference solution already contains a much more substancial production line simulation. On the Automation page, select the Key Vault deployed for this reference solution and then copy the `az iot ops init` command automatically generated. From your deployed VM, open a new **Administrator PowerShell Window**, login to the correct Azure subscription by running `az login` and then run the `az iot ops init` command. Once the command completes, click `Next` in the Install Azure IoT Operations Arc Extension page and then `Create`. 
 
 

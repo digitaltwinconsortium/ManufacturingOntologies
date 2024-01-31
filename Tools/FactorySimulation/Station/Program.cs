@@ -140,7 +140,7 @@ namespace Station.Simulation
 
                 // create OPC UA cert validator
                 application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
-                application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(OPCUAClientCertificateValidationCallback);
+                application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(OPCUAServerCertificateValidationCallback);
                 application.ApplicationConfiguration.CertificateValidator.Update(application.ApplicationConfiguration.SecurityConfiguration).GetAwaiter().GetResult();
 
                 // replace the production line name in the list of endpoints to connect to.
@@ -767,12 +767,11 @@ namespace Station.Simulation
                 StoreCertsInCloud();
             }
 
-#if DEBUG
             // create OPC UA cert validator
             application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
             application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(OPCUAClientCertificateValidationCallback);
             application.ApplicationConfiguration.CertificateValidator.Update(application.ApplicationConfiguration.SecurityConfiguration).GetAwaiter().GetResult();
-#endif
+
             // start the server.
             await application.Start(new FactoryStationServer());
 
@@ -789,12 +788,45 @@ namespace Station.Simulation
             }
         }
 
-        private static void OPCUAClientCertificateValidationCallback(CertificateValidator sender, CertificateValidationEventArgs e)
+        private static void OPCUAServerCertificateValidationCallback(CertificateValidator sender, CertificateValidationEventArgs e)
         {
-            // always trust the OPC UA client certificate ind debug mode
             if (e.Error.StatusCode == StatusCodes.BadCertificateUntrusted)
             {
+                // always trust server cert
                 e.Accept = true;
+            }
+        }
+
+        private static void OPCUAClientCertificateValidationCallback(CertificateValidator sender, CertificateValidationEventArgs e)
+        {
+            if (e.Error.StatusCode == StatusCodes.BadCertificateUntrusted)
+            {
+                // make sure our rejected cert store exists
+                string rejectedCertPath = Path.Combine(Directory.GetCurrentDirectory(), "pki", "rejected", "certs");
+                if (!Directory.Exists(rejectedCertPath))
+                {
+                    Directory.CreateDirectory(rejectedCertPath);
+                }
+
+                // store cert
+                string subject = e.Certificate.Subject;
+                try
+                {
+                    subject = e.Certificate.Subject.Split(",")[0].Replace("CN=", "");
+                }
+                catch (Exception)
+                {
+                    // do nothing
+                }
+
+                string rejectedCertFilePath = Path.Combine(rejectedCertPath, subject + " [" + e.Certificate.Thumbprint + "].der");
+                File.WriteAllBytes(rejectedCertFilePath, e.Certificate.RawData);
+
+                // upload untrusted client certs to cloud, so they can be moved manually to the trusted certs store
+                foreach (string filePath in Directory.EnumerateFiles(rejectedCertPath, "*.der"))
+                {
+                    _storage.StoreFileAsync(filePath, File.ReadAllBytesAsync(rejectedCertFilePath).GetAwaiter().GetResult()).GetAwaiter().GetResult();
+                }
             }
         }
     }

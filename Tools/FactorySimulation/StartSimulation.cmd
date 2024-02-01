@@ -23,6 +23,8 @@ SHIFT
 SET "arg14=%9"
 SHIFT
 SET "arg15=%9"
+SHIFT
+SET "arg16=%9"
 
 ECHO .
 ECHO Arguments provided:
@@ -41,6 +43,7 @@ ECHO 12: !arg12!
 ECHO 13: !arg13!
 ECHO 14: !arg14!
 ECHO 15: !arg15!
+ECHO 16: !arg16!
 
 if "%~1"=="" goto :InvalidArgument
 IF NOT !arg1!==Endpoint goto :InvalidArgument
@@ -57,7 +60,7 @@ goto :Config
 
 :InvalidArgument
 ECHO Argument error:
-ECHO Input parameters must be of the form Endpoint=sb://[eventhubnamespace].servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=[key] DefaultEndpointsProtocol=https;AccountName=[storageaccountname];AccountKey=[key];EndpointSuffix=core.windows.net [subscriptionID]
+ECHO Input parameters must be of the form Endpoint=sb://[eventhubnamespace].servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=[key] DefaultEndpointsProtocol=https;AccountName=[storageaccountname];AccountKey=[key];EndpointSuffix=core.windows.net [subscriptionID] [tenantID]
 EXIT /B 1
 
 :Config
@@ -71,9 +74,10 @@ ECHO Events Hub connection string: !connectionstring!
 ECHO Storage Account connection string: !storageconnectionstring!
 ECHO Event Hubs name: !name!
 ECHO Storage Account name: !storagename!
-ECHO Subscription name: !arg15!
+ECHO Azure Subscription: !arg15!
+ECHO Azure Tenant: !arg16!
 
-CALL az login
+CALL az login -t !arg16!
 CALL az account set -s !arg15!
 CALL az extension add --name azure-iot-ops --allow-preview true
 

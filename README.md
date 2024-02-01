@@ -220,7 +220,9 @@ Note: To save cost, the deployment deploys just a single Windows 11 Enterprise V
 Once the deployment completes, follow these steps to setup a single-node Edge Kubernetes cluster and finish configuring the simulation:
 
 1. Connect to the deployed Windows VM with an RDP (remote desktop) connection. You can download the RDP file in the [Azure portal](https://portal.azure.com) page for the VM, under the **Connect** options. Sign in using the credentials you provided during deployment.
-1. From the deployed VM, open an **Administrator Powershell window**, navigate to the `C:\ManufacturingOntologies-main\Deployment` directory and run `New-AksEdgeDeployment -JsonConfigFilePath .\aksedge-config.json`.
+1. From the deployed VM, open an **Administrator Powershell window**, navigate to the `C:\ManufacturingOntologies-main\Deployment` directory and run
+     
+     New-AksEdgeDeployment -JsonConfigFilePath .\aksedge-config.json
 
 Once the command is finished, your Kubernetes installation is complete and you can start deploying workloads.
 
@@ -235,7 +237,7 @@ From the deployed VM, open a **Windows command prompt**, navigate to the `C:\Man
 
 Syntax:
 
-    StartSimulation <EventHubsCS> <StorageAccountCS> <AzureSubscriptionID>
+    StartSimulation <EventHubsCS> <StorageAccountCS> <AzureSubscriptionID> <AzureTenantID>
 
 Parameters:
 
@@ -244,6 +246,8 @@ Parameters:
 | EventHubCS | Copy the Event Hubs namespace connection string as described [here](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string). |
 | StorageAccountCS | In the Azure Portal, navigate to the Storage Account created by this solution. Select "Access keys" from the left-hand navigation menu. Then, copy the connection string for key1. |
 | AzureSubscriptionID | In Azure Portal, browse your Subscriptions and copy the ID of the subscription used in this solution. |
+| AzureTenantID | In Azure Portal, open the Microsoft Entry ID page and copy your Tenant ID. |
+
     
 Example:
 
@@ -281,7 +285,7 @@ Please make sure you have already started the production line simulation and ena
 
 1. From the Azure Portal, navigate to the Key Vault deployed in this reference solution and add your own identity to the access policies by clicking `Access policies`, `Create`, select the `Keys, Secrets & Certificate Management` template, click `Next`, search for and select your own user identity, click `Next`, leave the Application section blank, click `Next` and finally `Create`.
 1. Enable custom locations for your Arc-connected Kubernetes cluster (called ontologies_cluster) by first logging in to your Azure subscription via `az login` from an **Administrator PowerShell Window** and then running `az connectedk8s enable-features -n "ontologies_cluster" -g "<resourceGroupName>" --features cluster-connect custom-locations`, providing the `resourceGroupName` from the reference solution deployed.
-1. From the Azure Portal, deploy Azure IoT Operations by navigating to your Arc-connected kubernetes cluster, click on `Extensions`, `Add`, select `Azure IoT Operations` and click `Create`. On the Basic page, leave everything as-in. On the Configuration page, set the MQ mode to `Auto`. You don't need to deploy a simulated PLC, as this reference solution already contains a much more substancial production line simulation. On the Automation page, select the Key Vault deployed for this reference solution and then copy the `az iot ops init` command automatically generated. From your deployed VM, open a new **Administrator PowerShell Window**, login to the correct Azure subscription by running `az login` and then run the `az iot ops init` command. Once the command completes, click `Next` in the Install Azure IoT Operations Arc Extension page and then `Create`. 
+1. From the Azure Portal, deploy Azure IoT Operations by navigating to your Arc-connected kubernetes cluster, click on `Extensions`, `Add`, select `Azure IoT Operations` and click `Create`. On the Basic page, leave everything as-is. On the Configuration page, set the MQ mode to `Auto`. You don't need to deploy a simulated PLC, as this reference solution already contains a much more substancial production line simulation. On the Automation page, select the Key Vault deployed for this reference solution and then copy the `az iot ops init` command automatically generated. From your deployed VM, open a new **Administrator PowerShell Window**, login to the correct Azure subscription by running `az login` and then run the `az iot ops init` command. Once the command completes, click `Next` in the Install Azure IoT Operations Arc Extension page and then `Create`. 
 1. Once deployment completes and all Kubernetes pods are up and running, log in to https://iotoperations.azure.com, pick the right Azure directory (top right hand corner) and start creating assets from the production line simulation. As mentioned above, the solution comes with 2 production lines (Munich and Seattle) consisting of 3 stations each (assembly, test and packaging).
     1. For the asset endpoints, enter opc.tcp://assembly.munich in the OPC UA Broker URL field for the assembly station of the Munich production line, etc.
     1. For the asset tags, enter ns=1;NodeID, where NodeID is the OPC UA node ID as described above [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#opc-ua-node-ids-of-station-opc-ua-server). I.e., for the manufactured product serial number enter ns=1;i=379.

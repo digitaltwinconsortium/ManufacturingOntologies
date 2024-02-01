@@ -213,13 +213,11 @@ Note: During deployment, you must provide a password for a VM used to host the p
 
 Note: To save cost, the deployment deploys just a single Windows 11 Enterprise VM for both the production line simulation and the base OS for the Azure Kubernetes Services Edge Essentials instance. In production scenarios, the production line simulation is obviously not required and for the base OS for the Azure Kubernetes Services Edge Essentials instance, we recommend Windows IoT Enterprise Long Term Servicing Channel (LTSC).
 
-Once the deployment completes, follow these steps to setup a single-node Edge Kubernetes cluster and finish configuring the simulation:
-
-Connect to the deployed Windows VM with an RDP (remote desktop) connection. You can download the RDP file in the [Azure portal](https://portal.azure.com) page for the VM, under the **Connect** options. Sign in using the credentials you provided during deployment, open an **Administrator Powershell window**, navigate to the `C:\ManufacturingOntologies-main\Deployment` directory and run
+Once the deployment completes, connect to the deployed Windows VM with an RDP (remote desktop) connection. You can download the RDP file in the [Azure portal](https://portal.azure.com) page for the VM, under the **Connect** options. Sign in using the credentials you provided during deployment, open an **Administrator Powershell window**, navigate to the `C:\ManufacturingOntologies-main\Deployment` directory and run
      
     New-AksEdgeDeployment -JsonConfigFilePath .\aksedge-config.json
 
-Once the command is finished, your Kubernetes installation is complete and you can start deploying workloads.
+Once the command is finished, your Azure Kubernetes Services Edge Essentials installation is complete and you can run the production line simulation.
 
 Note: To get logs from all your Kubernetes workloads and services at any time, simply run `Get-AksEdgeLogs` from an **Administrator Powershell window**.
 

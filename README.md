@@ -219,10 +219,9 @@ Note: To save cost, the deployment deploys just a single Windows 11 Enterprise V
 
 Once the deployment completes, follow these steps to setup a single-node Edge Kubernetes cluster and finish configuring the simulation:
 
-1. Connect to the deployed Windows VM with an RDP (remote desktop) connection. You can download the RDP file in the [Azure portal](https://portal.azure.com) page for the VM, under the **Connect** options. Sign in using the credentials you provided during deployment.
-1. From the deployed VM, open an **Administrator Powershell window**, navigate to the `C:\ManufacturingOntologies-main\Deployment` directory and run
+Connect to the deployed Windows VM with an RDP (remote desktop) connection. You can download the RDP file in the [Azure portal](https://portal.azure.com) page for the VM, under the **Connect** options. Sign in using the credentials you provided during deployment, open an **Administrator Powershell window**, navigate to the `C:\ManufacturingOntologies-main\Deployment` directory and run
      
-     New-AksEdgeDeployment -JsonConfigFilePath .\aksedge-config.json
+    New-AksEdgeDeployment -JsonConfigFilePath .\aksedge-config.json
 
 Once the command is finished, your Kubernetes installation is complete and you can start deploying workloads.
 
@@ -251,7 +250,7 @@ Parameters:
     
 Example:
 
-    StartSimulation Endpoint=sb://ontologies.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=abcdefgh= DefaultEndpointsProtocol=https;AccountName=ontologiesstorage;AccountKey=abcdefgh==;EndpointSuffix=core.windows.net 9dd2eft0-3dad-4aeb-85d8-c3adssd8127a
+    StartSimulation Endpoint=sb://ontologies.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=abcdefgh= DefaultEndpointsProtocol=https;AccountName=ontologiesstorage;AccountKey=abcdefgh==;EndpointSuffix=core.windows.net 9dd2eft0-3dad-4aeb-85d8-c3adssd8127a 6e660ce4-d51a-4585-80c6-58035e212354
 
 Note: If you have access to several Azure subscriptions, it is worth first logging into the Azure Portal from the VM through the web browser. You can also switch Active Directory tenants through the Azure Portal UI (in the top-right-hand corner), to make sure you are logged in to the tenant used during deployment. Once logged in, simply leave the browser window open. This will ensure that the StartSimulation script can more easily connect to the right subscription.
 

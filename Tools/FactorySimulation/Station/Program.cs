@@ -61,6 +61,8 @@ namespace Station.Simulation
 
         private static List<Tuple<string, string, string>> m_shiftTimes = new();
 
+        private static int _traceMasks = 1; // default to errors only
+
         public static double PowerConsumption { get; set; }
 
         public static ulong CycleTime { get; set; }
@@ -126,6 +128,10 @@ namespace Station.Simulation
 
                 // load the application configuration
                 ApplicationConfiguration appConfiguration = application.LoadApplicationConfiguration(false).Result;
+
+                // hook up OPC UA stack traces
+                _traceMasks = appConfiguration.TraceConfiguration.TraceMasks;
+                Utils.Tracing.TraceEventHandler += new EventHandler<TraceEventArgs>(OpcStackLoggingHandler);
 
                 // check the application certificate
                 bool certOK = application.CheckApplicationInstanceCertificate(false, 0).GetAwaiter().GetResult();
@@ -756,6 +762,10 @@ namespace Station.Simulation
             // load the application configuration
             ApplicationConfiguration appConfiguration = application.LoadApplicationConfiguration(false).Result;
 
+            // hook up OPC UA stack traces
+            _traceMasks = appConfiguration.TraceConfiguration.TraceMasks;
+            Utils.Tracing.TraceEventHandler += new EventHandler<TraceEventArgs>(OpcStackLoggingHandler);
+
             // check the application certificate
             bool certOK = await application.CheckApplicationInstanceCertificate(false, 0).ConfigureAwait(false);
             if (!certOK)
@@ -788,6 +798,21 @@ namespace Station.Simulation
             }
         }
 
+        private static void OpcStackLoggingHandler(object sender, TraceEventArgs e)
+        {
+            if ((e.TraceMask & _traceMasks) != 0)
+            {
+                if (e.Arguments != null)
+                {
+                    Console.WriteLine("OPC UA Stack: " + string.Format(CultureInfo.InvariantCulture, e.Format, e.Arguments).Trim());
+                }
+                else
+                {
+                    Console.WriteLine("OPC UA Stack: " + e.Format.Trim());
+                }
+            }
+        }
+
         private static void OPCUAServerCertificateValidationCallback(CertificateValidator sender, CertificateValidationEventArgs e)
         {
             if (e.Error.StatusCode == StatusCodes.BadCertificateUntrusted)
@@ -799,6 +824,8 @@ namespace Station.Simulation
 
         private static void OPCUAClientCertificateValidationCallback(CertificateValidator sender, CertificateValidationEventArgs e)
         {
+            Console.WriteLine("Certificate Validation: " + e.Error.ToString());
+
             if (e.Error.StatusCode == StatusCodes.BadCertificateUntrusted)
             {
                 // make sure our rejected cert store exists

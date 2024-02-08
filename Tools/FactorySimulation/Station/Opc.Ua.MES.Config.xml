@@ -157,44 +157,6 @@
     </ua:XmlElement>
   </Extensions>
 
-  <!--
-  Masks supported by the trace feature.
-  Servers will detect changes within 5 seconds.
-
-  Do not output any messages.
-  None = 0x0;
-
-  Output error messages.
-  Error = 0x1;
-
-  Output informational messages.
-  Information = 0x2;
-
-  Output stack traces.
-  StackTrace = 0x4;
-
-  Output basic messages for service calls.
-  Service = 0x8;
-
-  Output detailed messages for service calls.
-  ServiceDetail = 0x10;
-
-  Output basic messages for each operation.
-  Operation = 0x20;
-
-  Output detailed messages for each operation.
-  OperationDetail = 0x40;
-
-  Output messages related to application initialization or shutdown
-  StartStop = 0x80;
-
-  Output messages related to a call to an external system.
-  ExternalSystem = 0x100;
-
-  Output messages related to security
-  Security = 0x200;
-  -->
-
   <TraceConfiguration>
     <OutputFilePath>../Logs/Opc.Ua.MES.log.txt</OutputFilePath>
     <DeleteOnLoad>true</DeleteOnLoad>

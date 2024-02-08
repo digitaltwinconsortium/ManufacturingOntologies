@@ -7,42 +7,18 @@ namespace Station.Simulation
 
     public class ApplicationMessageDlg : IApplicationMessageDlg
     {
-        private string message = string.Empty;
-        private bool ask = false;
+        private string _message = string.Empty;
 
         public override void Message(string text, bool ask)
         {
-            this.message = text;
-            this.ask = ask;
+            _message = text;
         }
 
         public override async Task<bool> ShowAsync()
         {
-            if (ask)
-            {
-                message += " (y/n, default y): ";
-                Console.Write(message);
-            }
-            else
-            {
-                Console.WriteLine(message);
-            }
+            Console.WriteLine(_message);
 
-            if (ask)
-            {
-                try
-                {
-                    ConsoleKeyInfo result = Console.ReadKey();
-                    Console.WriteLine();
-                    return await Task.FromResult((result.KeyChar == 'y') || (result.KeyChar == 'Y') || (result.KeyChar == '\r'));
-                }
-                catch
-                {
-                    // intentionally fall through
-                }
-            }
-
-            // always return yes by default
+            // always return yes
             return await Task.FromResult(true);
         }
     }

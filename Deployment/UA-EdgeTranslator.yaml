@@ -26,6 +26,7 @@ spec:
       containers:
       - name: ua-edgetranslator
         image: ghcr.io/opcfoundation/ua-edgetranslator:main
+        imagePullPolicy: Always
         ports:
         - containerPort: 4840
 ---

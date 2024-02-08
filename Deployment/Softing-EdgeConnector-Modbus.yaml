@@ -26,6 +26,7 @@ spec:
       containers:
       - name: softing-edgeconnector-modbus
         image: softingindustrial/edgeconnector-modbus
+        imagePullPolicy: Always
         ports:
         - containerPort: 4897
         - containerPort: 8099

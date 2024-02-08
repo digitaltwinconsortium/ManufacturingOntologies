@@ -26,6 +26,7 @@ spec:
       containers:
       - name: ua-cloudpublisher
         image: ghcr.io/barnstee/ua-cloudpublisher:main
+        imagePullPolicy: Always
         env:
         - name: USE_KAFKA
           value: "1"

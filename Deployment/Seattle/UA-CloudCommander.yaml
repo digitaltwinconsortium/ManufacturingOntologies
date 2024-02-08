@@ -26,6 +26,7 @@ spec:
       containers:
       - name: ua-cloudcommander
         image: ghcr.io/opcfoundation/ua-cloudcommander:main
+        imagePullPolicy: Always
         env:
         - name: APPNAME
           value: "commander.seattle"

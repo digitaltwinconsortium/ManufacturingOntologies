@@ -26,6 +26,7 @@ spec:
       containers:
       - name: assembly
         image: ghcr.io/digitaltwinconsortium/manufacturingontologies:main
+        imagePullPolicy: Always
         env:
         - name: StationType
           value: "assembly"
@@ -75,6 +76,7 @@ spec:
       containers:
       - name: test
         image: ghcr.io/digitaltwinconsortium/manufacturingontologies:main
+        imagePullPolicy: Always
         env:
         - name: StationType
           value: "test"
@@ -124,6 +126,7 @@ spec:
       containers:
       - name: packaging
         image: ghcr.io/digitaltwinconsortium/manufacturingontologies:main
+        imagePullPolicy: Always
         env:
         - name: StationType
           value: "packaging"

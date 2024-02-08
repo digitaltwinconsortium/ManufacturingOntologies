@@ -26,6 +26,7 @@ spec:
       containers:
       - name: mes
         image: ghcr.io/digitaltwinconsortium/manufacturingontologies:main
+        imagePullPolicy: Always
         env:
         - name: StationType
           value: "MES"

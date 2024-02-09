@@ -286,6 +286,7 @@ Please make sure you have already started the production line simulation and ena
     1. For the asset tags, select `Import CSV file` and open the `StationTags.csv` file located in the `C:\ManufacturingOntologies-main\Tools\FactorySimulation\Station` directory.
 1. From the Azure Portal, navigate to the Azure Storage deployed in this reference solution, open the `Storage browser` and then `Blob containers`. For each production line simulated, navigate to the `app/pki/rejected/certs` folder and download the Azure IoT Operations certificate file. Then delete the file. Navigate to the `app/pki/trusted/certs` folder and upload the Azure IoT Operations certificate file to this directory.
 1. From the deployed VM, open a **Windows command prompt** and restart the production line simulation by navigating to the `C:\ManufacturingOntologies-main\Tools\FactorySimulation` directory and run the **StopSimulation** command, followed by the **StartSimulation** command as described above.
+1. From the deployed VM, open a **Windows command prompt** and follow the instructions as described [here](https://learn.microsoft.com/en-us/azure/iot-operations/get-started/quickstart-add-assets#verify-data-is-flowing) to verify that data is flowing from the production line simulation.
 
 
 ## Condition Monitoring, Calculating OEE, Detecting Anomalies and Making Predictions in Azure Data Explorer

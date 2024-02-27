@@ -15,6 +15,7 @@
 * [Enabling the Kubernetes Cluster for Management via Azure Arc](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#enabling-the-kubernetes-cluster-for-management-via-azure-arc)
 * [Deploying Azure IoT Operations on the Edge](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#deploying-azure-iot-operations-on-the-edge)
 * [Condition Monitoring, Calculating OEE, Detecting Anomalies and Making Predictions in Azure Data Explorer](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#condition-monitoring-calculating-oee-detecting-anomalies-and-making-predictions-in-azure-data-explorer)
+* [Rendering the Built-In Unified NameSpace (UNS) and ISA-95 Model Graph in Kusto Explorer](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#rendering-the-built-in-unified-namespace-(uns)-and-isa-95-model-graph-in-kusto-explorer)
 * [Using Azure Managed Grafana Service](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#using-azure-managed-grafana-service)
 * [Enabling the Product Carbon Footprint Calculation (PCF) in the Asset Admin Shell (AAS) Repository](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#enabling-the-product-carbon-footprint-calculation-pcf-in-the-asset-admin-shell-aas-repository)
 * [Connecting the Reference Solution to Microsoft Power BI](https://github.com/digitaltwinconsortium/ManufacturingOntologies?tab=readme-ov-file#connecting-the-reference-solution-to-microsoft-power-bi)
@@ -38,7 +39,7 @@ The ontologies defined in this repository are described by leveraging the Digita
 
 The ontologies defined in this repository are also described by leveraging the W3C Web of Things (WoT), which is specified [here](https://www.w3.org/TR/wot-thing-description/).
 
-### International Society of Automation 95 (ISA95/IEC 62264)
+### International Society of Automation 95 (ISA-95/IEC 62264)
 
 ISA95 / IEC 62264 is one of the ontologies leveraged by this solution. It is a standard and described [here](https://en.wikipedia.org/wiki/ANSI/ISA-95) and [here](https://en.wikipedia.org/wiki/IEC_62264).
 
@@ -297,6 +298,40 @@ You can also visit the [Azure Data Explorer documentation](https://learn.microso
 <img src="Docs/dashboard.png" alt="dashboard" width="900" />
 
 Note: If you want to display the OEE for a specific shift, select `Custom Time Range` in the `Time Range` drop down in the top-left hand corner of the ADX Dashboard and enter the date and time from start to end of the shift you are interested in. 
+
+
+## Rendering the Built-In Unified NameSpace (UNS) and ISA-95 Model Graph in Kusto Explorer
+
+This reference solution implements a Unified NameSapce (UNS), based on the OPC UA metadata set to the time-series database in the cloud (Azure Data Explorer). This OPC UA metadata also includes the ISA-95 asset hierarchy. The resulting graph can be easily visualized in the Kusto Explorer tool available for download [here](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/tools/kusto-explorer).
+
+Create a new connection to your Azure Data Explorer instance deployed in this reference solution and then run the following query:
+
+    let edges = opcua_metadata_lkv
+    | project source = NodeId, target = Workcell
+    | join kind=fullouter (opcua_metadata_lkv
+        | project source = Workcell, target = Line) on source
+        | join kind=fullouter (opcua_metadata_lkv
+            | project source = Line, target = Area) on source
+            | join kind=fullouter (opcua_metadata_lkv
+                | project source = Area, target = Site) on source
+                | join kind=fullouter (opcua_metadata_lkv
+                    | project source = Site, target = Enterprise) on source
+                    | project source = coalesce(source, source1, source2, source3), target = coalesce(target, target1, target2, target3);
+    let nodes = opcua_metadata_lkv;
+    edges | make-graph source --> target with nodes on NodeId
+
+For best results, change the `Layout` option to `Grouped`.
+
+<img src="Docs/isa95graph.png" alt="dashboard" width="900" />
+
+Similarily, the full ISA-95 model graph automatically uploaded via UA Cloud Twin to Azure Data Explorer can be rendered in Kusto Explorer by executing the follwing query:
+
+    let edges = DTDL_models | where contenttype == "Relationship" | extend src = id, dst = target, typeName = type | project-away type ;
+    let nodes = DTDL_models | where contenttype == "Component" | extend nodeId = id, typeName = type | project-away type ;
+    edges
+    | make-graph src --> dst with nodes on nodeId
+
+<img src="Docs/isa95modelgraph.png" alt="dashboard" width="900" />
 
 
 ## Using Azure Managed Grafana Service

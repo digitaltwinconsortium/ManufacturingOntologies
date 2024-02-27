@@ -102,16 +102,7 @@ Here are the data flow steps:
 
 ## UA Cloud Twin
 
-The solution makes use of the UA Cloud Twin also available from the Digital Twin Consortium [here](https://github.com/digitaltwinconsortium/UA-CloudTwin).
-
-
-#### Mapping OPC UA Servers to the ISA95 Hierarchy Model
-
-UA Cloud Twin takes the combination of the OPC UA Application URI and the OPC UA Namespace URIs discovered in the OPC UA telemetry stream (specifically, in the OPC UA PubSub metadata messages) and creates OPC UA Nodeset digital twin instances (inherited from the ISA95 Work Center digital twin model) for each one. UA Cloud Publisher sends the OPC UA PubSub metadata messages to a separate broker topic to make sure all metadata can be read by UA Cloud Twin before the processing of the telemetry messages starts.
-
-#### Mapping OPC UA PubSub Publishers to the ISA95 Hierarchy Model
-
-UA Cloud Twin takes the OPC UA Publisher ID and creates ISA95 Area digital twin instances (derived from the digital twin model of the same name) for each one.
+The solution makes use of the UA Cloud Twin also available from the Digital Twin Consortium [here](https://github.com/digitaltwinconsortium/UA-CloudTwin). It uploads the ISA-95 ontology models to Azure Data Explorer.
 
 
 ## A Cloud-based OPC UA Certificate Store and Persisted Storage

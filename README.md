@@ -316,7 +316,7 @@ Create a new connection to your Azure Data Explorer instance deployed in this re
                 | project source = Area, target = Site) on source
                 | join kind=fullouter (opcua_metadata_lkv
                     | project source = Site, target = Enterprise) on source
-                    | project source = coalesce(source, source1, source2, source3), target = coalesce(target, target1, target2, target3);
+                    | project source = coalesce(source, source1, source2, source3, source4), target = coalesce(target, target1, target2, target3, target4);
     let nodes = opcua_metadata_lkv;
     edges | make-graph source --> target with nodes on NodeId
 

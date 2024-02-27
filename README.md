@@ -302,9 +302,9 @@ Note: If you want to display the OEE for a specific shift, select `Custom Time R
 
 ## Rendering the Built-In Unified NameSpace (UNS) and ISA-95 Model Graph in Kusto Explorer
 
-This reference solution implements a Unified NameSapce (UNS), based on the OPC UA metadata set to the time-series database in the cloud (Azure Data Explorer). This OPC UA metadata also includes the ISA-95 asset hierarchy. The resulting graph can be easily visualized in the Kusto Explorer tool available for download [here](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/tools/kusto-explorer).
+This reference solution implements a Unified NameSapce (UNS), based on the OPC UA metadata sent to the time-series database in the cloud (Azure Data Explorer). This OPC UA metadata also includes the ISA-95 asset hierarchy. The resulting graph can be easily visualized in the Kusto Explorer tool available for download [here](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/tools/kusto-explorer).
 
-Create a new connection to your Azure Data Explorer instance deployed in this reference solution and then run the following query:
+Add a new connection to your Azure Data Explorer instance deployed in this reference solution and then run the following query in Kusto Explorer:
 
     let edges = opcua_metadata_lkv
     | project source = NodeId, target = Workcell
@@ -324,7 +324,7 @@ For best results, change the `Layout` option to `Grouped`.
 
 <img src="Docs/isa95graph.png" alt="dashboard" width="900" />
 
-Similarily, the full ISA-95 model graph automatically uploaded via UA Cloud Twin to Azure Data Explorer can be rendered in Kusto Explorer by executing the follwing query:
+Similarily, the full ISA-95 model graph automatically uploaded via UA Cloud Twin to Azure Data Explorer can be rendered in Kusto Explorer by executing the following query:
 
     let edges = DTDL_models | where contenttype == "Relationship" | extend src = id, dst = target, typeName = type | project-away type ;
     let nodes = DTDL_models | where contenttype == "Component" | extend nodeId = id, typeName = type | project-away type ;

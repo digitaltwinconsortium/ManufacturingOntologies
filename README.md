@@ -136,6 +136,37 @@ You need to provide two things in the query above:
 1. The Information Model's unique ID from the UA Cloud Library and enter it into the <insert information model identifier from cloud library here> field of the ADX query.
 1. Your UA Cloud Library credentials (generated during registration) basic authorization header hash and insert it into the <insert your cloud library credentials hash here> field of the ADX query. Use tools like https://www.debugbear.com/basic-auth-header-generator to generate this.
 
+For example, to render the production line simulation Station OPC UA Server's Information Model in the Kusto Explorer tool available for download [here](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/tools/kusto-explorer), run the following query:
+
+    let uri='https://uacloudlibrary.opcfoundation.org/infomodel/download/1627266626';
+    let headers=dynamic({'accept':'text/plain'});
+    let options=dynamic({'Authorization':'Basic bmhlYkBob3RtYWlsLmRlOjQ4eUouIUZYUFJKU0s0Ug=='});
+    let variables = evaluate http_request(uri, headers, options)
+        | project title = tostring(ResponseBody.['title']), contributor = tostring(ResponseBody.contributor.name), nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
+        | mv-expand UAVariable = nodeset.UANodeSet.UAVariable
+        | extend NodeId = UAVariable.['@NodeId'], ParentNodeId = UAVariable.['@ParentNodeId'], DisplayName = tostring(UAVariable['DisplayName']), DataType = tostring(UAVariable.['@DataType']), References = tostring(UAVariable.['References'])
+        | where References !contains "HasModellingRule"
+        | where DisplayName != "InputArguments"
+        | project-away nodeset, UAVariable, References;
+    let objects = evaluate http_request(uri, headers, options)
+        | project title = tostring(ResponseBody.['title']), contributor = tostring(ResponseBody.contributor.name), nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
+        | mv-expand UAObject = nodeset.UANodeSet.UAObject
+        | extend NodeId = UAObject.['@NodeId'], ParentNodeId = UAObject.['@ParentNodeId'], DisplayName = tostring(UAObject['DisplayName']), References = tostring(UAObject.['References'])
+        | where References !contains "HasModellingRule"
+        | project-away nodeset, UAObject, References;
+    let nodes = variables
+        | project source = tostring(NodeId), target = tostring(ParentNodeId), name = tostring(DisplayName)
+        | join kind=fullouter (objects
+            | project source = tostring(NodeId), target = tostring(ParentNodeId), name = tostring(DisplayName)) on source
+            | project source = coalesce(source, source1), target = coalesce(target, target1), name = coalesce(name, name1);
+    let edges = nodes;
+    edges
+        | make-graph source --> target with nodes on source
+
+For best results, change the `Layout` option to `Grouped` and the `Lables` to `name`.
+
+<img src="Docs/stationgraph.png" alt="stationgraph" width="900" />
+
 
 ## Production Line Simulation
 
@@ -313,7 +344,7 @@ Add a new connection to your Azure Data Explorer instance deployed in this refer
 
 For best results, change the `Layout` option to `Grouped`.
 
-<img src="Docs/isa95graph.png" alt="dashboard" width="900" />
+<img src="Docs/isa95graph.png" alt="isa95graph" width="900" />
 
 Similarily, the full ISA-95 model graph automatically uploaded via UA Cloud Twin to Azure Data Explorer can be rendered in Kusto Explorer by executing the following query:
 
@@ -322,7 +353,7 @@ Similarily, the full ISA-95 model graph automatically uploaded via UA Cloud Twin
     edges
     | make-graph src --> dst with nodes on nodeId
 
-<img src="Docs/isa95modelgraph.png" alt="dashboard" width="900" />
+<img src="Docs/isa95modelgraph.png" alt="isa95modelgraph" width="900" />
 
 
 ## Using Azure Managed Grafana Service

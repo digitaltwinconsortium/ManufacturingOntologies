@@ -140,7 +140,7 @@ For example, to render the production line simulation Station OPC UA Server's In
 
     let uri='https://uacloudlibrary.opcfoundation.org/infomodel/download/1627266626';
     let headers=dynamic({'accept':'text/plain'});
-    let options=dynamic({'Authorization':'Basic bmhlYkBob3RtYWlsLmRlOjQ4eUouIUZYUFJKU0s0Ug=='});
+    let options=dynamic({'Authorization':'Basic <insert your cloud library credentials hash here>'});
     let variables = evaluate http_request(uri, headers, options)
         | project title = tostring(ResponseBody.['title']), contributor = tostring(ResponseBody.contributor.name), nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
         | mv-expand UAVariable = nodeset.UANodeSet.UAVariable

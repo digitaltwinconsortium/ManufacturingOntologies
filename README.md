@@ -329,7 +329,7 @@ This reference solution implements a Unified NameSapce (UNS), based on the OPC U
 Add a new connection to your Azure Data Explorer instance deployed in this reference solution and then run the following query in Kusto Explorer:
 
     let edges = opcua_metadata_lkv
-    | project source = NodeId, target = Workcell
+    | project source = DisplayName, target = Workcell
     | join kind=fullouter (opcua_metadata_lkv
         | project source = Workcell, target = Line) on source
         | join kind=fullouter (opcua_metadata_lkv
@@ -340,7 +340,7 @@ Add a new connection to your Azure Data Explorer instance deployed in this refer
                     | project source = Site, target = Enterprise) on source
                     | project source = coalesce(source, source1, source2, source3, source4), target = coalesce(target, target1, target2, target3, target4);
     let nodes = opcua_metadata_lkv;
-    edges | make-graph source --> target with nodes on NodeId
+    edges | make-graph source --> target with nodes on DisplayName
 
 For best results, change the `Layout` option to `Grouped`.
 

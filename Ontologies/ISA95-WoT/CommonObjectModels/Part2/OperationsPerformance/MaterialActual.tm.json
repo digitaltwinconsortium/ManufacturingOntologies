@@ -16,6 +16,13 @@
       "dtdl:description": "The related object(s) makes up part of this material actual as the whole"
     },
     {
+      "href": "dtmi:digitaltwins:isa95:MaterialActualProperty;1",
+      "rel": "dtdl:hasValuesOf",
+      "@type": "dtdl:Relationship",
+      "dtdl:displayName": "has values of",
+      "dtdl:description": "The material actual property(s) of this material actual"
+    },
+    {
       "href": "dtmi:digitaltwins:isa95:MaterialSpecificationProperty;1",
       "rel": "dtdl:hasValuesOf",
       "@type": "dtdl:Relationship",

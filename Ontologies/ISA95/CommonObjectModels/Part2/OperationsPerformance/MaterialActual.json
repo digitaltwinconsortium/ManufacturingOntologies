@@ -26,13 +26,6 @@
         },
         {
             "@type": "Relationship",
-            "name": "hasValuesOf",
-            "displayName": "has values of",
-            "description": "The material actual property(s) of this material actual",
-            "target": "dtmi:digitaltwins:isa95:MaterialSpecificationProperty;1"
-        },
-        {
-            "@type": "Relationship",
             "name": "correspondsToClass",
             "displayName": "Corresponds to",
             "description": "A cross-model association to element in the material model as explained in Clause 3.3.8. Identifies the associated material class or set of material classes of the specification for a specific process segment",

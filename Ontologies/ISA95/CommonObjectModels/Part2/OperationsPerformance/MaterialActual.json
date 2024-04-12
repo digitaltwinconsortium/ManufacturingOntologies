@@ -22,7 +22,7 @@
             "name": "hasValuesOf",
             "displayName": "has values of",
             "description": "The material actual property(s) of this material actual",
-            "target": "dtmi:digitaltwins:isa95:MaterialSpecificationProperty;1"
+            "target": "dtmi:digitaltwins:isa95:MaterialActualProperty;1"
         },
         {
             "@type": "Relationship",
@@ -90,7 +90,7 @@
             "comment": "Not part of the Standard Specs.",
             "target": "dtmi:digitaltwins:isa95:OperationalLocation;1",
             "maxMultiplicity": 1
-        },	
+        },
         {
             "@type": "Property",
             "name": "storageLocation",

@@ -1,1 +1,0 @@
-# opendigitaltwins-assetadminstrationshell metamodel

@@ -61,10 +61,10 @@
       "name": "[concat(parameters('resourcesName'), '-AppService')]",
       "location": "[resourceGroup().location]",
       "sku": {
-        "name": "P1v2",
-        "tier": "PremiumV2",
-        "size": "P1v2",
-        "family": "Pv2",
+        "name": "P0v3",
+        "tier": "Premium0V3",
+        "size": "P0v3",
+        "family": "Pv3",
         "capacity": 1
       },
       "kind": "linux",

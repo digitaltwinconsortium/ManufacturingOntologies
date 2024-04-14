@@ -80,6 +80,7 @@ ECHO Azure Tenant: !arg16!
 CALL az login -t !arg16!
 CALL az account set -s !arg15!
 CALL az extension add --name azure-iot-ops --allow-preview true
+CALL az extension add --name connectedk8s
 
 ECHO .
 ECHO Copying Publisher config files...

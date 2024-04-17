@@ -22,7 +22,7 @@ ISA95 / IEC 62264 is one of the ontologies leveraged by this solution. It is a s
 
 ## ADT Generation tool for ISA95
 
-<img src="docs/generator.png" width="900" />
+<img src="Docs/generator.png" width="900" />
 
 ### Overview
 
@@ -45,22 +45,22 @@ The tool makes use of the UA Cloud Twin also available from the Digital Twin Con
 
 1. Provide the URL of your ADT instance, then select `Test`, to validate the URL.
 
-<img src="docs/Picture1.png" width="900" />
+<img src="Docs/Picture1.png" width="900" />
 
 Note: Select `Save Config` to persist the URL of your ADT instance.
 
 1. Load the Excel file (use the isa95-test.xlsx provided with the tool to get started).
 
-<img src="docs/Picture2.png" width="900" />
+<img src="Docs/Picture2.png" width="900" />
 
 1. Before starting the graph generation, you must select the Excel worksheets you are going to use for ADT digital twins and relationships generation. In our case we will select `Physical Asset & Equipment` and `Relationships`.
 1. Select `Generate Graph` to process your Excel document. This will generate the digital twins and relationships in your ADT instance.
 
-<img src="docs/Picture3.png" width="900" />
+<img src="Docs/Picture3.png" width="900" />
 
 1. Open ADT Explorer for your ADT instance, you should see a digital twin graph similar to this:
 
-<img src="docs/Picture4.png" width="900" />
+<img src="Docs/Picture4.png" width="900" />
 
 ### Adding digital twins
 
@@ -97,7 +97,7 @@ There are different technical sheets to simplify data preparation:
 - In column H specifies the twin model (from the UI sheet)
 - The tool uses the 'x' information set in the `Components & Properties` sheet to apply conditional formatting from columns I to the end (depending on properties relevant for the models). If the cell is greyed-out, don't enter a value.
 
-<img src="docs/Picture5.png" width="900" />
+<img src="Docs/Picture5.png" width="900" />
 
 
 ## License

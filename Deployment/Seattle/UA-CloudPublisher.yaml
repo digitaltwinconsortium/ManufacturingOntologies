@@ -28,8 +28,6 @@ spec:
         image: ghcr.io/barnstee/ua-cloudpublisher:main
         imagePullPolicy: Always
         env:
-        - name: USE_KAFKA
-          value: "1"
         - name: STORAGE_TYPE
           value: "Azure"
         - name: STORAGE_CONNECTION_STRING

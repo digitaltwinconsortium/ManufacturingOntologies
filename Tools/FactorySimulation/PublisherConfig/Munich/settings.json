@@ -6,7 +6,7 @@
   "BrokerUsername": "$ConnectionString",
   "BrokerPassword": "[myeventhubsnamespaceprimarykeyconnectionstring]",
   "UseAltBrokerForMetadata": false,
-  "UseAltBrokerForReceivingUABinaryOverMQTT": false,
+  "UseAltBrokerForReceivingUAOverMQTT": false,
   "AltBrokerUrl": null,
   "AltBrokerPort": 8883,
   "AltBrokerUsername": null,

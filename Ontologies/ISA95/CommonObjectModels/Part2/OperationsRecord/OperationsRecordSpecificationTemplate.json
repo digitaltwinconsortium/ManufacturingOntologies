@@ -72,7 +72,7 @@
         },
         {
             "@type": "Property",
-            "name": "ationMultiplicity",
+            "name": "actionMultiplicity",
             "displayName": "Action multiplicity",
             "description": "The range of actions allowed to be represented in the operations record template occurrence.If no limit is explicitly specified, the unbounded keyword is specified. If no multiplicity entry is specified, this is equivalent to no constraint. EXAMPLE 3 {Min: 0, Max: Unbounded}",
             "comment": "Samples: {Min: 1, Max: 1}, Min:1, Max: Unbounded}",

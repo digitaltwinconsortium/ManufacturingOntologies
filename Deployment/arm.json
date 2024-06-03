@@ -194,7 +194,7 @@
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', concat(parameters('resourcesName'), '-AppService'))]",
         "siteConfig": {
           "numberOfWorkers": 1,
-          "linuxFxVersion": "DOCKER|ghcr.io/digitaltwinconsortium/ua-cloudaction:main",
+          "linuxFxVersion": "DOCKER|ghcr.io/opcfoundation/ua-cloudaction:main",
           "minTlsVersion": "1.2",
           "ftpsState": "FtpsOnly",
           "acrUseManagedIdentityCreds": false,

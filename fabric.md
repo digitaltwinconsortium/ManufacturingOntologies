@@ -98,16 +98,68 @@ Click on your workspace, select `Lineage view` to see the entire flow of OPC UA 
 
 Click on our KQL Database and select `Open KQL Database` followed by `Explore your data`. Delete the sample queries and enter the following query in the text box:
 
-         let _startTime = ago(1h);
-         let _endTime = now();
-         opcua_metadata_lkv
-         | where Name contains "assembly"
-         | where Name contains "munich"
-         | join kind=inner (opcua_telemetry
-             | where Name == "ActualCycleTime"
-             | where Timestamp > _startTime and Timestamp < _endTime
-         ) on DataSetWriterID
-         | extend NodeValue = todouble(Value)
-         | project Timestamp, NodeValue
-         | sort by Timestamp desc 
-         | render linechart 
+        let _startTime = ago(1h);
+        let _endTime = now();
+        opcua_metadata
+        | where Name contains "assembly"
+        | where Name contains "munich"
+        | join kind=inner (opcua_telemetry
+            | where Name == "Status"
+            | where Timestamp > _startTime and Timestamp < _endTime
+        ) on DataSetWriterID
+        | extend energy = todouble(Value)
+        | project Timestamp1, energy
+        | sort by Timestamp1 desc 
+        | render linechart
+
+
+## Useful Helper-Functions
+
+        .create-or-alter function QuerySpecificValue(stationName: string, productionLineName: string, valueToQuery: string, desiredValue: real) {
+        opcua_metadata_lkv
+        | where Name contains stationName
+        | where Name contains productionLineName
+        | join kind = inner(opcua_telemetry
+            | where Name == valueToQuery
+            | where Value == desiredValue
+            | where Timestamp > ago(5m)
+        ) on DataSetWriterID
+        | project Timestamp1
+        | sort by Timestamp1 desc
+        | take 1
+        }
+
+        .create-or-alter function QuerySpecificTime(stationName: string, productionLineName: string, valueToQuery: string, timeToQuery: datetime, idealCycleTime: timespan) {
+        opcua_metadata_lkv
+        | where Name contains stationName
+        | where Name contains productionLineName
+        | join kind = inner(opcua_telemetry
+            | where Name == valueToQuery
+            | where Timestamp > ago(5m)
+        ) on DataSetWriterID
+        | where around(Timestamp1, timeToQuery, idealCycleTime)
+        | sort by Timestamp1 desc
+        | project Value
+        | take 1
+        }
+
+        .create-or-alter function EnergyPerPart(productionLineName: string, idealCycleTime: timespan) {
+        // check if a new part was produced (last machine in the production line, i.e. packaging, is in state 2 ("done") with a passed QA)
+        // and get the part's serial number and energy consumption at that time
+        let timeLatestProductWasProduced = toscalar(QuerySpecificValue("packaging", productionLineName, "Status", "2"));
+        let serialNumber = toscalar(QuerySpecificTime("packaging", productionLineName, "ProductSerialNumber", timeLatestProductWasProduced, idealCycleTime));
+        //
+        let timePartWasProducedPackaging = toscalar(timeLatestProductWasProduced);
+        let energyPackaging = toscalar(QuerySpecificTime("packaging", productionLineName, "EnergyConsumption", timePartWasProducedPackaging, idealCycleTime));
+        //
+        // check each other machine for the time when the product with this serial number was in the machine and get its energy comsumption at that time
+        let timePartWasProducedTest = toscalar(QuerySpecificValue("test", productionLineName, "ProductSerialNumber", serialNumber));
+        let energyTest = toscalar(QuerySpecificTime("test", productionLineName, "EnergyConsumption", timePartWasProducedTest, idealCycleTime));
+        //
+        let timePartWasProducedAssembly = toscalar(QuerySpecificValue("assembly", productionLineName, "ProductSerialNumber", serialNumber));
+        let energyAssembly = toscalar(QuerySpecificTime("assembly", productionLineName, "EnergyConsumption", timePartWasProducedAssembly, idealCycleTime));
+        //
+        // calculate the total energy consumption for the product by summing up all the machines' energy consumptions (in kW), multiply by 1000 to get Watts and then multiply by the ideal cycle time (which is in seconds) divided by 3600 to get Wh
+        let totalenergy = (todouble(energyAssembly) + todouble(energyTest) + todouble(energyPackaging)) * 1000 * todouble(format_timespan(idealCycleTime, "s")) / 3600;
+        print serialNumber, timeLatestProductWasProduced, totalenergy
+        }

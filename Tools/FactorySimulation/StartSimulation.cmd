@@ -77,6 +77,8 @@ ECHO Storage Account name: !storagename!
 ECHO Azure Subscription: !arg15!
 ECHO Azure Tenant: !arg16!
 
+CALL az account clear
+CALL az config set core.enable_broker_on_windows=false
 CALL az login -t !arg16!
 CALL az account set -s !arg15!
 CALL az extension add --name azure-iot-ops --allow-preview true

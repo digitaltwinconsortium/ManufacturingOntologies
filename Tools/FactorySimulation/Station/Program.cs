@@ -116,7 +116,7 @@ namespace Station.Simulation
                 ApplicationInstance.MessageDlg = new ApplicationMessageDlg();
                 ApplicationInstance application = new ApplicationInstance();
                 application.ApplicationName = "Manufacturing Execution System";
-                application.ApplicationType = ApplicationType.Client;
+                application.ApplicationType = ApplicationType.ClientAndServer;
                 application.ConfigSectionName = "Opc.Ua.MES";
 
                 LoadCertsFromCloud("MES." + Environment.GetEnvironmentVariable("ProductionLineName"));
@@ -148,6 +148,10 @@ namespace Station.Simulation
                 application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
                 application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(OPCUAServerCertificateValidationCallback);
                 application.ApplicationConfiguration.CertificateValidator.Update(application.ApplicationConfiguration.SecurityConfiguration).GetAwaiter().GetResult();
+
+                // start the server.
+                application.Start(new FactoryStationServer()).GetAwaiter().GetResult();
+                Console.WriteLine("Server started.");
 
                 // replace the production line name in the list of endpoints to connect to.
                 string endpointsFilePath = Path.Combine(Directory.GetCurrentDirectory(), application.ConfigSectionName + ".Endpoints.xml");

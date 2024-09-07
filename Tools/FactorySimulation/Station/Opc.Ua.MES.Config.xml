@@ -15,7 +15,7 @@
   <ProductUri>http://opcfoundation.org/UA/MES/</ProductUri>
 
   <!-- Indicates the type of application (Client, Server or ClientServer). -->
-  <ApplicationType>Client_1</ApplicationType>
+  <ApplicationType>ClientAndServer_2</ApplicationType>
 
   <SecurityConfiguration>
     <ApplicationCertificate>
@@ -88,6 +88,68 @@
     <SecurityTokenLifetime>3600000</SecurityTokenLifetime>
 
   </TransportQuotas>
+
+  <ServerConfiguration>
+    <BaseAddresses>
+      <ua:String>opc.tcp://localhost:4840</ua:String>
+    </BaseAddresses>
+
+    <SecurityPolicies>
+      <ServerSecurityPolicy>
+        <SecurityMode>SignAndEncrypt_3</SecurityMode>
+        <SecurityPolicyUri></SecurityPolicyUri>
+      </ServerSecurityPolicy>
+      <ServerSecurityPolicy>
+        <SecurityMode>Sign_2</SecurityMode>
+        <SecurityPolicyUri></SecurityPolicyUri>
+      </ServerSecurityPolicy>
+    </SecurityPolicies>
+
+    <MinRequestThreadCount>5</MinRequestThreadCount>
+    <MaxRequestThreadCount>100</MaxRequestThreadCount>
+    <MaxQueuedRequestCount>2000</MaxQueuedRequestCount>
+
+    <UserTokenPolicies>
+      <!-- Allows anonymous users -->
+      <ua:UserTokenPolicy>
+        <ua:TokenType>Anonymous_0</ua:TokenType>
+        <ua:SecurityPolicyUri>http://opcfoundation.org/UA/SecurityPolicy#None</ua:SecurityPolicyUri>
+      </ua:UserTokenPolicy>
+
+      <!-- Allows username/password -->
+      <ua:UserTokenPolicy>
+        <ua:TokenType>UserName_1</ua:TokenType>
+        <!-- passwords must be encrypted - this specifies what algorithm to use -->
+        <ua:SecurityPolicyUri>http://opcfoundation.org/UA/SecurityPolicy#Basic256</ua:SecurityPolicyUri>
+      </ua:UserTokenPolicy>
+
+      <!-- Allows user certificates -->
+      <ua:UserTokenPolicy>
+        <ua:TokenType>Certificate_2</ua:TokenType>
+        <!-- certificate possession must be proven with a digital signature - this specifies what algorithm to use -->
+        <ua:SecurityPolicyUri>http://opcfoundation.org/UA/SecurityPolicy#Basic256</ua:SecurityPolicyUri>
+      </ua:UserTokenPolicy>
+    </UserTokenPolicies>
+    <DiagnosticsEnabled>true</DiagnosticsEnabled>
+    <MaxSessionCount>100</MaxSessionCount>
+    <MinSessionTimeout>10000</MinSessionTimeout>
+    <MaxSessionTimeout>3600000</MaxSessionTimeout>
+    <MaxBrowseContinuationPoints>10</MaxBrowseContinuationPoints>
+    <MaxQueryContinuationPoints>10</MaxQueryContinuationPoints>
+    <MaxHistoryContinuationPoints>100</MaxHistoryContinuationPoints>
+    <MaxRequestAge>1800000</MaxRequestAge>
+    <MinPublishingInterval>100</MinPublishingInterval>
+    <MaxPublishingInterval>3600000</MaxPublishingInterval>
+    <PublishingResolution>50</PublishingResolution>
+    <MaxSubscriptionLifetime>3600000</MaxSubscriptionLifetime>
+    <MaxMessageQueueSize>100</MaxMessageQueueSize>
+    <MaxNotificationQueueSize>100</MaxNotificationQueueSize>
+    <MaxNotificationsPerPublish>1000</MaxNotificationsPerPublish>
+    <MinMetadataSamplingInterval>1000</MinMetadataSamplingInterval>
+    <AvailableSamplingRates />
+    <MaxRegistrationInterval>0</MaxRegistrationInterval>
+    <NodeManagerSaveFile>Opc.Ua.Server.nodes.xml</NodeManagerSaveFile>
+  </ServerConfiguration>
 
   <!-- This element is only required for Client and ClientServer applications -->
   <ClientConfiguration>

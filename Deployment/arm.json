@@ -378,17 +378,10 @@
               "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('resourcesName'), '-IF'))]"
             }
           ]
-        },
-        "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": true,
-            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', concat(parameters('resourcesName'), 'storage'))).primaryEndpoints.blob]"
-          }
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('resourcesName'), '-IF'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts', concat(parameters('resourcesName'), 'storage'))]"
+        "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('resourcesName'), '-IF'))]"
       ]
     },
     {

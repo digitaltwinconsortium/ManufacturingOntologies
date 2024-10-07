@@ -8,9 +8,6 @@ $ErrorActionPreference = "SilentlyContinue"
 # Install AZ CLI and AKS-EE
 msiexec /i https://aka.ms/installazurecliwindows /passive
 
-# Install WSL
-wsl --install
-
 # Download and expand Manufacturing Ontologies repo
 invoke-webrequest -Uri https://github.com/digitaltwinconsortium/ManufacturingOntologies/archive/refs/heads/main.zip -OutFile C:\Manufacturing.zip
 expand-archive -Path C:\Manufacturing.zip -DestinationPath C:\

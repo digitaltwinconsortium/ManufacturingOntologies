@@ -30,10 +30,6 @@ spec:
         env:
         - name: APPNAME
           value: "commander.munich"
-        - name: STORAGE_CONNECTION_STRING
-          value: "[mystorageaccountkey1connectionstring]"
-        - name: STORAGE_CONTAINER_NAME
-          value: "munich"
         - name: USE_KAFKA
           value: "1"
         - name: BROKERNAME
@@ -48,3 +44,7 @@ spec:
           value: "$ConnectionString"
         - name: PASSWORD
           value: "[myeventhubsnamespaceprimarykeyconnectionstring]"
+        - name: OPCUA_USERNAME
+          value: "myUsername"
+        - name: OPCUA_PASSWORD
+          value: "myPassword"

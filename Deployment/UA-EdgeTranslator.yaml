@@ -27,6 +27,11 @@ spec:
       - name: ua-edgetranslator
         image: ghcr.io/opcfoundation/ua-edgetranslator:main
         imagePullPolicy: Always
+        env:
+        - name: OPCUA_USERNAME
+          value: "myUsername"
+        - name: OPCUA_PASSWORD
+          value: "myPassword"
         ports:
         - containerPort: 4840
 ---

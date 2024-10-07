@@ -28,12 +28,10 @@ spec:
         image: ghcr.io/barnstee/ua-cloudpublisher:main
         imagePullPolicy: Always
         env:
-        - name: STORAGE_TYPE
-          value: "Azure"
-        - name: STORAGE_CONNECTION_STRING
-          value: "DefaultEndpointsProtocol=https;AccountName=[yourstorageaccountname];AccountKey=[key];EndpointSuffix=core.windows.net"
-        - name: STORAGE_CONTAINER_NAME
-          value: "ua-cloudpublisher-namespace"
+        - name: OPCUA_USERNAME
+          value: "myUsername"
+        - name: OPCUA_PASSWORD
+          value: "myPassword"
         ports:
         - containerPort: 80
 ---

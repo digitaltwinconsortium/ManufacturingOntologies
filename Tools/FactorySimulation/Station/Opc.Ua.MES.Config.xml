@@ -122,14 +122,8 @@
         <!-- passwords must be encrypted - this specifies what algorithm to use -->
         <ua:SecurityPolicyUri>http://opcfoundation.org/UA/SecurityPolicy#Basic256</ua:SecurityPolicyUri>
       </ua:UserTokenPolicy>
-
-      <!-- Allows user certificates -->
-      <ua:UserTokenPolicy>
-        <ua:TokenType>Certificate_2</ua:TokenType>
-        <!-- certificate possession must be proven with a digital signature - this specifies what algorithm to use -->
-        <ua:SecurityPolicyUri>http://opcfoundation.org/UA/SecurityPolicy#Basic256</ua:SecurityPolicyUri>
-      </ua:UserTokenPolicy>
     </UserTokenPolicies>
+
     <DiagnosticsEnabled>true</DiagnosticsEnabled>
     <MaxSessionCount>100</MaxSessionCount>
     <MinSessionTimeout>10000</MinSessionTimeout>

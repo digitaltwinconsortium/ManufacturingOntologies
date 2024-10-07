@@ -32,7 +32,7 @@ spec:
           value: "MES"
         - name: ProductionLineName
           value: "munich"
-        - name: STORAGE_CONNECTION_STRING
-          value: "[mystorageaccountkey1connectionstring]"
-        - name: STORAGE_CONTAINER_NAME
-          value: "munich"
+        - name: OPCUA_USERNAME
+          value: "myUsername"
+        - name: OPCUA_PASSWORD
+          value: "myPassword"

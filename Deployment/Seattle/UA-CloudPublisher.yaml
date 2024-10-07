@@ -28,14 +28,19 @@ spec:
         image: ghcr.io/barnstee/ua-cloudpublisher:main
         imagePullPolicy: Always
         env:
-        - name: STORAGE_TYPE
-          value: "Azure"
-        - name: STORAGE_CONNECTION_STRING
-          value: "[mystorageaccountkey1connectionstring]"
-        - name: STORAGE_CONTAINER_NAME
-          value: "seattle"
+        - name: OPCUA_USERNAME
+          value: "myUsername"
+        - name: OPCUA_PASSWORD
+          value: "myPassword"
         ports:
         - containerPort: 80
+        volumeMounts:
+        - name: "settings"
+          mountPath: "/app/settings"
+      volumes:
+        - name: "settings"
+          hostPath:
+            path: "/mnt/c/ManufacturingOntologies-main/Tools/FactorySimulation/PublisherConfig/Seattle"
 ---
 apiVersion: v1
 kind: Service

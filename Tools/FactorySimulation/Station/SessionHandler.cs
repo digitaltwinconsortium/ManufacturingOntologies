@@ -25,13 +25,16 @@ namespace Mes.Simulation
                 return true;
             }
 
+            string configuredUsername = Environment.GetEnvironmentVariable("OPCUA_USERNAME");
+            string configuredPassword = Environment.GetEnvironmentVariable("OPCUA_PASSWORD");
+
             Session = Session.Create(
                 appConfiguration,
                 endpoint,
                 true,
                 appConfiguration.ApplicationName,
                 c_connectTimeout,
-                new UserIdentity(new AnonymousIdentityToken()),
+                new UserIdentity(configuredUsername, configuredPassword),
                 null).Result;
 
             if (Session != null)

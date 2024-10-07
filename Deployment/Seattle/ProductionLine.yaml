@@ -36,10 +36,10 @@ spec:
           value: "200"
         - name: CycleTime
           value: "10"
-        - name: STORAGE_CONNECTION_STRING
-          value: "[mystorageaccountkey1connectionstring]"
-        - name: STORAGE_CONTAINER_NAME
-          value: "seattle"
+        - name: OPCUA_USERNAME
+          value: "myUsername"
+        - name: OPCUA_PASSWORD
+          value: "myPassword"
         ports:
         - containerPort: 4840
           name: opcua
@@ -86,10 +86,10 @@ spec:
           value: "100"
         - name: CycleTime
           value: "10"
-        - name: STORAGE_CONNECTION_STRING
-          value: "[mystorageaccountkey1connectionstring]"
-        - name: STORAGE_CONTAINER_NAME
-          value: "seattle"
+        - name: OPCUA_USERNAME
+          value: "myUsername"
+        - name: OPCUA_PASSWORD
+          value: "myPassword"
         ports:
         - containerPort: 4840
           name: opcua
@@ -136,10 +136,10 @@ spec:
           value: "100"
         - name: CycleTime
           value: "10"
-        - name: STORAGE_CONNECTION_STRING
-          value: "[mystorageaccountkey1connectionstring]"
-        - name: STORAGE_CONTAINER_NAME
-          value: "seattle"
+        - name: OPCUA_USERNAME
+          value: "myUsername"
+        - name: OPCUA_PASSWORD
+          value: "myPassword"
         ports:
         - containerPort: 4840
           name: opcua

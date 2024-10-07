@@ -4,8 +4,8 @@
   xmlns="http://opcfoundation.org/UA/SDK/Configuration.xsd"
   schemaLocation="./Schema/ApplicationConfiguration.xsd"
 >
-  <ApplicationName>UndefinedStationName</ApplicationName>
-  <ApplicationUri>urn:UndefinedStationUri</ApplicationUri>
+  <ApplicationName>assembly.munich</ApplicationName>
+  <ApplicationUri>urn:assembly.line1.building1.munich.contoso</ApplicationUri>
   <ProductUri>http://opcfoundation.org/UA/Station</ProductUri>
   <ApplicationType>Server_0</ApplicationType>
 
@@ -13,7 +13,7 @@
     <ApplicationCertificate>
       <StoreType>Directory</StoreType>
       <StorePath>./pki/own</StorePath>
-      <SubjectName>CN=UndefinedStationName</SubjectName>
+      <SubjectName>CN=assembly.munich</SubjectName>
     </ApplicationCertificate>
     <TrustedIssuerCertificates>
       <StoreType>Directory</StoreType>
@@ -64,10 +64,6 @@
         <SecurityMode>SignAndEncrypt_3</SecurityMode>
         <SecurityPolicyUri></SecurityPolicyUri>
       </ServerSecurityPolicy>
-      <ServerSecurityPolicy>
-        <SecurityMode>Sign_2</SecurityMode>
-        <SecurityPolicyUri></SecurityPolicyUri>
-      </ServerSecurityPolicy>
     </SecurityPolicies>
 
     <MinRequestThreadCount>5</MinRequestThreadCount>
@@ -87,14 +83,8 @@
         <!-- passwords must be encrypted - this specifies what algorithm to use -->
         <ua:SecurityPolicyUri>http://opcfoundation.org/UA/SecurityPolicy#Basic256</ua:SecurityPolicyUri>
       </ua:UserTokenPolicy>
-
-      <!-- Allows user certificates -->
-      <ua:UserTokenPolicy>
-        <ua:TokenType>Certificate_2</ua:TokenType>
-        <!-- certificate possession must be proven with a digital signature - this specifies what algorithm to use -->
-        <ua:SecurityPolicyUri>http://opcfoundation.org/UA/SecurityPolicy#Basic256</ua:SecurityPolicyUri>
-      </ua:UserTokenPolicy>
     </UserTokenPolicies>
+
     <DiagnosticsEnabled>true</DiagnosticsEnabled>
     <MaxSessionCount>100</MaxSessionCount>
     <MinSessionTimeout>10000</MinSessionTimeout>

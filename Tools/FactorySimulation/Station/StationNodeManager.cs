@@ -8,6 +8,7 @@ namespace Station.Simulation
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
+    using System.Linq;
     using System.Threading;
 
     public enum StationStatus : int
@@ -63,8 +64,11 @@ namespace Station.Simulation
         {
             SystemContext.NodeIdFactory = this;
 
-            List<string> namespaceUris = new List<string>();
-            namespaceUris.Add("http://opcfoundation.org/UA/Station/");
+            List<string> namespaceUris = new()
+            {
+                "http://opcfoundation.org/UA/Station/"
+            };
+
             NamespaceUris = namespaceUris;
 
             m_namespaceIndex = Server.NamespaceUris.GetIndexOrAppend(namespaceUris[0]);
@@ -77,20 +81,21 @@ namespace Station.Simulation
         {
             return new NodeId(Utils.IncrementIdentifier(ref m_lastUsedId), m_namespaceIndex);
         }
-         
+
         public override void CreateAddressSpace(IDictionary<NodeId, IList<IReference>> externalReferences)
         {
             lock (Lock)
             {
-                IList<IReference> references = null;
-                if (!externalReferences.TryGetValue(ObjectIds.ObjectsFolder, out references))
+                IList<IReference> objectsFolderReferences = null;
+                if (!externalReferences.TryGetValue(ObjectIds.ObjectsFolder, out objectsFolderReferences))
                 {
-                    externalReferences[ObjectIds.ObjectsFolder] = references = new List<IReference>();
+                    externalReferences[ObjectIds.ObjectsFolder] = objectsFolderReferences = new List<IReference>();
                 }
 
                 ImportNodeset2Xml(externalReferences, "Station.NodeSet2.xml");
-                        
+
                 AddReverseReferences(externalReferences);
+                base.CreateAddressSpace(externalReferences);
             }
         }
 
@@ -212,8 +217,10 @@ namespace Station.Simulation
                 {
                     m_StatusID = variableState.NodeId;
                 }
+
+                variableState.OnReadValue = OnReadValue;
             }
-                       
+
             return predefinedNode;
         }
 
@@ -267,7 +274,7 @@ namespace Station.Simulation
         {
             m_faultClock.Stop();
             m_status = StationStatus.Ready;
-            
+
             UpdateNodeValues();
 
             return ServiceResult.Good;
@@ -280,6 +287,41 @@ namespace Station.Simulation
             UpdateNodeValues();
 
             return ServiceResult.Good;
+        }
+
+        private ServiceResult OnReadValue(ISystemContext context, NodeState node, NumericRange indexRange, QualifiedName dataEncoding, ref object value, ref StatusCode statusCode, ref DateTime timestamp)
+        {
+            bool provisioningMode = (Directory.EnumerateFiles(Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs")).Count() == 0);
+            if (provisioningMode)
+            {
+                return new ServiceResult(StatusCodes.BadNotReadable, "Access to Station is limited while in provisioning mode!");
+            }
+
+            BaseDataVariableState variableState = node as BaseDataVariableState;
+            if (variableState != null)
+            {
+                switch (node.DisplayName.Text)
+                {
+                    case "NumberOfManufacturedProducts":
+                    case "NumberOfDiscardedProducts":
+                    case "ProductSerialNumber":
+                    case "ActualCycleTime":
+                    case "EnergyConsumption":
+                    case "FaultyTime":
+                    case "IdealCycleTime":
+                    case "OverallRunningTime":
+                    case "Pressure":
+                    case "Status":
+                        value = variableState.Value;
+                        timestamp = variableState.Timestamp;
+                        statusCode = StatusCodes.Good;
+                        return ServiceResult.Good;
+
+                    default: return new ServiceResult(StatusCodes.BadNotReadable, "Node not found!");
+                }
+            }
+
+            return new ServiceResult(StatusCodes.BadNotReadable, "Node not found!");
         }
 
         private void UpdateNodeValues()
@@ -373,7 +415,7 @@ namespace Station.Simulation
                 variableState.Timestamp = DateTime.UtcNow;
                 variableState.ClearChangeMasks(SystemContext, false);
             }
-                        
+
             if (!m_faultClock.IsRunning)
             {
                 m_faultyTime = (ulong)m_faultClock.ElapsedMilliseconds;
@@ -409,7 +451,7 @@ namespace Station.Simulation
 
             double idealCycleTime = m_idealCycleTime;
 
-            // The power consumption of the station increases exponentially if the ideal cycle time is reduced below the default ideal cycle time 
+            // The power consumption of the station increases exponentially if the ideal cycle time is reduced below the default ideal cycle time
             double cycleTimeModifier = (1 / Math.E) * (1 / Math.Exp(-(double)m_idealCycleTimeDefault / idealCycleTime));
             double powerConsumption = Program.PowerConsumption * cycleTimeModifier;
 
@@ -436,7 +478,7 @@ namespace Station.Simulation
             //  z = (x - mean) / stdDev
             //
             // then with z value you can retrieve the probability value P(X>x) from the standard
-            // normal distribution table 
+            // normal distribution table
 
             // these are uniform(0,1) random doubles
             double u1 = rand.NextDouble();

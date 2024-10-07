@@ -10,8 +10,8 @@
         "StationURI": "opc.tcp://assembly.munich/",
         "PowerConsumption": "200",
         "CycleTime": "6",
-        "STORAGE_CONTAINER_NAME": "ontologies",
-        "STORAGE_CONNECTION_STRING": "DefaultEndpointsProtocol=https;AccountName=[yourstorageaccountname];AccountKey=[key];EndpointSuffix=core.windows.net"
+        "OPCUA_USERNAME": "myUsername",
+        "OPCUA_PASSWORD": "myPassword"
       }
     }
   }

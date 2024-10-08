@@ -5,11 +5,11 @@
   schemaLocation="./Schema/ApplicationConfiguration.xsd"
 >
   <!-- A human readable but not necessarily unique name for the application instance -->
-  <ApplicationName>MES</ApplicationName>
+  <ApplicationName>UndefinedMESName</ApplicationName>
 
   <!-- A globally unique identifier for the application instance.
        This is overridden with the value contained in the application certificate. -->
-  <ApplicationUri>urn:MES</ApplicationUri>
+  <ApplicationUri>urn:UndefinedMESUri</ApplicationUri>
 
   <!-- A globally unique URI for the product (usually assigned by the product vendor) -->
   <ProductUri>http://opcfoundation.org/UA/MES/</ProductUri>

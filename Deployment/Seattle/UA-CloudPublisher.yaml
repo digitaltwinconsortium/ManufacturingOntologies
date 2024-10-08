@@ -40,7 +40,7 @@ spec:
       volumes:
         - name: "settings"
           hostPath:
-            path: "/mnt/c/ManufacturingOntologies-main/Tools/FactorySimulation/PublisherConfig/Seattle"
+            path: "/mnt/c/K3s/PublisherConfig/Seattle"
 ---
 apiVersion: v1
 kind: Service

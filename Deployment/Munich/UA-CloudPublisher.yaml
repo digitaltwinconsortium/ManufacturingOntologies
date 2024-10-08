@@ -40,8 +40,7 @@ spec:
       volumes:
         - name: "settings"
           hostPath:
-            path: "/mnt/c/ManufacturingOntologies-main/Tools/FactorySimulation/PublisherConfig/Munich"
-
+            path: "/mnt/c/K3s/PublisherConfig/Munich"
 ---
 apiVersion: v1
 kind: Service

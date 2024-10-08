@@ -30,6 +30,8 @@ spec:
         env:
         - name: StationType
           value: "mes"
+        - name: StationURI
+          value: "opc.tcp://mes.seattle/"
         - name: ProductionLineName
           value: "seattle"
         - name: OPCUA_USERNAME

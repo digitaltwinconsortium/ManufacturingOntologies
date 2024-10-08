@@ -4,8 +4,8 @@
   xmlns="http://opcfoundation.org/UA/SDK/Configuration.xsd"
   schemaLocation="./Schema/ApplicationConfiguration.xsd"
 >
-  <ApplicationName>assembly.munich</ApplicationName>
-  <ApplicationUri>urn:assembly.line1.building1.munich.contoso</ApplicationUri>
+  <ApplicationName>UndefinedStationName</ApplicationName>
+  <ApplicationUri>urn:UndefinedStationUri</ApplicationUri>
   <ProductUri>http://opcfoundation.org/UA/Station</ProductUri>
   <ApplicationType>Server_0</ApplicationType>
 
@@ -13,7 +13,7 @@
     <ApplicationCertificate>
       <StoreType>Directory</StoreType>
       <StorePath>./pki/own</StorePath>
-      <SubjectName>CN=assembly.munich</SubjectName>
+      <SubjectName>CN=UndefinedStationName</SubjectName>
     </ApplicationCertificate>
     <TrustedIssuerCertificates>
       <StoreType>Directory</StoreType>

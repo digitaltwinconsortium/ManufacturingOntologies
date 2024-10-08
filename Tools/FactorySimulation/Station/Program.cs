@@ -114,13 +114,18 @@ namespace Station.Simulation
 
                 ApplicationInstance.MessageDlg = new ApplicationMessageDlg();
                 ApplicationInstance application = new ApplicationInstance();
-                application.ApplicationName = "Manufacturing Execution System";
-                application.ApplicationType = ApplicationType.ClientAndServer;
+
+                Uri stationUri = new Uri(Environment.GetEnvironmentVariable("StationURI"));
+
+                application.ApplicationName = stationUri.DnsSafeHost.ToLowerInvariant();
                 application.ConfigSectionName = "Opc.Ua.MES";
+                application.ApplicationType = ApplicationType.ClientAndServer;
+
+                string applicationUri = application.ApplicationName.Insert(application.ApplicationName.IndexOf("."), ".line1.building1") + ".contoso";
 
                 // replace the certificate subject name in the configuration
                 string configFilePath = Path.Combine(Directory.GetCurrentDirectory(), application.ConfigSectionName + ".Config.xml");
-                string configFileContent = File.ReadAllText(configFilePath).Replace("UndefinedMESName", "MES." + Environment.GetEnvironmentVariable("ProductionLineName"));
+                string configFileContent = File.ReadAllText(configFilePath).Replace("UndefinedStationName", application.ApplicationName).Replace("UndefinedStationUri", applicationUri);
                 File.WriteAllText(configFilePath, configFileContent);
 
                 // load the application configuration

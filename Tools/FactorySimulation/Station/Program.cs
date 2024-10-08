@@ -390,7 +390,21 @@ namespace Station.Simulation
                 Console.WriteLine("<<Assembly line reset!>>");
 
                 // reset assembly line
-                m_sessionAssembly.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
+                bool provisioningMode = true;
+                while (provisioningMode)
+                {
+                    try
+                    {
+                        m_sessionAssembly.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
+                        provisioningMode = false;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Assembly line is still in provisioning mode: " + ex.Message);
+                        Thread.Sleep(5000);
+                    }
+                }
+
                 m_sessionTest.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
                 m_sessionPackaging.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
 
@@ -405,7 +419,6 @@ namespace Station.Simulation
 
                 // reset communication timeout
                 m_lastActivity = DateTime.UtcNow;
-
             }
         }
 

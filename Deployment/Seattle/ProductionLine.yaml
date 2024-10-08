@@ -38,6 +38,21 @@ spec:
           value: "myUsername"
         - name: OPCUA_PASSWORD
           value: "myPassword"
+        ports:
+        - containerPort: 4840
+          name: opcua
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mes
+  namespace: seattle
+spec:
+  ports:
+  - targetPort: 4840
+    port: 4840
+  selector:
+    app: mes
 ---
 apiVersion: apps/v1
 kind: Deployment

@@ -75,7 +75,7 @@ namespace Station.Simulation
                     throw new ArgumentException("You must specify the StationType environment variable!");
                 }
 
-                if (Environment.GetEnvironmentVariable("StationType") == "MES")
+                if (Environment.GetEnvironmentVariable("StationType") == "mes")
                 {
                     MES();
                 }

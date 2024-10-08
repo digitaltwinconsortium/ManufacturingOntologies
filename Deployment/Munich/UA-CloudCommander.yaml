@@ -33,7 +33,7 @@ spec:
         - name: USE_KAFKA
           value: "1"
         - name: BROKERNAME
-          value: "[myeventhubsnamespace].servicebus.windows.net"
+          value: "myeventhubsnamespace.servicebus.windows.net"
         - name: CLIENTNAME
           value: "commander.munich"
         - name: TOPIC
@@ -43,7 +43,7 @@ spec:
         - name: USERNAME
           value: "$ConnectionString"
         - name: PASSWORD
-          value: "[myeventhubsnamespaceprimarykeyconnectionstring]"
+          value: "myeventhubsnamespaceprimarykeyconnectionstring"
         - name: OPCUA_USERNAME
           value: "myUsername"
         - name: OPCUA_PASSWORD

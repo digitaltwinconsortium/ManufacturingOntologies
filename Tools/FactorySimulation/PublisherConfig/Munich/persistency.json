@@ -1,5 +1,33 @@
 [
   {
+    "EndpointUrl": "opc.tcp://mes.munich/",
+    "OpcNodes": [
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station-MES/;s=Morning",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station-MES/;s=Afternoon",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      },
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/Station-MES/;s=Night",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      }
+    ],
+    "OpcEvents": [],
+    "OpcAuthenticationMode": "Anonymous"
+  },
+  {
     "EndpointUrl": "opc.tcp://assembly.munich/",
     "OpcNodes": [
       {

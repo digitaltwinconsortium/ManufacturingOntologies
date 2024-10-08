@@ -9,6 +9,37 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: mes
+  namespace: munich
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mes
+  template:
+    metadata:
+      labels:
+        app: mes
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: mes
+        image: ghcr.io/digitaltwinconsortium/manufacturingontologies:main
+        imagePullPolicy: Always
+        env:
+        - name: StationType
+          value: "mes"
+        - name: ProductionLineName
+          value: "munich"
+        - name: OPCUA_USERNAME
+          value: "myUsername"
+        - name: OPCUA_PASSWORD
+          value: "myPassword"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: assembly
   namespace: munich
 spec:

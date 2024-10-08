@@ -34,6 +34,3 @@ If (-NOT (Test-Path $RegistryPath)) {
 New-ItemProperty -Path $RegistryPath -Name $Name -Value $Value -PropertyType DWORD -Force
 
 Stop-Transcript
-
-# Restart for WSL to become operational
-Restart-Computer

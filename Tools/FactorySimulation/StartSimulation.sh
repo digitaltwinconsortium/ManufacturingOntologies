@@ -52,7 +52,7 @@ cd /mnt/c/K3s/Deployment/Munich
 kubectl apply -f ProductionLine.yaml
 
 echo Waiting for production lines to be started, please be patient...
-sleep 20
+sleep 30
 
 echo Starting UA-CloudPublisher...
 kubectl apply -f UA-CloudPublisher.yaml
@@ -70,7 +70,7 @@ cd /mnt/c/K3s/Deployment/Seattle
 kubectl apply -f ProductionLine.yaml
 
 echo Waiting for production lines to be started, please be patient...
-sleep 20
+sleep 30
 
 echo Starting UA-CloudPublisher...
 kubectl apply -f UA-CloudPublisher.yaml

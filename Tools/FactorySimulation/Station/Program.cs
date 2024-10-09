@@ -405,7 +405,7 @@ namespace Station.Simulation
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine("Assembly line is still in provisioning mode: " + ex.Message + "Retrying...");
+                        Console.WriteLine("Assembly line is still in provisioning mode: " + ex.Message + ". Retrying...");
                         Thread.Sleep(5000);
                     }
                 }

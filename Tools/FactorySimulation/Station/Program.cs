@@ -390,26 +390,26 @@ namespace Station.Simulation
                 Console.WriteLine("<<Assembly line reset!>>");
 
                 // reset assembly line
+                 m_sessionAssembly.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
+                m_sessionTest.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
+                m_sessionPackaging.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
+
+                // read assembly line status
                 bool provisioningMode = true;
                 while (provisioningMode)
                 {
                     try
                     {
-                        m_sessionAssembly.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
+                        m_statusAssembly = (StationStatus)m_sessionAssembly.Session.ReadValue(m_station.StatusNode).Value;
                         provisioningMode = false;
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine("Assembly line is still in provisioning mode: " + ex.Message);
+                        Console.WriteLine("Assembly line is still in provisioning mode: " + ex.Message + "Retrying...");
                         Thread.Sleep(5000);
                     }
                 }
 
-                m_sessionTest.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
-                m_sessionPackaging.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
-
-                // update status
-                m_statusAssembly = (StationStatus)m_sessionAssembly.Session.ReadValue(m_station.StatusNode).Value;
                 m_statusTest = (StationStatus)m_sessionTest.Session.ReadValue(m_station.StatusNode).Value;
                 m_statusPackaging = (StationStatus)m_sessionPackaging.Session.ReadValue(m_station.StatusNode).Value;
 

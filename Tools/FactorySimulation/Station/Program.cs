@@ -401,6 +401,8 @@ namespace Station.Simulation
                     try
                     {
                         m_statusAssembly = (StationStatus)m_sessionAssembly.Session.ReadValue(m_station.StatusNode).Value;
+                        m_statusTest = (StationStatus)m_sessionTest.Session.ReadValue(m_station.StatusNode).Value;
+                        m_statusPackaging = (StationStatus)m_sessionPackaging.Session.ReadValue(m_station.StatusNode).Value;
                         provisioningMode = false;
                     }
                     catch (Exception ex)
@@ -409,9 +411,6 @@ namespace Station.Simulation
                         Thread.Sleep(5000);
                     }
                 }
-
-                m_statusTest = (StationStatus)m_sessionTest.Session.ReadValue(m_station.StatusNode).Value;
-                m_statusPackaging = (StationStatus)m_sessionPackaging.Session.ReadValue(m_station.StatusNode).Value;
 
                 Console.WriteLine("#{0} Assemble ", m_serialNumber[c_Assembly]);
                 // start assembly

@@ -1,5 +1,19 @@
 [
   {
+    "EndpointUrl": "opc.tcp://ua-cloudcommander.seattle/",
+    "OpcNodes": [
+      {
+        "Id": "nsu=http://opcfoundation.org/UA/;i=2257",
+        "OpcSamplingInterval": 500,
+        "OpcPublishingInterval": 1000,
+        "HeartbeatInterval": 0,
+        "SkipFirst": false
+      }
+    ],
+    "OpcEvents": [],
+    "OpcAuthenticationMode": "Anonymous"
+  },
+  {
     "EndpointUrl": "opc.tcp://mes.seattle/",
     "OpcNodes": [
       {

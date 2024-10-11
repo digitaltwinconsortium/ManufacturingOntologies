@@ -35,19 +35,15 @@ sed -i "s|myeventhubsnamespaceprimarykeyconnectionstring|$connectionstring|g" se
 sed -i "s|myeventhubsnamespace|$name|g" settings.json
 
 cd /mnt/c/K3s/Deployment/Munich
-sed -i "s|myeventhubsnamespaceprimarykeyconnectionstring|$connectionstring|g" UA-CloudCommander.yaml
-sed -i "s|myeventhubsnamespace|$name|g" UA-CloudCommander.yaml
+sed -i "s|myeventhubsnamespaceprimarykeyconnectionstring|$connectionstring|g" ProductionLine.yaml
+sed -i "s|myeventhubsnamespace|$name|g" ProductionLine.yaml
 
 cd /mnt/c/K3s/Deployment/Seattle
-sed -i "s|myeventhubsnamespaceprimarykeyconnectionstring|$connectionstring|g" UA-CloudCommander.yaml
-sed -i "s|myeventhubsnamespace|$name|g" UA-CloudCommander.yaml
+sed -i "s|myeventhubsnamespaceprimarykeyconnectionstring|$connectionstring|g" ProductionLine.yaml
+sed -i "s|myeventhubsnamespace|$name|g" ProductionLine.yaml
 
 echo .
 echo Starting Munich production line...
-echo ==================================
-
-echo .
-echo Starting production line...
 cd /mnt/c/K3s/Deployment/Munich
 kubectl apply -f ProductionLine.yaml
 
@@ -57,15 +53,8 @@ sleep 30
 echo Starting UA-CloudPublisher...
 kubectl apply -f UA-CloudPublisher.yaml
 
-echo Starting UA-CloudCommander...
-kubectl apply -f UA-CloudCommander.yaml
-
 echo .
 echo Starting Seattle production line...
-echo ==================================
-
-echo .
-echo Starting production line...
 cd /mnt/c/K3s/Deployment/Seattle
 kubectl apply -f ProductionLine.yaml
 
@@ -74,9 +63,6 @@ sleep 30
 
 echo Starting UA-CloudPublisher...
 kubectl apply -f UA-CloudPublisher.yaml
-
-echo Starting UA-CloudCommander...
-kubectl apply -f UA-CloudCommander.yaml
 
 echo .
 echo Production lines started.

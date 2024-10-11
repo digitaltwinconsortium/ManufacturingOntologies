@@ -9,6 +9,64 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: ua-cloudcommander
+  namespace: munich
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ua-cloudcommander
+  template:
+    metadata:
+      labels:
+        app: ua-cloudcommander
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: ua-cloudcommander
+        image: ghcr.io/opcfoundation/ua-cloudcommander:main
+        imagePullPolicy: Always
+        env:
+        - name: APPNAME
+          value: "commander.munich"
+        - name: USE_KAFKA
+          value: "1"
+        - name: BROKERNAME
+          value: "myeventhubsnamespace.servicebus.windows.net"
+        - name: CLIENTNAME
+          value: "commander.munich"
+        - name: TOPIC
+          value: "commander.command"
+        - name: RESPONSE_TOPIC
+          value: "commander.response"
+        - name: USERNAME
+          value: "$ConnectionString"
+        - name: PASSWORD
+          value: "myeventhubsnamespaceprimarykeyconnectionstring"
+        - name: OPCUA_USERNAME
+          value: "myUsername"
+        - name: OPCUA_PASSWORD
+          value: "myPassword"
+        ports:
+        - containerPort: 4840
+          name: opcua
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ua-cloudcommander
+  namespace: munich
+spec:
+  ports:
+  - targetPort: 4840
+    port: 4840
+  selector:
+    app: ua-cloudcommander
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: mes
   namespace: munich
 spec:

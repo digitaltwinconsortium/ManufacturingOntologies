@@ -99,6 +99,13 @@ spec:
         ports:
         - containerPort: 4840
           name: opcua
+        volumeMounts:
+        - name: "pki"
+          mountPath: "/app/pki"
+      volumes:
+        - name: "pki"
+          hostPath:
+            path: "/mnt/c/K3s/MES/Seattle"
 ---
 apiVersion: v1
 kind: Service

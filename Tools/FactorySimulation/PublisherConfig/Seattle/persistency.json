@@ -1,6 +1,6 @@
 [
   {
-    "EndpointUrl": "opc.tcp://ua-cloudcommander.seattle/",
+    "EndpointUrl": "opc.tcp://commander.seattle/",
     "OpcNodes": [
       {
         "Id": "nsu=http://opcfoundation.org/UA/;i=2257",

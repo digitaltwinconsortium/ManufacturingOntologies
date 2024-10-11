@@ -9,22 +9,22 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ua-cloudcommander
+  name: commander
   namespace: munich
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ua-cloudcommander
+      app: commander
   template:
     metadata:
       labels:
-        app: ua-cloudcommander
+        app: commander
     spec:
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
-      - name: ua-cloudcommander
+      - name: commander
         image: ghcr.io/opcfoundation/ua-cloudcommander:main
         imagePullPolicy: Always
         env:
@@ -55,14 +55,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ua-cloudcommander
+  name: commander
   namespace: munich
 spec:
   ports:
   - targetPort: 4840
     port: 4840
   selector:
-    app: ua-cloudcommander
+    app: commander
 ---
 apiVersion: apps/v1
 kind: Deployment

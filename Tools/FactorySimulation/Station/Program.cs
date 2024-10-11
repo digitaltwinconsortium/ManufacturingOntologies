@@ -676,7 +676,7 @@ namespace Station.Simulation
 
             // create OPC UA cert validator
             application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
-            application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(StationCertificateValidationCallback);
+            application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(MESCertificateValidationCallback);
             application.ApplicationConfiguration.CertificateValidator.Update(application.ApplicationConfiguration.SecurityConfiguration).GetAwaiter().GetResult();
 
             string issuerPath = Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs");

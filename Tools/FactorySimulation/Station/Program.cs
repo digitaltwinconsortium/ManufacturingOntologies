@@ -176,41 +176,48 @@ namespace Station.Simulation
                     throw new ArgumentException("Can not load station definition from configuration file!");
                 }
 
-                // connect to all servers
-                m_sessionAssembly = new SessionHandler();
-                m_sessionTest = new SessionHandler();
-                m_sessionPackaging = new SessionHandler();
-
-                do
+                bool provisioningMode = true;
+                while (provisioningMode)
                 {
                     try
                     {
+                        // connect to all servers
+                        m_sessionAssembly = new SessionHandler();
+                        m_sessionTest = new SessionHandler();
+                        m_sessionPackaging = new SessionHandler();
+
                         m_sessionAssembly.EndpointConnect(endpoints[c_Assembly], appConfiguration);
                         m_sessionTest.EndpointConnect(endpoints[c_Test], appConfiguration);
                         m_sessionPackaging.EndpointConnect(endpoints[c_Packaging], appConfiguration);
+
+                        if (!m_sessionAssembly.SessionConnected || !m_sessionTest.SessionConnected || !m_sessionPackaging.SessionConnected)
+                        {
+                            throw new Exception("Failed to connect to assembly line!");
+                        }
+
+                        if (!CreateMonitoredItem(m_station.StatusNode, m_sessionAssembly.Session, new MonitoredItemNotificationEventHandler(MonitoredItem_AssemblyStation)))
+                        {
+                            throw new Exception("Failed to create monitored Item for the assembly station!");
+                        }
+                        if (!CreateMonitoredItem(m_station.StatusNode, m_sessionTest.Session, new MonitoredItemNotificationEventHandler(MonitoredItem_TestStation)))
+                        {
+                            throw new Exception("Failed to create monitored Item for the test station!");
+                        }
+                        if (!CreateMonitoredItem(m_station.StatusNode, m_sessionPackaging.Session, new MonitoredItemNotificationEventHandler(MonitoredItem_PackagingStation)))
+                        {
+                            throw new Exception("Failed to create monitored Item for the packaging station!");
+                        }
+
+                        StartAssemblyLine();
+
+                        provisioningMode = false;
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine("Exception connecting to assembly line: {0}, retry!", ex.Message);
+                        Console.WriteLine("Assembly line is still in provisioning mode: " + ex.Message + ". Retrying...");
                         Thread.Sleep(5000);
                     }
                 }
-                while (!(m_sessionAssembly.SessionConnected && m_sessionTest.SessionConnected && m_sessionPackaging.SessionConnected));
-
-                if (!CreateMonitoredItem(m_station.StatusNode, m_sessionAssembly.Session, new MonitoredItemNotificationEventHandler(MonitoredItem_AssemblyStation)))
-                {
-                    throw new Exception("Failed to create monitored Item for the assembly station!");
-                }
-                if (!CreateMonitoredItem(m_station.StatusNode, m_sessionTest.Session, new MonitoredItemNotificationEventHandler(MonitoredItem_TestStation)))
-                {
-                    throw new Exception("Failed to create monitored Item for the test station!");
-                }
-                if (!CreateMonitoredItem(m_station.StatusNode, m_sessionPackaging.Session, new MonitoredItemNotificationEventHandler(MonitoredItem_PackagingStation)))
-                {
-                    throw new Exception("Failed to create monitored Item for the packaging station!");
-                }
-
-                StartAssemblyLine();
 
                 // MESLogic method is executed periodically, with period c_updateRate
                 RestartTimer(c_updateRate);
@@ -395,23 +402,10 @@ namespace Station.Simulation
                 m_sessionPackaging.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
 
                 // read assembly line status
-                bool provisioningMode = true;
-                while (provisioningMode)
-                {
-                    try
-                    {
-                        m_statusAssembly = (StationStatus)m_sessionAssembly.Session.ReadValue(m_station.StatusNode).Value;
-                        m_statusTest = (StationStatus)m_sessionTest.Session.ReadValue(m_station.StatusNode).Value;
-                        m_statusPackaging = (StationStatus)m_sessionPackaging.Session.ReadValue(m_station.StatusNode).Value;
-                        provisioningMode = false;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Assembly line is still in provisioning mode: " + ex.Message + ". Retrying...");
-                        Thread.Sleep(5000);
-                    }
-                }
-
+                m_statusAssembly = (StationStatus)m_sessionAssembly.Session.ReadValue(m_station.StatusNode).Value;
+                m_statusTest = (StationStatus)m_sessionTest.Session.ReadValue(m_station.StatusNode).Value;
+                m_statusPackaging = (StationStatus)m_sessionPackaging.Session.ReadValue(m_station.StatusNode).Value;
+       
                 Console.WriteLine("#{0} Assemble ", m_serialNumber[c_Assembly]);
                 // start assembly
                 m_sessionAssembly.Session.Call(m_station.RootMethodNode, m_station.ExecuteMethodNode, m_serialNumber[c_Assembly]);

@@ -144,7 +144,7 @@ namespace Station.Simulation
 
                 // create OPC UA cert validator
                 application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
-                application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(CertificateValidationCallback);
+                application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(MESCertificateValidationCallback);
                 application.ApplicationConfiguration.CertificateValidator.Update(application.ApplicationConfiguration.SecurityConfiguration).GetAwaiter().GetResult();
 
                 string issuerPath = Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs");
@@ -676,7 +676,7 @@ namespace Station.Simulation
 
             // create OPC UA cert validator
             application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
-            application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(CertificateValidationCallback);
+            application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(StationCertificateValidationCallback);
             application.ApplicationConfiguration.CertificateValidator.Update(application.ApplicationConfiguration.SecurityConfiguration).GetAwaiter().GetResult();
 
             string issuerPath = Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs");
@@ -716,7 +716,7 @@ namespace Station.Simulation
             }
         }
 
-        private static void CertificateValidationCallback(CertificateValidator sender, CertificateValidationEventArgs e)
+        private static void StationCertificateValidationCallback(CertificateValidator sender, CertificateValidationEventArgs e)
         {
             // check if we have a trusted issuer cert yet
             bool provisioningMode = (Directory.EnumerateFiles(Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs")).Count() == 0);
@@ -725,6 +725,15 @@ namespace Station.Simulation
             if ((e.Error.StatusCode == StatusCodes.BadCertificateUntrusted) && provisioningMode)
             {
                 Console.WriteLine("Auto-accepting certificate while in provisioning mode!");
+                e.Accept = true;
+            }
+        }
+
+        private static void MESCertificateValidationCallback(CertificateValidator sender, CertificateValidationEventArgs e)
+        {
+            // always trust the OPC UA server certificate
+            if (e.Error.StatusCode == StatusCodes.BadCertificateUntrusted)
+            {
                 e.Accept = true;
             }
         }

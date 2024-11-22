@@ -251,7 +251,7 @@
       "name": "[concat(parameters('resourcesName'), '-IPAddress')]",
       "location": "[resourceGroup().location]",
       "sku": {
-        "name": "Basic"
+        "name": "Standard"
       },
       "properties": {
         "publicIPAllocationMethod": "Dynamic",

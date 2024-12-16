@@ -290,7 +290,7 @@
       "location": "[resourceGroup().location]",
       "properties": {
         "hardwareProfile": {
-          "vmSize": "Standard_D4s_v5"
+          "vmSize": "Standard_D4s_v4"
         },
         "osProfile": {
           "computerName": "[parameters('resourcesName')]",

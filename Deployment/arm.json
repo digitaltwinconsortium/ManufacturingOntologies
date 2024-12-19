@@ -13,20 +13,21 @@
       "type": "string",
       "minLength": 2,
       "metadata": {
-        "description": "Username for the Virtual Machine and UA Cloud Twin."
+        "description": "Username for the Virtual Machine."
       }
     },
     "adminPassword": {
       "type": "secureString",
       "minLength": 12,
       "metadata": {
-        "description": "Password for the Virtual Machine and UA Cloud Twin."
+        "description": "Password for the Virtual Machine."
       }
     }
   },
   "variables": {
     "addressPrefix": "10.0.0.0/16",
     "subnetPrefix": "10.0.0.0/24",
+    "subnetPrefix2": "10.0.0.0/23",
     "dataOwnerRoleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacAzureDigitalTwinsDataOwner'))]",
     "authRuleResourceId": "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', concat(parameters('resourcesName'), '-EventHubs'), 'RootManageSharedAccessKey')]",
     "azureRbacContributor": "b24988ac-6180-42a0-ab88-20f7382dd24c",
@@ -38,22 +39,303 @@
   },
   "resources": [
     {
-      "type": "Microsoft.KeyVault/vaults",
-      "apiVersion": "2016-10-01",
-      "name": "[concat(parameters('resourcesName'), '-KV')]",
+      "type": "Microsoft.App/managedEnvironments",
+      "apiVersion": "2022-03-01",
+      "name": "[concat(parameters('resourcesName'), '-AppEnvironment')]",
       "location": "[resourceGroup().location]",
-      "tags": {},
       "properties": {
-        "tenantId": "[subscription().tenantId]",
-        "accessPolicies": [],
-        "enableRbacAuthorization": false,
-        "enableSoftDelete": true,
-        "softDeleteRetentionInDays": "90",
-        "sku": {
-          "family": "A",
-          "name": "standard"
+        "appLogsConfiguration": {}
+      },
+      "vnetConfiguration": {
+        "infrastructureSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(parameters('resourcesName'), '-Network'), concat(parameters('resourcesName'), '-Subnet-CA'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', concat(parameters('resourcesName'), '-Network'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2022-03-01",
+      "name": "[concat(parameters('resourcesName'), '-EDC-Producer')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
+        "configuration": {
+          "ingress": {
+            "external": true,
+            "targetPort": "8181",
+            "additionalPortMappings": [
+              {
+                "external": true,
+                "targetPort": "8182"
+              },
+              {
+                "external": true,
+                "targetPort": "8281"
+              },
+              {
+                "external": true,
+                "targetPort": "8282"
+              }
+            ],
+            "allowInsecure": true,
+            "traffic": [
+              {
+                "latestRevision": true,
+                "weight": 100
+              }
+            ]
+          }
+        },
+        "template": {
+          "revisionSuffix": "firstrevision",
+          "containers": [
+            {
+              "name": "edc-producer",
+              "image": "fraunhoferiosb/edc-extension4aas:latest",
+              "env": [
+                {
+                  "name": "edc.aas.remoteAasLocation",
+                  "value": "[concat('http://', parameters('resourcesName'), '-AAS-Repo'), '/api/v3.0']"
+                },
+                {
+                  "name": "edc.aas.syncPeriod",
+                  "value": "60"
+                },
+                {
+                  "name": "edc.dataplane.aas.acceptOwnSelfSignedCertificates",
+                  "value": "True"
+                },
+                {
+                  "name": "edc.transfer.functions.enabled.protocols",
+                  "value": "http"
+                },
+                {
+                  "name": "web.http.port",
+                  "value": "8281"
+                },
+                {
+                  "name": "web.http.path",
+                  "value": "/api"
+                },
+                {
+                  "name": "web.http.control.port",
+                  "value": "8181"
+                },
+                {
+                  "name": "web.http.control.path",
+                  "value": "/control"
+                },
+                {
+                  "name": "web.http.management.port",
+                  "value": "8182"
+                },
+                {
+                  "name": "web.http.management.path",
+                  "value": "/management"
+                },
+                {
+                  "name": "web.http.protocol.port",
+                  "value": "8282"
+                },
+                {
+                  "name": "web.http.protocol.path",
+                  "value": "/dsp"
+                },
+                {
+                  "name": "edc.dsp.callback.address",
+                  "value": "http://consumer:8282/dsp"
+                },
+                {
+                  "name": "edc.api.auth.key",
+                  "value": "password"
+                },
+                {
+                  "name": "edc.web.rest.cors.enabled",
+                  "value": "true"
+                },
+                {
+                  "name": "edc.web.rest.cors.origins",
+                  "value": "*"
+                },
+                {
+                  "name": "edc.web.rest.cors.headers",
+                  "value": "x-api-key, content-type"
+                },
+                {
+                  "name": "edc.web.rest.cors.methods",
+                  "value": "GET, POST, DELETE, PUT, OPTIONS"
+                },
+                {
+                  "name": "edc.transfer.proxy.token.verifier.publickey.alias",
+                  "value": "public-key"
+                },
+                {
+                  "name": "edc.transfer.proxy.token.signer.privatekey.alias",
+                  "value": "private-key"
+                },
+                {
+                  "name": "edc.hostname",
+                  "value": "provider"
+                },
+                {
+                  "name": "edc.participant.id",
+                  "value": "provider"
+                }
+              ],
+              "resources": {
+                "cpu": "0.5",
+                "memory": "1Gi"
+              }
+            }
+          ],
+          "scale": {
+            "minReplicas": "1",
+            "maxReplicas": "1"
+          }
         }
-      }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2022-03-01",
+      "name": "[concat(parameters('resourcesName'), '-EDC-Consumer')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
+        "configuration": {
+          "ingress": {
+            "external": true,
+            "targetPort": "9191",
+            "additionalPortMappings": [
+              {
+                "external": true,
+                "targetPort": "9192"
+              },
+              {
+                "external": true,
+                "targetPort": "9291"
+              },
+              {
+                "external": true,
+                "targetPort": "9292"
+              }
+            ],
+            "allowInsecure": true,
+            "traffic": [
+              {
+                "latestRevision": true,
+                "weight": 100
+              }
+            ]
+          }
+        },
+        "template": {
+          "revisionSuffix": "firstrevision",
+          "containers": [
+            {
+              "name": "edc-consumer",
+              "image": "fraunhoferiosb/edc-extension4aas:latest",
+              "env": [
+                {
+                  "name": "edc.aas.exposeSelfDescription",
+                  "value": "False"
+                },
+                {
+                  "name": "edc.client.acceptAllProviderOffers",
+                  "value": "true"
+                },
+                {
+                  "name": "web.http.port",
+                  "value": "9291"
+                },
+                {
+                  "name": "web.http.path",
+                  "value": "/api"
+                },
+                {
+                  "name": "web.http.control.port",
+                  "value": "9191"
+                },
+                {
+                  "name": "web.http.control.path",
+                  "value": "/control"
+                },
+                {
+                  "name": "web.http.management.port",
+                  "value": "9192"
+                },
+                {
+                  "name": "web.http.management.path",
+                  "value": "/management"
+                },
+                {
+                  "name": "web.http.protocol.port",
+                  "value": "9292"
+                },
+                {
+                  "name": "web.http.protocol.path",
+                  "value": "/dsp"
+                },
+                {
+                  "name": "edc.dsp.callback.address",
+                  "value": "http://consumer:9292/dsp"
+                },
+                {
+                  "name": "edc.api.auth.key",
+                  "value": "password"
+                },
+                {
+                  "name": "edc.web.rest.cors.enabled",
+                  "value": "true"
+                },
+                {
+                  "name": "edc.web.rest.cors.origins",
+                  "value": "*"
+                },
+                {
+                  "name": "edc.web.rest.cors.headers",
+                  "value": "x-api-key, content-type"
+                },
+                {
+                  "name": "edc.web.rest.cors.methods",
+                  "value": "GET, POST, DELETE, PUT, OPTIONS"
+                },
+                {
+                  "name": "edc.transfer.proxy.token.verifier.publickey.alias",
+                  "value": "public-key"
+                },
+                {
+                  "name": "edc.transfer.proxy.token.signer.privatekey.alias",
+                  "value": "private-key"
+                },
+                {
+                  "name": "edc.hostname",
+                  "value": "consumer"
+                },
+                {
+                  "name": "edc.participant.id",
+                  "value": "consumer"
+                }
+              ],
+              "resources": {
+                "cpu": "0.5",
+                "memory": "1Gi"
+              }
+            }
+          ],
+          "scale": {
+            "minReplicas": "1",
+            "maxReplicas": "1"
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]"
+      ]
     },
     {
       "type": "Microsoft.Web/serverfarms",
@@ -242,6 +524,12 @@
           ]
         },
         "subnets": [
+          {
+            "name": "[concat(parameters('resourcesName'), '-Subnet-CA')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefix2')]"
+            }
+          },
           {
             "name": "[concat(parameters('resourcesName'), '-Subnet')]",
             "properties": {

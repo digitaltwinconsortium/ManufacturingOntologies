@@ -96,7 +96,7 @@
               "env": [
                 {
                   "name": "edc.aas.remoteAasLocation",
-                  "value": "[concat('http://', parameters('resourcesName'), '-AAS-Repo'), '/api/v3.0']"
+                  "value": "[concat('http://', parameters('resourcesName'), '-aas-repo.azurewebsites.net/api/v3.0')]"
                 },
                 {
                   "name": "edc.aas.syncPeriod",

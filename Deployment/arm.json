@@ -63,19 +63,19 @@
         "configuration": {
           "ingress": {
             "external": true,
-            "targetPort": "8181",
+            "targetPort": 8181,
             "additionalPortMappings": [
               {
                 "external": true,
-                "targetPort": "8182"
+                "targetPort": 8182
               },
               {
                 "external": true,
-                "targetPort": "8281"
+                "targetPort": 8281
               },
               {
                 "external": true,
-                "targetPort": "8282"
+                "targetPort": 8282
               }
             ],
             "allowInsecure": true,
@@ -209,19 +209,19 @@
         "configuration": {
           "ingress": {
             "external": true,
-            "targetPort": "9191",
+            "targetPort": 9191,
             "additionalPortMappings": [
               {
                 "external": true,
-                "targetPort": "9192"
+                "targetPort": 9192
               },
               {
                 "external": true,
-                "targetPort": "9291"
+                "targetPort": 9291
               },
               {
                 "external": true,
-                "targetPort": "9292"
+                "targetPort": 9292
               }
             ],
             "allowInsecure": true,

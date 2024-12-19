@@ -56,7 +56,7 @@
     {
       "type": "Microsoft.App/containerApps",
       "apiVersion": "2022-03-01",
-      "name": "[concat(parameters('resourcesName'), '-EDC-Producer')]",
+      "name": "[concat(parameters('resourcesName'), '-edc-producer')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
@@ -202,7 +202,7 @@
     {
       "type": "Microsoft.App/containerApps",
       "apiVersion": "2022-03-01",
-      "name": "[concat(parameters('resourcesName'), '-EDC-Consumer')]",
+      "name": "[concat(parameters('resourcesName'), '-edc-consumer')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",

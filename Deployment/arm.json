@@ -55,7 +55,7 @@
     },
     {
       "type": "Microsoft.App/containerApps",
-      "apiVersion": "2022-03-01",
+      "apiVersion": "2024-03-01",
       "name": "[concat(parameters('resourcesName'), '-edc-producer')]",
       "location": "[resourceGroup().location]",
       "properties": {
@@ -201,7 +201,7 @@
     },
     {
       "type": "Microsoft.App/containerApps",
-      "apiVersion": "2022-03-01",
+      "apiVersion": "2024-03-01",
       "name": "[concat(parameters('resourcesName'), '-edc-consumer')]",
       "location": "[resourceGroup().location]",
       "properties": {

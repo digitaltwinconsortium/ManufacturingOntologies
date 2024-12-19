@@ -40,14 +40,14 @@
   "resources": [
     {
       "type": "Microsoft.App/managedEnvironments",
-      "apiVersion": "2022-03-01",
+      "apiVersion": "2024-03-01",
       "name": "[concat(parameters('resourcesName'), '-AppEnvironment')]",
       "location": "[resourceGroup().location]",
       "properties": {
-        "appLogsConfiguration": {}
-      },
-      "vnetConfiguration": {
-        "infrastructureSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(parameters('resourcesName'), '-Network-CA'), concat(parameters('resourcesName'), '-Subnet-CA'))]"
+        "appLogsConfiguration": {},
+        "vnetConfiguration": {
+          "infrastructureSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(parameters('resourcesName'), '-Network-CA'), concat(parameters('resourcesName'), '-Subnet-CA'))]"
+        }
       },
       "dependsOn": [
         "[resourceId('Microsoft.Network/virtualNetworks', concat(parameters('resourcesName'), '-Network-CA'))]"

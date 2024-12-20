@@ -631,7 +631,15 @@
           {
             "name": "[concat(parameters('resourcesName'), '-Subnet-CA')]",
             "properties": {
-              "addressPrefix": "[variables('subnetPrefix2')]"
+              "addressPrefix": "[variables('subnetPrefix2')]",
+              "delegations": [
+                {
+                  "name": "appServiceDelegation",
+                  "properties": {
+                    "serviceName": "Microsoft.App/environments"
+                  }
+                }
+              ]
             }
           }
         ]

@@ -197,8 +197,7 @@
             "minReplicas": "1",
             "maxReplicas": "1"
           }
-        },
-        "workloadProfileName": "Consumption"
+        }
       },
       "dependsOn": [
         "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]"
@@ -340,8 +339,7 @@
             "minReplicas": "1",
             "maxReplicas": "1"
           }
-        },
-        "workloadProfileName": "Consumption"
+        }
       },
       "dependsOn": [
         "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]"
@@ -420,8 +418,7 @@
             "minReplicas": "1",
             "maxReplicas": "1"
           }
-        },
-        "workloadProfileName": "Consumption"
+        }
       },
       "dependsOn": [
         "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]"

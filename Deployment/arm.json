@@ -444,7 +444,7 @@
           "ingress": {
             "external": true,
             "transport": "tcp",
-            "targetPort": 8081,
+            "targetPort": 80,
             "exposedPort": 8081,
             "traffic": [
               {

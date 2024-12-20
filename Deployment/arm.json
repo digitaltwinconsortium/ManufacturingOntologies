@@ -72,23 +72,19 @@
             "external": true,
             "transport": "Auto",
             "targetPort": 8181,
-            "exposedPort": 8181,
             "allowInsecure": true,
             "additionalPortMappings": [
               {
                 "external": true,
-                "targetPort": 8182,
-                "exposedPort": 8182
+                "targetPort": 8182
               },
               {
                 "external": true,
-                "targetPort": 8281,
-                "exposedPort": 8281
+                "targetPort": 8281
               },
               {
                 "external": true,
-                "targetPort": 8282,
-                "exposedPort": 8282
+                "targetPort": 8282
               }
             ],
             "traffic": [
@@ -224,23 +220,19 @@
             "external": true,
             "transport": "Auto",
             "targetPort": 9191,
-            "exposedPort": 9191,
             "allowInsecure": true,
             "additionalPortMappings": [
               {
                 "external": true,
-                "targetPort": 9192,
-                "exposedPort": 9192
+                "targetPort": 9192
               },
               {
                 "external": true,
-                "targetPort": 9291,
-                "exposedPort": 9291
+                "targetPort": 9291
               },
               {
                 "external": true,
-                "targetPort": 9292,
-                "exposedPort": 9292
+                "targetPort": 9292
               }
             ],
             "traffic": [
@@ -374,7 +366,6 @@
             "external": true,
             "transport": "Auto",
             "targetPort": 8080,
-            "exposedPort": 8080,
             "allowInsecure": true,
             "traffic": [
               {
@@ -455,7 +446,6 @@
             "external": true,
             "transport": "Auto",
             "targetPort": 80,
-            "exposedPort": 8081,
             "allowInsecure": true,
             "traffic": [
               {

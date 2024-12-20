@@ -83,7 +83,6 @@
                 "exposedPort": 8282
               }
             ],
-            "allowInsecure": true,
             "traffic": [
               {
                 "latestRevision": true,
@@ -234,7 +233,6 @@
                 "exposedPort": 9292
               }
             ],
-            "allowInsecure": true,
             "traffic": [
               {
                 "latestRevision": true,
@@ -365,7 +363,13 @@
             "external": true,
             "transport": "tcp",
             "targetPort": 80,
-            "exposedPort": 80
+            "exposedPort": 80,
+            "traffic": [
+              {
+                "latestRevision": true,
+                "weight": 100
+              }
+            ]
           }
         },
         "template": {

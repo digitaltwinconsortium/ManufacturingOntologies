@@ -348,7 +348,7 @@
     {
       "type": "Microsoft.App/containerApps",
       "apiVersion": "2024-03-01",
-      "name": "[concat(parameters('resourcesName'), '-AAS-Repo')]",
+      "name": "[concat(parameters('resourcesName'), '-aas-repository')]",
       "location": "[resourceGroup().location]",
       "identity": {
         "type": "UserAssigned",

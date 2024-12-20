@@ -100,7 +100,7 @@
               "env": [
                 {
                   "name": "edc.aas.remoteAasLocation",
-                  "value": "[concat('http://', parameters('resourcesName'), '-aas-repo.azurewebsites.net/api/v3.0')]"
+                  "value": "[concat('http://', parameters('resourcesName'), '-aas-repo.azurewebsites.net:8080/api/v3.0')]"
                 },
                 {
                   "name": "edc.aas.syncPeriod",
@@ -362,8 +362,8 @@
           "ingress": {
             "external": true,
             "transport": "tcp",
-            "targetPort": 80,
-            "exposedPort": 80,
+            "targetPort": 8080,
+            "exposedPort": 8080,
             "traffic": [
               {
                 "latestRevision": true,

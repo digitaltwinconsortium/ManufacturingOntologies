@@ -64,18 +64,22 @@
           "ingress": {
             "external": true,
             "targetPort": 8181,
+            "exposedPort": 8181,
             "additionalPortMappings": [
               {
                 "external": true,
-                "targetPort": 8182
+                "targetPort": 8182,
+                "exposedPort": 8182
               },
               {
                 "external": true,
-                "targetPort": 8281
+                "targetPort": 8281,
+                "exposedPort": 8281
               },
               {
                 "external": true,
-                "targetPort": 8282
+                "targetPort": 8282,
+                "exposedPort": 8282
               }
             ],
             "allowInsecure": true,
@@ -210,18 +214,22 @@
           "ingress": {
             "external": true,
             "targetPort": 9191,
+            "exposedPort": 9191,
             "additionalPortMappings": [
               {
                 "external": true,
-                "targetPort": 9192
+                "targetPort": 9192,
+                "exposedPort": 9192
               },
               {
                 "external": true,
-                "targetPort": 9291
+                "targetPort": 9291,
+                "exposedPort": 9291
               },
               {
                 "external": true,
-                "targetPort": 9292
+                "targetPort": 9292,
+                "exposedPort": 9292
               }
             ],
             "allowInsecure": true,
@@ -338,543 +346,564 @@
       ]
     },
     {
-      "type": "Microsoft.Web/serverfarms",
-      "apiVersion": "2021-02-01",
-      "name": "[concat(parameters('resourcesName'), '-AppService')]",
-      "location": "[resourceGroup().location]",
-      "sku": {
-        "name": "P0v3",
-        "tier": "Premium0V3",
-        "size": "P0v3",
-        "family": "Pv3",
-        "capacity": 1
-      },
-      "kind": "linux",
-      "properties": {
-        "perSiteScaling": false,
-        "elasticScaleEnabled": false,
-        "maximumElasticWorkerCount": 1,
-        "isSpot": false,
-        "reserved": true,
-        "isXenon": false,
-        "hyperV": false,
-        "targetWorkerCount": 0,
-        "targetWorkerSizeId": 0,
-        "zoneRedundant": false
-      }
-    },
-    {
-      "type": "Microsoft.Web/sites",
-      "apiVersion": "2021-02-01",
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2024-03-01",
       "name": "[concat(parameters('resourcesName'), '-AAS-Repo')]",
       "location": "[resourceGroup().location]",
-      "properties": {
-        "httpsOnly": true,
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', concat(parameters('resourcesName'), '-AppService'))]",
-        "siteConfig": {
-          "numberOfWorkers": 1,
-          "linuxFxVersion": "DOCKER|ghcr.io/digitaltwinconsortium/aas-repository:masterv3",
-          "minTlsVersion": "1.2",
-          "ftpsState": "FtpsOnly",
-          "acrUseManagedIdentityCreds": false,
-          "alwaysOn": true,
-          "http20Enabled": false,
-          "functionAppScaleLimit": 0,
-          "minimumElasticInstanceCount": 0
-        }
-      },
       "identity": {
         "type": "UserAssigned",
         "userAssignedIdentities": {
           "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]": {}
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Web/serverfarms', concat(parameters('resourcesName'), '-AppService'))]"
-      ],
-      "resources": [
-        {
-          "apiVersion": "2015-08-01",
-          "location": "[resourceGroup().location]",
-          "name": "appsettings",
-          "properties": {
-            "ADX_HOST": "[reference(resourceId('Microsoft.Kusto/clusters', variables('adxClusterName')), '2022-02-01').uri]",
-            "ADX_DB": "ontologies",
-            "AAD_APPLICATION_ID": "[reference(concat(parameters('resourcesName'), '-Identity')).clientId]",
-            "CALCULATE_PCF": "1",
-            "WATTTIME_USER": "",
-            "WATTTIME_PASSWORD": "",
-            "USE_JSON_SERIALIZATION": "1"
-          },
-          "type": "config",
-          "dependsOn": [
-            "[concat('Microsoft.Web/sites/', concat(parameters('resourcesName'), '-AAS-Repo'))]"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "Microsoft.Web/sites",
-      "apiVersion": "2021-02-01",
-      "name": "[concat(parameters('resourcesName'), '-UA-Cloud-Action')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "httpsOnly": true,
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', concat(parameters('resourcesName'), '-AppService'))]",
-        "siteConfig": {
-          "numberOfWorkers": 1,
-          "linuxFxVersion": "DOCKER|ghcr.io/opcfoundation/ua-cloudaction:main",
-          "minTlsVersion": "1.2",
-          "ftpsState": "FtpsOnly",
-          "acrUseManagedIdentityCreds": false,
-          "alwaysOn": true,
-          "http20Enabled": false,
-          "functionAppScaleLimit": 0,
-          "minimumElasticInstanceCount": 0
-        }
-      },
-      "identity": {
-        "type": "UserAssigned",
-        "userAssignedIdentities": {
-          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]": {}
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Web/serverfarms', concat(parameters('resourcesName'), '-AppService'))]"
-      ],
-      "resources": [
-        {
-          "apiVersion": "2015-08-01",
-          "location": "[resourceGroup().location]",
-          "name": "appsettings",
-          "properties": {
-            "ADMIN_PASSWORD": "[parameters('adminPassword')]",
-            "ADMIN_USERNAME": "[parameters('adminUsername')]",
-            "ADX_INSTANCE_URL": "[reference(resourceId('Microsoft.Kusto/clusters', variables('adxClusterName')), '2022-02-01').uri]",
-            "ADX_DB_NAME": "ontologies",
-            "ADX_TABLE_NAME": "opcua_telemetry",
-            "AAD_TENANT_ID": "[subscription().tenantId]",
-            "APPLICATION_ID": "[reference(concat(parameters('resourcesName'), '-Identity')).clientId]",
-            "APPLICATION_KEY": "",
-            "BROKER_NAME": "[concat(parameters('resourcesName'), '-EventHubs.servicebus.windows.net')]",
-            "BROKER_USERNAME": "$ConnectionString",
-            "BROKER_PASSWORD": "[listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString]",
-            "TOPIC": "commander.command",
-            "RESPONSE_TOPIC": "commander.response",
-            "UA_SERVER_ENDPOINT": "opc.tcp://assembly.seattle/",
-            "UA_SERVER_METHOD_ID": "ns=2;i=435",
-            "UA_SERVER_OBJECT_ID": "ns=2;i=424",
-            "UA_SERVER_APPLICATION_NAME": "assembly",
-            "UA_SERVER_LOCATION_NAME": "seattle"
-          },
-          "type": "config",
-          "dependsOn": [
-            "[concat('Microsoft.Web/sites/', concat(parameters('resourcesName'), '-UA-Cloud-Action'))]"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "Microsoft.Network/publicIPAddresses",
-      "apiVersion": "2020-11-01",
-      "name": "[concat(parameters('resourcesName'), '-IPAddress')]",
-      "location": "[resourceGroup().location]",
-      "sku": {
-        "name": "Standard"
-      },
-      "properties": {
-        "publicIPAllocationMethod": "Static",
-        "dnsSettings": {
-          "domainNameLabel": "[concat(parameters('resourcesName'), 'domain')]"
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Network/networkSecurityGroups",
-      "apiVersion": "2020-11-01",
-      "name": "[concat(parameters('resourcesName'), '-NSG')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "securityRules": [
-          {
-            "name": "default-allow-3389",
-            "properties": {
-              "priority": 1000,
-              "access": "Allow",
-              "direction": "Inbound",
-              "destinationPortRange": "3389",
-              "protocol": "Tcp",
-              "sourcePortRange": "*",
-              "sourceAddressPrefix": "*",
-              "destinationAddressPrefix": "*"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "type": "Microsoft.Network/virtualNetworks",
-      "apiVersion": "2020-11-01",
-      "name": "[concat(parameters('resourcesName'), '-Network')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[variables('addressPrefix')]"
-          ]
         },
-        "subnets": [
-          {
-            "name": "[concat(parameters('resourcesName'), '-Subnet')]",
-            "properties": {
-              "addressPrefix": "[variables('subnetPrefix')]",
-              "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(parameters('resourcesName'), '-NSG'))]"
+        "properties": {
+          "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
+          "configuration": {
+            "ingress": {
+              "external": true,
+              "targetPort": 80,
+              "exposedPort": 80
+            }
+          },
+          "template": {
+            "revisionSuffix": "firstrevision",
+            "containers": [
+              {
+                "name": "aas-repository",
+                "image": "ghcr.io/digitaltwinconsortium/aas-repository:masterv3",
+                "env": [
+                  {
+                    "name": "ADX_HOST",
+                    "value": "[reference(resourceId('Microsoft.Kusto/clusters', variables('adxClusterName')), '2022-02-01').uri]"
+                  },
+                  {
+                    "name": "ADX_DB",
+                    "value": "ontologies"
+                  },
+                  {
+                    "name": "AAD_APPLICATION_ID",
+                    "value": "[reference(concat(parameters('resourcesName'), '-Identity')).clientId]"
+                  },
+                  {
+                    "name": "CALCULATE_PCF",
+                    "value": "1"
+                  },
+                  {
+                    "name": "WATTTIME_USER",
+                    "value": ""
+                  },
+                  {
+                    "name": "WATTTIME_PASSWORD",
+                    "value": ""
+                  },
+                  {
+                    "name": "USE_JSON_SERIALIZATION",
+                    "value": "1"
+                  }
+                ],
+                "resources": {
+                  "cpu": "0.5",
+                  "memory": "1Gi"
+                }
               }
+            ],
+            "scale": {
+              "minReplicas": "1",
+              "maxReplicas": "1"
             }
           }
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]"
         ]
       },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/networkSecurityGroups', concat(parameters('resourcesName'), '-NSG'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.Network/virtualNetworks",
-      "apiVersion": "2020-11-01",
-      "name": "[concat(parameters('resourcesName'), '-Network-CA')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[variables('addressPrefix')]"
-          ]
+      {
+        "type": "Microsoft.Web/serverfarms",
+        "apiVersion": "2021-02-01",
+        "name": "[concat(parameters('resourcesName'), '-AppService')]",
+        "location": "[resourceGroup().location]",
+        "sku": {
+          "name": "P0v3",
+          "tier": "Premium0V3",
+          "size": "P0v3",
+          "family": "Pv3",
+          "capacity": 1
         },
-        "subnets": [
-          {
-            "name": "[concat(parameters('resourcesName'), '-Subnet-CA')]",
-            "properties": {
-              "addressPrefix": "[variables('subnetPrefix2')]"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "2020-11-01",
-      "name": "[concat(parameters('resourcesName'), '-IF')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "privateIPAllocationMethod": "Dynamic",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('resourcesName'), '-IPAddress'))]"
-              },
-              "subnet": {
-                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(parameters('resourcesName'), '-Network'), concat(parameters('resourcesName'), '-Subnet'))]"
-              }
-            }
-          }
-        ]
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('resourcesName'), '-IPAddress'))]",
-        "[resourceId('Microsoft.Network/virtualNetworks', concat(parameters('resourcesName'), '-Network'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2022-11-01",
-      "name": "[concat(parameters('resourcesName'), '-VM')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "hardwareProfile": {
-          "vmSize": "Standard_D4s_v4"
-        },
-        "osProfile": {
-          "computerName": "[parameters('resourcesName')]",
-          "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]",
-          "windowsConfiguration": {
-            "provisionVMAgent": true,
-            "enableAutomaticUpdates": false
-          }
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "MicrosoftWindowsDesktop",
-            "offer": "Windows-11",
-            "sku": "win11-22h2-ent",
-            "version": "latest"
-          },
-          "osDisk": {
-            "createOption": "FromImage",
-            "caching": "ReadWrite",
-            "managedDisk": {
-              "storageAccountType": "StandardSSD_LRS"
-            },
-            "deleteOption": "Delete",
-            "diskSizeGB": 127
-          },
-          "dataDisks": []
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('resourcesName'), '-IF'))]"
-            }
-          ]
+        "kind": "linux",
+        "properties": {
+          "perSiteScaling": false,
+          "elasticScaleEnabled": false,
+          "maximumElasticWorkerCount": 1,
+          "isSpot": false,
+          "reserved": true,
+          "isXenon": false,
+          "hyperV": false,
+          "targetWorkerCount": 0,
+          "targetWorkerSizeId": 0,
+          "zoneRedundant": false
         }
       },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('resourcesName'), '-IF'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(parameters('resourcesName'), '-VM','/Bootstrap')]",
-      "apiVersion": "2022-11-01",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('resourcesName'), '-VM')]"
-      ],
-      "tags": {
-        "displayName": "Run Bootstrap"
-      },
-      "properties": {
-        "publisher": "Microsoft.Compute",
-        "type": "CustomScriptExtension",
-        "typeHandlerVersion": "1.10",
-        "autoUpgradeMinorVersion": true,
-        "protectedSettings": {
-          "fileUris": [
-            "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'Bootstrap.ps1')]"
-          ],
-          "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File Bootstrap.ps1"
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Kusto/clusters",
-      "apiVersion": "2021-01-01",
-      "name": "[variables('adxClusterName')]",
-      "sku": {
-        "name": "Standard_D11_v2",
-        "tier": "Standard",
-        "capacity": 2
-      },
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "Created By": "GitHub quickstart template"
-      },
-      "properties": {
-        "trustedExternalTenants": [
-          {
-            "value": "*"
+      {
+        "type": "Microsoft.Web/sites",
+        "apiVersion": "2021-02-01",
+        "name": "[concat(parameters('resourcesName'), '-UA-Cloud-Action')]",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "httpsOnly": true,
+          "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', concat(parameters('resourcesName'), '-AppService'))]",
+          "siteConfig": {
+            "numberOfWorkers": 1,
+            "linuxFxVersion": "DOCKER|ghcr.io/opcfoundation/ua-cloudaction:main",
+            "minTlsVersion": "1.2",
+            "ftpsState": "FtpsOnly",
+            "acrUseManagedIdentityCreds": false,
+            "alwaysOn": true,
+            "http20Enabled": false,
+            "functionAppScaleLimit": 0,
+            "minimumElasticInstanceCount": 0
           }
+        },
+        "identity": {
+          "type": "UserAssigned",
+          "userAssignedIdentities": {
+            "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]": {}
+          }
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.Web/serverfarms', concat(parameters('resourcesName'), '-AppService'))]"
         ],
-        "enableDiskEncryption": false,
-        "enableStreamingIngest": true,
-        "enablePurge": false,
-        "enableDoubleEncryption": false,
-        "engineType": "V3"
+        "resources": [
+          {
+            "apiVersion": "2015-08-01",
+            "location": "[resourceGroup().location]",
+            "name": "appsettings",
+            "properties": {
+              "ADMIN_PASSWORD": "[parameters('adminPassword')]",
+              "ADMIN_USERNAME": "[parameters('adminUsername')]",
+              "ADX_INSTANCE_URL": "[reference(resourceId('Microsoft.Kusto/clusters', variables('adxClusterName')), '2022-02-01').uri]",
+              "ADX_DB_NAME": "ontologies",
+              "ADX_TABLE_NAME": "opcua_telemetry",
+              "AAD_TENANT_ID": "[subscription().tenantId]",
+              "APPLICATION_ID": "[reference(concat(parameters('resourcesName'), '-Identity')).clientId]",
+              "APPLICATION_KEY": "",
+              "BROKER_NAME": "[concat(parameters('resourcesName'), '-EventHubs.servicebus.windows.net')]",
+              "BROKER_USERNAME": "$ConnectionString",
+              "BROKER_PASSWORD": "[listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString]",
+              "TOPIC": "commander.command",
+              "RESPONSE_TOPIC": "commander.response",
+              "UA_SERVER_ENDPOINT": "opc.tcp://assembly.seattle/",
+              "UA_SERVER_METHOD_ID": "ns=2;i=435",
+              "UA_SERVER_OBJECT_ID": "ns=2;i=424",
+              "UA_SERVER_APPLICATION_NAME": "assembly",
+              "UA_SERVER_LOCATION_NAME": "seattle"
+            },
+            "type": "config",
+            "dependsOn": [
+              "[concat('Microsoft.Web/sites/', concat(parameters('resourcesName'), '-UA-Cloud-Action'))]"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Microsoft.Network/publicIPAddresses",
+        "apiVersion": "2020-11-01",
+        "name": "[concat(parameters('resourcesName'), '-IPAddress')]",
+        "location": "[resourceGroup().location]",
+        "sku": {
+          "name": "Standard"
+        },
+        "properties": {
+          "publicIPAllocationMethod": "Static",
+          "dnsSettings": {
+            "domainNameLabel": "[concat(parameters('resourcesName'), 'domain')]"
+          }
+        }
+      },
+      {
+        "type": "Microsoft.Network/networkSecurityGroups",
+        "apiVersion": "2020-11-01",
+        "name": "[concat(parameters('resourcesName'), '-NSG')]",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "securityRules": [
+            {
+              "name": "default-allow-3389",
+              "properties": {
+                "priority": 1000,
+                "access": "Allow",
+                "direction": "Inbound",
+                "destinationPortRange": "3389",
+                "protocol": "Tcp",
+                "sourcePortRange": "*",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "Microsoft.Network/virtualNetworks",
+        "apiVersion": "2020-11-01",
+        "name": "[concat(parameters('resourcesName'), '-Network')]",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "addressSpace": {
+            "addressPrefixes": [
+              "[variables('addressPrefix')]"
+            ]
+          },
+          "subnets": [
+            {
+              "name": "[concat(parameters('resourcesName'), '-Subnet')]",
+              "properties": {
+                "addressPrefix": "[variables('subnetPrefix')]",
+                "networkSecurityGroup": {
+                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(parameters('resourcesName'), '-NSG'))]"
+                }
+              }
+            }
+          ]
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.Network/networkSecurityGroups', concat(parameters('resourcesName'), '-NSG'))]"
+        ]
+      },
+      {
+        "type": "Microsoft.Network/virtualNetworks",
+        "apiVersion": "2020-11-01",
+        "name": "[concat(parameters('resourcesName'), '-Network-CA')]",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "addressSpace": {
+            "addressPrefixes": [
+              "[variables('addressPrefix')]"
+            ]
+          },
+          "subnets": [
+            {
+              "name": "[concat(parameters('resourcesName'), '-Subnet-CA')]",
+              "properties": {
+                "addressPrefix": "[variables('subnetPrefix2')]"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "Microsoft.Network/networkInterfaces",
+        "apiVersion": "2020-11-01",
+        "name": "[concat(parameters('resourcesName'), '-IF')]",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "ipconfig1",
+              "properties": {
+                "privateIPAllocationMethod": "Dynamic",
+                "publicIPAddress": {
+                  "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('resourcesName'), '-IPAddress'))]"
+                },
+                "subnet": {
+                  "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(parameters('resourcesName'), '-Network'), concat(parameters('resourcesName'), '-Subnet'))]"
+                }
+              }
+            }
+          ]
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('resourcesName'), '-IPAddress'))]",
+          "[resourceId('Microsoft.Network/virtualNetworks', concat(parameters('resourcesName'), '-Network'))]"
+        ]
+      },
+      {
+        "type": "Microsoft.Compute/virtualMachines",
+        "apiVersion": "2022-11-01",
+        "name": "[concat(parameters('resourcesName'), '-VM')]",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "hardwareProfile": {
+            "vmSize": "Standard_D4s_v4"
+          },
+          "osProfile": {
+            "computerName": "[parameters('resourcesName')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]",
+            "windowsConfiguration": {
+              "provisionVMAgent": true,
+              "enableAutomaticUpdates": false
+            }
+          },
+          "storageProfile": {
+            "imageReference": {
+              "publisher": "MicrosoftWindowsDesktop",
+              "offer": "Windows-11",
+              "sku": "win11-22h2-ent",
+              "version": "latest"
+            },
+            "osDisk": {
+              "createOption": "FromImage",
+              "caching": "ReadWrite",
+              "managedDisk": {
+                "storageAccountType": "StandardSSD_LRS"
+              },
+              "deleteOption": "Delete",
+              "diskSizeGB": 127
+            },
+            "dataDisks": []
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+              {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('resourcesName'), '-IF'))]"
+              }
+            ]
+          }
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('resourcesName'), '-IF'))]"
+        ]
+      },
+      {
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "name": "[concat(parameters('resourcesName'), '-VM','/Bootstrap')]",
+        "apiVersion": "2022-11-01",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+          "[concat('Microsoft.Compute/virtualMachines/', parameters('resourcesName'), '-VM')]"
+        ],
+        "tags": {
+          "displayName": "Run Bootstrap"
+        },
+        "properties": {
+          "publisher": "Microsoft.Compute",
+          "type": "CustomScriptExtension",
+          "typeHandlerVersion": "1.10",
+          "autoUpgradeMinorVersion": true,
+          "protectedSettings": {
+            "fileUris": [
+              "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'Bootstrap.ps1')]"
+            ],
+            "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File Bootstrap.ps1"
+          }
+        }
+      },
+      {
+        "type": "Microsoft.Kusto/clusters",
+        "apiVersion": "2021-01-01",
+        "name": "[variables('adxClusterName')]",
+        "sku": {
+          "name": "Standard_D11_v2",
+          "tier": "Standard",
+          "capacity": 2
+        },
+        "location": "[resourceGroup().location]",
+        "tags": {
+          "Created By": "GitHub quickstart template"
+        },
+        "properties": {
+          "trustedExternalTenants": [
+            {
+              "value": "*"
+            }
+          ],
+          "enableDiskEncryption": false,
+          "enableStreamingIngest": true,
+          "enablePurge": false,
+          "enableDoubleEncryption": false,
+          "engineType": "V3"
+        }
+      },
+      {
+        "type": "Microsoft.Kusto/clusters/databases",
+        "apiVersion": "2021-01-01",
+        "name": "[format('{0}/{1}', variables('adxClusterName'), 'ontologies')]",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+          "[resourceId('Microsoft.Kusto/clusters', variables('adxClusterName'))]"
+        ],
+        "properties": {
+          "softDeletePeriodInDays": 365,
+          "hotCachePeriodInDays": 31
+        },
+        "kind": "ReadWrite"
+      },
+      {
+        "type": "Microsoft.Kusto/Clusters/Databases/DataConnections",
+        "apiVersion": "2022-12-29",
+        "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies','EventHubDataConnection')]",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+          "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'OPCUA-parsing-script')]"
+        ],
+        "kind": "EventHub",
+        "properties": {
+          "eventHubResourceId": "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'data')]",
+          "consumerGroup": "adx",
+          "tableName": "opcua_raw",
+          "mappingRuleName": "opcua_mapping",
+          "dataFormat": "MULTIJSON",
+          "eventSystemProperties": [],
+          "compression": "None",
+          "databaseRouting": "Single"
+        }
+      },
+      {
+        "type": "Microsoft.Kusto/Clusters/Databases/DataConnections",
+        "apiVersion": "2022-12-29",
+        "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies','EventHubMetadataConnection')]",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+          "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'OPCUA-parsing-script')]"
+        ],
+        "kind": "EventHub",
+        "properties": {
+          "eventHubResourceId": "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'metadata')]",
+          "consumerGroup": "adx",
+          "tableName": "opcua_metadata_raw",
+          "mappingRuleName": "opcua_metadata_mapping",
+          "dataFormat": "MULTIJSON",
+          "eventSystemProperties": [],
+          "compression": "None",
+          "databaseRouting": "Single"
+        }
+      },
+      {
+        "type": "Microsoft.Kusto/clusters/databases/scripts",
+        "apiVersion": "2022-12-29",
+        "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies', 'OPCUA-parsing-script')]",
+        "properties": {
+          "scriptContent": "// Enable streaming ingestion for the database\n.alter database ontologies policy streamingingestion enable\n\n// Create a landing table for raw OPC UA telemetry\n.create table opcua_raw(payload: dynamic)\n\n// Create mapping from JSON ingestion to the landing table\n.create-or-alter table opcua_raw ingestion json mapping 'opcua_mapping' '[{\"column\":\"payload\",\"path\":\"$\",\"datatype\":\"dynamic\"}]'\n\n// Create an intermediate table to unbatch our OPC UA PubSub messages into\n.create table opcua_intermediate(DataSetWriterID: string, Timestamp: datetime, Payload: dynamic)\n\n// Create a function to do the raw OPC UA expansion\n.create-or-alter function OPCUARawExpand() { opcua_raw | mv-expand records = payload.Messages | where records != '' | project DataSetWriterID = tostring(records[\"DataSetWriterId\"]), Timestamp = todatetime(records[\"Timestamp\"]), Payload = todynamic(records[\"Payload\"]) }\n\n// Apply the raw expansion function to the OPC UA raw table\n.alter table opcua_intermediate policy update @'[{\"Source\": \"opcua_raw\", \"Query\": \"OPCUARawExpand()\", \"IsEnabled\": \"True\"}]'\n\n// Create our final OPC UA telemetry table\n.create table opcua_telemetry (DataSetWriterID: string, Timestamp: datetime, Name: string, Value: dynamic)\n\n// Create a function to do the OPC UA dataset expansion\n.create-or-alter function OPCUADatasetExpand() { opcua_intermediate | mv-apply Payload on (extend key = tostring(bag_keys(Payload)[0]) | extend p = Payload[key] | project Name = key, Value = todynamic(p.Value)) }\n\n// Apply the dataset expansion function to the intermediate table\n.alter table opcua_telemetry policy update @'[{\"Source\": \"opcua_intermediate\", \"Query\": \"OPCUADatasetExpand()\", \"IsEnabled\": \"True\"}]'\n\n// Create a landing table for raw OPC UA metadata\n.create table opcua_metadata_raw(payload: dynamic)\n\n// Create mapping from JSON ingestion to the metadata landing table\n.create-or-alter table opcua_metadata_raw ingestion json mapping 'opcua_metadata_mapping' '[{\"column\":\"payload\",\"path\":\"$\",\"datatype\":\"dynamic\"}]'\n\n// Create an OPC UA metadata landing table\n.create table opcua_metadata(DataSetWriterID: string, Timestamp: datetime, Name: string, Type: string, DisplayName:string, Workcell: string, Line: string, Area: string, Site: string, Enterprise: string, NamespaceUri: string, NodeId: string)\n\n// Create a function to do the raw OPC UA metadata expansion\n.create-or-alter function OPCUAMetaDataExpand() { opcua_metadata_raw | parse tostring(payload.MetaData.Name) with * \":\" Workcell \".\" Line \".\" Area \".\" Site \".\" Enterprise \";nsu=\" NamespaceUri \";\" NodeId | project DataSetWriterId = tostring(payload.DataSetWriterId), Timestamp = todatetime(payload.Timestamp), Name = tostring(payload.MetaData.Name), Type = tostring(payload.MetaData.Fields[0].Description), DisplayName = tostring(payload.MetaData.Fields[0].Name), Workcell, Line, Area, Site, Enterprise, NamespaceUri, NodeId }\n\n// Apply the raw metadata expansion function to the metadata landing table\n.alter table opcua_metadata policy update @'[{\"Source\": \"opcua_metadata_raw\", \"Query\": \"OPCUAMetaDataExpand()\", \"IsEnabled\": \"True\"}]'\n\n// Create a materialized view for the last known value (LKV) of our metadata\n.create materialized-view opcua_metadata_lkv on table opcua_metadata { opcua_metadata | summarize arg_max(Timestamp, *) by Name, DataSetWriterID }\n\n.create table DTDL_models (context:string, id:string, type:string, displayname: string, description:string, comment:string, contenttype:string, contentid:string, writable:bool, schema:dynamic, contentname:string, contentdisplayname: string, contentdescription:string, contentcomment:string, target:string, extends: string, schemas:string)\n\n",
+          "continueOnErrors": false
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), 'ontologies')]"
+        ]
+      },
+      {
+        "type": "Microsoft.Kusto/clusters/databases/scripts",
+        "apiVersion": "2022-12-29",
+        "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies', 'OEE-calculation-script')]",
+        "properties": {
+          "scriptContent": ".create-or-alter function CalculateOEEForStation(stationName:string,location:string,idealCycleTime:int,shiftStartTime:datetime,shiftEndTime:datetime) {\n// calculation from https://www.oee.com/calculating-oee/\nlet idealRunningTime = (shiftEndTime - shiftStartTime) / time(1ms); // [ms]\nlet numProdEnd = toscalar(\nopcua_metadata_lkv\n| where Name contains stationName\n| where Name contains location\n| join kind=inner (opcua_telemetry\n| where Name == \"NumberOfManufacturedProducts\"\n| where Timestamp > shiftStartTime and Timestamp < shiftEndTime\n) on DataSetWriterID\n| extend numProd = toint(Value)\n| summarize max(numProd));\nlet numProdStart = toscalar(\nopcua_metadata_lkv\n| where Name contains stationName\n| where Name contains location\n| join kind=inner (opcua_telemetry\n| where Name == \"NumberOfManufacturedProducts\"\n| where Timestamp > shiftStartTime and Timestamp < shiftEndTime\n) on DataSetWriterID\n| extend numProd = toint(Value)\n| summarize min(numProd));\nlet numScrapEnd = toscalar(\nopcua_metadata_lkv\n| where Name contains stationName\n| where Name contains location\n| join kind=inner (opcua_telemetry\n| where Name == \"NumberOfDiscardedProducts\"\n| where Timestamp > shiftStartTime and Timestamp < shiftEndTime\n) on DataSetWriterID\n| extend numDisc = toint(Value)\n| summarize max(numDisc));\nlet numScrapStart = toscalar(\nopcua_metadata_lkv\n| where Name contains stationName\n| where Name contains location\n| join kind=inner (opcua_telemetry\n| where Name == \"NumberOfDiscardedProducts\"\n| where Timestamp > shiftStartTime and Timestamp < shiftEndTime\n) on DataSetWriterID\n| extend numDisc = toint(Value)\n| summarize min(numDisc));\nlet numProdShift = numProdEnd - numProdStart;\nlet numScrapShift = numScrapEnd - numScrapStart;\nlet actualCycleTime = toscalar(\nopcua_metadata_lkv\n| where Name contains stationName\n| where Name contains location\n| join kind=inner (opcua_telemetry\n| where Name == \"ActualCycleTime\"\n| where Timestamp > shiftStartTime and Timestamp < shiftEndTime\n) on DataSetWriterID\n| extend cycleTime = toint(Value)\n| summarize avg(cycleTime));\nlet faultyTimeShift = toscalar(\nopcua_metadata_lkv\n| where Name contains stationName\n| where Name contains location\n| join kind=inner (opcua_telemetry\n| where Name == \"FaultyTime\"\n| where Timestamp > shiftStartTime and Timestamp < shiftEndTime\n) on DataSetWriterID\n| extend faultyTime = toint(Value)\n| summarize sum(faultyTime));\nlet availability = todouble(idealRunningTime - faultyTimeShift) / todouble(idealRunningTime);\nlet performance = todouble(idealCycleTime) * todouble(numProdShift + numScrapShift) / todouble(idealRunningTime - faultyTimeShift);\nlet quality = todouble(numProdShift) / todouble(numProdShift + numScrapShift);\nlet oee = availability * performance * quality;\ntoscalar(oee)\n}\n\n.create-or-alter function CalculateOEEForLine(location:string,idealCycleTime:int,shiftStartTime:datetime,shiftEndTime:datetime) {\nlet stations = opcua_metadata_lkv\n| where Site == location\n| where Workcell !=\"publisher\"\n| summarize by Workcell\n| project station = tostring(Workcell);\nlet oeeForStations = stations\n| partition hint.strategy=legacy by station\n(\n  extend oee = toscalar(CalculateOEEForStation(station, location, idealCycleTime, shiftStartTime, shiftEndTime))\n)\n| summarize min(oee);\ntoscalar(oeeForStations)\n}\n\n",
+          "continueOnErrors": false
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'OPCUA-parsing-script')]"
+        ]
+      },
+      {
+        "type": "Microsoft.EventHub/namespaces",
+        "apiVersion": "2021-11-01",
+        "name": "[variables('eventHubsNamespaceName')]",
+        "location": "[resourceGroup().location]",
+        "sku": {
+          "name": "Standard",
+          "tier": "Standard",
+          "capacity": 1
+        },
+        "properties": {
+          "isAutoInflateEnabled": true,
+          "maximumThroughputUnits": 16
+        }
+      },
+      {
+        "type": "Microsoft.EventHub/namespaces/eventhubs",
+        "apiVersion": "2021-11-01",
+        "name": "[concat(parameters('resourcesName'), '-EventHubs', '/commander.command')]",
+        "properties": {
+          "messageRetentionInDays": 1,
+          "partitionCount": 1
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]"
+        ]
+      },
+      {
+        "type": "Microsoft.EventHub/namespaces/eventhubs",
+        "apiVersion": "2021-11-01",
+        "name": "[concat(parameters('resourcesName'), '-EventHubs', '/commander.response')]",
+        "properties": {
+          "messageRetentionInDays": 1,
+          "partitionCount": 1
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]"
+        ]
+      },
+      {
+        "type": "Microsoft.EventHub/namespaces/eventhubs",
+        "apiVersion": "2021-11-01",
+        "name": "[concat(parameters('resourcesName'), '-EventHubs', '/data')]",
+        "properties": {
+          "messageRetentionInDays": 1,
+          "partitionCount": 1
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]"
+        ]
+      },
+      {
+        "type": "Microsoft.EventHub/namespaces/eventhubs",
+        "apiVersion": "2021-11-01",
+        "name": "[concat(parameters('resourcesName'), '-EventHubs', '/metadata')]",
+        "properties": {
+          "messageRetentionInDays": 1,
+          "partitionCount": 1
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]"
+        ]
+      },
+      {
+        "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
+        "apiVersion": "2021-11-01",
+        "name": "[format('{0}/{1}/{2}', concat(parameters('resourcesName'), '-EventHubs'), 'data', 'adx')]",
+        "dependsOn": [
+          "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'data')]"
+        ],
+        "properties": {}
+      },
+      {
+        "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
+        "apiVersion": "2021-11-01",
+        "name": "[format('{0}/{1}/{2}', concat(parameters('resourcesName'), '-EventHubs'), 'metadata', 'adx')]",
+        "dependsOn": [
+          "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'metadata')]"
+        ],
+        "properties": {}
+      },
+      {
+        "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+        "name": "[concat(parameters('resourcesName'), '-Identity')]",
+        "apiVersion": "2018-11-30",
+        "location": "[resourceGroup().location]"
+      },
+      {
+        "type": "Microsoft.Authorization/roleAssignments",
+        "apiVersion": "2020-10-01-preview",
+        "name": "[guid(variables('dataOwnerRoleDefinitionId'), resourceGroup().id)]",
+        "dependsOn": [
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+        ],
+        "properties": {
+          "roleDefinitionId": "[variables('dataOwnerRoleDefinitionId')]",
+          "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId]",
+          "principalType": "ServicePrincipal"
+        }
+      },
+      {
+        "type": "Microsoft.Kusto/clusters/databases/principalAssignments",
+        "apiVersion": "2021-01-01",
+        "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies', guid(resourceId('Microsoft.Kusto/clusters/databases', split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[1]), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), 'Admin'))]",
+        "dependsOn": [
+          "[resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), 'ontologies')]"
+        ],
+        "properties": {
+          "principalId": "[reference(concat(parameters('resourcesName'), '-Identity')).principalId]",
+          "role": "Admin",
+          "tenantId": "[reference(concat(parameters('resourcesName'), '-Identity')).tenantId]",
+          "principalType": "App"
+        }
       }
-    },
-    {
-      "type": "Microsoft.Kusto/clusters/databases",
-      "apiVersion": "2021-01-01",
-      "name": "[format('{0}/{1}', variables('adxClusterName'), 'ontologies')]",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters', variables('adxClusterName'))]"
-      ],
-      "properties": {
-        "softDeletePeriodInDays": 365,
-        "hotCachePeriodInDays": 31
-      },
-      "kind": "ReadWrite"
-    },
-    {
-      "type": "Microsoft.Kusto/Clusters/Databases/DataConnections",
-      "apiVersion": "2022-12-29",
-      "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies','EventHubDataConnection')]",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'OPCUA-parsing-script')]"
-      ],
-      "kind": "EventHub",
-      "properties": {
-        "eventHubResourceId": "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'data')]",
-        "consumerGroup": "adx",
-        "tableName": "opcua_raw",
-        "mappingRuleName": "opcua_mapping",
-        "dataFormat": "MULTIJSON",
-        "eventSystemProperties": [],
-        "compression": "None",
-        "databaseRouting": "Single"
-      }
-    },
-    {
-      "type": "Microsoft.Kusto/Clusters/Databases/DataConnections",
-      "apiVersion": "2022-12-29",
-      "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies','EventHubMetadataConnection')]",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'OPCUA-parsing-script')]"
-      ],
-      "kind": "EventHub",
-      "properties": {
-        "eventHubResourceId": "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'metadata')]",
-        "consumerGroup": "adx",
-        "tableName": "opcua_metadata_raw",
-        "mappingRuleName": "opcua_metadata_mapping",
-        "dataFormat": "MULTIJSON",
-        "eventSystemProperties": [],
-        "compression": "None",
-        "databaseRouting": "Single"
-      }
-    },
-    {
-      "type": "Microsoft.Kusto/clusters/databases/scripts",
-      "apiVersion": "2022-12-29",
-      "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies', 'OPCUA-parsing-script')]",
-      "properties": {
-        "scriptContent": "// Enable streaming ingestion for the database\n.alter database ontologies policy streamingingestion enable\n\n// Create a landing table for raw OPC UA telemetry\n.create table opcua_raw(payload: dynamic)\n\n// Create mapping from JSON ingestion to the landing table\n.create-or-alter table opcua_raw ingestion json mapping 'opcua_mapping' '[{\"column\":\"payload\",\"path\":\"$\",\"datatype\":\"dynamic\"}]'\n\n// Create an intermediate table to unbatch our OPC UA PubSub messages into\n.create table opcua_intermediate(DataSetWriterID: string, Timestamp: datetime, Payload: dynamic)\n\n// Create a function to do the raw OPC UA expansion\n.create-or-alter function OPCUARawExpand() { opcua_raw | mv-expand records = payload.Messages | where records != '' | project DataSetWriterID = tostring(records[\"DataSetWriterId\"]), Timestamp = todatetime(records[\"Timestamp\"]), Payload = todynamic(records[\"Payload\"]) }\n\n// Apply the raw expansion function to the OPC UA raw table\n.alter table opcua_intermediate policy update @'[{\"Source\": \"opcua_raw\", \"Query\": \"OPCUARawExpand()\", \"IsEnabled\": \"True\"}]'\n\n// Create our final OPC UA telemetry table\n.create table opcua_telemetry (DataSetWriterID: string, Timestamp: datetime, Name: string, Value: dynamic)\n\n// Create a function to do the OPC UA dataset expansion\n.create-or-alter function OPCUADatasetExpand() { opcua_intermediate | mv-apply Payload on (extend key = tostring(bag_keys(Payload)[0]) | extend p = Payload[key] | project Name = key, Value = todynamic(p.Value)) }\n\n// Apply the dataset expansion function to the intermediate table\n.alter table opcua_telemetry policy update @'[{\"Source\": \"opcua_intermediate\", \"Query\": \"OPCUADatasetExpand()\", \"IsEnabled\": \"True\"}]'\n\n// Create a landing table for raw OPC UA metadata\n.create table opcua_metadata_raw(payload: dynamic)\n\n// Create mapping from JSON ingestion to the metadata landing table\n.create-or-alter table opcua_metadata_raw ingestion json mapping 'opcua_metadata_mapping' '[{\"column\":\"payload\",\"path\":\"$\",\"datatype\":\"dynamic\"}]'\n\n// Create an OPC UA metadata landing table\n.create table opcua_metadata(DataSetWriterID: string, Timestamp: datetime, Name: string, Type: string, DisplayName:string, Workcell: string, Line: string, Area: string, Site: string, Enterprise: string, NamespaceUri: string, NodeId: string)\n\n// Create a function to do the raw OPC UA metadata expansion\n.create-or-alter function OPCUAMetaDataExpand() { opcua_metadata_raw | parse tostring(payload.MetaData.Name) with * \":\" Workcell \".\" Line \".\" Area \".\" Site \".\" Enterprise \";nsu=\" NamespaceUri \";\" NodeId | project DataSetWriterId = tostring(payload.DataSetWriterId), Timestamp = todatetime(payload.Timestamp), Name = tostring(payload.MetaData.Name), Type = tostring(payload.MetaData.Fields[0].Description), DisplayName = tostring(payload.MetaData.Fields[0].Name), Workcell, Line, Area, Site, Enterprise, NamespaceUri, NodeId }\n\n// Apply the raw metadata expansion function to the metadata landing table\n.alter table opcua_metadata policy update @'[{\"Source\": \"opcua_metadata_raw\", \"Query\": \"OPCUAMetaDataExpand()\", \"IsEnabled\": \"True\"}]'\n\n// Create a materialized view for the last known value (LKV) of our metadata\n.create materialized-view opcua_metadata_lkv on table opcua_metadata { opcua_metadata | summarize arg_max(Timestamp, *) by Name, DataSetWriterID }\n\n.create table DTDL_models (context:string, id:string, type:string, displayname: string, description:string, comment:string, contenttype:string, contentid:string, writable:bool, schema:dynamic, contentname:string, contentdisplayname: string, contentdescription:string, contentcomment:string, target:string, extends: string, schemas:string)\n\n",
-        "continueOnErrors": false
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), 'ontologies')]"
-      ]
-    },
-    {
-      "type": "Microsoft.Kusto/clusters/databases/scripts",
-      "apiVersion": "2022-12-29",
-      "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies', 'OEE-calculation-script')]",
-      "properties": {
-        "scriptContent": ".create-or-alter function CalculateOEEForStation(stationName:string,location:string,idealCycleTime:int,shiftStartTime:datetime,shiftEndTime:datetime) {\n// calculation from https://www.oee.com/calculating-oee/\nlet idealRunningTime = (shiftEndTime - shiftStartTime) / time(1ms); // [ms]\nlet numProdEnd = toscalar(\nopcua_metadata_lkv\n| where Name contains stationName\n| where Name contains location\n| join kind=inner (opcua_telemetry\n| where Name == \"NumberOfManufacturedProducts\"\n| where Timestamp > shiftStartTime and Timestamp < shiftEndTime\n) on DataSetWriterID\n| extend numProd = toint(Value)\n| summarize max(numProd));\nlet numProdStart = toscalar(\nopcua_metadata_lkv\n| where Name contains stationName\n| where Name contains location\n| join kind=inner (opcua_telemetry\n| where Name == \"NumberOfManufacturedProducts\"\n| where Timestamp > shiftStartTime and Timestamp < shiftEndTime\n) on DataSetWriterID\n| extend numProd = toint(Value)\n| summarize min(numProd));\nlet numScrapEnd = toscalar(\nopcua_metadata_lkv\n| where Name contains stationName\n| where Name contains location\n| join kind=inner (opcua_telemetry\n| where Name == \"NumberOfDiscardedProducts\"\n| where Timestamp > shiftStartTime and Timestamp < shiftEndTime\n) on DataSetWriterID\n| extend numDisc = toint(Value)\n| summarize max(numDisc));\nlet numScrapStart = toscalar(\nopcua_metadata_lkv\n| where Name contains stationName\n| where Name contains location\n| join kind=inner (opcua_telemetry\n| where Name == \"NumberOfDiscardedProducts\"\n| where Timestamp > shiftStartTime and Timestamp < shiftEndTime\n) on DataSetWriterID\n| extend numDisc = toint(Value)\n| summarize min(numDisc));\nlet numProdShift = numProdEnd - numProdStart;\nlet numScrapShift = numScrapEnd - numScrapStart;\nlet actualCycleTime = toscalar(\nopcua_metadata_lkv\n| where Name contains stationName\n| where Name contains location\n| join kind=inner (opcua_telemetry\n| where Name == \"ActualCycleTime\"\n| where Timestamp > shiftStartTime and Timestamp < shiftEndTime\n) on DataSetWriterID\n| extend cycleTime = toint(Value)\n| summarize avg(cycleTime));\nlet faultyTimeShift = toscalar(\nopcua_metadata_lkv\n| where Name contains stationName\n| where Name contains location\n| join kind=inner (opcua_telemetry\n| where Name == \"FaultyTime\"\n| where Timestamp > shiftStartTime and Timestamp < shiftEndTime\n) on DataSetWriterID\n| extend faultyTime = toint(Value)\n| summarize sum(faultyTime));\nlet availability = todouble(idealRunningTime - faultyTimeShift) / todouble(idealRunningTime);\nlet performance = todouble(idealCycleTime) * todouble(numProdShift + numScrapShift) / todouble(idealRunningTime - faultyTimeShift);\nlet quality = todouble(numProdShift) / todouble(numProdShift + numScrapShift);\nlet oee = availability * performance * quality;\ntoscalar(oee)\n}\n\n.create-or-alter function CalculateOEEForLine(location:string,idealCycleTime:int,shiftStartTime:datetime,shiftEndTime:datetime) {\nlet stations = opcua_metadata_lkv\n| where Site == location\n| where Workcell !=\"publisher\"\n| summarize by Workcell\n| project station = tostring(Workcell);\nlet oeeForStations = stations\n| partition hint.strategy=legacy by station\n(\n  extend oee = toscalar(CalculateOEEForStation(station, location, idealCycleTime, shiftStartTime, shiftEndTime))\n)\n| summarize min(oee);\ntoscalar(oeeForStations)\n}\n\n",
-        "continueOnErrors": false
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'OPCUA-parsing-script')]"
-      ]
-    },
-    {
-      "type": "Microsoft.EventHub/namespaces",
-      "apiVersion": "2021-11-01",
-      "name": "[variables('eventHubsNamespaceName')]",
-      "location": "[resourceGroup().location]",
-      "sku": {
-        "name": "Standard",
-        "tier": "Standard",
-        "capacity": 1
-      },
-      "properties": {
-        "isAutoInflateEnabled": true,
-        "maximumThroughputUnits": 16
-      }
-    },
-    {
-      "type": "Microsoft.EventHub/namespaces/eventhubs",
-      "apiVersion": "2021-11-01",
-      "name": "[concat(parameters('resourcesName'), '-EventHubs', '/commander.command')]",
-      "properties": {
-        "messageRetentionInDays": 1,
-        "partitionCount": 1
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.EventHub/namespaces/eventhubs",
-      "apiVersion": "2021-11-01",
-      "name": "[concat(parameters('resourcesName'), '-EventHubs', '/commander.response')]",
-      "properties": {
-        "messageRetentionInDays": 1,
-        "partitionCount": 1
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.EventHub/namespaces/eventhubs",
-      "apiVersion": "2021-11-01",
-      "name": "[concat(parameters('resourcesName'), '-EventHubs', '/data')]",
-      "properties": {
-        "messageRetentionInDays": 1,
-        "partitionCount": 1
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.EventHub/namespaces/eventhubs",
-      "apiVersion": "2021-11-01",
-      "name": "[concat(parameters('resourcesName'), '-EventHubs', '/metadata')]",
-      "properties": {
-        "messageRetentionInDays": 1,
-        "partitionCount": 1
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
-      "apiVersion": "2021-11-01",
-      "name": "[format('{0}/{1}/{2}', concat(parameters('resourcesName'), '-EventHubs'), 'data', 'adx')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'data')]"
-      ],
-      "properties": {}
-    },
-    {
-      "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
-      "apiVersion": "2021-11-01",
-      "name": "[format('{0}/{1}/{2}', concat(parameters('resourcesName'), '-EventHubs'), 'metadata', 'adx')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'metadata')]"
-      ],
-      "properties": {}
-    },
-    {
-      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-      "name": "[concat(parameters('resourcesName'), '-Identity')]",
-      "apiVersion": "2018-11-30",
-      "location": "[resourceGroup().location]"
-    },
-    {
-      "type": "Microsoft.Authorization/roleAssignments",
-      "apiVersion": "2020-10-01-preview",
-      "name": "[guid(variables('dataOwnerRoleDefinitionId'), resourceGroup().id)]",
-      "dependsOn": [
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
-      ],
-      "properties": {
-        "roleDefinitionId": "[variables('dataOwnerRoleDefinitionId')]",
-        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId]",
-        "principalType": "ServicePrincipal"
-      }
-    },
-    {
-      "type": "Microsoft.Kusto/clusters/databases/principalAssignments",
-      "apiVersion": "2021-01-01",
-      "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies', guid(resourceId('Microsoft.Kusto/clusters/databases', split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[1]), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), 'Admin'))]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), 'ontologies')]"
-      ],
-      "properties": {
-        "principalId": "[reference(concat(parameters('resourcesName'), '-Identity')).principalId]",
-        "role": "Admin",
-        "tenantId": "[reference(concat(parameters('resourcesName'), '-Identity')).tenantId]",
-        "principalType": "App"
-      }
-    }
   ]
 }

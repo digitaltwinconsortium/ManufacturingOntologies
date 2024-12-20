@@ -45,6 +45,12 @@
       "location": "[resourceGroup().location]",
       "properties": {
         "appLogsConfiguration": {},
+        "workloadProfiles": [
+          {
+            "workloadProfileType": "Consumption",
+            "name": "Consumption"
+          }
+        ],
         "vnetConfiguration": {
           "infrastructureSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(parameters('resourcesName'), '-Network-CA'), concat(parameters('resourcesName'), '-Subnet-CA'))]"
         }
@@ -59,13 +65,15 @@
       "name": "[concat(parameters('resourcesName'), '-edc-provider')]",
       "location": "[resourceGroup().location]",
       "properties": {
+        "workloadProfileName": "Consumption",
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
         "configuration": {
           "ingress": {
             "external": true,
-            "transport": "tcp",
+            "transport": "Auto",
             "targetPort": 8181,
             "exposedPort": 8181,
+            "allowInsecure": true,
             "additionalPortMappings": [
               {
                 "external": true,
@@ -209,13 +217,15 @@
       "name": "[concat(parameters('resourcesName'), '-edc-consumer')]",
       "location": "[resourceGroup().location]",
       "properties": {
+        "workloadProfileName": "Consumption",
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
         "configuration": {
           "ingress": {
             "external": true,
-            "transport": "tcp",
+            "transport": "Auto",
             "targetPort": 9191,
             "exposedPort": 9191,
+            "allowInsecure": true,
             "additionalPortMappings": [
               {
                 "external": true,
@@ -357,13 +367,15 @@
         }
       },
       "properties": {
+        "workloadProfileName": "Consumption",
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
         "configuration": {
           "ingress": {
             "external": true,
-            "transport": "tcp",
+            "transport": "Auto",
             "targetPort": 8080,
             "exposedPort": 8080,
+            "allowInsecure": true,
             "traffic": [
               {
                 "latestRevision": true,
@@ -436,13 +448,15 @@
         }
       },
       "properties": {
+        "workloadProfileName": "Consumption",
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
         "configuration": {
           "ingress": {
             "external": true,
-            "transport": "tcp",
+            "transport": "Auto",
             "targetPort": 80,
             "exposedPort": 8081,
+            "allowInsecure": true,
             "traffic": [
               {
                 "latestRevision": true,

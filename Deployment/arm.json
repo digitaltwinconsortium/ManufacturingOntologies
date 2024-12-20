@@ -63,6 +63,7 @@
         "configuration": {
           "ingress": {
             "external": true,
+            "transport": "tcp",
             "targetPort": 8181,
             "exposedPort": 8181,
             "additionalPortMappings": [
@@ -213,6 +214,7 @@
         "configuration": {
           "ingress": {
             "external": true,
+            "transport": "tcp",
             "targetPort": 9191,
             "exposedPort": 9191,
             "additionalPortMappings": [
@@ -361,6 +363,7 @@
         "configuration": {
           "ingress": {
             "external": true,
+            "transport": "tcp",
             "targetPort": 80,
             "exposedPort": 80
           }

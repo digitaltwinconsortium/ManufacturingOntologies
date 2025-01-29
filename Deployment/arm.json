@@ -104,7 +104,7 @@
               "env": [
                 {
                   "name": "edc.aas.remoteAasLocation",
-                  "value": "[concat('http://', parameters('resourcesName'), '-aas-repository.', reference(resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment')), '2024-03-01').defaultDomain, '/api/v3.0')]"
+                  "value": "[concat('https://', parameters('resourcesName'), '-aas-repository.', reference(resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment')), '2024-03-01').defaultDomain, '/api/v3.0')]"
                 },
                 {
                   "name": "edc.aas.syncPeriod",
@@ -366,7 +366,7 @@
             "external": true,
             "transport": "Auto",
             "targetPort": 8080,
-            "allowInsecure": true,
+            "allowInsecure": false,
             "traffic": [
               {
                 "latestRevision": true,
@@ -409,6 +409,10 @@
                 {
                   "name": "USE_JSON_SERIALIZATION",
                   "value": "1"
+                },
+                {
+                  "name": "ServicePassword",
+                  "value": "[parameters('adminPassword')]"
                 }
               ],
               "resources": {

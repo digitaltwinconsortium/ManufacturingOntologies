@@ -407,10 +407,6 @@
                   "value": ""
                 },
                 {
-                  "name": "USE_JSON_SERIALIZATION",
-                  "value": "1"
-                },
-                {
                   "name": "ServicePassword",
                   "value": "[parameters('adminPassword')]"
                 }

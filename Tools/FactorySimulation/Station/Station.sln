@@ -19,6 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\..\..\fabric.md = ..\..\..\fabric.md
 		..\..\..\LICENSE = ..\..\..\LICENSE
 		..\..\..\README.md = ..\..\..\README.md
+		..\..\GrafanaDashboard\samplegrafanadashboard.json = ..\..\GrafanaDashboard\samplegrafanadashboard.json
 		..\..\..\Deployment\SetupArc.ps1 = ..\..\..\Deployment\SetupArc.ps1
 		..\..\..\Deployment\Softing-EdgeConnector-Modbus.yaml = ..\..\..\Deployment\Softing-EdgeConnector-Modbus.yaml
 		..\StartSimulation.sh = ..\StartSimulation.sh

@@ -103,8 +103,8 @@
               "image": "fraunhoferiosb/edc-extension4aas:latest",
               "env": [
                 {
-                  "name": "edc.aas.remoteAasLocation",
-                  "value": "[concat('https://', parameters('resourcesName'), '-aas-repository.', reference(resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment')), '2024-03-01').defaultDomain, '/api/v3.0')]"
+                  "name": "JAVA_OPTS",
+                  "value": "-XX:MaxRAMPercentage=50.0"
                 },
                 {
                   "name": "edc.aas.syncPeriod",

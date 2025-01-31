@@ -160,7 +160,7 @@
                 },
                 {
                   "name": "edc.web.rest.cors.enabled",
-                  "value": "true"
+                  "value": "True"
                 },
                 {
                   "name": "edc.web.rest.cors.origins",
@@ -192,8 +192,8 @@
                 }
               ],
               "resources": {
-                "cpu": "0.5",
-                "memory": "1Gi"
+                "cpu": "1",
+                "memory": "2Gi"
               }
             }
           ],
@@ -256,7 +256,7 @@
                 },
                 {
                   "name": "edc.client.acceptAllProviderOffers",
-                  "value": "true"
+                  "value": "True"
                 },
                 {
                   "name": "web.http.port",
@@ -300,7 +300,7 @@
                 },
                 {
                   "name": "edc.web.rest.cors.enabled",
-                  "value": "true"
+                  "value": "True"
                 },
                 {
                   "name": "edc.web.rest.cors.origins",

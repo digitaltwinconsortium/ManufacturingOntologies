@@ -152,7 +152,7 @@
                 },
                 {
                   "name": "edc.dsp.callback.address",
-                  "value": "[concat('http://', reference(resourceId('Microsoft.Network/virtualNetworks', concat(parameters('resourcesName'), '-Network-CA'))).ipAddress, ':8282/dsp')]"
+                  "value": "[concat('http://', resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment')).staticIp, ':8282/dsp')]"
                 },
                 {
                   "name": "edc.api.auth.key",
@@ -184,7 +184,7 @@
                 },
                 {
                   "name": "edc.hostname",
-                  "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', concat(parameters('resourcesName'), '-Network-CA'))).ipAddress]"
+                  "value": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment')).staticIp]"
                 },
                 {
                   "name": "edc.participant.id",
@@ -292,7 +292,7 @@
                 },
                 {
                   "name": "edc.dsp.callback.address",
-                  "value": "[concat('http://', reference(resourceId('Microsoft.Network/virtualNetworks', concat(parameters('resourcesName'), '-Network-CA'))).ipAddress, ':9292/dsp')]"
+                  "value": "[concat('http://', resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment')).staticIp, ':9292/dsp')]"
                 },
                 {
                   "name": "edc.api.auth.key",
@@ -324,7 +324,7 @@
                 },
                 {
                   "name": "edc.hostname",
-                  "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', concat(parameters('resourcesName'), '-Network-CA'))).ipAddress]"
+                  "value": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment')).staticIp]"
                 },
                 {
                   "name": "edc.participant.id",

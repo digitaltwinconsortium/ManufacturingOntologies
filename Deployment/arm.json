@@ -100,94 +100,94 @@
           "containers": [
             {
               "name": "edc-producer",
-              "image": "fraunhoferiosb/edc-extension4aas:latest",
+              "image": "fraunhoferiosb/edc-extension4aas:2.2.0",
               "env": [
                 {
                   "name": "JAVA_OPTS",
                   "value": "-XX:MaxRAMPercentage=50.0"
                 },
                 {
-                  "name": "edc.aas.syncPeriod",
+                  "name": "edc_aas_syncPeriod",
                   "value": "60"
                 },
                 {
-                  "name": "edc.dataplane.aas.acceptOwnSelfSignedCertificates",
-                  "value": "True"
+                  "name": "edc_dataplane_aas_acceptOwnSelfSignedCertificates",
+                  "value": "true"
                 },
                 {
-                  "name": "edc.transfer.functions.enabled.protocols",
+                  "name": "edc_transfer_functions_enabled_protocols",
                   "value": "http"
                 },
                 {
-                  "name": "web.http.port",
+                  "name": "web_http_port",
                   "value": "8281"
                 },
                 {
-                  "name": "web.http.path",
+                  "name": "web_http_path",
                   "value": "/api"
                 },
                 {
-                  "name": "web.http.control.port",
+                  "name": "web_http_control_port",
                   "value": "8181"
                 },
                 {
-                  "name": "web.http.control.path",
+                  "name": "web_http_control_path",
                   "value": "/control"
                 },
                 {
-                  "name": "web.http.management.port",
+                  "name": "web_http_management_port",
                   "value": "8182"
                 },
                 {
-                  "name": "web.http.management.path",
+                  "name": "web_http_management_path",
                   "value": "/management"
                 },
                 {
-                  "name": "web.http.protocol.port",
+                  "name": "web_http_protocol_port",
                   "value": "8282"
                 },
                 {
-                  "name": "web.http.protocol.path",
+                  "name": "web_http_protocol_path",
                   "value": "/dsp"
                 },
                 {
-                  "name": "edc.dsp.callback.address",
+                  "name": "edc_dsp_callback_address",
                   "value": "[concat('http://', reference(concat(parameters('resourcesName'), '-AppEnvironment')).staticIp, ':8282/dsp')]"
                 },
                 {
-                  "name": "edc.api.auth.key",
+                  "name": "edc_api_auth_key",
                   "value": "password"
                 },
                 {
-                  "name": "edc.web.rest.cors.enabled",
-                  "value": "True"
+                  "name": "edc_web_rest_cors_enabled",
+                  "value": "true"
                 },
                 {
-                  "name": "edc.web.rest.cors.origins",
+                  "name": "edc_web_rest_cors_origins",
                   "value": "*"
                 },
                 {
-                  "name": "edc.web.rest.cors.headers",
+                  "name": "edc_web_rest_cors_headers",
                   "value": "x-api-key, content-type"
                 },
                 {
-                  "name": "edc.web.rest.cors.methods",
+                  "name": "edc_web_rest_cors_methods",
                   "value": "GET, POST, DELETE, PUT, OPTIONS"
                 },
                 {
-                  "name": "edc.transfer.proxy.token.verifier.publickey.alias",
+                  "name": "edc_transfer_proxy_token_verifier_publickey_alias",
                   "value": "public-key"
                 },
                 {
-                  "name": "edc.transfer.proxy.token.signer.privatekey.alias",
+                  "name": "edc_transfer_proxy_token_signer_privatekey_alias",
                   "value": "private-key"
                 },
                 {
-                  "name": "edc.hostname",
+                  "name": "edc_hostname",
                   "value": "[reference(concat(parameters('resourcesName'), '-AppEnvironment')).staticIp]"
                 },
                 {
-                  "name": "edc.participant.id",
+                  "name": "edc_participant_id",
                   "value": "provider"
                 }
               ],
@@ -248,86 +248,86 @@
           "containers": [
             {
               "name": "edc-consumer",
-              "image": "fraunhoferiosb/edc-extension4aas:latest",
+              "image": "fraunhoferiosb/edc-extension4aas:2.2.0",
               "env": [
                 {
-                  "name": "edc.aas.exposeSelfDescription",
-                  "value": "False"
+                  "name": "edc_aas_exposeSelfDescription",
+                  "value": "false"
                 },
                 {
-                  "name": "edc.client.acceptAllProviderOffers",
-                  "value": "True"
+                  "name": "edc_client_acceptAllProviderOffers",
+                  "value": "true"
                 },
                 {
-                  "name": "web.http.port",
+                  "name": "web_http_port",
                   "value": "9291"
                 },
                 {
-                  "name": "web.http.path",
+                  "name": "web_http_path",
                   "value": "/api"
                 },
                 {
-                  "name": "web.http.control.port",
+                  "name": "web_http_control_port",
                   "value": "9191"
                 },
                 {
-                  "name": "web.http.control.path",
+                  "name": "web_http_control_path",
                   "value": "/control"
                 },
                 {
-                  "name": "web.http.management.port",
+                  "name": "web_http_management_port",
                   "value": "9192"
                 },
                 {
-                  "name": "web.http.management.path",
+                  "name": "web_http_management_path",
                   "value": "/management"
                 },
                 {
-                  "name": "web.http.protocol.port",
+                  "name": "web_http_protocol_port",
                   "value": "9292"
                 },
                 {
-                  "name": "web.http.protocol.path",
+                  "name": "web_http_protocol_path",
                   "value": "/dsp"
                 },
                 {
-                  "name": "edc.dsp.callback.address",
+                  "name": "edc_dsp_callback_address",
                   "value": "[concat('http://', reference(concat(parameters('resourcesName'), '-AppEnvironment')).staticIp, ':9292/dsp')]"
                 },
                 {
-                  "name": "edc.api.auth.key",
+                  "name": "edc_api_auth_key",
                   "value": "password"
                 },
                 {
-                  "name": "edc.web.rest.cors.enabled",
-                  "value": "True"
+                  "name": "edc_web_rest_cors_enabled",
+                  "value": "true"
                 },
                 {
-                  "name": "edc.web.rest.cors.origins",
+                  "name": "edc_web_rest_cors_origins",
                   "value": "*"
                 },
                 {
-                  "name": "edc.web.rest.cors.headers",
+                  "name": "edc_web_rest_cors_headers",
                   "value": "x-api-key, content-type"
                 },
                 {
-                  "name": "edc.web.rest.cors.methods",
+                  "name": "edc_web_rest_cors_methods",
                   "value": "GET, POST, DELETE, PUT, OPTIONS"
                 },
                 {
-                  "name": "edc.transfer.proxy.token.verifier.publickey.alias",
+                  "name": "edc_transfer_proxy_token_verifier_publickey_alias",
                   "value": "public-key"
                 },
                 {
-                  "name": "edc.transfer.proxy.token.signer.privatekey.alias",
+                  "name": "edc_transfer_proxy_token_signer_privatekey_alias",
                   "value": "private-key"
                 },
                 {
-                  "name": "edc.hostname",
+                  "name": "edc_hostname",
                   "value": "[reference(concat(parameters('resourcesName'), '-AppEnvironment')).staticIp]"
                 },
                 {
-                  "name": "edc.participant.id",
+                  "name": "edc_participant_id",
                   "value": "consumer"
                 }
               ],

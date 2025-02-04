@@ -136,7 +136,7 @@ namespace Station.Simulation
                 Utils.Tracing.TraceEventHandler += new EventHandler<TraceEventArgs>(OpcStackLoggingHandler);
 
                 // check the application certificate
-                bool certOK = application.CheckApplicationInstanceCertificate(false, 0).GetAwaiter().GetResult();
+                bool certOK = application.CheckApplicationInstanceCertificates(false).GetAwaiter().GetResult();
                 if (!certOK)
                 {
                     throw new Exception("Application instance certificate invalid!");
@@ -145,7 +145,7 @@ namespace Station.Simulation
                 // create OPC UA cert validator
                 application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
                 application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(MESCertificateValidationCallback);
-                application.ApplicationConfiguration.CertificateValidator.Update(application.ApplicationConfiguration.SecurityConfiguration).GetAwaiter().GetResult();
+                application.ApplicationConfiguration.CertificateValidator.Update(application.ApplicationConfiguration).GetAwaiter().GetResult();
 
                 string issuerPath = Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs");
                 if (!Directory.Exists(issuerPath))
@@ -405,7 +405,7 @@ namespace Station.Simulation
                 m_statusAssembly = (StationStatus)m_sessionAssembly.Session.ReadValue(m_station.StatusNode).Value;
                 m_statusTest = (StationStatus)m_sessionTest.Session.ReadValue(m_station.StatusNode).Value;
                 m_statusPackaging = (StationStatus)m_sessionPackaging.Session.ReadValue(m_station.StatusNode).Value;
-       
+
                 Console.WriteLine("#{0} Assemble ", m_serialNumber[c_Assembly]);
                 // start assembly
                 m_sessionAssembly.Session.Call(m_station.RootMethodNode, m_station.ExecuteMethodNode, m_serialNumber[c_Assembly]);
@@ -668,7 +668,7 @@ namespace Station.Simulation
             Utils.Tracing.TraceEventHandler += new EventHandler<TraceEventArgs>(OpcStackLoggingHandler);
 
             // check the application certificate
-            bool certOK = await application.CheckApplicationInstanceCertificate(false, 0).ConfigureAwait(false);
+            bool certOK = await application.CheckApplicationInstanceCertificates(false).ConfigureAwait(false);
             if (!certOK)
             {
                 throw new Exception("Application instance certificate invalid!");
@@ -677,7 +677,7 @@ namespace Station.Simulation
             // create OPC UA cert validator
             application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
             application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(MESCertificateValidationCallback);
-            application.ApplicationConfiguration.CertificateValidator.Update(application.ApplicationConfiguration.SecurityConfiguration).GetAwaiter().GetResult();
+            application.ApplicationConfiguration.CertificateValidator.Update(application.ApplicationConfiguration).GetAwaiter().GetResult();
 
             string issuerPath = Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs");
             if (!Directory.Exists(issuerPath))

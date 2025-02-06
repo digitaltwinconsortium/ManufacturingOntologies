@@ -70,9 +70,9 @@
         "configuration": {
           "ingress": {
             "external": true,
-            "transport": "Auto",
+            "transport": "Tcp",
             "targetPort": 8181,
-            "allowInsecure": true,
+            "allowInsecure": false,
             "additionalPortMappings": [
               {
                 "external": true,
@@ -218,9 +218,9 @@
         "configuration": {
           "ingress": {
             "external": true,
-            "transport": "Auto",
+            "transport": "Tcp",
             "targetPort": 9191,
-            "allowInsecure": true,
+            "allowInsecure": false,
             "additionalPortMappings": [
               {
                 "external": true,
@@ -446,7 +446,7 @@
             "external": true,
             "transport": "Auto",
             "targetPort": 80,
-            "allowInsecure": true,
+            "allowInsecure": false,
             "traffic": [
               {
                 "latestRevision": true,

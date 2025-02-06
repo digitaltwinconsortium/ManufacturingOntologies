@@ -100,7 +100,7 @@
           "containers": [
             {
               "name": "edc-producer",
-              "image": "fraunhoferiosb/edc-extension4aas:2.2.0",
+              "image": "fraunhoferiosb/edc-extension4aas:2.2.1",
               "env": [
                 {
                   "name": "JAVA_OPTS",
@@ -248,7 +248,7 @@
           "containers": [
             {
               "name": "edc-consumer",
-              "image": "fraunhoferiosb/edc-extension4aas:2.2.0",
+              "image": "fraunhoferiosb/edc-extension4aas:2.2.1",
               "env": [
                 {
                   "name": "edc_aas_exposeSelfDescription",

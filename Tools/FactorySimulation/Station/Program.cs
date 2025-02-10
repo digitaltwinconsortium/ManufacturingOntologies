@@ -68,26 +68,30 @@ namespace Station.Simulation
 
         public static void Main()
         {
-            try
+            while (true)
             {
-                if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("StationType")))
+                try
                 {
-                    throw new ArgumentException("You must specify the StationType environment variable!");
-                }
+                    if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("StationType")))
+                    {
+                        throw new ArgumentException("You must specify the StationType environment variable!");
+                    }
 
-                if (Environment.GetEnvironmentVariable("StationType") == "mes")
-                {
-                    MES();
+                    if (Environment.GetEnvironmentVariable("StationType") == "mes")
+                    {
+                        MES();
+                    }
+                    else
+                    {
+                        Task t = ConsoleServer();
+                        t.Wait();
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    Task t = ConsoleServer();
-                    t.Wait();
+                    Console.WriteLine("Exception: " + ex.Message);
+                    Thread.Sleep(5000);
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Exception: " + ex.Message);
             }
         }
 

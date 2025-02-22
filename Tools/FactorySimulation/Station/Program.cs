@@ -97,6 +97,9 @@ namespace Station.Simulation
 
         private static void MES()
         {
+            ApplicationInstance.MessageDlg = new ApplicationMessageDlg();
+            ApplicationInstance application = new ApplicationInstance();
+
             try
             {
                 if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ProductionLineName")))
@@ -115,9 +118,6 @@ namespace Station.Simulation
                         ShiftTimes.Add(new Tuple<string, string, string>(parts[0], parts[1], parts[2]));
                     }
                 }
-
-                ApplicationInstance.MessageDlg = new ApplicationMessageDlg();
-                ApplicationInstance application = new ApplicationInstance();
 
                 Uri stationUri = new Uri(Environment.GetEnvironmentVariable("StationURI"));
 
@@ -242,11 +242,19 @@ namespace Station.Simulation
 
                 // wait for MES timeout or Ctrl-C
                 m_quitEvent.WaitOne();
-
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Critical Exception: {0}, MES exiting!", ex.Message);
+                Console.WriteLine("Critical Exception: {0}, MES restarting!", ex.Message);
+
+                try
+                {
+                    application.Stop();
+                }
+                catch (Exception)
+                {
+                    // do nothing
+                }
             }
         }
 
@@ -614,94 +622,110 @@ namespace Station.Simulation
 
         private static async Task ConsoleServer()
         {
-            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("StationURI")))
-            {
-                throw new ArgumentException("You must specify the StationURI environment variable!");
-            }
-
-            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("PowerConsumption")))
-            {
-                throw new ArgumentException("You must specify the PowerConsumption environment variable!");
-            }
-
-            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CycleTime")))
-            {
-                throw new ArgumentException("You must specify the CycleTime environment variable!");
-            }
-
             ApplicationInstance.MessageDlg = new ApplicationMessageDlg();
             ApplicationInstance application = new ApplicationInstance();
-
-            Uri stationUri = new Uri(Environment.GetEnvironmentVariable("StationURI"));
-
-            application.ApplicationName = stationUri.DnsSafeHost.ToLowerInvariant();
-            application.ConfigSectionName = "Opc.Ua.Station";
-            application.ApplicationType = ApplicationType.Server;
-
-            string applicationUri = application.ApplicationName.Insert(application.ApplicationName.IndexOf("."), ".line1.building1") + ".contoso";
-
-            // replace the certificate subject name in the configuration
-            string configFilePath = Path.Combine(Directory.GetCurrentDirectory(), application.ConfigSectionName + ".Config.xml");
-            string configFileContent = File.ReadAllText(configFilePath).Replace("UndefinedStationName", application.ApplicationName).Replace("UndefinedStationUri", applicationUri);
-            File.WriteAllText(configFilePath, configFileContent);
-
-            // load the application configuration.
-            ApplicationConfiguration config = await application.LoadApplicationConfiguration(false);
-            if (config == null)
-            {
-                throw new Exception("Application configuration is null!");
-            }
-
-            // calculate our power consumption in [kW] and cycle time in [s]
-            PowerConsumption = ulong.Parse(Environment.GetEnvironmentVariable("PowerConsumption"), NumberStyles.Integer);
-            CycleTime = ulong.Parse(Environment.GetEnvironmentVariable("CycleTime"), NumberStyles.Integer);
-
-            // print out our configuration
-            Console.WriteLine("OPC UA Server Configuration:");
-            Console.WriteLine("----------------------------");
-            Console.WriteLine("OPC UA Endpoint: " + config.ServerConfiguration.BaseAddresses[0].ToString());
-            Console.WriteLine("Application URI: " + config.ApplicationUri);
-            Console.WriteLine("Power consumption: " + PowerConsumption.ToString() + "kW");
-            Console.WriteLine("Cycle time: " + CycleTime.ToString() + "s");
-
-            // load the application configuration
-            ApplicationConfiguration appConfiguration = application.LoadApplicationConfiguration(false).Result;
-
-            // hook up OPC UA stack traces
-            _traceMasks = appConfiguration.TraceConfiguration.TraceMasks;
-            Utils.Tracing.TraceEventHandler += new EventHandler<TraceEventArgs>(OpcStackLoggingHandler);
-
-            // check the application certificate
-            bool certOK = await application.CheckApplicationInstanceCertificate(false, 0).ConfigureAwait(false);
-            if (!certOK)
-            {
-                throw new Exception("Application instance certificate invalid!");
-            }
-
-            // create OPC UA cert validator
-            application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
-            application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(MESCertificateValidationCallback);
-            application.ApplicationConfiguration.CertificateValidator.Update(application.ApplicationConfiguration).GetAwaiter().GetResult();
-
-            string issuerPath = Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs");
-            if (!Directory.Exists(issuerPath))
-            {
-                Directory.CreateDirectory(issuerPath);
-            }
-
-            // start the server.
-            await application.Start(new FactoryStationServer(true));
-
-            Console.WriteLine("Server started. Press any key to exit.");
-
+            
             try
             {
-                Console.ReadKey(true);
+                if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("StationURI")))
+                {
+                    throw new ArgumentException("You must specify the StationURI environment variable!");
+                }
+
+                if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("PowerConsumption")))
+                {
+                    throw new ArgumentException("You must specify the PowerConsumption environment variable!");
+                }
+
+                if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CycleTime")))
+                {
+                    throw new ArgumentException("You must specify the CycleTime environment variable!");
+                }
+
+                Uri stationUri = new Uri(Environment.GetEnvironmentVariable("StationURI"));
+
+                application.ApplicationName = stationUri.DnsSafeHost.ToLowerInvariant();
+                application.ConfigSectionName = "Opc.Ua.Station";
+                application.ApplicationType = ApplicationType.Server;
+
+                string applicationUri = application.ApplicationName.Insert(application.ApplicationName.IndexOf("."), ".line1.building1") + ".contoso";
+
+                // replace the certificate subject name in the configuration
+                string configFilePath = Path.Combine(Directory.GetCurrentDirectory(), application.ConfigSectionName + ".Config.xml");
+                string configFileContent = File.ReadAllText(configFilePath).Replace("UndefinedStationName", application.ApplicationName).Replace("UndefinedStationUri", applicationUri);
+                File.WriteAllText(configFilePath, configFileContent);
+
+                // load the application configuration.
+                ApplicationConfiguration config = await application.LoadApplicationConfiguration(false);
+                if (config == null)
+                {
+                    throw new Exception("Application configuration is null!");
+                }
+
+                // calculate our power consumption in [kW] and cycle time in [s]
+                PowerConsumption = ulong.Parse(Environment.GetEnvironmentVariable("PowerConsumption"), NumberStyles.Integer);
+                CycleTime = ulong.Parse(Environment.GetEnvironmentVariable("CycleTime"), NumberStyles.Integer);
+
+                // print out our configuration
+                Console.WriteLine("OPC UA Server Configuration:");
+                Console.WriteLine("----------------------------");
+                Console.WriteLine("OPC UA Endpoint: " + config.ServerConfiguration.BaseAddresses[0].ToString());
+                Console.WriteLine("Application URI: " + config.ApplicationUri);
+                Console.WriteLine("Power consumption: " + PowerConsumption.ToString() + "kW");
+                Console.WriteLine("Cycle time: " + CycleTime.ToString() + "s");
+
+                // load the application configuration
+                ApplicationConfiguration appConfiguration = application.LoadApplicationConfiguration(false).Result;
+
+                // hook up OPC UA stack traces
+                _traceMasks = appConfiguration.TraceConfiguration.TraceMasks;
+                Utils.Tracing.TraceEventHandler += new EventHandler<TraceEventArgs>(OpcStackLoggingHandler);
+
+                // check the application certificate
+                bool certOK = await application.CheckApplicationInstanceCertificate(false, 0).ConfigureAwait(false);
+                if (!certOK)
+                {
+                    throw new Exception("Application instance certificate invalid!");
+                }
+
+                // create OPC UA cert validator
+                application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
+                application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(MESCertificateValidationCallback);
+                application.ApplicationConfiguration.CertificateValidator.Update(application.ApplicationConfiguration).GetAwaiter().GetResult();
+
+                string issuerPath = Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs");
+                if (!Directory.Exists(issuerPath))
+                {
+                    Directory.CreateDirectory(issuerPath);
+                }
+
+                // start the server.
+                await application.Start(new FactoryStationServer(true));
+
+                Console.WriteLine("Server started. Press any key to exit.");
+
+                try
+                {
+                    Console.ReadKey(true);
+                }
+                catch (Exception)
+                {
+                    // wait forever if there is no console
+                    Thread.Sleep(Timeout.Infinite);
+                }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // wait forever if there is no console
-                Thread.Sleep(Timeout.Infinite);
+                Console.WriteLine("Critical Exception: {0}, Station restarting!", ex.Message);
+
+                try
+                {
+                    application.Stop();
+                }
+                catch (Exception)
+                {
+                    // do nothing
+                }
             }
         }
 

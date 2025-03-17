@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: edc-dashboard-namespace
+spec:
+  finalizers:
+  - kubernetes
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edc-dashboard
+  namespace: edc-dashboard-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edc-dashboard
+  template:
+    metadata:
+      labels:
+        app: edc-dashboard
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: edc-dashboard
+        image: fraunhoferiosb/edc-extension4aas-dashboard:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: edc-dashboard
+  namespace: edc-dashboard-namespace
+spec:
+  type: LoadBalancer
+  ports:
+  - targetPort: 80
+    port: 80
+  selector:
+    app: edc-dashboard

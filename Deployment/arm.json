@@ -343,10 +343,7 @@
             "maxReplicas": "1"
           }
         }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]"
-      ]
+      }
     },
     {
       "type": "Microsoft.KeyVault/vaults",

@@ -419,6 +419,11 @@
               "name": "watttimepassword",
               "keyVaultUrl": "[concat('https://', parameters('resourcesName'), '-KV.vault.azure.net/secrets/watttimepassword')]",
               "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+            },
+            {
+              "name": "adminpassword",
+              "keyVaultUrl": "[concat('https://', parameters('resourcesName'), '-KV.vault.azure.net/secrets/adminpassword')]",
+              "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
             }
           ],
           "ingress": {
@@ -467,7 +472,7 @@
                 },
                 {
                   "name": "ServicePassword",
-                  "value": "[parameters('adminPassword')]"
+                  "secretRef": "adminpassword"
                 }
               ],
               "resources": {

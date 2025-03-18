@@ -361,7 +361,7 @@
         "enableSoftDelete": true,
         "enabledForTemplateDeployment": true,
         "softDeleteRetentionInDays": "90",
-        "publicNetworkAccess": "Disabled",
+        "publicNetworkAccess": "Enabled",
         "enablePurgeProtection": true,
         "networkAcls": {
           "bypass": "AzureServices",
@@ -373,7 +373,10 @@
           "family": "A",
           "name": "standard"
         }
-      }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]"
+      ]
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",

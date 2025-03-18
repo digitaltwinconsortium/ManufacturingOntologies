@@ -28,11 +28,11 @@
     "addressPrefix": "10.0.0.0/16",
     "subnetPrefix": "10.0.0.0/24",
     "subnetPrefix2": "10.0.0.0/23",
-    "dataOwnerRoleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacAzureDigitalTwinsDataOwner'))]",
+    "keyVaultSecretsUserId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacAzurekeyVaultSecretsUser'))]",
     "authRuleResourceId": "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', concat(parameters('resourcesName'), '-EventHubs'), 'RootManageSharedAccessKey')]",
     "azureRbacContributor": "b24988ac-6180-42a0-ab88-20f7382dd24c",
     "azureRbacAzureEventHubsDataOwner": "f526a384-b230-433a-b45c-95f59c4a2dec",
-    "azureRbacAzureDigitalTwinsDataOwner": "bcd981a7-7f74-457b-83e1-cceb9e632ffe",
+    "azureRbacAzurekeyVaultSecretsUser": "4633458b-17de-408a-b874-0445c86b69e6",
     "adxClusterName": "[concat(parameters('resourcesName'), 'ADX')]",
     "adxDBName": "[concat(parameters('resourcesName'), '-DB')]",
     "eventHubsNamespaceName": "[concat(parameters('resourcesName'), '-EventHubs')]"
@@ -56,7 +56,8 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/virtualNetworks', concat(parameters('resourcesName'), '-Network-CA'))]"
+        "[resourceId('Microsoft.Network/virtualNetworks', concat(parameters('resourcesName'), '-Network-CA'))]",
+        "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV'))]"
       ]
     },
     {
@@ -348,6 +349,57 @@
       ]
     },
     {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2016-10-01",
+      "name": "[concat(parameters('resourcesName'), '-KV')]",
+      "location": "[resourceGroup().location]",
+      "tags": {},
+      "properties": {
+        "tenantId": "[subscription().tenantId]",
+        "accessPolicies": [],
+        "enableRbacAuthorization": true,
+        "enableSoftDelete": true,
+        "softDeleteRetentionInDays": "90",
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2021-04-01-preview",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV'))]"
+      ],
+      "name": "[format('{0}/{1}', concat(parameters('resourcesName'), '-KV'), 'watttimepassword')]",
+      "properties": {
+        "value": "<yourpassword>"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2021-04-01-preview",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV'))]"
+      ],
+      "name": "[format('{0}/{1}', concat(parameters('resourcesName'), '-KV'), 'adminpassword')]",
+      "properties": {
+        "value": "[parameters('adminPassword')]"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2021-04-01-preview",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV'))]"
+      ],
+      "name": "[format('{0}/{1}', concat(parameters('resourcesName'), '-KV'), 'brokerpassword')]",
+      "properties": {
+        "value": "[listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString]"
+      }
+    },
+    {
       "type": "Microsoft.App/containerApps",
       "apiVersion": "2024-03-01",
       "name": "[concat(parameters('resourcesName'), '-aas-repository')]",
@@ -362,6 +414,13 @@
         "workloadProfileName": "Consumption",
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
         "configuration": {
+          "secrets": [
+            {
+              "name": "watttimepassword",
+              "keyVaultUrl": "[concat(reference(resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV')).vaultUri), 'secrets/watttimepassword')]",
+              "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+            }
+          ],
           "ingress": {
             "external": true,
             "transport": "Auto",
@@ -404,7 +463,7 @@
                 },
                 {
                   "name": "WATTTIME_PASSWORD",
-                  "value": ""
+                  "secretRef": "watttimepassword"
                 },
                 {
                   "name": "ServicePassword",
@@ -442,6 +501,18 @@
         "workloadProfileName": "Consumption",
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
         "configuration": {
+          "secrets": [
+            {
+              "name": "adminpassword",
+              "keyVaultUrl": "[concat(reference(resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV')).vaultUri), 'secrets/adminpassword')]",
+              "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+            },
+            {
+              "name": "brokerpassword",
+              "keyVaultUrl": "[concat(reference(resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV')).vaultUri), 'secrets/brokerpassword')]",
+              "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+            }
+          ],
           "ingress": {
             "external": true,
             "transport": "Auto",
@@ -468,7 +539,7 @@
                 },
                 {
                   "name": "ADMIN_PASSWORD",
-                  "value": "[parameters('adminPassword')]"
+                  "secretRef": "adminpassword"
                 },
                 {
                   "name": "ADX_INSTANCE_URL",
@@ -504,7 +575,7 @@
                 },
                 {
                   "name": "BROKER_PASSWORD",
-                  "value": "[listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString]"
+                  "secretRef": "brokerpassword"
                 },
                 {
                   "name": "TOPIC",
@@ -859,7 +930,8 @@
       },
       "properties": {
         "isAutoInflateEnabled": true,
-        "maximumThroughputUnits": 16
+        "maximumThroughputUnits": 16,
+        "minimumTlsVersion": "1.2"
       }
     },
     {
@@ -937,12 +1009,12 @@
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-10-01-preview",
-      "name": "[guid(variables('dataOwnerRoleDefinitionId'), resourceGroup().id)]",
+      "name": "[guid(variables('keyVaultSecretsUserId'), resourceGroup().id)]",
       "dependsOn": [
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
       ],
       "properties": {
-        "roleDefinitionId": "[variables('dataOwnerRoleDefinitionId')]",
+        "roleDefinitionId": "[variables('keyVaultSecretsUserId')]",
         "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId]",
         "principalType": "ServicePrincipal"
       }

@@ -359,6 +359,7 @@
         "accessPolicies": [],
         "enableRbacAuthorization": true,
         "enableSoftDelete": true,
+        "enabledForTemplateDeployment": true,
         "softDeleteRetentionInDays": "90",
         "publicNetworkAccess": "Disabled",
         "enablePurgeProtection": true,

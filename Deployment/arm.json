@@ -362,6 +362,12 @@
         "softDeleteRetentionInDays": "90",
         "publicNetworkAccess": "Disabled",
         "enablePurgeProtection": true,
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "defaultAction": "Deny",
+          "ipRules": [],
+          "virtualNetworkRules": []
+        },
         "sku": {
           "family": "A",
           "name": "standard"

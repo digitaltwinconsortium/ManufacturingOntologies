@@ -417,7 +417,7 @@
           "secrets": [
             {
               "name": "watttimepassword",
-              "keyVaultUrl": "[concat(reference(resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV')).vaultUri), 'secrets/watttimepassword')]",
+              "keyVaultUrl": "[concat('https://', parameters('resourcesName'), '-KV.vault.azure.net/secrets/watttimepassword')]",
               "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
             }
           ],
@@ -504,12 +504,12 @@
           "secrets": [
             {
               "name": "adminpassword",
-              "keyVaultUrl": "[concat(reference(resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV')).vaultUri), 'secrets/adminpassword')]",
+              "keyVaultUrl": "[concat('https://', parameters('resourcesName'), '-KV.vault.azure.net/secrets/adminpassword')]",
               "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
             },
             {
               "name": "brokerpassword",
-              "keyVaultUrl": "[concat(reference(resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV')).vaultUri), 'secrets/brokerpassword')]",
+              "keyVaultUrl": "[concat('https://', parameters('resourcesName'), '-KV.vault.azure.net/secrets/brokerpassword')]",
               "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
             }
           ],

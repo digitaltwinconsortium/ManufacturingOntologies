@@ -375,17 +375,6 @@
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV'))]"
       ],
-      "name": "[format('{0}/{1}', concat(parameters('resourcesName'), '-KV'), 'watttimepassword')]",
-      "properties": {
-        "value": "<yourpassword>"
-      }
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2021-04-01-preview",
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV'))]"
-      ],
       "name": "[format('{0}/{1}', concat(parameters('resourcesName'), '-KV'), 'adminpassword')]",
       "properties": {
         "value": "[parameters('adminPassword')]"
@@ -429,11 +418,6 @@
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
         "configuration": {
           "secrets": [
-            {
-              "name": "watttimepassword",
-              "keyVaultUrl": "[concat('https://', parameters('resourcesName'), '-KV.vault.azure.net/secrets/watttimepassword')]",
-              "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
-            },
             {
               "name": "servicepassword",
               "keyVaultUrl": "[concat('https://', parameters('resourcesName'), '-KV.vault.azure.net/secrets/servicepassword')]",
@@ -482,7 +466,7 @@
                 },
                 {
                   "name": "WATTTIME_PASSWORD",
-                  "secretRef": "watttimepassword"
+                  "value": ""
                 },
                 {
                   "name": "ServicePassword",

@@ -363,12 +363,6 @@
         "softDeleteRetentionInDays": "90",
         "publicNetworkAccess": "Enabled",
         "enablePurgeProtection": true,
-        "networkAcls": {
-          "bypass": "AzureServices",
-          "defaultAction": "Deny",
-          "ipRules": [],
-          "virtualNetworkRules": []
-        },
         "sku": {
           "family": "A",
           "name": "standard"
@@ -377,7 +371,7 @@
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2024-12-01-preview",
+      "apiVersion": "2021-04-01-preview",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV'))]"
       ],
@@ -388,7 +382,7 @@
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2024-12-01-preview",
+      "apiVersion": "2021-04-01-preview",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV'))]"
       ],
@@ -399,7 +393,7 @@
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2024-12-01-preview",
+      "apiVersion": "2021-04-01-preview",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV'))]"
       ],
@@ -410,7 +404,7 @@
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2024-12-01-preview",
+      "apiVersion": "2021-04-01-preview",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV'))]"
       ],

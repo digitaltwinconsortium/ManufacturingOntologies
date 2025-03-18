@@ -370,7 +370,7 @@
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2021-04-01-preview",
+      "apiVersion": "2024-12-01-preview",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV'))]"
       ],
@@ -381,7 +381,7 @@
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2021-04-01-preview",
+      "apiVersion": "2024-12-01-preview",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV'))]"
       ],
@@ -392,13 +392,24 @@
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2021-04-01-preview",
+      "apiVersion": "2024-12-01-preview",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV'))]"
       ],
       "name": "[format('{0}/{1}', concat(parameters('resourcesName'), '-KV'), 'brokerpassword')]",
       "properties": {
         "value": "[listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString]"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2024-12-01-preview",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV'))]"
+      ],
+      "name": "[format('{0}/{1}', concat(parameters('resourcesName'), '-KV'), 'servicepassword')]",
+      "properties": {
+        "value": "[parameters('adminPassword')]"
       }
     },
     {
@@ -423,8 +434,8 @@
               "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
             },
             {
-              "name": "adminpassword",
-              "keyVaultUrl": "[concat('https://', parameters('resourcesName'), '-KV.vault.azure.net/secrets/adminpassword')]",
+              "name": "servicepassword",
+              "keyVaultUrl": "[concat('https://', parameters('resourcesName'), '-KV.vault.azure.net/secrets/servicepassword')]",
               "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
             }
           ],
@@ -474,7 +485,7 @@
                 },
                 {
                   "name": "ServicePassword",
-                  "secretRef": "adminpassword"
+                  "secretRef": "servicepassword"
                 }
               ],
               "resources": {

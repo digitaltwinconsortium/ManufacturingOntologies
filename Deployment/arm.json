@@ -356,13 +356,25 @@
       "tags": {},
       "properties": {
         "tenantId": "[subscription().tenantId]",
+        "networkAcls": {
+          "bypass": "None",
+          "defaultAction": "Deny",
+          "ipRules": [],
+          "virtualNetworkRules": [
+            {
+              "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(parameters('resourcesName'), '-Network-CA'), concat(parameters('resourcesName'), '-Subnet-CA'))]"
+            }
+          ]
+        },
         "accessPolicies": [],
-        "enableRbacAuthorization": true,
+        "enabledForDeployment": false,
+        "enabledForDiskEncryption": false,
+        "enabledForTemplateDeployment": false,
         "enableSoftDelete": true,
-        "enabledForTemplateDeployment": true,
-        "softDeleteRetentionInDays": "90",
-        "publicNetworkAccess": "Enabled",
+        "softDeleteRetentionInDays": 90,
+        "enableRbacAuthorization": true,
         "enablePurgeProtection": true,
+        "publicNetworkAccess": "Enabled",
         "sku": {
           "family": "A",
           "name": "standard"

@@ -720,6 +720,14 @@
             "name": "[concat(parameters('resourcesName'), '-Subnet-CA')]",
             "properties": {
               "addressPrefix": "[variables('subnetPrefix2')]",
+              "serviceEndpoints": [
+                {
+                  "service": "Microsoft.KeyVault",
+                  "locations": [
+                    "*"
+                  ]
+                }
+              ],
               "delegations": [
                 {
                   "name": "appServiceDelegation",
@@ -937,7 +945,7 @@
     },
     {
       "type": "Microsoft.EventHub/namespaces",
-      "apiVersion": "2021-11-01",
+      "apiVersion": "2024-01-01",
       "name": "[variables('eventHubsNamespaceName')]",
       "location": "[resourceGroup().location]",
       "sku": {

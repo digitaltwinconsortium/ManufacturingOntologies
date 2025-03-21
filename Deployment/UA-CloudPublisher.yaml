@@ -34,6 +34,18 @@ spec:
           value: "myPassword"
         ports:
         - containerPort: 8080
+        volumeMounts:
+        - name: "settings"
+          mountPath: "/app/settings"
+        - name: "pki"
+          mountPath: "/app/pki"
+      volumes:
+        - name: "settings"
+          hostPath:
+            path: "/mnt/c/K3s/PublisherConfig/Settings"
+        - name: "pki"
+          hostPath:
+            path: "/mnt/c/K3s/PublisherConfig/PKI"
 ---
 apiVersion: v1
 kind: Service

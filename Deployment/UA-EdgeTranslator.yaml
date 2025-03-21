@@ -34,6 +34,23 @@ spec:
           value: "myPassword"
         ports:
         - containerPort: 4840
+        volumeMounts:
+        - name: "settings"
+          mountPath: "/app/settings"
+        - name: "pki"
+          mountPath: "/app/pki"
+        - name: "logs"
+          mountPath: "/app/logs"
+      volumes:
+        - name: "settings"
+          hostPath:
+            path: "/mnt/c/K3s/UAEdgeTranslator/Settings"
+        - name: "pki"
+          hostPath:
+            path: "/mnt/c/K3s/UAEdgeTranslator/PKI"
+        - name: "logs"
+          hostPath:
+            path: "/mnt/c/K3s/UAEdgeTranslator/Logs"
 ---
 apiVersion: v1
 kind: Service

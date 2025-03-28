@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: umati-gateway-namespace
+spec:
+  finalizers:
+  - kubernetes
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: umati-gateway
+  namespace: umati-gateway-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: umati-gateway
+  template:
+    metadata:
+      labels:
+        app: umati-gateway
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: umati-gateway
+        image: ghcr.io/umati/umatigateway:develop
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: "configuration"
+          mountPath: "/app/Configuration"
+      volumes:
+        - name: "configuration"
+          hostPath:
+            path: "/mnt/c/K3s/UmatiGatewayConfig/Configuration"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: umati-gateway
+  namespace: umati-gateway-namespace
+spec:
+  type: LoadBalancer
+  ports:
+  - targetPort: 8080
+    port: 8080
+  selector:
+    app: umati-gateway

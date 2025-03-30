@@ -25,7 +25,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: umati-gateway
-        image: ghcr.io/umati/umatigateway:develop
+        image: ghcr.io/barnstee/umatigateway:develop
         imagePullPolicy: Always
         ports:
         - containerPort: 8080

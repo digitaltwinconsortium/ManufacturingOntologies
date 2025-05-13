@@ -140,7 +140,7 @@ namespace Station.Simulation
                 Utils.Tracing.TraceEventHandler += new EventHandler<TraceEventArgs>(OpcStackLoggingHandler);
 
                 // check the application certificate
-                bool certOK = application.CheckApplicationInstanceCertificate(false, 0).GetAwaiter().GetResult();
+                bool certOK = application.CheckApplicationInstanceCertificates(false, 0).GetAwaiter().GetResult();
                 if (!certOK)
                 {
                     throw new Exception("Application instance certificate invalid!");
@@ -682,7 +682,7 @@ namespace Station.Simulation
                 Utils.Tracing.TraceEventHandler += new EventHandler<TraceEventArgs>(OpcStackLoggingHandler);
 
                 // check the application certificate
-                bool certOK = await application.CheckApplicationInstanceCertificate(false, 0).ConfigureAwait(false);
+                bool certOK = await application.CheckApplicationInstanceCertificates(false, 0).ConfigureAwait(false);
                 if (!certOK)
                 {
                     throw new Exception("Application instance certificate invalid!");

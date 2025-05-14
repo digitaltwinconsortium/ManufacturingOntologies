@@ -18,11 +18,42 @@
   <ApplicationType>ClientAndServer_2</ApplicationType>
 
   <SecurityConfiguration>
-    <ApplicationCertificate>
-      <StoreType>Directory</StoreType>
-      <StorePath>./pki/own</StorePath>
-      <SubjectName>CN=UndefinedMESName</SubjectName>
-    </ApplicationCertificate>
+    <ApplicationCertificates>
+      <CertificateIdentifier>
+        <StoreType>Directory</StoreType>
+        <StorePath>./pki/own</StorePath>
+        <SubjectName>CN=UndefinedMESName</SubjectName>
+        <CertificateTypeString>RsaSha256</CertificateTypeString>
+      </CertificateIdentifier>
+      <CertificateIdentifier>
+        <!-- <TypeId>NistP256</TypeId> -->
+        <StoreType>Directory</StoreType>
+        <StorePath>./pki/own</StorePath>
+        <SubjectName>CN=UndefinedMESName</SubjectName>
+        <CertificateTypeString>NistP256</CertificateTypeString>
+      </CertificateIdentifier>
+      <CertificateIdentifier>
+        <!-- <TypeId>NistP384</TypeId> -->
+        <StoreType>Directory</StoreType>
+        <StorePath>./pki/own</StorePath>
+        <SubjectName>CN=UndefinedMESName</SubjectName>
+        <CertificateTypeString>NistP384</CertificateTypeString>
+      </CertificateIdentifier>
+      <CertificateIdentifier>
+        <!-- <TypeId>BrainpoolP256r1</TypeId> -->
+        <StoreType>Directory</StoreType>
+        <StorePath>./pki/own</StorePath>
+        <SubjectName>CN=UndefinedMESName</SubjectName>
+        <CertificateTypeString>BrainpoolP256r1</CertificateTypeString>
+      </CertificateIdentifier>
+      <CertificateIdentifier>
+        <!-- <TypeId>BrainpoolP384r1</TypeId> -->
+        <StoreType>Directory</StoreType>
+        <StorePath>./pki/own</StorePath>
+        <SubjectName>CN=UndefinedMESName</SubjectName>
+        <CertificateTypeString>BrainpoolP384r1</CertificateTypeString>
+      </CertificateIdentifier>
+    </ApplicationCertificates>
     <TrustedIssuerCertificates>
       <StoreType>Directory</StoreType>
       <StorePath>./pki/issuer</StorePath>
@@ -39,6 +70,11 @@
     <RejectSHA1SignedCertificates>false</RejectSHA1SignedCertificates>
     <MinimumCertificateKeySize>1024</MinimumCertificateKeySize>
     <SendCertificateChain>false</SendCertificateChain>
+    <!-- Where the User issers list is stored-->
+    <UserIssuerCertificates>
+      <StoreType>Directory</StoreType>
+      <StorePath>./pki/userIssuer</StorePath>
+    </UserIssuerCertificates>
     <UserIssuerCertificates>
       <StoreType>Directory</StoreType>
       <StorePath>./pki/issuerUser</StorePath>
@@ -67,7 +103,7 @@
          Note that some protocols do not distinguish between bytes and arrays.
          In these cases the binding will choose the larger of
          MaxByteStringLength or MaxArrayLength-->
-    <MaxArrayLength>65535</MaxArrayLength>
+    <MaxArrayLength>1048576</MaxArrayLength>
 
     <!-- The maximum size of any message -->
     <MaxMessageSize>4194304</MaxMessageSize>
@@ -97,11 +133,7 @@
     <SecurityPolicies>
       <ServerSecurityPolicy>
         <SecurityMode>SignAndEncrypt_3</SecurityMode>
-        <SecurityPolicyUri></SecurityPolicyUri>
-      </ServerSecurityPolicy>
-      <ServerSecurityPolicy>
-        <SecurityMode>Sign_2</SecurityMode>
-        <SecurityPolicyUri></SecurityPolicyUri>
+        <SecurityPolicyUri>http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256</SecurityPolicyUri>
       </ServerSecurityPolicy>
     </SecurityPolicies>
 
@@ -148,7 +180,7 @@
   <!-- This element is only required for Client and ClientServer applications -->
   <ClientConfiguration>
     <!-- The default timeout for new sessions -->
-    <DefaultSessionTimeout>600000</DefaultSessionTimeout>
+    <DefaultSessionTimeout>15000</DefaultSessionTimeout>
 
     <!-- The well-known URLs for the local discovery servers
          URLs are tested in the order they appear in this list. -->

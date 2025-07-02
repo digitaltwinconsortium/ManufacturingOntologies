@@ -18,6 +18,11 @@
   <ApplicationType>ClientAndServer_2</ApplicationType>
 
   <SecurityConfiguration>
+    <ApplicationCertificate>
+      <StoreType>Directory</StoreType>
+      <StorePath>./pki/own</StorePath>
+      <SubjectName>CN=UndefinedMESName</SubjectName>
+    </ApplicationCertificate>
     <ApplicationCertificates>
       <CertificateIdentifier>
         <StoreType>Directory</StoreType>

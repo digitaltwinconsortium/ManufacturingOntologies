@@ -10,6 +10,11 @@
   <ApplicationType>Server_0</ApplicationType>
 
   <SecurityConfiguration>
+    <ApplicationCertificate>
+      <StoreType>Directory</StoreType>
+      <StorePath>./pki/own</StorePath>
+      <SubjectName>CN=UndefinedStationName</SubjectName>
+    </ApplicationCertificate>
     <ApplicationCertificates>
       <CertificateIdentifier>
         <StoreType>Directory</StoreType>

@@ -34,6 +34,10 @@ spec:
           value: "myPassword"
         ports:
         - containerPort: 4840
+        - containerPort: 5000
+        - containerPort: 5001
+        - containerPort: 19520
+        - containerPort: 19521
         volumeMounts:
         - name: "settings"
           mountPath: "/app/settings"
@@ -62,5 +66,13 @@ spec:
   ports:
   - targetPort: 4840
     port: 4840
+  - targetPort: 5000
+    port: 5000
+  - targetPort: 5001
+    port: 5001
+  - targetPort: 19520
+    port: 19520
+  - targetPort: 19521
+    port: 19521
   selector:
     app: ua-edgetranslator

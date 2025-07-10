@@ -64,15 +64,20 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-  - targetPort: 4840
+  - name: opcua
+    targetPort: 4840
     port: 4840
-  - targetPort: 5000
+  - name: lorawan
+    targetPort: 5000
     port: 5000
-  - targetPort: 5001
+  - name: securelorawan
+    targetPort: 5001
     port: 5001
-  - targetPort: 19520
+  - name: ocpp
+    targetPort: 19520
     port: 19520
-  - targetPort: 19521
+  - name: secureocpp
+    targetPort: 19521
     port: 19521
   selector:
     app: ua-edgetranslator

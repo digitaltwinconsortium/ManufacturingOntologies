@@ -13,7 +13,7 @@ namespace Mes.Simulation
         const int c_reconnectPeriod = 10000;
         const uint c_connectTimeout = 60000;
 
-        public Session Session { get; private set; }
+        public ISession Session { get; private set; }
 
         public bool SessionConnected => Session != null;
         private SessionReconnectHandler m_reconnectHandler = null;
@@ -28,7 +28,7 @@ namespace Mes.Simulation
             string configuredUsername = Environment.GetEnvironmentVariable("OPCUA_USERNAME");
             string configuredPassword = Environment.GetEnvironmentVariable("OPCUA_PASSWORD");
 
-            Session = Session.Create(
+            Session = DefaultSessionFactory.Instance.CreateAsync(
                 appConfiguration,
                 endpoint,
                 true,

@@ -133,14 +133,14 @@ namespace Station.Simulation
                 File.WriteAllText(configFilePath, configFileContent);
 
                 // load the application configuration
-                ApplicationConfiguration appConfiguration = application.LoadApplicationConfiguration(false).Result;
+                ApplicationConfiguration appConfiguration = application.LoadApplicationConfigurationAsync(false).GetAwaiter().GetResult();
 
                 // hook up OPC UA stack traces
                 _traceMasks = appConfiguration.TraceConfiguration.TraceMasks;
                 Utils.Tracing.TraceEventHandler += new EventHandler<TraceEventArgs>(OpcStackLoggingHandler);
 
                 // check the application certificate
-                bool certOK = application.CheckApplicationInstanceCertificate(false, 0).GetAwaiter().GetResult();
+                bool certOK = application.CheckApplicationInstanceCertificatesAsync(false, 0).GetAwaiter().GetResult();
                 if (!certOK)
                 {
                     throw new Exception("Application instance certificate invalid!");
@@ -149,7 +149,7 @@ namespace Station.Simulation
                 // create OPC UA cert validator
                 application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
                 application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(MESCertificateValidationCallback);
-                application.ApplicationConfiguration.CertificateValidator.Update(application.ApplicationConfiguration).GetAwaiter().GetResult();
+                application.ApplicationConfiguration.CertificateValidator.UpdateAsync(application.ApplicationConfiguration).GetAwaiter().GetResult();
 
                 string issuerPath = Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs");
                 if (!Directory.Exists(issuerPath))
@@ -158,7 +158,7 @@ namespace Station.Simulation
                 }
 
                 // start the server.
-                application.Start(new FactoryStationServer(false)).GetAwaiter().GetResult();
+                application.StartAsync(new FactoryStationServer(false)).GetAwaiter().GetResult();
                 Console.WriteLine("Server started.");
 
                 // replace the production line name in the list of endpoints to connect to.
@@ -308,8 +308,8 @@ namespace Station.Simulation
                     {
                         Console.WriteLine("#{0} Assembly --> Test", m_serialNumber[c_Assembly]);
                         m_serialNumber[c_Test] = m_serialNumber[c_Assembly];
-                        m_sessionTest.Session.Call(m_station.RootMethodNode, m_station.ExecuteMethodNode, m_serialNumber[c_Test]);
-                        m_sessionAssembly.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
+                        m_sessionTest.Session.CallAsync(m_station.RootMethodNode, m_station.ExecuteMethodNode, CancellationToken.None, m_serialNumber[c_Test]).GetAwaiter().GetResult();
+                        m_sessionAssembly.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
                         m_lastActivity = DateTime.UtcNow;
                         m_doneAssembly = false;
                     }
@@ -322,8 +322,8 @@ namespace Station.Simulation
                     {
                         Console.WriteLine("#{0} Test --> Packaging", m_serialNumber[c_Test]);
                         m_serialNumber[c_Packaging] = m_serialNumber[c_Test];
-                        m_sessionPackaging.Session.Call(m_station.RootMethodNode, m_station.ExecuteMethodNode, m_serialNumber[c_Packaging]);
-                        m_sessionTest.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
+                        m_sessionPackaging.Session.CallAsync(m_station.RootMethodNode, m_station.ExecuteMethodNode, CancellationToken.None, m_serialNumber[c_Packaging]).GetAwaiter().GetResult();
+                        m_sessionTest.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
                         m_lastActivity = DateTime.UtcNow;
                         m_doneTest = false;
                     }
@@ -347,7 +347,7 @@ namespace Station.Simulation
             }
         }
 
-        private static bool CreateMonitoredItem(NodeId nodeId, Session session, MonitoredItemNotificationEventHandler handler)
+        private static bool CreateMonitoredItem(NodeId nodeId, ISession session, MonitoredItemNotificationEventHandler handler)
         {
             if (session != null)
             {
@@ -355,7 +355,7 @@ namespace Station.Simulation
                 Subscription subscription = session.DefaultSubscription;
                 if (session.AddSubscription(subscription))
                 {
-                    subscription.Create();
+                    subscription.CreateAsync().GetAwaiter().GetResult();
                 }
 
                 // add the new monitored item.
@@ -380,7 +380,7 @@ namespace Station.Simulation
 
                     monitoredItem.Notification += handler;
                     subscription.AddItem(monitoredItem);
-                    subscription.ApplyChanges();
+                    subscription.ApplyChangesAsync().GetAwaiter().GetResult();
 
                     return true;
                 }
@@ -409,18 +409,18 @@ namespace Station.Simulation
                 Console.WriteLine("<<Assembly line reset!>>");
 
                 // reset assembly line
-                 m_sessionAssembly.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
-                m_sessionTest.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
-                m_sessionPackaging.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
+                m_sessionAssembly.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
+                m_sessionTest.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
+                m_sessionPackaging.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
 
                 // read assembly line status
-                m_statusAssembly = (StationStatus)m_sessionAssembly.Session.ReadValue(m_station.StatusNode).Value;
-                m_statusTest = (StationStatus)m_sessionTest.Session.ReadValue(m_station.StatusNode).Value;
-                m_statusPackaging = (StationStatus)m_sessionPackaging.Session.ReadValue(m_station.StatusNode).Value;
+                m_statusAssembly = (StationStatus)m_sessionAssembly.Session.ReadValueAsync(m_station.StatusNode).GetAwaiter().GetResult().Value;
+                m_statusTest = (StationStatus)m_sessionTest.Session.ReadValueAsync(m_station.StatusNode).GetAwaiter().GetResult().Value;
+                m_statusPackaging = (StationStatus)m_sessionPackaging.Session.ReadValueAsync(m_station.StatusNode).GetAwaiter().GetResult().Value;
 
                 Console.WriteLine("#{0} Assemble ", m_serialNumber[c_Assembly]);
                 // start assembly
-                m_sessionAssembly.Session.Call(m_station.RootMethodNode, m_station.ExecuteMethodNode, m_serialNumber[c_Assembly]);
+                m_sessionAssembly.Session.CallAsync(m_station.RootMethodNode, m_station.ExecuteMethodNode, CancellationToken.None, m_serialNumber[c_Assembly]).GetAwaiter().GetResult();
 
                 // reset communication timeout
                 m_lastActivity = DateTime.UtcNow;
@@ -448,7 +448,7 @@ namespace Station.Simulation
                                 // build the next product by calling execute with new serial number
                                 m_serialNumber[c_Assembly]++;
                                 Console.WriteLine("#{0} Assemble ", m_serialNumber[c_Assembly]);
-                                m_sessionAssembly.Session.Call(m_station.RootMethodNode, m_station.ExecuteMethodNode, m_serialNumber[c_Assembly]);
+                                m_sessionAssembly.Session.CallAsync(m_station.RootMethodNode, m_station.ExecuteMethodNode, CancellationToken.None, m_serialNumber[c_Assembly]).GetAwaiter().GetResult();
                             }
                             break;
 
@@ -463,7 +463,7 @@ namespace Station.Simulation
                         case StationStatus.Discarded:
                             // product was automatically discarded by the station, reset
                             Console.WriteLine("#{0} Discarded in Assembly", m_serialNumber[c_Assembly]);
-                            m_sessionAssembly.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
+                            m_sessionAssembly.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
                             break;
 
                         case StationStatus.Fault:
@@ -474,7 +474,7 @@ namespace Station.Simulation
                                 await Task.Delay(c_waitTime);
                                 Console.WriteLine("<<AssemblyStation: Restart from Fault>>");
 
-                                m_sessionAssembly.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
+                                m_sessionAssembly.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
                             });
                             break;
 
@@ -519,7 +519,7 @@ namespace Station.Simulation
 
                         case StationStatus.Discarded:
                             Console.WriteLine("#{0} Tested, not Passed, Discarded", m_serialNumber[c_Test]);
-                            m_sessionTest.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
+                            m_sessionTest.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
                             break;
 
                         case StationStatus.Fault:
@@ -532,7 +532,7 @@ namespace Station.Simulation
                                     Console.WriteLine("<<TestStation: Restart from Fault>>");
 
                                     m_faultTest = false;
-                                    m_sessionTest.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
+                                    m_sessionTest.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
                                 });
                             }
                             break;
@@ -575,12 +575,12 @@ namespace Station.Simulation
                         case StationStatus.Done:
                             Console.WriteLine("#{0} Packaged", m_serialNumber[c_Packaging]);
                             // last station (packaging) is done, reset so the next product can be built
-                            m_sessionPackaging.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
+                            m_sessionPackaging.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
                             break;
 
                         case StationStatus.Discarded:
                             Console.WriteLine("#{0} Discarded in Packaging", m_serialNumber[c_Packaging]);
-                            m_sessionPackaging.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
+                            m_sessionPackaging.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
                             break;
 
                         case StationStatus.Fault:
@@ -593,7 +593,7 @@ namespace Station.Simulation
                                     Console.WriteLine("<<PackagingStation: Restart from Fault>>");
 
                                     m_faultPackaging = false;
-                                    m_sessionPackaging.Session.Call(m_station.RootMethodNode, m_station.ResetMethodNode, null);
+                                    m_sessionPackaging.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
                                 });
                             }
                             break;
@@ -656,7 +656,7 @@ namespace Station.Simulation
                 File.WriteAllText(configFilePath, configFileContent);
 
                 // load the application configuration.
-                ApplicationConfiguration config = await application.LoadApplicationConfiguration(false);
+                ApplicationConfiguration config = await application.LoadApplicationConfigurationAsync(false).ConfigureAwait(false);
                 if (config == null)
                 {
                     throw new Exception("Application configuration is null!");
@@ -674,15 +674,12 @@ namespace Station.Simulation
                 Console.WriteLine("Power consumption: " + PowerConsumption.ToString() + "kW");
                 Console.WriteLine("Cycle time: " + CycleTime.ToString() + "s");
 
-                // load the application configuration
-                ApplicationConfiguration appConfiguration = application.LoadApplicationConfiguration(false).Result;
-
                 // hook up OPC UA stack traces
-                _traceMasks = appConfiguration.TraceConfiguration.TraceMasks;
+                _traceMasks = config.TraceConfiguration.TraceMasks;
                 Utils.Tracing.TraceEventHandler += new EventHandler<TraceEventArgs>(OpcStackLoggingHandler);
 
                 // check the application certificate
-                bool certOK = await application.CheckApplicationInstanceCertificate(false, 0).ConfigureAwait(false);
+                bool certOK = await application.CheckApplicationInstanceCertificatesAsync(false, 0).ConfigureAwait(false);
                 if (!certOK)
                 {
                     throw new Exception("Application instance certificate invalid!");
@@ -691,7 +688,7 @@ namespace Station.Simulation
                 // create OPC UA cert validator
                 application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
                 application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(MESCertificateValidationCallback);
-                application.ApplicationConfiguration.CertificateValidator.Update(application.ApplicationConfiguration).GetAwaiter().GetResult();
+                application.ApplicationConfiguration.CertificateValidator.UpdateAsync(application.ApplicationConfiguration).GetAwaiter().GetResult();
 
                 string issuerPath = Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs");
                 if (!Directory.Exists(issuerPath))
@@ -700,7 +697,7 @@ namespace Station.Simulation
                 }
 
                 // start the server.
-                await application.Start(new FactoryStationServer(true));
+                await application.StartAsync(new FactoryStationServer(true)).ConfigureAwait(false);
 
                 Console.WriteLine("Server started. Press any key to exit.");
 

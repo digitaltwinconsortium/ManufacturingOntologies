@@ -53,7 +53,7 @@ namespace Station.Simulation
             server.SessionManager.ImpersonateUser += new ImpersonateEventHandler(SessionManager_ImpersonateUser);
         }
 
-        private void SessionManager_ImpersonateUser(Session session, ImpersonateEventArgs args)
+        private void SessionManager_ImpersonateUser(ISession session, ImpersonateEventArgs args)
         {
             UserNameIdentityToken userNameToken = args.NewIdentity as UserNameIdentityToken;
             if (userNameToken != null)

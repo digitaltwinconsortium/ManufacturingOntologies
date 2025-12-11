@@ -133,14 +133,14 @@ namespace Station.Simulation
                 File.WriteAllText(configFilePath, configFileContent);
 
                 // load the application configuration
-                ApplicationConfiguration appConfiguration = application.LoadApplicationConfigurationAsync(false).GetAwaiter().GetResult();
+                ApplicationConfiguration appConfiguration = application.LoadApplicationConfiguration(false).GetAwaiter().GetResult();
 
                 // hook up OPC UA stack traces
                 _traceMasks = appConfiguration.TraceConfiguration.TraceMasks;
                 Utils.Tracing.TraceEventHandler += new EventHandler<TraceEventArgs>(OpcStackLoggingHandler);
 
                 // check the application certificate
-                bool certOK = application.CheckApplicationInstanceCertificatesAsync(false, 0).GetAwaiter().GetResult();
+                bool certOK = application.CheckApplicationInstanceCertificate(false, 0).GetAwaiter().GetResult();
                 if (!certOK)
                 {
                     throw new Exception("Application instance certificate invalid!");
@@ -149,7 +149,7 @@ namespace Station.Simulation
                 // create OPC UA cert validator
                 application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
                 application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(MESCertificateValidationCallback);
-                application.ApplicationConfiguration.CertificateValidator.UpdateAsync(application.ApplicationConfiguration).GetAwaiter().GetResult();
+                application.ApplicationConfiguration.CertificateValidator.Update(application.ApplicationConfiguration).GetAwaiter().GetResult();
 
                 string issuerPath = Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs");
                 if (!Directory.Exists(issuerPath))
@@ -158,7 +158,7 @@ namespace Station.Simulation
                 }
 
                 // start the server.
-                application.StartAsync(new FactoryStationServer(false)).GetAwaiter().GetResult();
+                application.Start(new FactoryStationServer(false)).GetAwaiter().GetResult();
                 Console.WriteLine("Server started.");
 
                 // replace the production line name in the list of endpoints to connect to.
@@ -656,7 +656,7 @@ namespace Station.Simulation
                 File.WriteAllText(configFilePath, configFileContent);
 
                 // load the application configuration.
-                ApplicationConfiguration config = await application.LoadApplicationConfigurationAsync(false).ConfigureAwait(false);
+                ApplicationConfiguration config = await application.LoadApplicationConfiguration(false).ConfigureAwait(false);
                 if (config == null)
                 {
                     throw new Exception("Application configuration is null!");
@@ -679,7 +679,7 @@ namespace Station.Simulation
                 Utils.Tracing.TraceEventHandler += new EventHandler<TraceEventArgs>(OpcStackLoggingHandler);
 
                 // check the application certificate
-                bool certOK = await application.CheckApplicationInstanceCertificatesAsync(false, 0).ConfigureAwait(false);
+                bool certOK = await application.CheckApplicationInstanceCertificate(false, 0).ConfigureAwait(false);
                 if (!certOK)
                 {
                     throw new Exception("Application instance certificate invalid!");
@@ -688,7 +688,7 @@ namespace Station.Simulation
                 // create OPC UA cert validator
                 application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
                 application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(MESCertificateValidationCallback);
-                application.ApplicationConfiguration.CertificateValidator.UpdateAsync(application.ApplicationConfiguration).GetAwaiter().GetResult();
+                application.ApplicationConfiguration.CertificateValidator.Update(application.ApplicationConfiguration).GetAwaiter().GetResult();
 
                 string issuerPath = Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs");
                 if (!Directory.Exists(issuerPath))
@@ -697,7 +697,7 @@ namespace Station.Simulation
                 }
 
                 // start the server.
-                await application.StartAsync(new FactoryStationServer(true)).ConfigureAwait(false);
+                await application.Start(new FactoryStationServer(true)).ConfigureAwait(false);
 
                 Console.WriteLine("Server started. Press any key to exit.");
 

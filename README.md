@@ -9,7 +9,7 @@ An ontology defines the language used to describe a system. In the manufacturing
 
 ### Digital Twin Definition Language
 
-The ontologies defined in this repository are described by leveraging the Digital Twin Definition Language (DTDL), which is specified [here](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/DTDL.v2.md).
+The ontologies defined in this repository are described by leveraging the Microsoft Azure Digital Twin Definition Language (DTDL), which is specified [here](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/DTDL.v2.md).
 
 ### W3C Web of Things
 

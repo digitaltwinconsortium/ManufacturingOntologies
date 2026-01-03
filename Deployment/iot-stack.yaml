@@ -1,0 +1,543 @@
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: iot-stack
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ua-edgetranslator
+  namespace: iot-stack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ua-edgetranslator
+  template:
+    metadata:
+      labels:
+        app: ua-edgetranslator
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: ua-edgetranslator
+        image: ghcr.io/opcfoundation/ua-edgetranslator:main
+        imagePullPolicy: Always
+        env:
+        - name: OPCUA_USERNAME
+          value: "myUsername"
+        - name: OPCUA_PASSWORD
+          value: "myPassword"
+        ports:
+        - containerPort: 4840
+        - containerPort: 5000
+        - containerPort: 5001
+        - containerPort: 19520
+        - containerPort: 19521
+        volumeMounts:
+        - name: "settings"
+          mountPath: "/app/settings"
+        - name: "pki"
+          mountPath: "/app/pki"
+        - name: "logs"
+          mountPath: "/app/logs"
+      volumes:
+        - name: "settings"
+          hostPath:
+            path: "/mnt/c/K3s/UAEdgeTranslator/Settings"
+        - name: "pki"
+          hostPath:
+            path: "/mnt/c/K3s/UAEdgeTranslator/PKI"
+        - name: "logs"
+          hostPath:
+            path: "/mnt/c/K3s/UAEdgeTranslator/Logs"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ua-edgetranslator
+  namespace: iot-stack
+spec:
+  type: LoadBalancer
+  ports:
+  - name: opcua
+    targetPort: 4840
+    port: 4840
+  - name: lorawan
+    targetPort: 5000
+    port: 5000
+  - name: securelorawan
+    targetPort: 5001
+    port: 5001
+  - name: ocpp
+    targetPort: 19520
+    port: 19520
+  - name: secureocpp
+    targetPort: 19521
+    port: 19521
+  selector:
+    app: ua-edgetranslator
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ua-cloudpublisher
+  namespace: iot-stack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ua-cloudpublisher
+  template:
+    metadata:
+      labels:
+        app: ua-cloudpublisher
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: ua-cloudpublisher
+        image: ghcr.io/barnstee/ua-cloudpublisher:main
+        imagePullPolicy: Always
+        env:
+        - name: OPCUA_USERNAME
+          value: "myUsername"
+        - name: OPCUA_PASSWORD
+          value: "myPassword"
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: "settings"
+          mountPath: "/app/settings"
+        - name: "pki"
+          mountPath: "/app/pki"
+      volumes:
+        - name: "settings"
+          hostPath:
+            path: "/mnt/c/K3s/PublisherConfig/Settings"
+        - name: "pki"
+          hostPath:
+            path: "/mnt/c/K3s/PublisherConfig/PKI"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ua-cloudpublisher
+  namespace: iot-stack
+spec:
+  type: LoadBalancer
+  ports:
+  - targetPort: 8080
+    port: 8080
+  selector:
+    app: ua-cloudpublisher
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: influxdb-auth
+  namespace: iot-stack
+type: Opaque
+stringData:
+  # Replace with a real InfluxDB v2 API token that has write privileges to the bucket (e.g. generated from within the InfuxDB UI).
+  INFLUX_TOKEN: "<YOUR TOKEN HERE>"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: telegraf-conf
+  namespace: iot-stack
+data:
+  telegraf.conf: |
+    [global_tags]
+      env = "dev"
+
+    [agent]
+      interval = "1s"
+      round_interval = true
+      metric_batch_size = 200
+      metric_buffer_limit = 2000
+      collection_jitter = "0s"
+      flush_interval = "1s"
+      flush_jitter = "0s"
+      logfile = ""
+      omit_hostname = false
+
+    ##################################################################################
+    # MQTT → consume OPC UA PubSub JSON data messages and parse it on ingest (json_v2)
+    ##################################################################################
+    [[inputs.mqtt_consumer]]
+      servers = ["tcp://mosquitto.iot-stack.svc.cluster.local:1883"]
+      topics  = ["data/#"]
+      qos     = 1
+      client_id = "telegraf-mqtt-data"
+      connection_timeout = "30s"
+      persistent_session = false
+
+      # Keep the MQTT topic as a tag (useful for filtering/debugging)
+      topic_tag = "mqtt_topic"
+
+      # Parse payload as json_v2
+      data_format = "json_v2"
+
+      [[inputs.mqtt_consumer.json_v2]]
+        # Measurement name for parsed points
+        measurement_name = "opcua_pubsub"
+
+        # Top-level PublisherId -> tag "publisher"
+        [[inputs.mqtt_consumer.json_v2.tag]]
+          path     = "PublisherId"
+          rename   = "publisher"
+          optional = false
+
+        # OPTIONAL: top-level MessageId as tag
+        [[inputs.mqtt_consumer.json_v2.tag]]
+          path     = "MessageId"
+          rename   = "messageId"
+          optional = true
+
+        # Parse the array Messages[] into one metric per element
+        [[inputs.mqtt_consumer.json_v2.object]]
+          path = "Messages"
+
+          # Use inner timestamp as point time (_time)  ✅
+          timestamp_key    = "Timestamp"
+          timestamp_format = "2006-01-02T15:04:05.999999999Z07:00"
+
+          # Keep nested prefixes so you get fields like Payload_ConnectedToBroker_Value
+          disable_prepend_keys = false
+
+          # Include DataSetWriterId as a TAG ✅
+          tags = ["DataSetWriterId"]
+
+          [inputs.mqtt_consumer.json_v2.object.renames]
+            DataSetWriterId = "datasetWriterId"
+
+    ###########################################################################
+    # UA-METADATA messages (ua-metadata)
+    #
+    # One message describes metadata for a given DataSetWriterId.
+    # We'll store it as measurement "opcua_metadata".
+    #
+    # We:
+    #   - use top-level Timestamp as _time via timestamp_path
+    #   - keep PublisherId + DataSetWriterId as tags
+    #   - extract MetaData.Name and first Field details (Fields[0].*)
+    ###########################################################################
+    [[inputs.mqtt_consumer]]
+      servers = ["tcp://mosquitto.iot-stack.svc.cluster.local:1883"]
+      topics  = ["metadata"]
+      qos     = 1
+      client_id = "telegraf-mqtt-metadata"
+      connection_timeout = "30s"
+      persistent_session = false
+      topic_tag = "mqtt_topic"
+
+      data_format = "json_v2"
+
+      [[inputs.mqtt_consumer.json_v2]]
+        measurement_name = "opcua_metadata"
+
+        # Use the inner Timestamp as point time (_time)
+        timestamp_path    = "Timestamp"
+        timestamp_format  = "2006-01-02T15:04:05.999999999Z07:00"
+
+        # Tags
+        [[inputs.mqtt_consumer.json_v2.tag]]
+          path     = "PublisherId"
+          rename   = "publisher"
+          optional = false
+
+        [[inputs.mqtt_consumer.json_v2.tag]]
+          path     = "DataSetWriterId"
+          rename   = "datasetWriterId"
+          optional = false
+
+        [[inputs.mqtt_consumer.json_v2.tag]]
+          path     = "MessageId"
+          rename   = "messageId"
+          optional = true
+
+        # Metadata name (this can be long; tag is convenient for filtering,
+        # but if you worry about cardinality, switch this to a field below.)
+        [[inputs.mqtt_consumer.json_v2.tag]]
+          path     = "MetaData.Name"
+          rename   = "metaName"
+          optional = true
+
+        # Fields[0] information (first field in the metadata Fields array)
+        [[inputs.mqtt_consumer.json_v2.tag]]
+          path     = "MetaData.Fields.0.Name"
+          rename   = "fieldName"
+          optional = true
+
+        [[inputs.mqtt_consumer.json_v2.tag]]
+          path     = "MetaData.Fields.0.Description"
+          rename   = "fieldDescription"
+          optional = true
+
+        # Store these as numeric fields
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path     = "MetaData.Fields.0.BuiltInType"
+          rename   = "builtInType"
+          type     = "int"
+          optional = true
+
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path     = "MetaData.Fields.0.DataType.Id"
+          rename   = "dataTypeId"
+          type     = "int"
+          optional = true
+
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path     = "MetaData.Fields.0.ValueRank"
+          rename   = "valueRank"
+          type     = "int"
+          optional = true
+
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path     = "MetaData.Fields.0.FieldFlags"
+          rename   = "fieldFlags"
+          type     = "int"
+          optional = true
+
+        # ConfigurationVersion (useful for detecting schema changes)
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path     = "MetaData.ConfigurationVersion.MajorVersion"
+          rename   = "cfgMajor"
+          type     = "int"
+          optional = true
+
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path     = "MetaData.ConfigurationVersion.MinorVersion"
+          rename   = "cfgMinor"
+          type     = "int"
+          optional = true
+
+    ###########################################################################
+    # Output → InfluxDB v2
+    ###########################################################################
+    [[outputs.influxdb_v2]]
+      urls = ["http://influxdb.iot-stack.svc.cluster.local:8086"]
+      token = "$INFLUX_TOKEN"
+      organization = "iot"
+      bucket = "mqtt"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mosquitto-conf
+  namespace: iot-stack
+data:
+  mosquitto.conf: |
+    pid_file /mosquitto/mosquitto.pid
+    persistence true
+    persistence_location /mosquitto/data/
+    log_dest stdout
+    allow_anonymous true
+    listener 1883
+    # For production, consider enabling authentication and TLS
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: influxdb-data
+  namespace: iot-stack
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mosquitto
+  namespace: iot-stack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mosquitto
+  template:
+    metadata:
+      labels:
+        app: mosquitto
+    spec:
+      containers:
+        - name: mosquitto
+          image: eclipse-mosquitto:2.0.18
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 1883
+              name: mqtt
+          volumeMounts:
+            - name: mosquitto-conf
+              mountPath: /mosquitto/config
+            - name: mosquitto-data
+              mountPath: /mosquitto/data
+          livenessProbe:
+            tcpSocket:
+              port: mqtt
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: mqtt
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: mosquitto-conf
+          configMap:
+            name: mosquitto-conf
+            items:
+              - key: mosquitto.conf
+                path: mosquitto.conf
+        - name: mosquitto-data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mosquitto
+  namespace: iot-stack
+spec:
+  type: ClusterIP
+  selector:
+    app: mosquitto
+  ports:
+    - name: mqtt
+      port: 1883
+      targetPort: 1883
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: influxdb
+  namespace: iot-stack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: influxdb
+  template:
+    metadata:
+      labels:
+        app: influxdb
+    spec:
+      containers:
+        - name: influxdb
+          image: influxdb:2.7
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8086
+              name: http
+          env:
+            # Optional first-run setup via env vars (if not using the UI)
+            - name: INFLUXD_REPORTING_DISABLED
+              value: "true"
+            # You can bootstrap with these if desired:
+            # - name: DOCKER_INFLUXDB_INIT_MODE
+            #   value: "setup"
+            # - name: DOCKER_INFLUXDB_INIT_USERNAME
+            #   value: "admin"
+            # - name: DOCKER_INFLUXDB_INIT_PASSWORD
+            #   value: "admin123"
+            # - name: DOCKER_INFLUXDB_INIT_ORG
+            #   value: "iot"
+            # - name: DOCKER_INFLUXDB_INIT_BUCKET
+            #   value: "mqtt"
+            # - name: DOCKER_INFLUXDB_INIT_ADMIN_TOKEN
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: influxdb-auth
+            #       key: INFLUX_TOKEN
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/influxdb2
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: influxdb-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: influxdb
+  namespace: iot-stack
+spec:
+  type: ClusterIP
+  selector:
+    app: influxdb
+  ports:
+    - name: http
+      port: 8086
+      targetPort: 8086
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telegraf
+  namespace: iot-stack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: telegraf
+  template:
+    metadata:
+      labels:
+        app: telegraf
+    spec:
+      containers:
+        - name: telegraf
+          image: telegraf:1.37-alpine
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: INFLUX_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: influxdb-auth
+                  key: INFLUX_TOKEN
+          volumeMounts:
+            - name: telegraf-conf
+              mountPath: /etc/telegraf
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          livenessProbe:
+            exec:
+              command: ["/bin/sh", "-c", "pgrep telegraf >/dev/null || exit 1"]
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          readinessProbe:
+            exec:
+              command: ["/bin/sh", "-c", "telegraf --version >/dev/null 2>&1"]
+            initialDelaySeconds: 5
+            periodSeconds: 20
+      volumes:
+        - name: telegraf-conf
+          configMap:
+            name: telegraf-conf
+            items:
+              - key: telegraf.conf
+                path: telegraf.conf

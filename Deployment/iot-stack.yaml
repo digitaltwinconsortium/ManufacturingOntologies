@@ -4,6 +4,84 @@ kind: Namespace
 metadata:
   name: iot-stack
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: translatorconfig-settings-pvc
+  namespace: iot-stack
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: local-path
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: translatorconfig-pki-pvc
+  namespace: iot-stack
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: local-path
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: translatorconfig-logs-pvc
+  namespace: iot-stack
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: local-path
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: publisherconfig-settings-pvc
+  namespace: iot-stack
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: local-path
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: publisherconfig-pki-pvc
+  namespace: iot-stack
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: local-path
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: publisherconfig-logs-pvc
+  namespace: iot-stack
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: local-path
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -45,14 +123,14 @@ spec:
           mountPath: "/app/logs"
       volumes:
         - name: "settings"
-          hostPath:
-            path: "/mnt/c/K3s/UAEdgeTranslator/Settings"
+          persistentVolumeClaim:
+            claimName: translatorconfig-settings-pvc
         - name: "pki"
-          hostPath:
-            path: "/mnt/c/K3s/UAEdgeTranslator/PKI"
+          persistentVolumeClaim:
+            claimName: translatorconfig-pki-pvc
         - name: "logs"
-          hostPath:
-            path: "/mnt/c/K3s/UAEdgeTranslator/Logs"
+          persistentVolumeClaim:
+            claimName: translatorconfig-logs-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -115,11 +193,14 @@ spec:
           mountPath: "/app/pki"
       volumes:
         - name: "settings"
-          hostPath:
-            path: "/mnt/c/K3s/PublisherConfig/Settings"
+          persistentVolumeClaim:
+            claimName: publisherconfig-settings-pvc
         - name: "pki"
-          hostPath:
-            path: "/mnt/c/K3s/PublisherConfig/PKI"
+          persistentVolumeClaim:
+            claimName: publisherconfig-pki-pvc
+        - name: "logs"
+          persistentVolumeClaim:
+            claimName: publisherconfig-logs-pvc
 ---
 apiVersion: v1
 kind: Service

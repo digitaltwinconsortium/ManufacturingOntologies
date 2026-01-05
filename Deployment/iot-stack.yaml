@@ -1,4 +1,4 @@
-
+# This deployment relies on Longhorn PVCs.
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -15,7 +15,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: local-path
+  storageClassName: longhorn
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -28,7 +28,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: local-path
+  storageClassName: longhorn
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -41,7 +41,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: local-path
+  storageClassName: longhorn
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -54,7 +54,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: local-path
+  storageClassName: longhorn
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -67,7 +67,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: local-path
+  storageClassName: longhorn
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -80,7 +80,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: local-path
+  storageClassName: longhorn
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -432,6 +432,7 @@ spec:
   resources:
     requests:
       storage: 10Gi
+  storageClassName: longhorn
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -486,7 +487,7 @@ metadata:
   name: mosquitto
   namespace: iot-stack
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: mosquitto
   ports:
@@ -562,7 +563,7 @@ metadata:
   name: influxdb
   namespace: iot-stack
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: influxdb
   ports:

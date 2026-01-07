@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.1.11312.151 d18.0
+VisualStudioVersion = 18.1.11312.151
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Station", "Station.csproj", "{6D8661D6-F520-4D42-AC50-C71E8551F0F0}"
 EndProject
@@ -19,6 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\..\..\fabric.md = ..\..\..\fabric.md
 		..\..\..\Deployment\iot-stack.yaml = ..\..\..\Deployment\iot-stack.yaml
 		..\..\..\LICENSE = ..\..\..\LICENSE
+		..\..\..\Deployment\metallb-pool.yaml = ..\..\..\Deployment\metallb-pool.yaml
 		..\..\..\README.md = ..\..\..\README.md
 		..\..\GrafanaDashboard\samplegrafanadashboard.json = ..\..\GrafanaDashboard\samplegrafanadashboard.json
 		..\..\..\Deployment\SetupArc.ps1 = ..\..\..\Deployment\SetupArc.ps1

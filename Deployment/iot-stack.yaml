@@ -20,6 +20,19 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  name: translatorconfig-nodesets-pvc
+  namespace: iot-stack
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: longhorn
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
   name: translatorconfig-pki-pvc
   namespace: iot-stack
 spec:
@@ -117,6 +130,8 @@ spec:
         volumeMounts:
         - name: "settings"
           mountPath: "/app/settings"
+        - name: "nodesets"
+          mountPath: "/app/nodesets"
         - name: "pki"
           mountPath: "/app/pki"
         - name: "logs"
@@ -125,6 +140,9 @@ spec:
         - name: "settings"
           persistentVolumeClaim:
             claimName: translatorconfig-settings-pvc
+        - name: "nodesets"
+          persistentVolumeClaim:
+            claimName: translatorconfig-nodesets-pvc
         - name: "pki"
           persistentVolumeClaim:
             claimName: translatorconfig-pki-pvc

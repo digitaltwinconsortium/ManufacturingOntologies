@@ -209,6 +209,8 @@ spec:
           mountPath: "/app/settings"
         - name: "pki"
           mountPath: "/app/pki"
+        - name: "logs"
+          mountPath: "/app/logs"
       volumes:
         - name: "settings"
           persistentVolumeClaim:

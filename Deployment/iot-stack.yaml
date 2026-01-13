@@ -140,8 +140,7 @@ metadata:
   name: influxdb-auth
 type: Opaque
 stringData:
-  # Replace with a real InfluxDB v2 API token that has write privileges to the bucket (e.g. generated from within the InfuxDB UI).
-  INFLUX_TOKEN: "<YOUR TOKEN HERE>"
+  INFLUX_TOKEN: "${INFLUX_TOKEN}"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -421,22 +420,21 @@ spec:
             # Optional first-run setup via env vars (if not using the UI)
             - name: INFLUXD_REPORTING_DISABLED
               value: "true"
-            # You can bootstrap with these if desired:
-            # - name: DOCKER_INFLUXDB_INIT_MODE
-            #   value: "setup"
-            # - name: DOCKER_INFLUXDB_INIT_USERNAME
-            #   value: "admin"
-            # - name: DOCKER_INFLUXDB_INIT_PASSWORD
-            #   value: "admin123"
-            # - name: DOCKER_INFLUXDB_INIT_ORG
-            #   value: "iot"
-            # - name: DOCKER_INFLUXDB_INIT_BUCKET
-            #   value: "mqtt"
-            # - name: DOCKER_INFLUXDB_INIT_ADMIN_TOKEN
-            #   valueFrom:
-            #     secretKeyRef:
-            #       name: influxdb-auth
-            #       key: INFLUX_TOKEN
+            - name: DOCKER_INFLUXDB_INIT_MODE
+              value: "setup"
+            - name: DOCKER_INFLUXDB_INIT_USERNAME
+              value: "myUsername"
+            - name: DOCKER_INFLUXDB_INIT_PASSWORD
+              value: "myPassword"
+            - name: DOCKER_INFLUXDB_INIT_ORG
+              value: "iot"
+            - name: DOCKER_INFLUXDB_INIT_BUCKET
+              value: "mqtt"
+            - name: DOCKER_INFLUXDB_INIT_ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: influxdb-auth
+                  key: INFLUX_TOKEN
           volumeMounts:
             - name: data
               mountPath: /var/lib/influxdb2

@@ -1,105 +1,7 @@
-# This deployment relies on Longhorn PVCs.
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: iot-stack
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: translatorconfig-settings-pvc
-  namespace: iot-stack
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-  storageClassName: longhorn
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: translatorconfig-nodesets-pvc
-  namespace: iot-stack
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-  storageClassName: longhorn
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: translatorconfig-pki-pvc
-  namespace: iot-stack
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-  storageClassName: longhorn
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: translatorconfig-logs-pvc
-  namespace: iot-stack
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
-  storageClassName: longhorn
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: publisherconfig-settings-pvc
-  namespace: iot-stack
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-  storageClassName: longhorn
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: publisherconfig-pki-pvc
-  namespace: iot-stack
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-  storageClassName: longhorn
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: publisherconfig-logs-pvc
-  namespace: iot-stack
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
-  storageClassName: longhorn
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ua-edgetranslator
-  namespace: iot-stack
 spec:
   replicas: 1
   selector:
@@ -115,7 +17,7 @@ spec:
       containers:
       - name: ua-edgetranslator
         image: ghcr.io/opcfoundation/ua-edgetranslator:main
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         env:
         - name: OPCUA_USERNAME
           value: "myUsername"
@@ -138,23 +40,22 @@ spec:
           mountPath: "/app/logs"
       volumes:
         - name: "settings"
-          persistentVolumeClaim:
-            claimName: translatorconfig-settings-pvc
+          hostPath:
+            path: "/translator/settings"
         - name: "nodesets"
-          persistentVolumeClaim:
-            claimName: translatorconfig-nodesets-pvc
+          hostPath:
+            path: "/translator/nodesets"
         - name: "pki"
-          persistentVolumeClaim:
-            claimName: translatorconfig-pki-pvc
+          hostPath:
+            path: "/translator/pki"
         - name: "logs"
-          persistentVolumeClaim:
-            claimName: translatorconfig-logs-pvc
+          hostPath:
+            path: "/translator/logs"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: ua-edgetranslator
-  namespace: iot-stack
 spec:
   type: LoadBalancer
   ports:
@@ -180,7 +81,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ua-cloudpublisher
-  namespace: iot-stack
 spec:
   replicas: 1
   selector:
@@ -196,7 +96,7 @@ spec:
       containers:
       - name: ua-cloudpublisher
         image: ghcr.io/barnstee/ua-cloudpublisher:main
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         env:
         - name: OPCUA_USERNAME
           value: "myUsername"
@@ -213,20 +113,19 @@ spec:
           mountPath: "/app/logs"
       volumes:
         - name: "settings"
-          persistentVolumeClaim:
-            claimName: publisherconfig-settings-pvc
+          hostPath:
+            path: "/publisher/settings"
         - name: "pki"
-          persistentVolumeClaim:
-            claimName: publisherconfig-pki-pvc
+          hostPath:
+            path: "/publisher/pki"
         - name: "logs"
-          persistentVolumeClaim:
-            claimName: publisherconfig-logs-pvc
+          hostPath:
+            path: "/publisher/logs"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: ua-cloudpublisher
-  namespace: iot-stack
 spec:
   type: LoadBalancer
   ports:
@@ -239,7 +138,6 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: influxdb-auth
-  namespace: iot-stack
 type: Opaque
 stringData:
   # Replace with a real InfluxDB v2 API token that has write privileges to the bucket (e.g. generated from within the InfuxDB UI).
@@ -249,7 +147,6 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: telegraf-conf
-  namespace: iot-stack
 data:
   telegraf.conf: |
     [global_tags]
@@ -270,7 +167,7 @@ data:
     # MQTT → consume OPC UA PubSub JSON data messages and parse it on ingest (json_v2)
     ##################################################################################
     [[inputs.mqtt_consumer]]
-      servers = ["tcp://mosquitto.iot-stack.svc.cluster.local:1883"]
+      servers = ["tcp://mosquitto.default.svc.cluster.local:1883"]
       topics  = ["data/#"]
       qos     = 1
       client_id = "telegraf-mqtt-data"
@@ -328,7 +225,7 @@ data:
     #   - extract MetaData.Name and first Field details (Fields[0].*)
     ###########################################################################
     [[inputs.mqtt_consumer]]
-      servers = ["tcp://mosquitto.iot-stack.svc.cluster.local:1883"]
+      servers = ["tcp://mosquitto.default.svc.cluster.local:1883"]
       topics  = ["metadata"]
       qos     = 1
       client_id = "telegraf-mqtt-metadata"
@@ -421,7 +318,7 @@ data:
     # Output → InfluxDB v2
     ###########################################################################
     [[outputs.influxdb_v2]]
-      urls = ["http://influxdb.iot-stack.svc.cluster.local:8086"]
+      urls = ["http://influxdb.default.svc.cluster.local:8086"]
       token = "$INFLUX_TOKEN"
       organization = "iot"
       bucket = "mqtt"
@@ -430,7 +327,6 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: mosquitto-conf
-  namespace: iot-stack
 data:
   mosquitto.conf: |
     pid_file /mosquitto/mosquitto.pid
@@ -441,24 +337,10 @@ data:
     listener 1883
     # For production, consider enabling authentication and TLS
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: influxdb-data
-  namespace: iot-stack
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi
-  storageClassName: longhorn
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mosquitto
-  namespace: iot-stack
 spec:
   replicas: 1
   selector:
@@ -505,7 +387,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mosquitto
-  namespace: iot-stack
 spec:
   type: LoadBalancer
   selector:
@@ -519,7 +400,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: influxdb
-  namespace: iot-stack
 spec:
   replicas: 1
   selector:
@@ -573,15 +453,14 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 10
       volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: influxdb-data
+        - name: "data"
+          hostPath:
+            path: "/influxdb2"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: influxdb
-  namespace: iot-stack
 spec:
   type: LoadBalancer
   selector:
@@ -595,7 +474,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: telegraf
-  namespace: iot-stack
 spec:
   replicas: 1
   selector:

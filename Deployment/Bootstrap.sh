@@ -80,6 +80,29 @@ try sudo rm -f "${ZIP_PATH}"
 echo "Repo extracted to: ${DEST_DIR}"
 
 # --------------------------
+# Fix line endings + make simulation scripts executable
+# --------------------------
+echo
+echo "=== Fixing FactorySimulation scripts (CRLF + executable bit) ==="
+
+FACTORY_SIM_DIR="${DEST_DIR}/Tools/FactorySimulation"
+
+if [ -d "${FACTORY_SIM_DIR}" ]; then
+  # 1) Convert CRLF -> LF (common when repos are authored on Windows)
+  # Use sed so we don't depend on dos2unix being installed.
+  sudo find "${FACTORY_SIM_DIR}" -maxdepth 1 -type f -name "*.sh" -print0 \
+    | sudo xargs -0 -r sed -i 's/\r$//'
+
+  # 2) Make scripts executable
+  sudo find "${FACTORY_SIM_DIR}" -maxdepth 1 -type f -name "*.sh" -exec chmod +x {} \;
+
+  # Optional: show what we fixed
+  sudo ls -l "${FACTORY_SIM_DIR}"/*.sh 2>/dev/null || true
+else
+  echo "FactorySimulation directory not found: ${FACTORY_SIM_DIR}"
+fi
+
+# --------------------------
 # Install K3s (single-node server)
 # --------------------------
 echo

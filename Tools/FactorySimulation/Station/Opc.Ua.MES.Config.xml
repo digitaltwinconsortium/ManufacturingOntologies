@@ -30,34 +30,6 @@
         <SubjectName>CN=UndefinedMESName</SubjectName>
         <CertificateTypeString>RsaSha256</CertificateTypeString>
       </CertificateIdentifier>
-      <CertificateIdentifier>
-        <!-- <TypeId>NistP256</TypeId> -->
-        <StoreType>Directory</StoreType>
-        <StorePath>./pki/own</StorePath>
-        <SubjectName>CN=UndefinedMESName</SubjectName>
-        <CertificateTypeString>NistP256</CertificateTypeString>
-      </CertificateIdentifier>
-      <CertificateIdentifier>
-        <!-- <TypeId>NistP384</TypeId> -->
-        <StoreType>Directory</StoreType>
-        <StorePath>./pki/own</StorePath>
-        <SubjectName>CN=UndefinedMESName</SubjectName>
-        <CertificateTypeString>NistP384</CertificateTypeString>
-      </CertificateIdentifier>
-      <CertificateIdentifier>
-        <!-- <TypeId>BrainpoolP256r1</TypeId> -->
-        <StoreType>Directory</StoreType>
-        <StorePath>./pki/own</StorePath>
-        <SubjectName>CN=UndefinedMESName</SubjectName>
-        <CertificateTypeString>BrainpoolP256r1</CertificateTypeString>
-      </CertificateIdentifier>
-      <CertificateIdentifier>
-        <!-- <TypeId>BrainpoolP384r1</TypeId> -->
-        <StoreType>Directory</StoreType>
-        <StorePath>./pki/own</StorePath>
-        <SubjectName>CN=UndefinedMESName</SubjectName>
-        <CertificateTypeString>BrainpoolP384r1</CertificateTypeString>
-      </CertificateIdentifier>
     </ApplicationCertificates>
     <TrustedIssuerCertificates>
       <StoreType>Directory</StoreType>

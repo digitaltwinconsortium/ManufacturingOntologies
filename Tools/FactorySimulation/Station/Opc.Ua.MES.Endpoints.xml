@@ -9,7 +9,7 @@
       <ua:Endpoint>
         <EndpointUrl>opc.tcp://assembly.munich/</EndpointUrl>
         <SecurityMode>SignAndEncrypt_3</SecurityMode>
-        <SecurityPolicyUri>http://opcfoundation.org/UA/SecurityPolicy#Basic128Rsa15</SecurityPolicyUri>
+        <SecurityPolicyUri>http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256</SecurityPolicyUri>
         <UserIdentityTokens>
           <UserTokenPolicy>
             <TokenType>Anonymous_0</TokenType>
@@ -24,7 +24,7 @@
       <ua:Endpoint>
         <EndpointUrl>opc.tcp://test.munich/</EndpointUrl>
         <SecurityMode>SignAndEncrypt_3</SecurityMode>
-        <SecurityPolicyUri>http://opcfoundation.org/UA/SecurityPolicy#Basic128Rsa15</SecurityPolicyUri>
+        <SecurityPolicyUri>http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256</SecurityPolicyUri>
         <UserIdentityTokens>
           <UserTokenPolicy>
             <TokenType>Anonymous_0</TokenType>
@@ -39,7 +39,7 @@
       <ua:Endpoint>
         <EndpointUrl>opc.tcp://packaging.munich/</EndpointUrl>
         <SecurityMode>SignAndEncrypt_3</SecurityMode>
-        <SecurityPolicyUri>http://opcfoundation.org/UA/SecurityPolicy#Basic128Rsa15</SecurityPolicyUri>
+        <SecurityPolicyUri>http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256</SecurityPolicyUri>
         <UserIdentityTokens>
           <UserTokenPolicy>
             <TokenType>Anonymous_0</TokenType>

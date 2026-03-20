@@ -773,40 +773,49 @@
       ]
     },
     {
-      "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2022-11-01",
+      "apiVersion": "2025-04-01",
+      "type": "microsoft.compute/virtualmachines",
       "name": "[concat(parameters('resourcesName'), '-VM')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "hardwareProfile": {
-          "vmSize": "Standard_D4s_v4"
-        },
-        "osProfile": {
-          "computerName": "[parameters('resourcesName')]",
-          "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]",
-          "windowsConfiguration": {
-            "provisionVMAgent": true,
-            "enableAutomaticUpdates": false
-          }
+          "vmSize": "Standard_D2ps_v6"
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "MicrosoftWindowsDesktop",
-            "offer": "Windows-11",
-            "sku": "win11-22h2-ent",
+            "publisher": "canonical",
+            "offer": "ubuntu-24_04-lts",
+            "sku": "minimal-arm64",
             "version": "latest"
           },
           "osDisk": {
+            "osType": "Linux",
             "createOption": "FromImage",
             "caching": "ReadWrite",
             "managedDisk": {
               "storageAccountType": "StandardSSD_LRS"
             },
             "deleteOption": "Delete",
-            "diskSizeGB": 127
+            "diskSizeGB": 30
           },
-          "dataDisks": []
+          "dataDisks": [],
+          "diskControllerType": "SCSI"
+        },
+        "osProfile": {
+          "computerName": "[parameters('resourcesName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]",
+          "linuxConfiguration": {
+            "disablePasswordAuthentication": false,
+            "provisionVMAgent": true,
+            "patchSettings": {
+              "patchMode": "ImageDefault",
+              "assessmentMode": "ImageDefault"
+            }
+          },
+          "secrets": [],
+          "allowExtensionOperations": true,
+          "requireGuestProvisionSignal": true
         },
         "networkProfile": {
           "networkInterfaces": [
@@ -829,18 +838,21 @@
         "[concat('Microsoft.Compute/virtualMachines/', parameters('resourcesName'), '-VM')]"
       ],
       "tags": {
-        "displayName": "Run Bootstrap"
+        "displayName": "Run Bootstrap (Linux)"
       },
       "properties": {
-        "publisher": "Microsoft.Compute",
-        "type": "CustomScriptExtension",
-        "typeHandlerVersion": "1.10",
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "CustomScript",
+        "typeHandlerVersion": "2.1",
         "autoUpgradeMinorVersion": true,
-        "protectedSettings": {
+        "settings": {
           "fileUris": [
-            "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'Bootstrap.ps1')]"
+            "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'Bootstrap.sh')]"
           ],
-          "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File Bootstrap.ps1"
+          "timestamp": "[utcNow()]"
+        },
+        "protectedSettings": {
+          "commandToExecute": "bash Bootstrap.sh"
         }
       }
     },
@@ -910,7 +922,7 @@
       "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies','EventHubMetadataConnection')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'OPCUA-parsing-script')]"
+        "[resourceId('Microsoft.Kusto/Clusters/Databases/DataConnections', variables('adxClusterName'), 'ontologies', 'EventHubDataConnection')]"
       ],
       "kind": "EventHub",
       "properties": {

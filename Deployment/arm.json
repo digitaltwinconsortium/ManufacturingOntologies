@@ -667,12 +667,12 @@
       "properties": {
         "securityRules": [
           {
-            "name": "default-allow-3389",
+            "name": "default-allow-22",
             "properties": {
               "priority": 1000,
               "access": "Allow",
               "direction": "Inbound",
-              "destinationPortRange": "3389",
+              "destinationPortRange": "22",
               "protocol": "Tcp",
               "sourcePortRange": "*",
               "sourceAddressPrefix": "*",

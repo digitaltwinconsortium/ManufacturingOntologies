@@ -46,10 +46,16 @@
       "properties": {
         "appLogsConfiguration": {},
         "workloadProfiles": [
-          {
-            "workloadProfileType": "Consumption",
-            "name": "Consumption"
-          }
+         {
+           "workloadProfileType": "Consumption",
+           "name": "Consumption"
+         },
+         {
+           "workloadProfileType": "D4",
+           "name": "DedicatedD4",
+           "minimumCount": 0,
+           "maximumCount": 1
+         }
         ],
         "vnetConfiguration": {
           "infrastructureSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(parameters('resourcesName'), '-Network-CA'), concat(parameters('resourcesName'), '-Subnet-CA'))]"
@@ -814,8 +820,7 @@
             }
           },
           "secrets": [],
-          "allowExtensionOperations": true,
-          "requireGuestProvisionSignal": true
+          "allowExtensionOperations": true
         },
         "networkProfile": {
           "networkInterfaces": [

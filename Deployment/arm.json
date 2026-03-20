@@ -49,12 +49,6 @@
          {
            "workloadProfileType": "Consumption",
            "name": "Consumption"
-         },
-         {
-           "workloadProfileType": "D4",
-           "name": "DedicatedD4",
-           "minimumCount": 0,
-           "maximumCount": 1
          }
         ],
         "vnetConfiguration": {

@@ -853,8 +853,7 @@
         "settings": {
           "fileUris": [
             "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'Bootstrap.sh')]"
-          ],
-          "timestamp": "[utcNow()]"
+          ]
         },
         "protectedSettings": {
           "commandToExecute": "bash Bootstrap.sh"

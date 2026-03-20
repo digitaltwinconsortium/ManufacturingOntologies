@@ -19,7 +19,7 @@ namespace Station.Simulation
             Console.WriteLine(_message);
 
             // always return yes
-            return await Task.FromResult(true);
+            return await Task.FromResult(true).ConfigureAwait(false);
         }
     }
 }

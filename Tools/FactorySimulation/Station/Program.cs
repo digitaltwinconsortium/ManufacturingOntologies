@@ -4,6 +4,7 @@ namespace Station.Simulation
     using Mes.Simulation;
     using Opc.Ua;
     using Opc.Ua.Client;
+    using Opc.Ua.Cloud;
     using Opc.Ua.Configuration;
     using System;
     using System.Collections.Generic;
@@ -28,6 +29,8 @@ namespace Station.Simulation
     public class Program
     {
         public static List<Tuple<string, string, string>> ShiftTimes = new();
+
+        public static ConsoleTelemetry Telemetry { get; } = new();
 
         private static Station m_station = null;
         private static SessionHandler m_sessionAssembly = null;
@@ -59,8 +62,6 @@ namespace Station.Simulation
         private const int c_connectTimeout = 300 * 1000;
 
         private static Timer m_timer = null;
-
-        private static int _traceMasks = 1; // default to errors only
 
         public static double PowerConsumption { get; set; }
 
@@ -98,7 +99,7 @@ namespace Station.Simulation
         private static void MES()
         {
             ApplicationInstance.MessageDlg = new ApplicationMessageDlg();
-            ApplicationInstance application = new ApplicationInstance();
+            ApplicationInstance application = new ApplicationInstance(Telemetry);
 
             try
             {
@@ -133,23 +134,19 @@ namespace Station.Simulation
                 File.WriteAllText(configFilePath, configFileContent);
 
                 // load the application configuration
-                ApplicationConfiguration appConfiguration = application.LoadApplicationConfiguration(false).GetAwaiter().GetResult();
-
-                // hook up OPC UA stack traces
-                _traceMasks = appConfiguration.TraceConfiguration.TraceMasks;
-                Utils.Tracing.TraceEventHandler += new EventHandler<TraceEventArgs>(OpcStackLoggingHandler);
+                ApplicationConfiguration appConfiguration = application.LoadApplicationConfigurationAsync(false).GetAwaiter().GetResult();
 
                 // check the application certificate
-                bool certOK = application.CheckApplicationInstanceCertificate(false, 0).GetAwaiter().GetResult();
+                bool certOK = application.CheckApplicationInstanceCertificatesAsync(false, 0).GetAwaiter().GetResult();
                 if (!certOK)
                 {
                     throw new Exception("Application instance certificate invalid!");
                 }
 
                 // create OPC UA cert validator
-                application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
+                application.ApplicationConfiguration.CertificateValidator = new CertificateValidator(Telemetry);
                 application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(MESCertificateValidationCallback);
-                application.ApplicationConfiguration.CertificateValidator.Update(application.ApplicationConfiguration).GetAwaiter().GetResult();
+                application.ApplicationConfiguration.CertificateValidator.UpdateAsync(application.ApplicationConfiguration).GetAwaiter().GetResult();
 
                 string issuerPath = Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs");
                 if (!Directory.Exists(issuerPath))
@@ -158,7 +155,7 @@ namespace Station.Simulation
                 }
 
                 // start the server.
-                application.Start(new FactoryStationServer(false)).GetAwaiter().GetResult();
+                application.StartAsync(new FactoryStationServer(false)).GetAwaiter().GetResult();
                 Console.WriteLine("Server started.");
 
                 // replace the production line name in the list of endpoints to connect to.
@@ -190,9 +187,9 @@ namespace Station.Simulation
                         m_sessionTest = new SessionHandler();
                         m_sessionPackaging = new SessionHandler();
 
-                        m_sessionAssembly.EndpointConnect(endpoints[c_Assembly], appConfiguration);
-                        m_sessionTest.EndpointConnect(endpoints[c_Test], appConfiguration);
-                        m_sessionPackaging.EndpointConnect(endpoints[c_Packaging], appConfiguration);
+                        m_sessionAssembly.EndpointConnectAsync(endpoints[c_Assembly], appConfiguration, Telemetry).GetAwaiter().GetResult();
+                        m_sessionTest.EndpointConnectAsync(endpoints[c_Test], appConfiguration, Telemetry).GetAwaiter().GetResult();
+                        m_sessionPackaging.EndpointConnectAsync(endpoints[c_Packaging], appConfiguration, Telemetry).GetAwaiter().GetResult();
 
                         if (!m_sessionAssembly.SessionConnected || !m_sessionTest.SessionConnected || !m_sessionPackaging.SessionConnected)
                         {
@@ -249,7 +246,7 @@ namespace Station.Simulation
 
                 try
                 {
-                    application.Stop();
+                    application.StopAsync().GetAwaiter().GetResult();
                 }
                 catch (Exception)
                 {
@@ -471,7 +468,7 @@ namespace Station.Simulation
                             {
                                 // station is at fault state, wait some time to simulate manual intervention before reseting
                                 Console.WriteLine("<<AssemblyStation: Fault>>");
-                                await Task.Delay(c_waitTime);
+                                await Task.Delay(c_waitTime).ConfigureAwait(false);
                                 Console.WriteLine("<<AssemblyStation: Restart from Fault>>");
 
                                 m_sessionAssembly.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
@@ -528,7 +525,7 @@ namespace Station.Simulation
                                 Task.Run(async () =>
                                 {
                                     Console.WriteLine("<<TestStation: Fault>>");
-                                    await Task.Delay(c_waitTime);
+                                    await Task.Delay(c_waitTime).ConfigureAwait(false);
                                     Console.WriteLine("<<TestStation: Restart from Fault>>");
 
                                     m_faultTest = false;
@@ -589,7 +586,7 @@ namespace Station.Simulation
                                 Task.Run(async () =>
                                 {
                                     Console.WriteLine("<<PackagingStation: Fault>>");
-                                    await Task.Delay(c_waitTime);
+                                    await Task.Delay(c_waitTime).ConfigureAwait(false);
                                     Console.WriteLine("<<PackagingStation: Restart from Fault>>");
 
                                     m_faultPackaging = false;
@@ -623,7 +620,7 @@ namespace Station.Simulation
         private static async Task ConsoleServer()
         {
             ApplicationInstance.MessageDlg = new ApplicationMessageDlg();
-            ApplicationInstance application = new ApplicationInstance();
+            ApplicationInstance application = new ApplicationInstance(Telemetry);
 
             try
             {
@@ -656,7 +653,7 @@ namespace Station.Simulation
                 File.WriteAllText(configFilePath, configFileContent);
 
                 // load the application configuration.
-                ApplicationConfiguration config = await application.LoadApplicationConfiguration(false).ConfigureAwait(false);
+                ApplicationConfiguration config = await application.LoadApplicationConfigurationAsync(false).ConfigureAwait(false);
                 if (config == null)
                 {
                     throw new Exception("Application configuration is null!");
@@ -674,21 +671,17 @@ namespace Station.Simulation
                 Console.WriteLine("Power consumption: " + PowerConsumption.ToString() + "kW");
                 Console.WriteLine("Cycle time: " + CycleTime.ToString() + "s");
 
-                // hook up OPC UA stack traces
-                _traceMasks = config.TraceConfiguration.TraceMasks;
-                Utils.Tracing.TraceEventHandler += new EventHandler<TraceEventArgs>(OpcStackLoggingHandler);
-
                 // check the application certificate
-                bool certOK = await application.CheckApplicationInstanceCertificate(false, 0).ConfigureAwait(false);
+                bool certOK = await application.CheckApplicationInstanceCertificatesAsync(false, 0).ConfigureAwait(false);
                 if (!certOK)
                 {
                     throw new Exception("Application instance certificate invalid!");
                 }
 
                 // create OPC UA cert validator
-                application.ApplicationConfiguration.CertificateValidator = new CertificateValidator();
+                application.ApplicationConfiguration.CertificateValidator = new CertificateValidator(Telemetry);
                 application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(MESCertificateValidationCallback);
-                application.ApplicationConfiguration.CertificateValidator.Update(application.ApplicationConfiguration).GetAwaiter().GetResult();
+                application.ApplicationConfiguration.CertificateValidator.UpdateAsync(application.ApplicationConfiguration).GetAwaiter().GetResult();
 
                 string issuerPath = Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs");
                 if (!Directory.Exists(issuerPath))
@@ -697,7 +690,7 @@ namespace Station.Simulation
                 }
 
                 // start the server.
-                await application.Start(new FactoryStationServer(true)).ConfigureAwait(false);
+                await application.StartAsync(new FactoryStationServer(true)).ConfigureAwait(false);
 
                 Console.WriteLine("Server started. Press any key to exit.");
 
@@ -717,26 +710,11 @@ namespace Station.Simulation
 
                 try
                 {
-                    application.Stop();
+                    await application.StopAsync().ConfigureAwait(false);
                 }
                 catch (Exception)
                 {
                     // do nothing
-                }
-            }
-        }
-
-        private static void OpcStackLoggingHandler(object sender, TraceEventArgs e)
-        {
-            if ((e.TraceMask & _traceMasks) != 0)
-            {
-                if (e.Arguments != null)
-                {
-                    Console.WriteLine("OPC UA Stack: " + string.Format(CultureInfo.InvariantCulture, e.Format, e.Arguments).Trim());
-                }
-                else
-                {
-                    Console.WriteLine("OPC UA Stack: " + e.Format.Trim());
                 }
             }
         }

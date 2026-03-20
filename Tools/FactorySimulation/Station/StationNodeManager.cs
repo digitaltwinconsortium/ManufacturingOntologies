@@ -46,7 +46,7 @@ namespace Station.Simulation
         private Random m_random = new Random();
 
         private ushort m_namespaceIndex;
-        private long m_lastUsedId;
+        private uint m_lastUsedId;
 
         private NodeId m_NumberOfManufacturedProductsID;
         private NodeId m_NumberOfDiscardedProductsID;

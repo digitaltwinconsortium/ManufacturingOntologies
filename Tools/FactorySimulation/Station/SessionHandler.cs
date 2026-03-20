@@ -4,6 +4,8 @@ namespace Mes.Simulation
     using Opc.Ua;
     using Opc.Ua.Client;
     using System;
+    using System.Text;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Handles the connection and reconnection of sessions to endpoints.
@@ -17,9 +19,12 @@ namespace Mes.Simulation
 
         public bool SessionConnected => Session != null;
         private SessionReconnectHandler m_reconnectHandler = null;
+        private ITelemetryContext _telemetry = null;
 
-        public bool EndpointConnect(ConfiguredEndpoint endpoint, ApplicationConfiguration appConfiguration)
+        public async Task<bool> EndpointConnectAsync(ConfiguredEndpoint endpoint, ApplicationConfiguration appConfiguration, ITelemetryContext telemetry)
         {
+            _telemetry = telemetry;
+
             if (Session != null)
             {
                 return true;
@@ -28,14 +33,14 @@ namespace Mes.Simulation
             string configuredUsername = Environment.GetEnvironmentVariable("OPCUA_USERNAME");
             string configuredPassword = Environment.GetEnvironmentVariable("OPCUA_PASSWORD");
 
-            Session = DefaultSessionFactory.Instance.CreateAsync(
+            Session = await new DefaultSessionFactory(telemetry).CreateAsync(
                 appConfiguration,
                 endpoint,
                 true,
                 appConfiguration.ApplicationName,
                 c_connectTimeout,
-                new UserIdentity(configuredUsername, configuredPassword),
-                null).Result;
+                new UserIdentity(configuredUsername, Encoding.UTF8.GetBytes(configuredPassword)),
+                null).ConfigureAwait(false);
 
             if (Session != null)
             {
@@ -87,7 +92,7 @@ namespace Mes.Simulation
                         m_reconnectHandler == null)
                     {
                         Console.WriteLine("--- RECONNECTING --- {0}", sender.Endpoint.EndpointUrl);
-                        m_reconnectHandler = new SessionReconnectHandler();
+                        m_reconnectHandler = new SessionReconnectHandler(_telemetry);
                         m_reconnectHandler.BeginReconnect(sender, c_reconnectPeriod, Client_ReconnectComplete);
                     }
                 }

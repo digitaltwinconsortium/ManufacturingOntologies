@@ -10,7 +10,7 @@ namespace Station.Simulation
     public class MESNodeManager : CustomNodeManager2
     {
         private ushort m_namespaceIndex = 0;
-        private long m_lastUsedId = 0;
+        private uint m_lastUsedId = 0;
 
         public MESNodeManager(IServerInternal server, ApplicationConfiguration configuration)
         : base(server, configuration)

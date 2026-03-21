@@ -39,6 +39,8 @@ spec:
           mountPath: "/app/settings"
         - name: "pki"
           mountPath: "/app/pki"
+        - name: "logs"
+          mountPath: "/app/logs"
       volumes:
         - name: "settings"
           hostPath:
@@ -46,6 +48,9 @@ spec:
         - name: "pki"
           hostPath:
             path: "/mnt/c/K3s/PublisherConfig/PKI"
+        - name: "logs"
+          hostPath:
+            path: "/mnt/c/K3s/PublisherConfig/Logs"
 ---
 apiVersion: v1
 kind: Service

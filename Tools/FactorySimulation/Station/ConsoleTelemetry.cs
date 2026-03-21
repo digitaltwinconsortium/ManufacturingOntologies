@@ -29,9 +29,11 @@
 
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Serilog.Events;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Opc.Ua.Cloud
@@ -40,6 +42,25 @@ namespace Opc.Ua.Cloud
     {
         public ConsoleTelemetry(Action<ILoggingBuilder> configure = null)
         {
+            string logDirectory = Path.Combine(Directory.GetCurrentDirectory(), "logs");
+            if (!Directory.Exists(logDirectory))
+            {
+                Directory.CreateDirectory(logDirectory);
+            }
+
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .Enrich.FromLogContext()
+                .WriteTo.Console(
+                    outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+                .WriteTo.File(
+                    path: "logs/station-.log",
+                    rollingInterval: RollingInterval.Day,
+                    retainedFileCountLimit: 7,
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+                .CreateLogger();
+
             LoggerFactory = Microsoft.Extensions.Logging.LoggerFactory.Create(builder =>
             {
                 builder.SetMinimumLevel(LogLevel.Information);
@@ -61,6 +82,7 @@ namespace Opc.Ua.Cloud
             CreateMeter().Dispose();
             ActivitySource.Dispose();
             LoggerFactory?.Dispose();
+            Log.CloseAndFlush();
 
             AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
             TaskScheduler.UnobservedTaskException -= Unobserved_TaskException;

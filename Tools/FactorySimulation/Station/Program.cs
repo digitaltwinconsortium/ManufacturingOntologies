@@ -1,5 +1,4 @@
-﻿
-namespace Station.Simulation
+﻿namespace Station.Simulation
 {
     using Mes.Simulation;
     using Opc.Ua;
@@ -61,7 +60,15 @@ namespace Station.Simulation
         private const int c_waitTime = 60 * 1000;
         private const int c_connectTimeout = 300 * 1000;
 
+        // Minimum subscription lifetime should be >= session timeout to avoid
+        // premature expiry (fixes the "minLifetimeInterval 10000ms" warning).
+        private const uint c_minSubscriptionLifetime = 120000;
+
         private static Timer m_timer = null;
+
+        // Cached config for session recreation after cert rotation
+        private static ApplicationConfiguration m_appConfiguration = null;
+        private static ConfiguredEndpointCollection m_endpoints = null;
 
         public static double PowerConsumption { get; set; }
 
@@ -134,7 +141,7 @@ namespace Station.Simulation
                 File.WriteAllText(configFilePath, configFileContent);
 
                 // load the application configuration
-                ApplicationConfiguration appConfiguration = application.LoadApplicationConfigurationAsync(false).GetAwaiter().GetResult();
+                m_appConfiguration = application.LoadApplicationConfigurationAsync(false).GetAwaiter().GetResult();
 
                 // check the application certificate
                 bool certOK = application.CheckApplicationInstanceCertificatesAsync(false, 0).GetAwaiter().GetResult();
@@ -164,10 +171,10 @@ namespace Station.Simulation
                 File.WriteAllText(endpointsFilePath, endpointsFileContent);
 
                 // load list of endpoints to connect to
-                ConfiguredEndpointCollection endpoints = appConfiguration.LoadCachedEndpoints(true);
-                endpoints.DiscoveryUrls = appConfiguration.ClientConfiguration.WellKnownDiscoveryUrls;
+                m_endpoints = m_appConfiguration.LoadCachedEndpoints(true);
+                m_endpoints.DiscoveryUrls = m_appConfiguration.ClientConfiguration.WellKnownDiscoveryUrls;
 
-                StationsCollection collection = StationsCollection.Load(appConfiguration);
+                StationsCollection collection = StationsCollection.Load(m_appConfiguration);
                 if (collection.Count > 0)
                 {
                     m_station = collection[0];
@@ -183,13 +190,7 @@ namespace Station.Simulation
                     try
                     {
                         // connect to all servers
-                        m_sessionAssembly = new SessionHandler();
-                        m_sessionTest = new SessionHandler();
-                        m_sessionPackaging = new SessionHandler();
-
-                        m_sessionAssembly.EndpointConnectAsync(endpoints[c_Assembly], appConfiguration, Telemetry).GetAwaiter().GetResult();
-                        m_sessionTest.EndpointConnectAsync(endpoints[c_Test], appConfiguration, Telemetry).GetAwaiter().GetResult();
-                        m_sessionPackaging.EndpointConnectAsync(endpoints[c_Packaging], appConfiguration, Telemetry).GetAwaiter().GetResult();
+                        ConnectAllSessions();
 
                         if (!m_sessionAssembly.SessionConnected || !m_sessionTest.SessionConnected || !m_sessionPackaging.SessionConnected)
                         {
@@ -253,6 +254,32 @@ namespace Station.Simulation
                     // do nothing
                 }
             }
+            finally
+            {
+                // Dispose sessions to close transport channels cleanly
+                m_sessionAssembly?.Dispose();
+                m_sessionTest?.Dispose();
+                m_sessionPackaging?.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Creates (or recreates) all three session handlers and connects them.
+        /// Disposes any existing handlers first to prevent orphaned publish loops.
+        /// </summary>
+        private static void ConnectAllSessions()
+        {
+            m_sessionAssembly?.Dispose();
+            m_sessionTest?.Dispose();
+            m_sessionPackaging?.Dispose();
+
+            m_sessionAssembly = new SessionHandler();
+            m_sessionTest = new SessionHandler();
+            m_sessionPackaging = new SessionHandler();
+
+            m_sessionAssembly.EndpointConnectAsync(m_endpoints[c_Assembly], m_appConfiguration, Telemetry).GetAwaiter().GetResult();
+            m_sessionTest.EndpointConnectAsync(m_endpoints[c_Test], m_appConfiguration, Telemetry).GetAwaiter().GetResult();
+            m_sessionPackaging.EndpointConnectAsync(m_endpoints[c_Packaging], m_appConfiguration, Telemetry).GetAwaiter().GetResult();
         }
 
         private static void MesLogic(object state)
@@ -295,6 +322,33 @@ namespace Station.Simulation
                     {
                         m_lastActivity = DateTime.UtcNow;
                         return;
+                    }
+
+                    // Proactively check session health before issuing calls.
+                    // If any session is broken, attempt recreation instead of
+                    // waiting for the full c_connectTimeout (300s) to expire.
+                    if (!m_sessionAssembly.SessionConnected ||
+                        !m_sessionTest.SessionConnected ||
+                        !m_sessionPackaging.SessionConnected)
+                    {
+                        Console.WriteLine("MES detected disconnected session(s), attempting recovery...");
+                        try
+                        {
+                            if (!m_sessionAssembly.SessionConnected)
+                                m_sessionAssembly.RecreateSessionAsync().GetAwaiter().GetResult();
+                            if (!m_sessionTest.SessionConnected)
+                                m_sessionTest.RecreateSessionAsync().GetAwaiter().GetResult();
+                            if (!m_sessionPackaging.SessionConnected)
+                                m_sessionPackaging.RecreateSessionAsync().GetAwaiter().GetResult();
+
+                            m_lastActivity = DateTime.UtcNow;
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("Session recovery failed: {0}", ex.Message);
+                        }
+
+                        return; // skip this cycle, let next tick proceed with healthy sessions
                     }
 
                     // when the assembly station is done and the test station is ready
@@ -350,6 +404,12 @@ namespace Station.Simulation
             {
                 // access the default subscription, add it to the session and only create it if successful
                 Subscription subscription = session.DefaultSubscription;
+
+                // Set a minimum lifetime that is >= session timeout to prevent
+                // the "minLifetimeInterval smaller than session timeout" warning
+                // and avoid premature subscription expiry.
+                subscription.MinLifetimeInterval = c_minSubscriptionLifetime;
+
                 if (session.AddSubscription(subscription))
                 {
                     subscription.CreateAsync().GetAwaiter().GetResult();

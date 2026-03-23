@@ -402,13 +402,13 @@
         {
             if (session != null)
             {
-                // access the default subscription, add it to the session and only create it if successful
-                Subscription subscription = session.DefaultSubscription;
-
-                // Set a minimum lifetime that is >= session timeout to prevent
-                // the "minLifetimeInterval smaller than session timeout" warning
-                // and avoid premature subscription expiry.
-                subscription.MinLifetimeInterval = c_minSubscriptionLifetime;
+                var subscription = new Subscription(session.DefaultSubscription)
+                {
+                    // Set a minimum lifetime that is >= session timeout to prevent
+                    // the "minLifetimeInterval smaller than session timeout" warning
+                    // and avoid premature subscription expiry.
+                    MinLifetimeInterval = c_minSubscriptionLifetime
+                };
 
                 if (session.AddSubscription(subscription))
                 {
@@ -432,7 +432,7 @@
                     monitoredItem.DisplayName = nodeId.Identifier.ToString();
                     monitoredItem.MonitoringMode = MonitoringMode.Reporting;
                     monitoredItem.SamplingInterval = 0;
-                    monitoredItem.QueueSize = 0;
+                    monitoredItem.QueueSize = 1;
                     monitoredItem.DiscardOldest = true;
 
                     monitoredItem.Notification += handler;

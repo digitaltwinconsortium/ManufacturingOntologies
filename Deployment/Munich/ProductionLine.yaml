@@ -52,14 +52,9 @@ spec:
         - containerPort: 4840
           name: opcua
         volumeMounts:
-        - name: "pki"
-          mountPath: "/app/pki"
         - name: "logs"
           mountPath: "/app/logs"
       volumes:
-        - name: "pki"
-          hostPath:
-            path: "/mnt/c/K3s/Commander/Munich/PKI"
         - name: "logs"
           hostPath:
             path: "/mnt/c/K3s/Commander/Munich/Logs"
@@ -112,14 +107,9 @@ spec:
         - containerPort: 4840
           name: opcua
         volumeMounts:
-        - name: "pki"
-          mountPath: "/app/pki"
         - name: "logs"
           mountPath: "/app/logs"
       volumes:
-        - name: "pki"
-          hostPath:
-            path: "/mnt/c/K3s/MES/Munich/PKI"
         - name: "logs"
           hostPath:
             path: "/mnt/c/K3s/MES/Munich/Logs"
@@ -174,14 +164,9 @@ spec:
         - containerPort: 4840
           name: opcua
         volumeMounts:
-        - name: "pki"
-          mountPath: "/app/pki"
         - name: "logs"
           mountPath: "/app/logs"
       volumes:
-        - name: "pki"
-          hostPath:
-            path: "/mnt/c/K3s/Assembly/Munich/PKI"
         - name: "logs"
           hostPath:
             path: "/mnt/c/K3s/Assembly/Munich/Logs"
@@ -236,14 +221,9 @@ spec:
         - containerPort: 4840
           name: opcua
         volumeMounts:
-        - name: "pki"
-          mountPath: "/app/pki"
         - name: "logs"
           mountPath: "/app/logs"
       volumes:
-        - name: "pki"
-          hostPath:
-            path: "/mnt/c/K3s/Test/Munich/PKI"
         - name: "logs"
           hostPath:
             path: "/mnt/c/K3s/Test/Munich/Logs"
@@ -298,14 +278,9 @@ spec:
         - containerPort: 4840
           name: opcua
         volumeMounts:
-        - name: "pki"
-          mountPath: "/app/pki"
         - name: "logs"
           mountPath: "/app/logs"
       volumes:
-        - name: "pki"
-          hostPath:
-            path: "/mnt/c/K3s/Packaging/Munich/PKI"
         - name: "logs"
           hostPath:
             path: "/mnt/c/K3s/Packaging/Munich/Logs"

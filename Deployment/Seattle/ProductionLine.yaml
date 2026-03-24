@@ -52,14 +52,9 @@ spec:
         - containerPort: 4840
           name: opcua
         volumeMounts:
-        - name: "pki"
-          mountPath: "/app/pki"
         - name: "logs"
           mountPath: "/app/logs"
       volumes:
-        - name: "pki"
-          hostPath:
-            path: "/mnt/c/K3s/Commander/Seattle/PKI"
         - name: "logs"
           hostPath:
             path: "/mnt/c/K3s/Commander/Seattle/Logs"
@@ -112,14 +107,9 @@ spec:
         - containerPort: 4840
           name: opcua
         volumeMounts:
-        - name: "pki"
-          mountPath: "/app/pki"
         - name: "logs"
           mountPath: "/app/logs"
       volumes:
-        - name: "pki"
-          hostPath:
-            path: "/mnt/c/K3s/MES/Seattle/PKI"
         - name: "logs"
           hostPath:
             path: "/mnt/c/K3s/MES/Seattle/Logs"
@@ -174,14 +164,9 @@ spec:
         - containerPort: 4840
           name: opcua
         volumeMounts:
-        - name: "pki"
-          mountPath: "/app/pki"
         - name: "logs"
           mountPath: "/app/logs"
       volumes:
-        - name: "pki"
-          hostPath:
-            path: "/mnt/c/K3s/Assembly/Seattle/PKI"
         - name: "logs"
           hostPath:
             path: "/mnt/c/K3s/Assembly/Seattle/Logs"
@@ -236,14 +221,9 @@ spec:
         - containerPort: 4840
           name: opcua
         volumeMounts:
-        - name: "pki"
-          mountPath: "/app/pki"
         - name: "logs"
           mountPath: "/app/logs"
       volumes:
-        - name: "pki"
-          hostPath:
-            path: "/mnt/c/K3s/Test/Seattle/PKI"
         - name: "logs"
           hostPath:
             path: "/mnt/c/K3s/Test/Seattle/Logs"
@@ -298,14 +278,9 @@ spec:
         - containerPort: 4840
           name: opcua
         volumeMounts:
-        - name: "pki"
-          mountPath: "/app/pki"
         - name: "logs"
           mountPath: "/app/logs"
       volumes:
-        - name: "pki"
-          hostPath:
-            path: "/mnt/c/K3s/Packaging/Seattle/PKI"
         - name: "logs"
           hostPath:
             path: "/mnt/c/K3s/Packaging/Seattle/Logs"

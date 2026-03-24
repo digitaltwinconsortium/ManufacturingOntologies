@@ -51,6 +51,10 @@
             if (Session != null)
             {
                 Session.KeepAlive += new KeepAliveEventHandler(StandardClient_KeepAlive);
+
+                // Limit outstanding publish requests to reduce log flooding when
+                // the transport channel breaks (default can be 10+).
+                ((Session)Session).MaxPublishRequestCount = 3;
             }
             else
             {
@@ -115,7 +119,26 @@
                 return;
             }
 
-            Session = (Session)m_reconnectHandler.Session;
+            var newSession = (Session)m_reconnectHandler.Session;
+
+            // If the reconnect handler created a brand-new session (e.g. after
+            // certificate rotation), the old session's publish loop is still
+            // running against the dead transport channel.  Dispose it to stop
+            // the flood of "UaSCUaBinaryTransportChannel not open" errors.
+            if (Session != null && !Object.ReferenceEquals(Session, newSession))
+            {
+                try
+                {
+                    Session.KeepAlive -= StandardClient_KeepAlive;
+                    Session.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error disposing old session: {0}", ex.Message);
+                }
+            }
+
+            Session = newSession;
             m_reconnectHandler.Dispose();
             m_reconnectHandler = null;
 
@@ -154,7 +177,8 @@
                 if (code == StatusCodes.BadNoCommunication ||
                     code == StatusCodes.BadNotConnected ||
                     code == StatusCodes.BadSessionIdInvalid ||
-                    code == StatusCodes.BadSecureChannelClosed)
+                    code == StatusCodes.BadSecureChannelClosed ||
+                    code == StatusCodes.BadSecureChannelIdInvalid)
                 {
                     Console.WriteLine("--- RECONNECTING --- {0}", sender.Endpoint.EndpointUrl);
                     m_reconnectHandler = new SessionReconnectHandler(_telemetry);

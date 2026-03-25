@@ -5,6 +5,7 @@
     using Opc.Ua.Client;
     using Opc.Ua.Cloud;
     using Opc.Ua.Configuration;
+    using Serilog;
     using System;
     using System.Collections.Generic;
     using System.Globalization;
@@ -36,7 +37,7 @@
         private static SessionHandler m_sessionTest = null;
         private static SessionHandler m_sessionPackaging = null;
 
-        private static Object m_mesStatusLock = new Object();
+        private static SemaphoreSlim m_mesStatusLock = new SemaphoreSlim(1, 1);
 
         private static StationStatus m_statusAssembly = StationStatus.Ready;
         private static StationStatus m_statusTest = StationStatus.Ready;
@@ -60,10 +61,6 @@
         private const int c_waitTime = 60 * 1000;
         private const int c_connectTimeout = 300 * 1000;
 
-        // Minimum subscription lifetime should be >= session timeout to avoid
-        // premature expiry (fixes the "minLifetimeInterval 10000ms" warning).
-        private const uint c_minSubscriptionLifetime = 120000;
-
         private static Timer m_timer = null;
 
         // Cached config for session recreation after cert rotation
@@ -74,36 +71,43 @@
 
         public static ulong CycleTime { get; set; }
 
-        public static void Main()
+        public static async Task Main()
         {
-            while (true)
+            try
             {
-                try
+                while (true)
                 {
-                    if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("StationType")))
+                    try
                     {
-                        throw new ArgumentException("You must specify the StationType environment variable!");
-                    }
+                        if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("StationType")))
+                        {
+                            throw new ArgumentException("You must specify the StationType environment variable!");
+                        }
 
-                    if (Environment.GetEnvironmentVariable("StationType") == "mes")
-                    {
-                        MES();
+                        if (Environment.GetEnvironmentVariable("StationType") == "mes")
+                        {
+                            await MESAsync().ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            Task t = ConsoleServer();
+                            t.Wait();
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        Task t = ConsoleServer();
-                        t.Wait();
+                        Log.Error(ex, "Unhandled exception in main loop");
+                        Thread.Sleep(5000);
                     }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Exception: " + ex.Message);
-                    Thread.Sleep(5000);
-                }
+            }
+            finally
+            {
+                Log.CloseAndFlush();
             }
         }
 
-        private static void MES()
+        private static async Task MESAsync()
         {
             ApplicationInstance.MessageDlg = new ApplicationMessageDlg();
             ApplicationInstance application = new ApplicationInstance(Telemetry);
@@ -141,10 +145,10 @@
                 File.WriteAllText(configFilePath, configFileContent);
 
                 // load the application configuration
-                m_appConfiguration = application.LoadApplicationConfigurationAsync(false).GetAwaiter().GetResult();
+                m_appConfiguration = await application.LoadApplicationConfigurationAsync(false).ConfigureAwait(false);
 
                 // check the application certificate
-                bool certOK = application.CheckApplicationInstanceCertificatesAsync(false, 0).GetAwaiter().GetResult();
+                bool certOK = await application.CheckApplicationInstanceCertificatesAsync(false, 0).ConfigureAwait(false);
                 if (!certOK)
                 {
                     throw new Exception("Application instance certificate invalid!");
@@ -152,8 +156,8 @@
 
                 // create OPC UA cert validator
                 application.ApplicationConfiguration.CertificateValidator = new CertificateValidator(Telemetry);
-                application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(MESCertificateValidationCallback);
-                application.ApplicationConfiguration.CertificateValidator.UpdateAsync(application.ApplicationConfiguration).GetAwaiter().GetResult();
+                application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(CertificateValidationCallback);
+                await application.ApplicationConfiguration.CertificateValidator.UpdateAsync(application.ApplicationConfiguration).ConfigureAwait(false);
 
                 string issuerPath = Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs");
                 if (!Directory.Exists(issuerPath))
@@ -162,8 +166,8 @@
                 }
 
                 // start the server.
-                application.StartAsync(new FactoryStationServer(false)).GetAwaiter().GetResult();
-                Console.WriteLine("Server started.");
+                await application.StartAsync(new FactoryStationServer(false)).ConfigureAwait(false);
+                Log.Information("Server started");
 
                 // replace the production line name in the list of endpoints to connect to.
                 string endpointsFilePath = Path.Combine(Directory.GetCurrentDirectory(), application.ConfigSectionName + ".Endpoints.xml");
@@ -190,33 +194,33 @@
                     try
                     {
                         // connect to all servers
-                        ConnectAllSessions();
+                        await ConnectAllSessionsAsync().ConfigureAwait(false);
 
                         if (!m_sessionAssembly.SessionConnected || !m_sessionTest.SessionConnected || !m_sessionPackaging.SessionConnected)
                         {
                             throw new Exception("Failed to connect to assembly line!");
                         }
 
-                        if (!CreateMonitoredItem(m_station.StatusNode, m_sessionAssembly.Session, new MonitoredItemNotificationEventHandler(MonitoredItem_AssemblyStation)))
+                        if (!await CreateMonitoredItemAsync(m_station.StatusNode, m_sessionAssembly, new MonitoredItemNotificationEventHandler(MonitoredItem_AssemblyStationAsync)).ConfigureAwait(false))
                         {
                             throw new Exception("Failed to create monitored Item for the assembly station!");
                         }
-                        if (!CreateMonitoredItem(m_station.StatusNode, m_sessionTest.Session, new MonitoredItemNotificationEventHandler(MonitoredItem_TestStation)))
+                        if (!await CreateMonitoredItemAsync(m_station.StatusNode, m_sessionTest, new MonitoredItemNotificationEventHandler(MonitoredItem_TestStationAsync)).ConfigureAwait(false))
                         {
                             throw new Exception("Failed to create monitored Item for the test station!");
                         }
-                        if (!CreateMonitoredItem(m_station.StatusNode, m_sessionPackaging.Session, new MonitoredItemNotificationEventHandler(MonitoredItem_PackagingStation)))
+                        if (!await CreateMonitoredItemAsync(m_station.StatusNode, m_sessionPackaging, new MonitoredItemNotificationEventHandler(MonitoredItem_PackagingStationAsync)).ConfigureAwait(false))
                         {
                             throw new Exception("Failed to create monitored Item for the packaging station!");
                         }
 
-                        StartAssemblyLine();
+                        await StartAssemblyLineAsync().ConfigureAwait(false);
 
                         provisioningMode = false;
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine("Assembly line is still in provisioning mode: " + ex.Message + ". Retrying...");
+                        Log.Warning(ex, "Assembly line is still in provisioning mode, retrying...");
                         Thread.Sleep(5000);
                     }
                 }
@@ -224,7 +228,7 @@
                 // MESLogic method is executed periodically, with period c_updateRate
                 RestartTimer(c_updateRate);
 
-                Console.WriteLine("MES started. Press Ctrl-C to exit.");
+                Log.Information("MES started. Press Ctrl-C to exit");
 
                 m_quitEvent = new ManualResetEvent(false);
                 try
@@ -236,6 +240,7 @@
                 }
                 catch
                 {
+                    // do nothing
                 }
 
                 // wait for MES timeout or Ctrl-C
@@ -243,11 +248,11 @@
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Critical Exception: {0}, MES restarting!", ex.Message);
+                Log.Fatal(ex, "Critical exception, MES restarting");
 
                 try
                 {
-                    application.StopAsync().GetAwaiter().GetResult();
+                    await application.StopAsync().ConfigureAwait(false);
                 }
                 catch (Exception)
                 {
@@ -257,9 +262,10 @@
             finally
             {
                 // Dispose sessions to close transport channels cleanly
-                m_sessionAssembly?.Dispose();
-                m_sessionTest?.Dispose();
-                m_sessionPackaging?.Dispose();
+                await (m_sessionAssembly?.DisposeAsync() ?? default).ConfigureAwait(false);
+                await (m_sessionTest?.DisposeAsync() ?? default).ConfigureAwait(false);
+                await (m_sessionPackaging?.DisposeAsync() ?? default).ConfigureAwait(false);
+
             }
         }
 
@@ -267,22 +273,24 @@
         /// Creates (or recreates) all three session handlers and connects them.
         /// Disposes any existing handlers first to prevent orphaned publish loops.
         /// </summary>
-        private static void ConnectAllSessions()
+        private static async Task ConnectAllSessionsAsync()
         {
-            m_sessionAssembly?.Dispose();
-            m_sessionTest?.Dispose();
-            m_sessionPackaging?.Dispose();
+            // Dispose sessions to close transport channels cleanly
+            await (m_sessionAssembly?.DisposeAsync() ?? default).ConfigureAwait(false);
+            await (m_sessionTest?.DisposeAsync() ?? default).ConfigureAwait(false);
+            await (m_sessionPackaging?.DisposeAsync() ?? default).ConfigureAwait(false);
+
 
             m_sessionAssembly = new SessionHandler();
             m_sessionTest = new SessionHandler();
             m_sessionPackaging = new SessionHandler();
 
-            m_sessionAssembly.EndpointConnectAsync(m_endpoints[c_Assembly], m_appConfiguration, Telemetry).GetAwaiter().GetResult();
-            m_sessionTest.EndpointConnectAsync(m_endpoints[c_Test], m_appConfiguration, Telemetry).GetAwaiter().GetResult();
-            m_sessionPackaging.EndpointConnectAsync(m_endpoints[c_Packaging], m_appConfiguration, Telemetry).GetAwaiter().GetResult();
+            await m_sessionAssembly.EndpointConnectAsync(m_endpoints[c_Assembly], m_appConfiguration, Telemetry).ConfigureAwait(false);
+            await m_sessionTest.EndpointConnectAsync(m_endpoints[c_Test], m_appConfiguration, Telemetry).ConfigureAwait(false);
+            await m_sessionPackaging.EndpointConnectAsync(m_endpoints[c_Packaging], m_appConfiguration, Telemetry).ConfigureAwait(false);
         }
 
-        private static void MesLogic(object state)
+        private static async void MesLogicAsync(object state)
         {
             try
             {
@@ -316,7 +324,8 @@
                     }
                 }
 
-                lock (m_mesStatusLock)
+                await m_mesStatusLock.WaitAsync().ConfigureAwait(false);
+                try
                 {
                     if (!productionShouldBeRunning)
                     {
@@ -326,26 +335,32 @@
 
                     // Proactively check session health before issuing calls.
                     // If any session is broken, attempt recreation instead of
-                    // waiting for the full c_connectTimeout (300s) to expire.
+                    // waiting for the full connect Timeout.
                     if (!m_sessionAssembly.SessionConnected ||
                         !m_sessionTest.SessionConnected ||
                         !m_sessionPackaging.SessionConnected)
                     {
-                        Console.WriteLine("MES detected disconnected session(s), attempting recovery...");
+                        Log.Warning("MES detected disconnected session(s), attempting recovery...");
                         try
                         {
                             if (!m_sessionAssembly.SessionConnected)
-                                m_sessionAssembly.RecreateSessionAsync().GetAwaiter().GetResult();
+                            {
+                                await m_sessionAssembly.RecreateSessionAsync().ConfigureAwait(false);
+                            }
                             if (!m_sessionTest.SessionConnected)
-                                m_sessionTest.RecreateSessionAsync().GetAwaiter().GetResult();
+                            {
+                                await m_sessionTest.RecreateSessionAsync().ConfigureAwait(false);
+                            }
                             if (!m_sessionPackaging.SessionConnected)
-                                m_sessionPackaging.RecreateSessionAsync().GetAwaiter().GetResult();
+                            {
+                                await m_sessionPackaging.RecreateSessionAsync().ConfigureAwait(false);
+                            }
 
                             m_lastActivity = DateTime.UtcNow;
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine("Session recovery failed: {0}", ex.Message);
+                            Log.Error(ex, "Session recovery failed");
                         }
 
                         return; // skip this cycle, let next tick proceed with healthy sessions
@@ -355,12 +370,12 @@
                     // move the serial number (the product) to the test station and call
                     // the method execute for the test station to start working, and
                     // the reset method for the assembly to go in the ready state
-                    if ((m_doneAssembly) && (m_statusTest == StationStatus.Ready))
+                    if (m_doneAssembly && (m_statusTest == StationStatus.Ready))
                     {
-                        Console.WriteLine("#{0} Assembly --> Test", m_serialNumber[c_Assembly]);
+                        Log.Information("#{SerialNumber} Assembly --> Test", m_serialNumber[c_Assembly]);
                         m_serialNumber[c_Test] = m_serialNumber[c_Assembly];
-                        m_sessionTest.Session.CallAsync(m_station.RootMethodNode, m_station.ExecuteMethodNode, CancellationToken.None, m_serialNumber[c_Test]).GetAwaiter().GetResult();
-                        m_sessionAssembly.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
+                        await m_sessionTest.Session.CallAsync(m_station.RootMethodNode, m_station.ExecuteMethodNode, CancellationToken.None, m_serialNumber[c_Test]).ConfigureAwait(false);
+                        await m_sessionAssembly.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).ConfigureAwait(false);
                         m_lastActivity = DateTime.UtcNow;
                         m_doneAssembly = false;
                     }
@@ -371,10 +386,10 @@
                     // the reset method for the test to go in the ready state
                     if ((m_doneTest) && (m_statusPackaging == StationStatus.Ready))
                     {
-                        Console.WriteLine("#{0} Test --> Packaging", m_serialNumber[c_Test]);
+                        Log.Information("#{SerialNumber} Test --> Packaging", m_serialNumber[c_Test]);
                         m_serialNumber[c_Packaging] = m_serialNumber[c_Test];
-                        m_sessionPackaging.Session.CallAsync(m_station.RootMethodNode, m_station.ExecuteMethodNode, CancellationToken.None, m_serialNumber[c_Packaging]).GetAwaiter().GetResult();
-                        m_sessionTest.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
+                        await m_sessionPackaging.Session.CallAsync(m_station.RootMethodNode, m_station.ExecuteMethodNode, CancellationToken.None, m_serialNumber[c_Packaging]).ConfigureAwait(false);
+                        await m_sessionTest.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).ConfigureAwait(false);
                         m_lastActivity = DateTime.UtcNow;
                         m_doneTest = false;
                     }
@@ -382,37 +397,63 @@
                     if (m_lastActivity + TimeSpan.FromMilliseconds(c_connectTimeout) < DateTime.UtcNow)
                     {
                         // recover from network / communication outages and restart assembly line
-                        Console.WriteLine("MES activity timeout - restart the MES controller.");
+                        Log.Warning("MES activity timeout — restarting the MES controller");
                         m_quitEvent.Set();
                     }
+                }
+                finally
+                {
+                    m_mesStatusLock.Release();
+                }
+            }
+            catch (ServiceResultException sre) when (
+                sre.StatusCode == StatusCodes.BadSessionIdInvalid ||
+                sre.StatusCode == StatusCodes.BadSessionClosed ||
+                sre.StatusCode == StatusCodes.BadNoCommunication)
+            {
+                Log.Warning(sre, "MES session fault (0x{StatusCode:X8}), forcing reconnect", sre.StatusCode);
+                try
+                {
+                    if (!m_sessionAssembly.SessionConnected)
+                    {
+                        await m_sessionAssembly.RecreateSessionAsync().ConfigureAwait(false);
+                    }
+                    if (!m_sessionTest.SessionConnected)
+                    {
+                        await m_sessionTest.RecreateSessionAsync().ConfigureAwait(false);
+                    }
+                    if (!m_sessionPackaging.SessionConnected)
+                    {
+                        await m_sessionPackaging.RecreateSessionAsync().ConfigureAwait(false);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Forced reconnect failed");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("MES logic exception: {0}!", ex.Message);
+                Log.Error(ex, "MES logic exception");
             }
             finally
             {
-                // reschedule the timer event
                 RestartTimer(c_updateRate);
             }
         }
 
-        private static bool CreateMonitoredItem(NodeId nodeId, ISession session, MonitoredItemNotificationEventHandler handler)
+        private static async Task<bool> CreateMonitoredItemAsync(NodeId nodeId, SessionHandler sessionHandler, MonitoredItemNotificationEventHandler handler)
         {
+            var session = sessionHandler.Session;
             if (session != null)
             {
-                var subscription = new Subscription(session.DefaultSubscription)
-                {
-                    // Set a minimum lifetime that is >= session timeout to prevent
-                    // the "minLifetimeInterval smaller than session timeout" warning
-                    // and avoid premature subscription expiry.
-                    MinLifetimeInterval = c_minSubscriptionLifetime
-                };
+                var subscription = new Subscription(session.DefaultSubscription);
+
+                subscription.PublishStatusChanged += OnPublishStatusChanged;
 
                 if (session.AddSubscription(subscription))
                 {
-                    subscription.CreateAsync().GetAwaiter().GetResult();
+                    await subscription.CreateAsync().ConfigureAwait(false);
                 }
 
                 // add the new monitored item.
@@ -437,64 +478,98 @@
 
                     monitoredItem.Notification += handler;
                     subscription.AddItem(monitoredItem);
-                    subscription.ApplyChangesAsync().GetAwaiter().GetResult();
+                    await subscription.ApplyChangesAsync().ConfigureAwait(false);
 
                     return true;
                 }
                 else
                 {
-                    Console.WriteLine("Error: Can not create monitored item!");
+                    Log.Error("Cannot create monitored item");
                 }
             }
             else
             {
-                Console.WriteLine("Argument error: Session is null!");
+                Log.Error("Cannot create monitored item: session is null");
             }
 
             return false;
         }
 
-        private static void StartAssemblyLine()
+        private static void OnPublishStatusChanged(object sender, EventArgs e)
         {
-            lock (m_mesStatusLock)
+            var subscription = (Subscription)sender;
+            var status = subscription.PublishingStopped
+                ? "STOPPED"
+                : "OK";
+
+            Log.Information(
+                "Subscription {SubscriptionId} publish status: {PublishStatus}, LastNotification: {LastNotificationTime}",
+                subscription.Id,
+                status,
+                subscription.LastNotificationTime);
+
+            // If publishing has been stopped for longer than two keep-alive
+            // cycles, flag the owning session for reconnection.
+            if (subscription.PublishingStopped)
+            {
+                var elapsed = DateTime.UtcNow - subscription.LastNotificationTime;
+                if (elapsed > TimeSpan.FromSeconds(30))
+                {
+                    Log.Warning(
+                        "Subscription {SubscriptionId} stale for {ElapsedSeconds:F0}s — marking session for recovery",
+                        subscription.Id,
+                        elapsed.TotalSeconds);
+
+                    // Force the MES logic to detect and recover the session
+                    m_lastActivity = DateTime.UtcNow - TimeSpan.FromMilliseconds(c_connectTimeout);
+                }
+            }
+        }
+
+        private static async Task StartAssemblyLineAsync()
+        {
+            await m_mesStatusLock.WaitAsync().ConfigureAwait(false);
+            try
             {
                 m_doneAssembly = false;
                 m_doneTest = false;
 
                 m_serialNumber[c_Assembly]++;
 
-                Console.WriteLine("<<Assembly line reset!>>");
+                Log.Information("Assembly line reset");
 
                 // reset assembly line
-                m_sessionAssembly.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
-                m_sessionTest.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
-                m_sessionPackaging.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
+                await m_sessionAssembly.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).ConfigureAwait(false);
+                await m_sessionTest.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).ConfigureAwait(false);
+                await m_sessionPackaging.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).ConfigureAwait(false);
 
                 // read assembly line status
-                m_statusAssembly = (StationStatus)m_sessionAssembly.Session.ReadValueAsync(m_station.StatusNode).GetAwaiter().GetResult().Value;
-                m_statusTest = (StationStatus)m_sessionTest.Session.ReadValueAsync(m_station.StatusNode).GetAwaiter().GetResult().Value;
-                m_statusPackaging = (StationStatus)m_sessionPackaging.Session.ReadValueAsync(m_station.StatusNode).GetAwaiter().GetResult().Value;
+                m_statusAssembly = (StationStatus)(await m_sessionAssembly.Session.ReadValueAsync(m_station.StatusNode).ConfigureAwait(false)).Value;
+                m_statusTest = (StationStatus)(await m_sessionTest.Session.ReadValueAsync(m_station.StatusNode).ConfigureAwait(false)).Value;
+                m_statusPackaging = (StationStatus)(await m_sessionPackaging.Session.ReadValueAsync(m_station.StatusNode).ConfigureAwait(false)).Value;
 
-                Console.WriteLine("#{0} Assemble ", m_serialNumber[c_Assembly]);
                 // start assembly
-                m_sessionAssembly.Session.CallAsync(m_station.RootMethodNode, m_station.ExecuteMethodNode, CancellationToken.None, m_serialNumber[c_Assembly]).GetAwaiter().GetResult();
+                await m_sessionAssembly.Session.CallAsync(m_station.RootMethodNode, m_station.ExecuteMethodNode, CancellationToken.None, m_serialNumber[c_Assembly]).ConfigureAwait(false);
 
                 // reset communication timeout
                 m_lastActivity = DateTime.UtcNow;
             }
+            finally
+            {
+                m_mesStatusLock.Release();
+            }
         }
 
-        private static void MonitoredItem_AssemblyStation(MonitoredItem monitoredItem, MonitoredItemNotificationEventArgs e)
+        private static async void MonitoredItem_AssemblyStationAsync(MonitoredItem monitoredItem, MonitoredItemNotificationEventArgs e)
         {
 
             try
             {
-                lock (m_mesStatusLock)
+                await m_mesStatusLock.WaitAsync().ConfigureAwait(false);
+                try
                 {
                     MonitoredItemNotification change = e.NotificationValue as MonitoredItemNotification;
                     m_statusAssembly = (StationStatus)change.Value.Value;
-
-                    Console.WriteLine("-AssemblyStation: {0}", m_statusAssembly);
 
                     // now check what the status is
                     switch (m_statusAssembly)
@@ -504,8 +579,7 @@
                             {
                                 // build the next product by calling execute with new serial number
                                 m_serialNumber[c_Assembly]++;
-                                Console.WriteLine("#{0} Assemble ", m_serialNumber[c_Assembly]);
-                                m_sessionAssembly.Session.CallAsync(m_station.RootMethodNode, m_station.ExecuteMethodNode, CancellationToken.None, m_serialNumber[c_Assembly]).GetAwaiter().GetResult();
+                                await m_sessionAssembly.Session.CallAsync(m_station.RootMethodNode, m_station.ExecuteMethodNode, CancellationToken.None, m_serialNumber[c_Assembly]).ConfigureAwait(false);
                             }
                             break;
 
@@ -519,45 +593,44 @@
 
                         case StationStatus.Discarded:
                             // product was automatically discarded by the station, reset
-                            Console.WriteLine("#{0} Discarded in Assembly", m_serialNumber[c_Assembly]);
-                            m_sessionAssembly.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
+                            await m_sessionAssembly.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).ConfigureAwait(false);
                             break;
 
                         case StationStatus.Fault:
-                            Task.Run(async () =>
+                            _ = Task.Run(async () =>
                             {
                                 // station is at fault state, wait some time to simulate manual intervention before reseting
-                                Console.WriteLine("<<AssemblyStation: Fault>>");
                                 await Task.Delay(c_waitTime).ConfigureAwait(false);
-                                Console.WriteLine("<<AssemblyStation: Restart from Fault>>");
-
-                                m_sessionAssembly.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
+                                await m_sessionAssembly.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).ConfigureAwait(false);
                             });
                             break;
 
                         default:
-                            Console.WriteLine("Argument error: Invalid station status type received!");
+                            Log.Error("Invalid station status type received from AssemblyStation: {Status}", m_statusAssembly);
                             break;
                     }
+                }
+                finally
+                {
+                    m_mesStatusLock.Release();
                 }
             }
             catch (Exception exception)
             {
-                Console.WriteLine("Exception: Error processing monitored item notification: " + exception.Message);
+                Log.Error(exception, "Error processing AssemblyStation monitored item notification");
             }
         }
 
-        private static void MonitoredItem_TestStation(MonitoredItem monitoredItem, MonitoredItemNotificationEventArgs e)
+        private static async void MonitoredItem_TestStationAsync(MonitoredItem monitoredItem, MonitoredItemNotificationEventArgs e)
         {
 
             try
             {
-                lock (m_mesStatusLock)
+                await m_mesStatusLock.WaitAsync().ConfigureAwait(false);
+                try
                 {
                     MonitoredItemNotification change = e.NotificationValue as MonitoredItemNotification;
                     m_statusTest = (StationStatus)change.Value.Value;
-
-                    Console.WriteLine("--TestStation: {0}", m_statusTest);
 
                     switch (m_statusTest)
                     {
@@ -570,54 +643,52 @@
                             break;
 
                         case StationStatus.Done:
-                            Console.WriteLine("#{0} Tested, Passed", m_serialNumber[c_Test]);
                             m_doneTest = true;
                             break;
 
                         case StationStatus.Discarded:
-                            Console.WriteLine("#{0} Tested, not Passed, Discarded", m_serialNumber[c_Test]);
-                            m_sessionTest.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
+                            await m_sessionTest.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).ConfigureAwait(false);
                             break;
 
                         case StationStatus.Fault:
                             {
                                 m_faultTest = true;
-                                Task.Run(async () =>
+                                _ =Task.Run(async () =>
                                 {
-                                    Console.WriteLine("<<TestStation: Fault>>");
                                     await Task.Delay(c_waitTime).ConfigureAwait(false);
-                                    Console.WriteLine("<<TestStation: Restart from Fault>>");
-
                                     m_faultTest = false;
-                                    m_sessionTest.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
+                                    await m_sessionTest.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).ConfigureAwait(false);
                                 });
                             }
                             break;
 
                         default:
                             {
-                                Console.WriteLine("Argument error: Invalid station status type received!");
+                                Log.Error("Invalid station status type received from TestStation: {Status}", m_statusTest);
                                 return;
                             }
                     }
                 }
+                finally
+                {
+                    m_mesStatusLock.Release();
+                }
             }
             catch (Exception exception)
             {
-                Console.WriteLine("Exception: Error processing monitored item notification: " + exception.Message);
+                Log.Error(exception, "Error processing TestStation monitored item notification");
             }
         }
 
-        private static void MonitoredItem_PackagingStation(MonitoredItem monitoredItem, MonitoredItemNotificationEventArgs e)
+        private static async void MonitoredItem_PackagingStationAsync(MonitoredItem monitoredItem, MonitoredItemNotificationEventArgs e)
         {
             try
             {
-                lock (m_mesStatusLock)
+                await m_mesStatusLock.WaitAsync().ConfigureAwait(false);
+                try
                 {
                     MonitoredItemNotification change = e.NotificationValue as MonitoredItemNotification;
                     m_statusPackaging = (StationStatus)change.Value.Value;
-
-                    Console.WriteLine("---PackagingStation: {0}", m_statusPackaging);
 
                     switch (m_statusPackaging)
                     {
@@ -630,40 +701,39 @@
                             break;
 
                         case StationStatus.Done:
-                            Console.WriteLine("#{0} Packaged", m_serialNumber[c_Packaging]);
                             // last station (packaging) is done, reset so the next product can be built
-                            m_sessionPackaging.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
+                            await m_sessionPackaging.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).ConfigureAwait(false);
                             break;
 
                         case StationStatus.Discarded:
-                            Console.WriteLine("#{0} Discarded in Packaging", m_serialNumber[c_Packaging]);
-                            m_sessionPackaging.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
+                            await m_sessionPackaging.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).ConfigureAwait(false);
                             break;
 
                         case StationStatus.Fault:
                             {
                                 m_faultPackaging = true;
-                                Task.Run(async () =>
+                                _ = Task.Run(async () =>
                                 {
-                                    Console.WriteLine("<<PackagingStation: Fault>>");
                                     await Task.Delay(c_waitTime).ConfigureAwait(false);
-                                    Console.WriteLine("<<PackagingStation: Restart from Fault>>");
-
                                     m_faultPackaging = false;
-                                    m_sessionPackaging.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).GetAwaiter().GetResult();
+                                    await m_sessionPackaging.Session.CallAsync(m_station.RootMethodNode, m_station.ResetMethodNode).ConfigureAwait(false);
                                 });
                             }
                             break;
 
                         default:
-                            Console.WriteLine("Argument error: Invalid station status type received!");
+                            Log.Error("Invalid station status type received from PackagingStation: {Status}", m_statusPackaging);
                             break;
                     }
+                }
+                finally
+                {
+                    m_mesStatusLock.Release();
                 }
             }
             catch (Exception exception)
             {
-                Console.WriteLine("Exception: Error processing monitored item notification: " + exception.Message);
+                Log.Error(exception, "Error processing PackagingStation monitored item notification");
             }
         }
 
@@ -674,7 +744,7 @@
                 m_timer.Dispose();
             }
 
-            m_timer = new Timer(MesLogic, null, dueTime, Timeout.Infinite);
+            m_timer = new Timer(MesLogicAsync, null, dueTime, Timeout.Infinite);
         }
 
         private static async Task ConsoleServer()
@@ -724,12 +794,11 @@
                 CycleTime = ulong.Parse(Environment.GetEnvironmentVariable("CycleTime"), NumberStyles.Integer);
 
                 // print out our configuration
-                Console.WriteLine("OPC UA Server Configuration:");
-                Console.WriteLine("----------------------------");
-                Console.WriteLine("OPC UA Endpoint: " + config.ServerConfiguration.BaseAddresses[0].ToString());
-                Console.WriteLine("Application URI: " + config.ApplicationUri);
-                Console.WriteLine("Power consumption: " + PowerConsumption.ToString() + "kW");
-                Console.WriteLine("Cycle time: " + CycleTime.ToString() + "s");
+                Log.Information("OPC UA Server Configuration:");
+                Log.Information("OPC UA Endpoint: {Endpoint}", config.ServerConfiguration.BaseAddresses[0]);
+                Log.Information("Application URI: {ApplicationUri}", config.ApplicationUri);
+                Log.Information("Power consumption: {PowerConsumption}kW", PowerConsumption);
+                Log.Information("Cycle time: {CycleTime}s", CycleTime);
 
                 // check the application certificate
                 bool certOK = await application.CheckApplicationInstanceCertificatesAsync(false, 0).ConfigureAwait(false);
@@ -740,8 +809,8 @@
 
                 // create OPC UA cert validator
                 application.ApplicationConfiguration.CertificateValidator = new CertificateValidator(Telemetry);
-                application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(MESCertificateValidationCallback);
-                application.ApplicationConfiguration.CertificateValidator.UpdateAsync(application.ApplicationConfiguration).GetAwaiter().GetResult();
+                application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(CertificateValidationCallback);
+                await application.ApplicationConfiguration.CertificateValidator.UpdateAsync(application.ApplicationConfiguration).ConfigureAwait(false);
 
                 string issuerPath = Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs");
                 if (!Directory.Exists(issuerPath))
@@ -752,7 +821,7 @@
                 // start the server.
                 await application.StartAsync(new FactoryStationServer(true)).ConfigureAwait(false);
 
-                Console.WriteLine("Server started. Press any key to exit.");
+                Log.Information("Server started. Press any key to exit");
 
                 try
                 {
@@ -766,7 +835,7 @@
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Critical Exception: {0}, Station restarting!", ex.Message);
+                Log.Fatal(ex, "Critical exception, Station restarting");
 
                 try
                 {
@@ -779,7 +848,7 @@
             }
         }
 
-        private static void StationCertificateValidationCallback(CertificateValidator sender, CertificateValidationEventArgs e)
+        private static void CertificateValidationCallback(CertificateValidator sender, CertificateValidationEventArgs e)
         {
             // check if we have a trusted issuer cert yet
             bool provisioningMode = (Directory.EnumerateFiles(Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs")).Count() == 0);
@@ -787,16 +856,7 @@
             // we allow conections in provisoning mode, but limit access to the server
             if ((e.Error.StatusCode == StatusCodes.BadCertificateUntrusted) && provisioningMode)
             {
-                Console.WriteLine("Auto-accepting certificate while in provisioning mode!");
-                e.Accept = true;
-            }
-        }
-
-        private static void MESCertificateValidationCallback(CertificateValidator sender, CertificateValidationEventArgs e)
-        {
-            // always trust the OPC UA server certificate
-            if (e.Error.StatusCode == StatusCodes.BadCertificateUntrusted)
-            {
+                Log.Warning("Auto-accepting certificate while in provisioning mode");
                 e.Accept = true;
             }
         }

@@ -2,6 +2,7 @@
 {
     using Opc.Ua;
     using Opc.Ua.Client;
+    using Serilog;
     using System;
     using System.Text;
     using System.Threading.Tasks;
@@ -9,7 +10,7 @@
     /// <summary>
     /// Handles the connection and reconnection of sessions to endpoints.
     /// </summary>
-    class SessionHandler : IDisposable
+    class SessionHandler : IAsyncDisposable
     {
         const int c_reconnectPeriod = 10000;
         const uint c_connectTimeout = 60000;
@@ -21,6 +22,7 @@
         private ITelemetryContext _telemetry = null;
         private ConfiguredEndpoint _endpoint = null;
         private ApplicationConfiguration _appConfiguration = null;
+        private uint _missedKeepAlives = 0;
 
         public async Task<bool> EndpointConnectAsync(ConfiguredEndpoint endpoint, ApplicationConfiguration appConfiguration, ITelemetryContext telemetry)
         {
@@ -50,7 +52,7 @@
 
             if (Session != null)
             {
-                Session.KeepAlive += new KeepAliveEventHandler(StandardClient_KeepAlive);
+                Session.KeepAlive += new KeepAliveEventHandler(KeepAliveHandler);
 
                 // Limit outstanding publish requests to reduce log flooding when
                 // the transport channel breaks (default can be 10+).
@@ -58,7 +60,7 @@
             }
             else
             {
-                Console.WriteLine("Can not create session!");
+                Log.Error("Cannot create session for endpoint {EndpointUrl}", endpoint?.EndpointUrl);
                 return false;
             }
 
@@ -73,11 +75,11 @@
         {
             if (_endpoint == null || _appConfiguration == null || _telemetry == null)
             {
-                Console.WriteLine("Cannot recreate session: missing configuration.");
+                Log.Error("Cannot recreate session: missing configuration");
                 return false;
             }
 
-            Console.WriteLine("--- RECREATING SESSION --- {0}", _endpoint.EndpointUrl);
+            Log.Information("RECREATING SESSION for {EndpointUrl}", _endpoint.EndpointUrl);
 
             await CloseSessionAsync().ConfigureAwait(false);
             Session = null;
@@ -97,13 +99,13 @@
             {
                 try
                 {
-                    Session.KeepAlive -= StandardClient_KeepAlive;
+                    Session.KeepAlive -= KeepAliveHandler;
                     var status = await Session.CloseAsync().ConfigureAwait(false);
-                    Console.WriteLine("Session closed: {0}, Status: {1}", Session.Endpoint?.EndpointUrl, status);
+                    Log.Information("Session closed: {EndpointUrl}, Status: {Status}", Session.Endpoint?.EndpointUrl, status);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error closing session: {0}", ex.Message);
+                    Log.Error(ex, "Error closing session for {EndpointUrl}", Session.Endpoint?.EndpointUrl);
                 }
 
                 Session.Dispose();
@@ -111,10 +113,104 @@
             }
         }
 
-        private void Client_ReconnectComplete(object sender, EventArgs e)
+        private void KeepAliveHandler(ISession session, KeepAliveEventArgs eventArgs)
         {
-            // ignore callbacks from discarded objects.
-            if (!Object.ReferenceEquals(sender, m_reconnectHandler))
+            if ((eventArgs == null) || (session == null) || (session.ConfiguredEndpoint == null))
+            {
+                Log.Logger.Warning("Keep alive arguments invalid.");
+                return;
+            }
+
+            try
+            {
+                string endpoint = session.ConfiguredEndpoint.EndpointUrl.AbsoluteUri;
+
+                if (ServiceResult.IsGood(eventArgs.Status))
+                {
+                    // reset keep alives counter
+                    if (_missedKeepAlives > 0)
+                    {
+                        Log.Logger.Information("Session endpoint: {endpoint} got a keep alive after {missedKeepAlives} {verb} missed.",
+                            endpoint,
+                            _missedKeepAlives,
+                            _missedKeepAlives == 1 ? "was" : "were");
+                    }
+
+                    _missedKeepAlives = 0;
+                    return;
+                }
+
+                // ignore callbacks from discarded objects.
+                if (!ReferenceEquals(session, Session))
+                {
+                    return;
+                }
+
+                _missedKeepAlives++;
+
+                Log.Warning("KeepAlive status: {Status}, Missed KeepAlives: {MissedKeepAlives}, OutstandingRequests: {Outstanding}, DefunctRequests: {Defunct}",
+                    eventArgs.Status,
+                    _missedKeepAlives,
+                    session.OutstandingRequestCount,
+                    session.DefunctRequestCount);
+
+                // check if already reconnecting
+                if (m_reconnectHandler != null && ReferenceEquals(m_reconnectHandler.Session, session))
+                {
+                    return;
+                }
+
+                // check if below # missed keep alives threshold
+                if (_missedKeepAlives < 3)
+                {
+                    return;
+                }
+
+                Log.Logger.Warning("RECONNECTING session {SessionId}...", session.SessionId);
+
+                // Determine if a standard reconnect is possible or if a full
+                // session recreation is needed (e.g. after certificate rotation).
+                var code = eventArgs.Status.StatusCode.Code;
+                if (code == StatusCodes.BadSecurityChecksFailed || code == StatusCodes.BadCertificateInvalid)
+                {
+                    // Certificate-related failure: transport channel cannot be
+                    // reused; schedule a full session recreation on a background
+                    // thread so we don't block the keep-alive callback.
+                    Log.Warning("Certificate error, recreating session for {EndpointUrl}", session.Endpoint.EndpointUrl);
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await RecreateSessionAsync().ConfigureAwait(false);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex, "Session recreation failed for {EndpointUrl}", session.Endpoint?.EndpointUrl);
+                        }
+                    });
+                }
+
+                m_reconnectHandler = new SessionReconnectHandler(_telemetry);
+                m_reconnectHandler.BeginReconnect(session, c_reconnectPeriod, ReconnectComplete);
+            }
+            catch (Exception e)
+            {
+                Log.Logger.Error(e, "Exception in keep alive handling for endpoint {endpointUrl}. {message}",
+                   session.ConfiguredEndpoint.EndpointUrl,
+                   e.Message);
+            }
+        }
+
+        private void ReconnectComplete(object sender, EventArgs e)
+        {
+            // ignore callbacks from discarded objects
+            if (!ReferenceEquals(sender, m_reconnectHandler))
+            {
+                return;
+            }
+
+            // ignore callbacks from discarded objects
+            if (m_reconnectHandler == null || m_reconnectHandler.Session == null)
             {
                 return;
             }
@@ -129,86 +225,30 @@
             {
                 try
                 {
-                    Session.KeepAlive -= StandardClient_KeepAlive;
+                    Session.KeepAlive -= KeepAliveHandler;
                     Session.Dispose();
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error disposing old session: {0}", ex.Message);
+                    Log.Error(ex, "Error disposing old session");
                 }
             }
+
+            // Reset the missed keep-alive counter so the next transient failure
+            // doesn't immediately trigger another reconnect
+            _missedKeepAlives = 0;
 
             Session = newSession;
             m_reconnectHandler.Dispose();
             m_reconnectHandler = null;
 
-            Console.WriteLine("--- RECONNECTED --- {0}", Session.Endpoint.EndpointUrl);
+            Log.Information("RECONNECTED to {EndpointUrl}", Session.Endpoint.EndpointUrl);
         }
 
-        private void StandardClient_KeepAlive(ISession sender, KeepAliveEventArgs e)
+        public async ValueTask DisposeAsync()
         {
-            if ((e == null) || (sender == null))
-            {
-                return;
-            }
-
-            // ignore callbacks from discarded objects.
-            if (!Object.ReferenceEquals(sender, Session))
-            {
-                return;
-            }
-
-            if (!ServiceResult.IsGood(e.Status))
-            {
-                Console.WriteLine("Status: {0} Outstanding requests: {1} Defunct requests: {2}",
-                    e.Status,
-                    sender.OutstandingRequestCount,
-                    sender.DefunctRequestCount);
-
-                if (m_reconnectHandler != null)
-                {
-                    return; // already reconnecting
-                }
-
-                // Determine if a standard reconnect is possible or if a full
-                // session recreation is needed (e.g. after certificate rotation).
-                var code = e.Status.StatusCode.Code;
-
-                if (code == StatusCodes.BadNoCommunication ||
-                    code == StatusCodes.BadNotConnected ||
-                    code == StatusCodes.BadSessionIdInvalid ||
-                    code == StatusCodes.BadSecureChannelClosed ||
-                    code == StatusCodes.BadSecureChannelIdInvalid)
-                {
-                    Console.WriteLine("--- RECONNECTING --- {0}", sender.Endpoint.EndpointUrl);
-                    m_reconnectHandler = new SessionReconnectHandler(_telemetry);
-                    m_reconnectHandler.BeginReconnect(sender, c_reconnectPeriod, Client_ReconnectComplete);
-                }
-                else if (code == StatusCodes.BadSecurityChecksFailed ||
-                         code == StatusCodes.BadCertificateInvalid)
-                {
-                    // Certificate-related failure: transport channel cannot be
-                    // reused; schedule a full session recreation on a background
-                    // thread so we don't block the keep-alive callback.
-                    Console.WriteLine("--- CERTIFICATE ERROR, RECREATING SESSION --- {0}", sender.Endpoint.EndpointUrl);
-                    _ = Task.Run(async () =>
-                    {
-                        try
-                        {
-                            await RecreateSessionAsync().ConfigureAwait(false);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine("Session recreation failed: {0}", ex.Message);
-                        }
-                    });
-                }
-            }
-        }
-
-        public void Dispose()
-        {
-            CloseSessionAsync().GetAwaiter().GetResult();
+            await CloseSessionAsync().ConfigureAwait(false);
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -12,6 +12,7 @@
     using System.IO;
     using System.Linq;
     using System.Runtime.Serialization;
+    using System.Security.Cryptography.X509Certificates;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -176,18 +177,31 @@
 
                 issuerWatcher.Created += async (_, args) =>
                 {
-                    Log.Information("New issuer certificate detected: {File} — reloading CertificateValidator", args.Name);
+                    Log.Information("New issuer certificate detected: {File}", args.Name);
                     try
                     {
+                        // OPC UA Part 2 §8.3: the trust decision uses TrustedPeerCertificates,
+                        // not TrustedIssuerCertificates (which is only for chain completion).
+                        // Copy the CA cert to the trusted peer store so all application
+                        // certs signed by this CA pass the trust check.
+                        string certFilePath = Path.Combine(issuerPath, args.Name);
+                        using var caCert = X509CertificateLoader.LoadCertificateFromFile(certFilePath);
+
+                        using var peerStore = m_appConfiguration.SecurityConfiguration.TrustedPeerCertificates.OpenStore(Telemetry);
+                        await peerStore.AddAsync(caCert).ConfigureAwait(false);
+
+                        Log.Information("CA cert [{Thumbprint}] added to TrustedPeerCertificates", caCert.Thumbprint);
+
+                        // reload validator to pick up the updated trusted peer store
                         await m_appConfiguration.CertificateValidator.UpdateAsync(m_appConfiguration).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
-                        Log.Error(ex, "Failed to reload CertificateValidator after issuer cert change");
+                        Log.Error(ex, "Failed to process new issuer certificate");
                     }
                 };
 
-                // start the server.
+                // start the server
                 await application.StartAsync(new FactoryStationServer(false)).ConfigureAwait(false);
                 Log.Information("Server started");
 
@@ -603,7 +617,7 @@
                 try
                 {
                     MonitoredItemNotification change = e.NotificationValue as MonitoredItemNotification;
-                    if (change == null)
+                    if (change == null || change.Value == null)
                     {
                         return;
                     }
@@ -671,7 +685,7 @@
                 try
                 {
                     MonitoredItemNotification change = e.NotificationValue as MonitoredItemNotification;
-                    if (change == null)
+                    if (change == null || change.Value == null)
                     {
                         return;
                     }
@@ -738,7 +752,7 @@
                 try
                 {
                     MonitoredItemNotification change = e.NotificationValue as MonitoredItemNotification;
-                    if (change == null)
+                    if (change == null || change.Value == null)
                     {
                         return;
                     }
@@ -871,6 +885,41 @@
                 {
                     Directory.CreateDirectory(issuerPath);
                 }
+
+                // Watch for new issuer certificates written by GDS push.
+                // When the CA cert lands on disk, reload the CertificateValidator
+                // so downstream server certs signed by that CA are trusted immediately.
+                var issuerWatcher = new FileSystemWatcher(issuerPath)
+                {
+                    NotifyFilter = NotifyFilters.FileName | NotifyFilters.CreationTime,
+                    EnableRaisingEvents = true
+                };
+
+                issuerWatcher.Created += async (_, args) =>
+                {
+                    Log.Information("New issuer certificate detected: {File}", args.Name);
+                    try
+                    {
+                        // OPC UA Part 2 §8.3: the trust decision uses TrustedPeerCertificates,
+                        // not TrustedIssuerCertificates (which is only for chain completion).
+                        // Copy the CA cert to the trusted peer store so all application
+                        // certs signed by this CA pass the trust check.
+                        string certFilePath = Path.Combine(issuerPath, args.Name);
+                        using var caCert = X509CertificateLoader.LoadCertificateFromFile(certFilePath);
+
+                        using var peerStore = m_appConfiguration.SecurityConfiguration.TrustedPeerCertificates.OpenStore(Telemetry);
+                        await peerStore.AddAsync(caCert).ConfigureAwait(false);
+
+                        Log.Information("CA cert [{Thumbprint}] added to TrustedPeerCertificates", caCert.Thumbprint);
+
+                        // reload validator to pick up the updated trusted peer store
+                        await m_appConfiguration.CertificateValidator.UpdateAsync(m_appConfiguration).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Failed to process new issuer certificate");
+                    }
+                };
 
                 // start the server.
                 await application.StartAsync(new FactoryStationServer(true)).ConfigureAwait(false);

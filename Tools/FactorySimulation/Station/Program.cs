@@ -165,6 +165,28 @@
                     Directory.CreateDirectory(issuerPath);
                 }
 
+                // Watch for new issuer certificates written by GDS push.
+                // When the CA cert lands on disk, reload the CertificateValidator
+                // so downstream server certs signed by that CA are trusted immediately.
+                var issuerWatcher = new FileSystemWatcher(issuerPath)
+                {
+                    NotifyFilter = NotifyFilters.FileName | NotifyFilters.CreationTime,
+                    EnableRaisingEvents = true
+                };
+
+                issuerWatcher.Created += async (_, args) =>
+                {
+                    Log.Information("New issuer certificate detected: {File} — reloading CertificateValidator", args.Name);
+                    try
+                    {
+                        await m_appConfiguration.CertificateValidator.UpdateAsync(m_appConfiguration).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Failed to reload CertificateValidator after issuer cert change");
+                    }
+                };
+
                 // start the server.
                 await application.StartAsync(new FactoryStationServer(false)).ConfigureAwait(false);
                 Log.Information("Server started");
@@ -189,6 +211,10 @@
                 }
 
                 bool provisioningMode = true;
+                int retryCount = 0;
+                int retryDelayMs = 5_000;
+                const int maxRetryDelayMs = 60_000;
+
                 while (provisioningMode)
                 {
                     try
@@ -220,8 +246,13 @@
                     }
                     catch (Exception ex)
                     {
-                        Log.Warning(ex, "Assembly line is still in provisioning mode, retrying...");
-                        Thread.Sleep(5000);
+                        retryCount++;
+
+                        Log.Warning(ex, "Assembly line is still in provisioning mode, retrying ({Attempt}) in {Delay}ms...", retryCount, retryDelayMs);
+
+                        await Task.Delay(retryDelayMs).ConfigureAwait(false);
+
+                        retryDelayMs = Math.Min(retryDelayMs * 2, maxRetryDelayMs);
                     }
                 }
 
@@ -279,7 +310,6 @@
             await (m_sessionAssembly?.DisposeAsync() ?? default).ConfigureAwait(false);
             await (m_sessionTest?.DisposeAsync() ?? default).ConfigureAwait(false);
             await (m_sessionPackaging?.DisposeAsync() ?? default).ConfigureAwait(false);
-
 
             m_sessionAssembly = new SessionHandler();
             m_sessionTest = new SessionHandler();
@@ -562,6 +592,10 @@
 
         private static async void MonitoredItem_AssemblyStationAsync(MonitoredItem monitoredItem, MonitoredItemNotificationEventArgs e)
         {
+            if (e == null || e.NotificationValue == null)
+            {
+                return;
+            }
 
             try
             {
@@ -569,9 +603,12 @@
                 try
                 {
                     MonitoredItemNotification change = e.NotificationValue as MonitoredItemNotification;
-                    m_statusAssembly = (StationStatus)change.Value.Value;
+                    if (change == null)
+                    {
+                        return;
+                    }
 
-                    // now check what the status is
+                    m_statusAssembly = (StationStatus)change.Value.Value;
                     switch (m_statusAssembly)
                     {
                         case StationStatus.Ready:
@@ -623,6 +660,10 @@
 
         private static async void MonitoredItem_TestStationAsync(MonitoredItem monitoredItem, MonitoredItemNotificationEventArgs e)
         {
+            if (e == null || e.NotificationValue == null)
+            {
+                return;
+            }
 
             try
             {
@@ -630,8 +671,12 @@
                 try
                 {
                     MonitoredItemNotification change = e.NotificationValue as MonitoredItemNotification;
-                    m_statusTest = (StationStatus)change.Value.Value;
+                    if (change == null)
+                    {
+                        return;
+                    }
 
+                    m_statusTest = (StationStatus)change.Value.Value;
                     switch (m_statusTest)
                     {
                         case StationStatus.Ready:
@@ -682,14 +727,23 @@
 
         private static async void MonitoredItem_PackagingStationAsync(MonitoredItem monitoredItem, MonitoredItemNotificationEventArgs e)
         {
+            if (e == null || e.NotificationValue == null)
+            {
+                return;
+            }
+
             try
             {
                 await m_mesStatusLock.WaitAsync().ConfigureAwait(false);
                 try
                 {
                     MonitoredItemNotification change = e.NotificationValue as MonitoredItemNotification;
-                    m_statusPackaging = (StationStatus)change.Value.Value;
+                    if (change == null)
+                    {
+                        return;
+                    }
 
+                    m_statusPackaging = (StationStatus)change.Value.Value;
                     switch (m_statusPackaging)
                     {
                         case StationStatus.Ready:
@@ -850,13 +904,14 @@
 
         private static void CertificateValidationCallback(CertificateValidator sender, CertificateValidationEventArgs e)
         {
-            // check if we have a trusted issuer cert yet
-            bool provisioningMode = (Directory.EnumerateFiles(Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs")).Count() == 0);
-
-            // we allow conections in provisoning mode, but limit access to the server
-            if ((e.Error.StatusCode == StatusCodes.BadCertificateUntrusted) && provisioningMode)
+            // Auto-accept only during initial provisioning (no issuer cert on disk yet).
+            // Once the GDS push delivers the issuer cert, the FileSystemWatcher reloads
+            // the CertificateValidator and all certs signed by that CA are trusted
+            // automatically — no per-peer storage needed.
+            bool provisioningMode = !Directory.EnumerateFiles(Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs")).Any();
+            if (e.Error.StatusCode == StatusCodes.BadCertificateUntrusted && provisioningMode)
             {
-                Log.Warning("Auto-accepting certificate while in provisioning mode");
+                Log.Warning("Auto-accepting certificate in provisioning mode: [{Subject}]", e.Certificate?.Subject);
                 e.Accept = true;
             }
         }

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Most Azure users looking to store and analyze OPC UA PubSub telemetry data sent from industrial sites via a cloud broker now have a powerful alternative in **Azure Databricks**. Databricks provides a unified analytics platform built on Apache Spark, with native support for Delta Lake, structured streaming, and scalable data engineering — making it an excellent fit for industrial IoT workloads.
+Most Azure users looking to store and analyze OPC UA PubSub telemetry data sent from industrial sites via a cloud broker now have a powerful cloud store and analytics platform in **Azure Databricks**. Databricks provides a unified analytics platform built on Apache Spark, with native support for Delta Lake, structured streaming, and scalable data engineering — making it an excellent fit for industrial IoT workloads.
 
 This article walks you through:
 
@@ -415,16 +415,5 @@ else:
 And voilà! You have just imported an entire OPC UA Information Model into a Delta Lake table in Azure Databricks, ready to be joined with your telemetry and metadata for richer analytics.
 
 ## Summary
-
-| Capability | Azure Data Explorer (ADX) | Azure Databricks |
-|---|---|---|
-| **Storage** | Kusto tables | Delta Lake tables |
-| **Query Language** | KQL (Kusto Query Language) | SQL / PySpark |
-| **Streaming Ingestion** | Event Hub native connector | Structured Streaming + Event Hub connector |
-| **Data Expansion** | KQL functions + update policies | PySpark transformations / Delta Live Tables |
-| **Last-Known-Value** | Materialized views (`arg_max`) | SQL views / Delta Live Tables |
-| **External API Calls** | `evaluate http_request()` | Python `requests` library in notebooks |
-| **Information Model Import** | KQL callout policy | PySpark notebook with REST + XML parsing |
-| **Visualization** | ADX Web UI, Power BI, Grafana | Databricks SQL Dashboards, Power BI, Grafana |
 
 Azure Databricks offers a flexible, scalable, and unified analytics platform for OPC UA data. With Delta Lake, Structured Streaming, and the rich PySpark/SQL ecosystem, you get all the capabilities needed to ingest, process, contextualize, and analyze your industrial data — from the shop floor to the cloud.

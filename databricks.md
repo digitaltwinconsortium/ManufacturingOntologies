@@ -1,4 +1,4 @@
-# Using Azure Databricks for OPC UA
+# Connect Azure Databricks to the Reference Solution
 
 ## Introduction
 

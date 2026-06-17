@@ -4,15 +4,15 @@
 
 ## Create a Fabric Eventhouse to Store your Production Line Data
 
-To configure Microsoft Fabric for production line data, you need at least 1 OPC UA server integrated into your produciton line that support OPC UA PubSub. Alternatively, you can use an OPC UA Client/Server to OPC UA PubSub adapter app like UA Cloud Publisher used in this reference solution. Then follow these steps:
-
 1. Log into Microsoft Fabric [here](https://fabric.microsoft.com).
 1. Create a `Eventhouse` by clicking `Create` -> `See all` -> `Eventhouse` and give it a name, e.g. `opcua`. Click `Create`.
 1. Under `KQL Database` and `Database details` activate the setting `OneLake availability`. This will enable sharing your OPC UA time-series data from your production line within your organization via [OneLake](https://learn.microsoft.com/en-us/fabric/onelake/onelake-overview) in [Parquet file format](https://parquet.apache.org/docs/file-format/). Click `Done`.
 
 ## Configure OPC UA PubSub Data Ingestion
 
-Create the tables you need for ingesting the OPC UA PubSub data by clicking `Explore your data`, deleting the sample data in the text box and then entering the following Kusto commands, and then clicking on each itema dn click `Run`:
+These tables, mappings, functions and the materialized view mirror the ones the reference solution creates in Azure Data Explorer, so Fabric processes the OPC UA PubSub data exactly the same way ADX does.
+
+Create the tables you need for ingesting the OPC UA PubSub data by clicking `Explore your data`, deleting the sample data in the text box, entering the following Kusto commands, and then clicking `Run` for each command:
 
         // Create a landing table for raw OPC UA telemetry
         .create table opcua_raw(payload: dynamic)
@@ -60,29 +60,33 @@ Then run the following Kusto commands each:
         // Apply the raw metadata expansion function to the metadata landing table
         .alter table opcua_metadata policy update @'[{"Source": "opcua_metadata_raw", "Query": "OPCUAMetaDataExpand()", "IsEnabled": "True"}]'
 
-## Create Two Fabric Eventstreams to Ingest Data from Your Production Line
+## Connect Fabric to your existing Azure Event Hubs
 
-1. Create an `Eventstream` by clicking `Create` -> `See all` -> `Eventstream` and give it a name (e.g. `eventstream_opcua_telemetry`). Click `Create`. This component will receive the OPC UA PubSub production line telemetry and send it to your KQL database.
-1. Click `New source` and select `Custom App` and give it a name (e.g. `opcua_telemetry`). Click `Add`. In the `Information` box, click on `Connection string-primary key` and copy it. You will need it soon when configuring UA Cloud Publisher.
-1. Create another `Eventstream` by clicking `Create` -> `See all` -> `Eventstream` and give it a name (e.g. `eventstream_opcua_metadata`). Click `Create`. This component will receive the OPC UA PubSub production line metadata and send it to your KQL database.
-1. Click `New source` and select `Custom App` and give it a name (e.g. `opcua_metadata`). Click `Add`. In the `Information` box, click on `Connection string-primary key` and copy it. You will need it soon when configuring UA Cloud Publisher.
+The reference solution deploys an Azure Event Hubs namespace named `<resourcesName>-EventHubs` (where `<resourcesName>` is the name you chose during deployment) that already receives your OPC UA PubSub data on two event hubs:
 
-## Configure UA Cloud Publisher
+| Event hub  | Contents                | KQL landing table    | Ingestion mapping        |
+| ---------- | ----------------------- | -------------------- | ------------------------ |
+| `data`     | OPC UA PubSub telemetry | `opcua_raw`          | `opcua_mapping`          |
+| `metadata` | OPC UA PubSub metadata  | `opcua_metadata_raw` | `opcua_metadata_mapping` |
 
-You can either follow the steps for connecting your own production line described [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies#replacing-the-production-line-simulation-with-a-real-production-line) or you can modify the configuration of the UA Cloud Publisher setup in the production line simulation provided in this repository, for example for the Munich production line. For the latter, follow these steps:
-1. Log into the VM deployed with this reference solution, open an **Administrator Powershell window** and run `Get-AksEdgeNodeAddr` as well as `kubectl get services -n munich`.
-1. Open a browser on the VM and enter the IP address and port retrieved for UA Cloud Publisher in the previous step in the address field (e.g. `http://192.168.0.2:30356`) to access the UA Cloud Publisher UI.
-1. In the UA Cloud Publisher UI, click `Configuration` and enter the `Connection string-primary key` from the `opcua_telemetry` custom app you copied earlier into the `Broker Password` field, enter `$ConnectionString` into the `Broker Username` field, enter the `EntityPath` into the `Broker Message Topic` (the entity path is contained at the end of the connection string and starts with "es_") and the name of your custom app into the `Broker URL` field (the custom app name is contained within the connection string and starts with `eventstream-` and ends with `.servicebus.windows.net`).
-1. Select the checkbox `Use Alternative Broker For OPC UA Metadata Messages` and enter the `Connection string-primary key` from the `opcua_metadata` custom app you copied earlier into the `Alternative Broker Password` field, enter `9093` in the `Alternative Broker Port` field, enter `$ConnectionString` into the `Alternative Broker Username` field, enter the `EntityPath` into the `Broker Metadata Topic` (the entity path is contained at the end of the connection string and starts with "es_") and the name of your custom app into the `Alternative Broker URL` field (the custom app name is contained within the connection string and starts with `eventstream-` and ends with `.servicebus.windows.net`).
-1. Set the `Metadata Send Interval in Seconds` to `3000`.
-1. Click `Apply` at the top of the configuration page. 
-1. In the UA Cloud Publisher UI, click `Diagnostics` and verify that you have a connection to Microsoft Fabric (`Connected to broker(s)` is set to `True`).
-1. Back in Microsoft Fabric, select your workspace, click on your `eventstream_opcua_telemetry` event stream and select `Open Eventsteam`.
-1. Click `New destination` and select `KQL Database` and give it a name (e.g. `kql_db_opcua_telemetry`). Under `Workspace`, select you Fabric workspace (e.g. `My workspace`) and under `KQL Database`, select your KQL database you setup earlier. Click `Add and configure`.
-1. In the `Ingest data` popup window, under `Table`, select `Existing table`, select `opcua_raw` and click `Next: Source`. Leave everything the way it is and click `Next: Schema`. Wait a few seconds for the ingested data to be made available. Under `Data format`, select `JSON`. Under `Mapping name`, select `Use existing mapping` and select `opcua_mapping`. Click `Next: Summary`. Click `Close`.
-1. Select your workspace, click on your `eventstream_opcua_metadata` event stream and select `Open Eventsteam`.
-1. Click `New destination` and select `KQL Database` and give it a name (e.g. `kql_db_opcua_metadata`). Under `Workspace`, select you Fabric workspace (e.g. `My workspace`) and under `KQL Database`, select your KQL database you setup earlier. Click `Add and configure`.
-1. In the `Ingest data` popup window, under `Table`, select `Existing table`, select `opcua_raw_metadata` and click `Next: Source`. Leave everything the way it is and click `Next: Schema`. Wait a few seconds for the ingested data to be made available. Under `Data format`, select `JSON`. Under `Mapping name`, select `Use existing mapping` and select `opcua_metadata_mapping`. Click `Next: Summary`. Click `Close`.
+The Azure Data Explorer (ADX) cluster deployed by the solution consumes these Event Hubs through a dedicated `adx` consumer group. To let Fabric read the same data without interfering with ADX, create a separate consumer group for Fabric on each event hub. You can do this in the Azure portal under the event hub's `Consumer groups` blade. Call the new consumer group 'fabric'.
+You will also need a connection string with at least `Listen` rights. The simplest option is the namespace-level `RootManageSharedAccessKey` policy: in the Azure portal, open your `<resourcesName>-EventHubs` namespace, select `Shared access policies` -> `RootManageSharedAccessKey` and copy the `Connection string-primary key`.
+
+### Ingest the telemetry event hub (`data` -> `opcua_raw`)
+
+1. In your Fabric workspace, click `Create` -> `See all` -> `Eventstream`, name it e.g. `eventstream_opcua_data` and click `Create`.
+1. Click `Add source` -> `Azure Event Hubs`. Under `Connection`, click `New connection` and enter your `<resourcesName>-EventHubs` namespace, the `data` event hub, the `RootManageSharedAccessKey` shared access key name and key, and the `fabric` consumer group (or `$Default`). Set `Data format` to `Json`, click `Add` and then `Publish` the eventstream.
+1. Click `Add destination` -> `Eventhouse`. Select `Direct ingestion`, choose your workspace and the KQL database you created earlier, then click `Save` and `Publish`.
+1. Open the destination to launch the `Ingest data` wizard. Under `Table`, select `Existing table` and choose `opcua_raw`, then click `Next: Source`. Leave everything the way it is and click `Next: Schema`. Under `Data format`, select `JSON`. Under `Mapping name`, select `Use existing mapping` and select `opcua_mapping`. Click `Next: Summary`. Click `Close`.
+
+### Ingest the metadata event hub (`metadata` -> `opcua_metadata_raw`)
+
+1. Create a second eventstream, name it e.g. `eventstream_opcua_metadata` and click `Create`.
+1. Click `Add source` -> `Azure Event Hubs`. Create or select a connection exactly as above, but set the event hub to `metadata` (consumer group `fabric`). Set `Data format` to `Json`, click `Add` and then `Publish` the eventstream.
+1. Click `Add destination` -> `Eventhouse`. Select `Direct ingestion`, choose your workspace and the same KQL database, then click `Save` and `Publish`.
+1. Open the destination to launch the `Ingest data` wizard. Under `Table`, select `Existing table` and choose `opcua_metadata_raw`, then click `Next: Source`. Leave everything the way it is and click `Next: Schema`. Under `Data format`, select `JSON`. Under `Mapping name`, select `Use existing mapping` and select `opcua_metadata_mapping`. Click `Next: Summary`. Click `Close`.
+
+Once both eventstreams are running, the update policies and the `opcua_metadata_lkv` materialized view you created above automatically expand the raw OPC UA PubSub messages into the `opcua_telemetry` and `opcua_metadata` tables, exactly like the ADX deployment.
 
 ## Create a Fabric Lakehouse to Share Your OPC UA Data within Your Organization
 
@@ -113,7 +117,84 @@ Click on our KQL Database and select `Open KQL Database` followed by `Explore yo
         | render linechart
 
 
-## Useful Helper-Functions
+## Import OPC UA Information Models from the UA Cloud Library
+
+Beyond the metadata published via OPC UA PubSub, you can import entire OPC UA Information Models into your Eventhouse from the [UA Cloud Library](https://uacloudlibrary.opcfoundation.org), an online store of OPC UA Information Models hosted by the OPC Foundation. Importing the OPC UA nodes defined in an Information Model into a table lets you look up richer semantics within your queries, including the full model hierarchy, complex type definitions and all available telemetry from your sites.
+
+Because the Fabric Eventhouse KQL engine supports the [`http_request` plugin](https://learn.microsoft.com/kusto/query/http-request-plugin?view=microsoft-fabric), the queries below work in Fabric exactly like they do in ADX.
+
+### Register and find an Information Model
+
+1. Register for free at the UA Cloud Library: [https://uacloudlibrary.opcfoundation.org/Identity/Account/Register](https://uacloudlibrary.opcfoundation.org/Identity/Account/Register).
+1. Browse the available Information Models at [https://uacloudlibrary.opcfoundation.org/Explorer](https://uacloudlibrary.opcfoundation.org/Explorer) and note the unique ID of the model you want to import. You can find this ID in the URL of the model's page. For example, the `Station` nodeset used by this reference solution has the ID `1627266626`.
+1. Create a basic authorization header from your UA Cloud Library credentials. Generate the Base64 hash with the bash command `echo -n 'username:password' | base64`, or use a tool such as [https://www.debugbear.com/basic-auth-header-generator](https://www.debugbear.com/basic-auth-header-generator).
+
+### Enable the http_request plugin and allow the UA Cloud Library endpoint
+
+Unlike Azure Data Explorer, a Fabric Eventhouse has the `http_request` plugin disabled by default, so it must be enabled first. In your KQL database, click `Explore your data` and run the following commands (you need database admin permissions):
+
+        // Enable the http_request plugin used to call the UA Cloud Library REST API
+        .enable plugin http_request
+
+        // Allow Kusto to call the UA Cloud Library endpoint
+        .alter cluster policy callout @'[{"CalloutType": "webapi","CalloutUriRegex": "uacloudlibrary.opcfoundation.org","CanCall": true}]'
+
+### Import an Information Model
+
+Run the following query to download an Information Model from the UA Cloud Library and expand its variable nodes. Replace `<INFORMATION_MODEL_IDENTIFIER_FROM_THE_UA_CLOUD_LIBRARY>` with the model's unique ID (for example `1627266626`) and `<HASHED_CLOUD_LIBRARY_CREDENTIALS>` with your Base64-encoded credentials:
+
+        let uri='https://uacloudlibrary.opcfoundation.org/infomodel/download/<INFORMATION_MODEL_IDENTIFIER_FROM_THE_UA_CLOUD_LIBRARY>';
+        let headers=dynamic({'accept':'text/plain', 'Authorization':'Basic <HASHED_CLOUD_LIBRARY_CREDENTIALS>'});
+        evaluate http_request(uri, headers)
+        | project title = tostring(ResponseBody.['title']), contributor = tostring(ResponseBody.contributor.name), nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
+        | mv-expand UAVariable=nodeset.UANodeSet.UAVariable
+        | project-away nodeset
+        | extend NodeId = UAVariable.['@NodeId'], DisplayName = tostring(UAVariable.DisplayName.['#text']), BrowseName = tostring(UAVariable.['@BrowseName']), DataType = tostring(UAVariable.['@DataType'])
+        | project-away UAVariable
+        | take 10000
+
+To persist the imported model into a table (for example `opcua_information_model`) so you can join it with your `opcua_telemetry` and `opcua_metadata` tables, wrap the same query with `.set-or-append`. The table is created automatically on the first run:
+
+        .set-or-append opcua_information_model <|
+        let uri='https://uacloudlibrary.opcfoundation.org/infomodel/download/<INFORMATION_MODEL_IDENTIFIER_FROM_THE_UA_CLOUD_LIBRARY>';
+        let headers=dynamic({'accept':'text/plain', 'Authorization':'Basic <HASHED_CLOUD_LIBRARY_CREDENTIALS>'});
+        evaluate http_request(uri, headers)
+        | project title = tostring(ResponseBody.['title']), contributor = tostring(ResponseBody.contributor.name), nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
+        | mv-expand UAVariable=nodeset.UANodeSet.UAVariable
+        | extend NodeId = tostring(UAVariable.['@NodeId']), DisplayName = tostring(UAVariable.DisplayName.['#text']), BrowseName = tostring(UAVariable.['@BrowseName']), DataType = tostring(UAVariable.['@DataType'])
+        | project title, contributor, NodeId, DisplayName, BrowseName, DataType
+        | take 10000
+
+### Visualize an Information Model as a graph
+
+To view a graphical representation of an OPC UA Information Model, run the following query and switch the result view to `Graph`. For best results, set the `Layout` option to `Grouped` and the `Labels` to `name`:
+
+        let uri='https://uacloudlibrary.opcfoundation.org/infomodel/download/1627266626';
+        let headers=dynamic({'accept':'text/plain', 'Authorization':'Basic <HASHED_CLOUD_LIBRARY_CREDENTIALS>'});
+        let variables = evaluate http_request(uri, headers)
+            | project title = tostring(ResponseBody.['title']), contributor = tostring(ResponseBody.contributor.name), nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
+            | mv-expand UAVariable = nodeset.UANodeSet.UAVariable
+            | extend NodeId = UAVariable.['@NodeId'], ParentNodeId = UAVariable.['@ParentNodeId'], DisplayName = tostring(UAVariable['DisplayName']), DataType = tostring(UAVariable.['@DataType']), References = tostring(UAVariable.['References'])
+            | where References !contains "HasModellingRule"
+            | where DisplayName != "InputArguments"
+            | project-away nodeset, UAVariable, References;
+        let objects = evaluate http_request(uri, headers)
+            | project title = tostring(ResponseBody.['title']), contributor = tostring(ResponseBody.contributor.name), nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
+            | mv-expand UAObject = nodeset.UANodeSet.UAObject
+            | extend NodeId = UAObject.['@NodeId'], ParentNodeId = UAObject.['@ParentNodeId'], DisplayName = tostring(UAObject['DisplayName']), References = tostring(UAObject.['References'])
+            | where References !contains "HasModellingRule"
+            | project-away nodeset, UAObject, References;
+        let nodes = variables
+            | project source = tostring(NodeId), target = tostring(ParentNodeId), name = tostring(DisplayName)
+            | join kind=fullouter (objects
+                | project source = tostring(NodeId), target = tostring(ParentNodeId), name = tostring(DisplayName)) on source
+                | project source = coalesce(source, source1), target = coalesce(target, target1), name = coalesce(name, name1);
+        let edges = nodes;
+        edges
+        | make-graph source --> target with nodes on source
+
+
+## Useful KQL Database Helper-Functions for Advanced Queries
 
         .create-or-alter function QuerySpecificValue(stationName: string, productionLineName: string, valueToQuery: string, desiredValue: real) {
         opcua_metadata_lkv

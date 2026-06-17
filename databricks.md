@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Most Azure users looking to store and analyze OPC UA PubSub telemetry data sent from industrial sites via a cloud broker now have a powerful cloud store and analytics platform in **Azure Databricks**. Databricks provides a unified analytics platform built on Apache Spark, with native support for Delta Lake, structured streaming, and scalable data engineering — making it an excellent fit for industrial IoT workloads.
+Most Azure users looking to store and analyze OPC UA PubSub telemetry data sent from industrial sites via a cloud broker have a powerful cloud store and analytics platform in **Azure Databricks**. Databricks provides a unified analytics platform built on Apache Spark, with native support for Delta Lake, structured streaming, and scalable data engineering — making it an excellent fit for industrial IoT workloads.
 
 This article walks you through:
 
@@ -15,7 +15,7 @@ This article walks you through:
 ## Prerequisites
 
 - An **Azure Databricks workspace** in your Azure subscription
-- An **Azure Event Hub** (or MQTT broker with Event Hub-compatible endpoint) receiving OPC UA PubSub messages from your industrial sites (e.g. via [UA Cloud Publisher](https://github.com/barnstee/UA-CloudPublisher))
+- The **Azure Event Hubs namespace** deployed by the reference solution, named `<resourcesName>-EventHubs` (where `<resourcesName>` is the name you chose during deployment). It already receives your OPC UA PubSub data on two event hubs: `data` (telemetry) and `metadata` (metadata).
 - A login to the **UA Cloud Library**, hosted by the OPC Foundation — register for free at: [https://uacloudlibrary.opcfoundation.org/Identity/Account/Register](https://uacloudlibrary.opcfoundation.org/Identity/Account/Register)
 
 ## Step 1: Create Delta Lake Tables
@@ -74,16 +74,35 @@ USING DELTA;
 
 Use Databricks **Structured Streaming** to continuously ingest OPC UA PubSub messages from Azure Event Hubs into the raw landing tables.
 
+The reference solution deploys an Azure Event Hubs namespace named `<resourcesName>-EventHubs` (where `<resourcesName>` is the name you chose during deployment) with two event hubs:
+
+| Event hub  | Contents                | Delta landing table  |
+| ---------- | ----------------------- | -------------------- |
+| `data`     | OPC UA PubSub telemetry | `opcua_raw`          |
+| `metadata` | OPC UA PubSub metadata  | `opcua_metadata_raw` |
+
+The Azure Data Explorer cluster deployed by the template already consumes these event hubs through a dedicated `adx` consumer group. To let Databricks read the same data without interfering with ADX, create a separate `databricks` consumer group on each event hub.
+Each Event Hubs connection string below is the namespace-level `RootManageSharedAccessKey` connection string (Azure portal -> your `<resourcesName>-EventHubs` namespace -> `Shared access policies` -> `RootManageSharedAccessKey` -> `Connection string-primary key`) with the target event hub appended via `;EntityPath=...`.
+
+> **Note:** The snippets below use the [`azure-event-hubs-spark`](https://github.com/Azure/azure-event-hubs-spark) connector. Install the `com.microsoft.azure:azure-event-hubs-spark_2.12:<version>` Maven library on your cluster. On Unity Catalog clusters or Databricks Runtime 13.3 LTS and later, use the built-in Kafka connector instead (see [Alternative: read via the Event Hubs Kafka endpoint](#alternative-read-via-the-event-hubs-kafka-endpoint)).
+
 ### Telemetry Ingestion
 
 ```python
+# OPC UA telemetry is published to the "data" event hub of the
+# "<resourcesName>-EventHubs" namespace deployed by the reference solution.
+telemetry_connection_string = (
+    "Endpoint=sb://<resourcesName>-EventHubs.servicebus.windows.net/;"
+    "SharedAccessKeyName=RootManageSharedAccessKey;"
+    "SharedAccessKey=<YOUR_PRIMARY_KEY>;"
+    "EntityPath=data"
+)
+
 # Event Hub connection configuration for telemetry
 eh_telemetry_conf = {
     "eventhubs.connectionString": sc._jvm.org.apache.spark.eventhubs
-        .EventHubsUtils.encrypt(
-            "<YOUR_EVENTHUB_TELEMETRY_CONNECTION_STRING>"
-        ),
-    "eventhubs.consumerGroup": "$Default"
+        .EventHubsUtils.encrypt(telemetry_connection_string),
+    "eventhubs.consumerGroup": "databricks"
 }
 
 # Read the telemetry stream from Event Hub
@@ -108,13 +127,20 @@ telemetry_stream = (
 ### Metadata Ingestion
 
 ```python
+# OPC UA metadata is published to the "metadata" event hub of the
+# "<resourcesName>-EventHubs" namespace deployed by the reference solution.
+metadata_connection_string = (
+    "Endpoint=sb://<resourcesName>-EventHubs.servicebus.windows.net/;"
+    "SharedAccessKeyName=RootManageSharedAccessKey;"
+    "SharedAccessKey=<YOUR_PRIMARY_KEY>;"
+    "EntityPath=metadata"
+)
+
 # Event Hub connection configuration for metadata
 eh_metadata_conf = {
     "eventhubs.connectionString": sc._jvm.org.apache.spark.eventhubs
-        .EventHubsUtils.encrypt(
-            "<YOUR_EVENTHUB_METADATA_CONNECTION_STRING>"
-        ),
-    "eventhubs.consumerGroup": "$Default"
+        .EventHubsUtils.encrypt(metadata_connection_string),
+    "eventhubs.consumerGroup": "databricks"
 }
 
 # Read the metadata stream from Event Hub
@@ -135,6 +161,57 @@ metadata_stream = (
     .table("opcua_metadata_raw")
 )
 ```
+
+### Alternative: read via the Event Hubs Kafka endpoint
+
+On Unity Catalog clusters or Databricks Runtime 13.3 LTS and later, the `azure-event-hubs-spark` connector is not supported. Instead, read the same `data` and `metadata` event hubs through the built-in Kafka connector — no extra library required:
+
+```python
+EH_NAMESPACE = "<resourcesName>-EventHubs"
+# Namespace-level RootManageSharedAccessKey connection string (no EntityPath here):
+EH_CONNECTION_STRING = (
+    "Endpoint=sb://<resourcesName>-EventHubs.servicebus.windows.net/;"
+    "SharedAccessKeyName=RootManageSharedAccessKey;"
+    "SharedAccessKey=<YOUR_PRIMARY_KEY>"
+)
+eh_sasl = (
+    "kafkashaded.org.apache.kafka.common.security.plain.PlainLoginModule required "
+    f'username="$ConnectionString" password="{EH_CONNECTION_STRING}";'
+)
+
+def read_eventhub(topic: str):
+    return (
+        spark.readStream
+        .format("kafka")
+        .option("kafka.bootstrap.servers", f"{EH_NAMESPACE}.servicebus.windows.net:9093")
+        .option("kafka.security.protocol", "SASL_SSL")
+        .option("kafka.sasl.mechanism", "PLAIN")
+        .option("kafka.sasl.jaas.config", eh_sasl)
+        .option("subscribe", topic)            # "data" or "metadata"
+        .option("startingOffsets", "earliest")
+        .load()
+        .selectExpr("CAST(value AS STRING) AS payload")
+    )
+
+# Telemetry -> opcua_raw, metadata -> opcua_metadata_raw
+(
+    read_eventhub("data").writeStream
+    .format("delta")
+    .outputMode("append")
+    .option("checkpointLocation", "/mnt/checkpoints/opcua_raw")
+    .table("opcua_raw")
+)
+
+(
+    read_eventhub("metadata").writeStream
+    .format("delta")
+    .outputMode("append")
+    .option("checkpointLocation", "/mnt/checkpoints/opcua_metadata_raw")
+    .table("opcua_metadata_raw")
+)
+```
+
+Both connectors land the raw event payloads in the same `opcua_raw` and `opcua_metadata_raw` tables, so the rest of this guide works unchanged.
 
 ## Step 3: Process and Expand OPC UA PubSub Messages
 
@@ -332,7 +409,7 @@ WHERE m.Name LIKE '%assembly%'
 
 ## Step 6: Import OPC UA Information Models from the UA Cloud Library
 
-Many customers are unaware that they can import entire **OPC UA Information Models** into their analytics platform from the [UA Cloud Library](https://uacloudlibrary.opcfoundation.org). This provides richer semantics beyond what OPC UA PubSub metadata alone can offer, including:
+Many customers want to import entire **OPC UA Information Models** into their analytics platform from the [UA Cloud Library](https://uacloudlibrary.opcfoundation.org). This provides richer semantics beyond what OPC UA PubSub metadata alone can offer, including:
 
 - **Full Information Model context** — not just the published data points, but the entire model hierarchy
 - **Complex type definitions** and references to other data needed for deeper analysis
@@ -412,7 +489,7 @@ else:
     print("No UAVariable nodes found in the Information Model.")
 ```
 
-And voilà! You have just imported an entire OPC UA Information Model into a Delta Lake table in Azure Databricks, ready to be joined with your telemetry and metadata for richer analytics.
+You have just imported an entire OPC UA Information Model into a Delta Lake table in Azure Databricks, ready to be joined with your telemetry and metadata for richer analytics.
 
 ## Summary
 

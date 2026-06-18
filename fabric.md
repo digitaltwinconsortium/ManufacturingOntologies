@@ -5,14 +5,14 @@
 ## Create a Fabric Eventhouse to Store your Production Line Data
 
 1. Log into Microsoft Fabric [here](https://fabric.microsoft.com).
-1. Create a `Eventhouse` by clicking `Create` -> `See all` -> `Eventhouse` and give it a name, e.g. `opcua`. Click `Create`.
-1. Under `KQL Database` and `Database details` activate the setting `OneLake availability`. This will enable sharing your OPC UA time-series data from your production line within your organization via [OneLake](https://learn.microsoft.com/en-us/fabric/onelake/onelake-overview) in [Parquet file format](https://parquet.apache.org/docs/file-format/). Click `Done`.
+1. Create an `Eventhouse` by opening your workspace, selecting `New item`, then searching for and selecting `Eventhouse`. Give it a name, e.g. `opcua`, and click `Create`. Both the eventhouse and a default KQL database with the same name are created.
+1. Select your KQL database. In the `Database details` pane, under the `OneLake` section, set `Availability` to `Enabled`. This will enable sharing your OPC UA time-series data from your production line within your organization via [OneLake](https://learn.microsoft.com/en-us/fabric/onelake/onelake-overview) in [Parquet file format](https://parquet.apache.org/docs/file-format/).
 
 ## Configure OPC UA PubSub Data Ingestion
 
 These tables, mappings, functions and the materialized view mirror the ones the reference solution creates in Azure Data Explorer, so Fabric processes the OPC UA PubSub data exactly the same way ADX does.
 
-Create the tables you need for ingesting the OPC UA PubSub data by clicking `Explore your data`, deleting the sample data in the text box, entering the following Kusto commands, and then clicking `Run` for each command:
+Create the tables you need for ingesting the OPC UA PubSub data by clicking `opcua_queryset`, deleting the sample data in the text box, entering the following Kusto commands one-by-one, and then clicking `Run` for each command:
 
         // Create a landing table for raw OPC UA telemetry
         .create table opcua_raw(payload: dynamic)
@@ -29,7 +29,7 @@ Create the tables you need for ingesting the OPC UA PubSub data by clicking `Exp
         // Create an OPC UA metadata landing table
         .create table opcua_metadata(DataSetWriterID: string, Timestamp: datetime, Name: string, Type: string, DisplayName:string, Workcell: string, Line: string, Area: string, Site: string, Enterprise: string, NamespaceUri: string, NodeId: string)
 
-Then run the following Kusto commands each:
+Then run the following Kusto commands one-by-one:
 
         // Create a function to do the raw OPC UA expansion
         .create-or-alter function OPCUARawExpand() { opcua_raw | mv-expand records = payload.Messages | where records != '' | project DataSetWriterID = tostring(records["DataSetWriterId"]), Timestamp = todatetime(records["Timestamp"]), Payload = todynamic(records["Payload"]) }
@@ -43,7 +43,7 @@ Then run the following Kusto commands each:
         // Create a materialized view for the last known value (LKV) of our metadata
         .create materialized-view opcua_metadata_lkv on table opcua_metadata { opcua_metadata | summarize arg_max(Timestamp, *) by Name, DataSetWriterID }
 
-Then run the following Kusto commands each:
+Then run the following Kusto commands one-by-one:
 
         // Create mapping from JSON ingestion to the landing table  
         .create-or-alter table opcua_raw ingestion json mapping 'opcua_mapping' '[{"column":"payload","path":"$","datatype":"dynamic"}]'
@@ -74,25 +74,25 @@ You will also need a connection string with at least `Listen` rights. The simple
 
 ### Ingest the telemetry event hub (`data` -> `opcua_raw`)
 
-1. In your Fabric workspace, click `Create` -> `See all` -> `Eventstream`, name it e.g. `eventstream_opcua_data` and click `Create`.
-1. Click `Add source` -> `Azure Event Hubs`. Under `Connection`, click `New connection` and enter your `<resourcesName>-EventHubs` namespace, the `data` event hub, the `RootManageSharedAccessKey` shared access key name and key, and the `fabric` consumer group (or `$Default`). Set `Data format` to `Json`, click `Add` and then `Publish` the eventstream.
-1. Click `Add destination` -> `Eventhouse`. Select `Direct ingestion`, choose your workspace and the KQL database you created earlier, then click `Save` and `Publish`.
-1. Open the destination to launch the `Ingest data` wizard. Under `Table`, select `Existing table` and choose `opcua_raw`, then click `Next: Source`. Leave everything the way it is and click `Next: Schema`. Under `Data format`, select `JSON`. Under `Mapping name`, select `Use existing mapping` and select `opcua_mapping`. Click `Next: Summary`. Click `Close`.
+1. In your Fabric workspace, select `New item`, then search for and select `Eventstream`. Name it e.g. `eventstream_opcua_data` and click `Create`.
+1. Select `Add source` -> `Azure Event Hubs`. Under `Connection`, select `New connection` and enter your `<resourcesName>-EventHubs` namespace, the `data` event hub, and the `RootManageSharedAccessKey` shared access key name and key. Back on the source page, select the `fabric` consumer group (or `$Default`) and set `Data format` to `Json`. Select `Next`, then on the `Review + connect` page select `Add`. Finally, select `Publish` to publish the eventstream.
+1. Select `Add destination` -> `Eventhouse`. Choose `Direct ingestion`, enter a `Destination name`, then select your `Workspace`, `Eventhouse`, and the KQL database you created earlier. Select `Save`, connect the destination card to your stream output if it isn't already, and select `Publish`.
+1. In `Live view`, select `Configure` on the Eventhouse destination node to open the `Get data` screen. Select the existing `opcua_raw` table, keep or edit the `Data connection name`, and select `Next`. On the `Inspect the data` screen, confirm the `Format` is `JSON` (the existing `opcua_mapping` routes the raw payload into the `payload` column; you can review it via the `Table_mapping` dropdown or `Advanced` options). Select `Finish`, then select `Close` on the `Summary` screen.
 
 ### Ingest the metadata event hub (`metadata` -> `opcua_metadata_raw`)
 
-1. Create a second eventstream, name it e.g. `eventstream_opcua_metadata` and click `Create`.
-1. Click `Add source` -> `Azure Event Hubs`. Create or select a connection exactly as above, but set the event hub to `metadata` (consumer group `fabric`). Set `Data format` to `Json`, click `Add` and then `Publish` the eventstream.
-1. Click `Add destination` -> `Eventhouse`. Select `Direct ingestion`, choose your workspace and the same KQL database, then click `Save` and `Publish`.
-1. Open the destination to launch the `Ingest data` wizard. Under `Table`, select `Existing table` and choose `opcua_metadata_raw`, then click `Next: Source`. Leave everything the way it is and click `Next: Schema`. Under `Data format`, select `JSON`. Under `Mapping name`, select `Use existing mapping` and select `opcua_metadata_mapping`. Click `Next: Summary`. Click `Close`.
+1. Create a second eventstream by selecting `New item` -> `Eventstream`, name it e.g. `eventstream_opcua_metadata` and click `Create`.
+1. Select `Add source` -> `Azure Event Hubs`. Create or select a connection exactly as above, but set the event hub to `metadata` (consumer group `fabric` or `$Default`). Set `Data format` to `Json`, select `Next`, then `Add` on the `Review + connect` page, and `Publish` the eventstream.
+1. Select `Add destination` -> `Eventhouse`. Choose `Direct ingestion`, enter a `Destination name`, then select your `Workspace`, `Eventhouse`, and the same KQL database. Select `Save`, connect the destination card to your stream output if it isn't already, and select `Publish`.
+1. In `Live view`, select `Configure` on the Eventhouse destination node to open the `Get data` screen. Select the existing `opcua_metadata_raw` table, keep or edit the `Data connection name`, and select `Next`. On the `Inspect the data` screen, confirm the `Format` is `JSON` (the existing `opcua_metadata_mapping` routes the raw payload into the `payload` column; you can review it via the `Table_mapping` dropdown or `Advanced` options). Select `Finish`, then select `Close` on the `Summary` screen.
 
 Once both eventstreams are running, the update policies and the `opcua_metadata_lkv` materialized view you created above automatically expand the raw OPC UA PubSub messages into the `opcua_telemetry` and `opcua_metadata` tables, exactly like the ADX deployment.
 
 ## Create a Fabric Lakehouse to Share Your OPC UA Data within Your Organization
 
-To share your OPC UA data via OneLake, create a `Lakehouse` by clicking `Create` -> `See all` -> `Lakehouse` and give it a name, e.g. `opcua_lake`. Click `Create`.
-1. Click `New shortcut`, select `Microsoft OneLake`, select your KQL database, expand the `Tables` and select `opcua_telemetry`.
-1. Click `New shortcut`, select `Microsoft OneLake`, select your KQL database, expand the `Tables` and select `opcua_metadata`.
+To share your OPC UA data via OneLake, create a `Lakehouse` by selecting `New item` in your workspace, then searching for and selecting `Lakehouse`. Give it a name, e.g. `opcua_lake`, and click `Create`.
+1. Under `Tables`, select `New shortcut`, select `Microsoft OneLake`, select your KQL database, expand the `Tables` node and select `opcua_telemetry`.
+1. Under `Tables`, select `New shortcut`, select `Microsoft OneLake`, select your KQL database, expand the `Tables` node and select `opcua_metadata`.
 
 ## View Your OPC UA Data Flow in Fabric
 
@@ -100,7 +100,7 @@ Click on your workspace, select `Lineage view` to see the entire flow of OPC UA 
 
 ## Run a Sample Data Query
 
-Click on our KQL Database and select `Open KQL Database` followed by `Explore your data`. Delete the sample queries and enter the following query in the text box:
+Open your KQL database and select its `opcua_queryset`. Delete the sample queries, enter the following query in the text box, and select `Run`:
 
         let _startTime = ago(1h);
         let _endTime = now();

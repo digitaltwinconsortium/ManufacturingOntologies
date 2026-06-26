@@ -14,45 +14,36 @@ These tables, mappings, functions and the materialized view mirror the ones the 
 
 Create the tables you need for ingesting the OPC UA PubSub data by clicking `opcua_queryset`, deleting the sample data in the text box, entering the following Kusto commands one-by-one, and then clicking `Run` for each command:
 
-        // Create a landing table for raw OPC UA telemetry
-        .create table opcua_raw(payload: dynamic)
-
-        // Create an intermediate table to unbatch our OPC UA PubSub messages into
-        .create table opcua_intermediate(DataSetWriterID: string, Timestamp: datetime, Payload: dynamic)
+        // Create a landing table for raw OPC UA telemetry (CloudEvents headers as columns + bare dataset payload)
+        .create table opcua_raw (Subject: string, Source: string, Timestamp: datetime, MajorVersion: long, MinorVersion: long, payload: dynamic)
 
         // Create our final OPC UA telemetry table
-        .create table opcua_telemetry (DataSetWriterID: string, Timestamp: datetime, Name: string, Value: dynamic)
+        .create table opcua_telemetry (Subject: string, Source: string, Timestamp: datetime, MajorVersion: long, MinorVersion: long, Name: string, Value: dynamic)
 
-        // Create a landing table for raw OPC UA metadata
-        .create table opcua_metadata_raw(payload: dynamic)
+        // Create a landing table for raw OPC UA metadata (CloudEvents headers as columns + bare DataSetMetaDataType)
+        .create table opcua_metadata_raw (Subject: string, Source: string, Timestamp: datetime, payload: dynamic)
 
-        // Create an OPC UA metadata landing table
-        .create table opcua_metadata(DataSetWriterID: string, Timestamp: datetime, Name: string, Type: string, DisplayName:string, Workcell: string, Line: string, Area: string, Site: string, Enterprise: string, NamespaceUri: string, NodeId: string)
+        // Create our final OPC UA metadata table (one row per field, keyed by Subject + ConfigurationVersion)
+        .create table opcua_metadata (Subject: string, Source: string, Timestamp: datetime, DataSetName: string, MajorVersion: long, MinorVersion: long, Name: string, BuiltInType: int, DataType: string, ValueRank: int)
 
 Then run the following Kusto commands one-by-one:
 
-        // Create a function to do the raw OPC UA expansion
-        .create-or-alter function OPCUARawExpand() { opcua_raw | mv-expand records = payload.Messages | where records != '' | project DataSetWriterID = tostring(records["DataSetWriterId"]), Timestamp = todatetime(records["Timestamp"]), Payload = todynamic(records["Payload"]) }
+        // Expand telemetry into one row per field, handling both shapes: an array of DataSet messages (identity in the body) and an Azure IoT Operations single bare bag (identity in the Subject column). The union branches on the payload type.
+        .create-or-alter function OPCUATelemetryExpand() { union (opcua_raw | where gettype(payload) == "array" | mv-expand record = payload | mv-apply fields = todynamic(record["Payload"]) on (extend key = tostring(bag_keys(fields)[0]) | extend p = fields[key] | project Name = key, Value = todynamic(p["Value"])) | project Subject = tostring(record["DataSetWriterId"]), Source, Timestamp = todatetime(record["Timestamp"]), MajorVersion, MinorVersion, Name, Value), (opcua_raw | where gettype(payload) == "dictionary" | mv-apply entry = payload on (extend key = tostring(bag_keys(entry)[0]) | extend v = entry[key] | project Name = key, Value = todynamic(v["Value"])) | project Subject, Source, Timestamp, MajorVersion, MinorVersion, Name, Value) | project Subject, Source, Timestamp, MajorVersion, MinorVersion, Name, Value }
 
-        // Create a function to do the OPC UA dataset expansion
-        .create-or-alter function OPCUADatasetExpand() { opcua_intermediate | mv-apply Payload on (extend key = tostring(bag_keys(Payload)[0]) | extend p = Payload[key] | project Name = key, Value = todynamic(p.Value)) }
-
-        // Create a function to do the raw OPC UA metadata expansion
-        .create-or-alter function OPCUAMetaDataExpand() { opcua_metadata_raw | parse tostring(payload.MetaData.Name) with * ":" Workcell "." Line "." Area "." Site "." Enterprise ";nsu=" NamespaceUri ";" NodeId | project DataSetWriterId = tostring(payload.DataSetWriterId), Timestamp = todatetime(payload.Timestamp), Name = tostring(payload.MetaData.Name), Type = tostring(payload.MetaData.Fields[0].Description), DisplayName = tostring(payload.MetaData.Fields[0].Name), Workcell, Line, Area, Site, Enterprise, NamespaceUri, NodeId }
+        // Expand the DataSetMetaDataType; mv-expand over Fields handles a single or many fields, keyed by Subject + ConfigurationVersion
+        .create-or-alter function OPCUAMetaDataExpand() { opcua_metadata_raw | extend DataSetName = tostring(payload["Name"]), MajorVersion = tolong(payload["ConfigurationVersion"]["MajorVersion"]), MinorVersion = tolong(payload["ConfigurationVersion"]["MinorVersion"]) | mv-expand Field = payload["Fields"] | project Subject, Source, Timestamp, DataSetName, MajorVersion, MinorVersion, Name = tostring(Field["Name"]), BuiltInType = toint(Field["BuiltInType"]), DataType = tostring(Field["DataType"]), ValueRank = toint(Field["ValueRank"]) }
 
         // Create a materialized view for the last known value (LKV) of our metadata
-        .create materialized-view opcua_metadata_lkv on table opcua_metadata { opcua_metadata | summarize arg_max(Timestamp, *) by Name, DataSetWriterID }
+        .create materialized-view opcua_metadata_lkv on table opcua_metadata { opcua_metadata | summarize arg_max(Timestamp, *) by Subject, Name }
 
 Then run the following Kusto commands one-by-one:
 
         // Create mapping from JSON ingestion to the landing table  
         .create-or-alter table opcua_raw ingestion json mapping 'opcua_mapping' '[{"column":"payload","path":"$","datatype":"dynamic"}]'
           
-        // Apply the raw expansion function to the OPC UA raw table
-        .alter table opcua_intermediate policy update @'[{"Source": "opcua_raw", "Query": "OPCUARawExpand()", "IsEnabled": "True"}]'
-
-        // Apply the dataset expansion function to the intermediate table  
-        .alter table opcua_telemetry policy update @'[{"Source": "opcua_intermediate", "Query": "OPCUADatasetExpand()", "IsEnabled": "True"}]'
+        // Apply the telemetry expansion function to the OPC UA raw table
+        .alter table opcua_telemetry policy update @'[{"Source": "opcua_raw", "Query": "OPCUATelemetryExpand()", "IsEnabled": "True"}]'
 
         // Create mapping from JSON ingestion to the metadata landing table
         .create-or-alter table opcua_metadata_raw ingestion json mapping 'opcua_metadata_mapping' '[{"column":"payload","path":"$","datatype":"dynamic"}]'
@@ -69,7 +60,9 @@ The reference solution deploys an Azure Event Hubs namespace named `<resourcesNa
 | `data`     | OPC UA PubSub telemetry | `opcua_raw`          | `opcua_mapping`          |
 | `metadata` | OPC UA PubSub metadata  | `opcua_metadata_raw` | `opcua_metadata_mapping` |
 
-The Azure Data Explorer (ADX) cluster deployed by the solution consumes these Event Hubs through a dedicated `adx` consumer group. To let Fabric read the same data without interfering with ADX, create a separate consumer group for Fabric on each event hub. You can do this in the Azure portal under the event hub's `Consumer groups` blade. Call the new consumer group 'fabric'.
+How identity and time reach the KQL engine depends on the message kind. `data` messages can either be an array of DataSet messages - the `DataSetWriterId` and `Timestamp` sit inside each element - so the `data` eventstream only needs to route the JSON body into `payload`. Its `metadata` messages (and all Azure IoT Operations messages) carry the identity in CloudEvents properties, so for those configure the eventstream to surface `subject`, `source` and `time` as the `Subject`, `Source` and `Timestamp` columns alongside `payload`. (If an eventstream can't map message properties to columns, emit the CloudEvent in structured mode - all attributes inside one JSON body - and read them from `payload` instead.)
+
+The Azure Data Explorer (ADX) cluster deployed by the solution consumes these Event Hubs through a dedicated `adx` consumer group. To let Fabric read the same data without interfering with ADX, create a separate consumer group for Fabric on each event hub.
 You will also need a connection string with at least `Listen` rights. The simplest option is the namespace-level `RootManageSharedAccessKey` policy: in the Azure portal, open your `<resourcesName>-EventHubs` namespace, select `Shared access policies` -> `RootManageSharedAccessKey` and copy the `Connection string-primary key`.
 
 ### Ingest the telemetry event hub (`data` -> `opcua_raw`)
@@ -100,20 +93,21 @@ Click on your workspace, select `Lineage view` to see the entire flow of OPC UA 
 
 ## Run a Sample Data Query
 
-Open your KQL database and select its `opcua_queryset`. Delete the sample queries, enter the following query in the text box, and select `Run`:
+Open your KQL database and select its `opcua_queryset`. Because the telemetry `Subject` is the numeric `DataSetWriterId`, the station and production line are matched on the metadata `DataSetName` (built from the OPC UA server's ApplicationUri and NodeId) and then joined to the telemetry on `Subject`. (With Azure IoT Operations, the station and line usually aren't encoded in `DataSetName`, so point these filters at whatever your asset or dataset naming carries instead.) Delete the sample queries, enter the following query in the text box, and select `Run`:
 
         let _startTime = ago(1h);
         let _endTime = now();
-        opcua_metadata
-        | where Name contains "assembly"
-        | where Name contains "munich"
-        | join kind=inner (opcua_telemetry
+        opcua_metadata_lkv
+        | where DataSetName contains "assembly"
+        | where DataSetName contains "munich"
+        | join kind=inner (
+            opcua_telemetry
             | where Name == "Status"
             | where Timestamp > _startTime and Timestamp < _endTime
-        ) on DataSetWriterID
+        ) on Subject
         | extend energy = todouble(Value)
         | project Timestamp1, energy
-        | sort by Timestamp1 desc 
+        | sort by Timestamp1 desc
         | render linechart
 
 
@@ -198,13 +192,14 @@ To view a graphical representation of an OPC UA Information Model, run the follo
 
         .create-or-alter function QuerySpecificValue(stationName: string, productionLineName: string, valueToQuery: string, desiredValue: real) {
         opcua_metadata_lkv
-        | where Name contains stationName
-        | where Name contains productionLineName
-        | join kind = inner(opcua_telemetry
+        | where DataSetName contains stationName
+        | where DataSetName contains productionLineName
+        | join kind=inner (
+            opcua_telemetry
             | where Name == valueToQuery
             | where Value == desiredValue
             | where Timestamp > ago(5m)
-        ) on DataSetWriterID
+        ) on Subject
         | project Timestamp1
         | sort by Timestamp1 desc
         | take 1
@@ -212,12 +207,13 @@ To view a graphical representation of an OPC UA Information Model, run the follo
 
         .create-or-alter function QuerySpecificTime(stationName: string, productionLineName: string, valueToQuery: string, timeToQuery: datetime, idealCycleTime: timespan) {
         opcua_metadata_lkv
-        | where Name contains stationName
-        | where Name contains productionLineName
-        | join kind = inner(opcua_telemetry
+        | where DataSetName contains stationName
+        | where DataSetName contains productionLineName
+        | join kind=inner (
+            opcua_telemetry
             | where Name == valueToQuery
             | where Timestamp > ago(5m)
-        ) on DataSetWriterID
+        ) on Subject
         | where around(Timestamp1, timeToQuery, idealCycleTime)
         | sort by Timestamp1 desc
         | project Value

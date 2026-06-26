@@ -14,25 +14,25 @@ These tables, mappings, functions and the materialized view mirror the ones the 
 
 Create the tables you need for ingesting the OPC UA PubSub data by clicking `opcua_queryset`, deleting the sample data in the text box, entering the following Kusto commands one-by-one, and then clicking `Run` for each command:
 
-        // Create a landing table for raw OPC UA telemetry (CloudEvents headers as columns + bare dataset payload)
-        .create table opcua_raw (Subject: string, Source: string, Timestamp: datetime, MajorVersion: long, MinorVersion: long, payload: dynamic)
+        // Create a landing table for the raw OPC UA telemetry JSON body
+        .create table opcua_raw (payload: dynamic)
 
-        // Create our final OPC UA telemetry table
-        .create table opcua_telemetry (Subject: string, Source: string, Timestamp: datetime, MajorVersion: long, MinorVersion: long, Name: string, Value: dynamic)
+        // Create our final OPC UA telemetry table (one row per field, keyed by Subject + Name)
+        .create table opcua_telemetry (Subject: string, Timestamp: datetime, Name: string, Value: dynamic)
 
-        // Create a landing table for raw OPC UA metadata (CloudEvents headers as columns + bare DataSetMetaDataType)
-        .create table opcua_metadata_raw (Subject: string, Source: string, Timestamp: datetime, payload: dynamic)
+        // Create a landing table for the raw OPC UA metadata JSON body
+        .create table opcua_metadata_raw (payload: dynamic)
 
-        // Create our final OPC UA metadata table (one row per field, keyed by Subject + ConfigurationVersion)
-        .create table opcua_metadata (Subject: string, Source: string, Timestamp: datetime, DataSetName: string, MajorVersion: long, MinorVersion: long, Name: string, BuiltInType: int, DataType: string, ValueRank: int)
+        // Create our final OPC UA metadata table (one row per field, keyed by Subject + Name)
+        .create table opcua_metadata (Subject: string, Timestamp: datetime, DataSetName: string, MajorVersion: long, MinorVersion: long, Name: string, BuiltInType: int, DataType: string, ValueRank: int)
 
 Then run the following Kusto commands one-by-one:
 
-        // Expand telemetry into one row per field, handling both shapes: an array of DataSet messages (identity in the body) and an Azure IoT Operations single bare bag (identity in the Subject column). The union branches on the payload type.
-        .create-or-alter function OPCUATelemetryExpand() { union (opcua_raw | where gettype(payload) == "array" | mv-expand record = payload | mv-apply fields = todynamic(record["Payload"]) on (extend key = tostring(bag_keys(fields)[0]) | extend p = fields[key] | project Name = key, Value = todynamic(p["Value"])) | project Subject = tostring(record["DataSetWriterId"]), Source, Timestamp = todatetime(record["Timestamp"]), MajorVersion, MinorVersion, Name, Value), (opcua_raw | where gettype(payload) == "dictionary" | mv-apply entry = payload on (extend key = tostring(bag_keys(entry)[0]) | extend v = entry[key] | project Name = key, Value = todynamic(v["Value"])) | project Subject, Source, Timestamp, MajorVersion, MinorVersion, Name, Value) | project Subject, Source, Timestamp, MajorVersion, MinorVersion, Name, Value }
+        // Expand telemetry into one row per field. Everything (identity, timestamp and values) lives in the JSON body, so the union just branches on the body shape: an array of DataSet messages or a single DataSet message. Both carry the DataSetWriterId and Timestamp inside the body.
+        .create-or-alter function OPCUATelemetryExpand() { union (opcua_raw | where gettype(payload) == "array" | mv-expand record = payload | mv-apply field = todynamic(record["Payload"]) on (extend key = tostring(bag_keys(field)[0]) | extend p = field[key] | project Name = key, Value = todynamic(p["Value"])) | project Subject = tostring(record["DataSetWriterId"]), Timestamp = todatetime(record["Timestamp"]), Name, Value), (opcua_raw | where gettype(payload) == "dictionary" | mv-apply field = todynamic(payload["Payload"]) on (extend key = tostring(bag_keys(field)[0]) | extend p = field[key] | project Name = key, Value = todynamic(p["Value"])) | project Subject = tostring(payload["DataSetWriterId"]), Timestamp = todatetime(payload["Timestamp"]), Name, Value) | project Subject, Timestamp, Name, Value }
 
-        // Expand the DataSetMetaDataType; mv-expand over Fields handles a single or many fields, keyed by Subject + ConfigurationVersion
-        .create-or-alter function OPCUAMetaDataExpand() { opcua_metadata_raw | extend DataSetName = tostring(payload["Name"]), MajorVersion = tolong(payload["ConfigurationVersion"]["MajorVersion"]), MinorVersion = tolong(payload["ConfigurationVersion"]["MinorVersion"]) | mv-expand Field = payload["Fields"] | project Subject, Source, Timestamp, DataSetName, MajorVersion, MinorVersion, Name = tostring(Field["Name"]), BuiltInType = toint(Field["BuiltInType"]), DataType = tostring(Field["DataType"]), ValueRank = toint(Field["ValueRank"]) }
+        // Expand the metadata message. The body is the DataSetMetaData wrapped with its DataSetWriterId and Timestamp; mv-expand over Fields produces one row per field, keyed by Subject + Name.
+        .create-or-alter function OPCUAMetaDataExpand() { opcua_metadata_raw | extend meta = todynamic(payload["MetaData"]) | extend DataSetName = tostring(meta["Name"]), MajorVersion = tolong(meta["ConfigurationVersion"]["MajorVersion"]), MinorVersion = tolong(meta["ConfigurationVersion"]["MinorVersion"]) | mv-expand Field = meta["Fields"] | project Subject = tostring(payload["DataSetWriterId"]), Timestamp = todatetime(payload["Timestamp"]), DataSetName, MajorVersion, MinorVersion, Name = tostring(Field["Name"]), BuiltInType = toint(Field["BuiltInType"]), DataType = tostring(Field["DataType"]), ValueRank = toint(Field["ValueRank"]) }
 
         // Create a materialized view for the last known value (LKV) of our metadata
         .create materialized-view opcua_metadata_lkv on table opcua_metadata { opcua_metadata | summarize arg_max(Timestamp, *) by Subject, Name }
@@ -60,7 +60,9 @@ The reference solution deploys an Azure Event Hubs namespace named `<resourcesNa
 | `data`     | OPC UA PubSub telemetry | `opcua_raw`          | `opcua_mapping`          |
 | `metadata` | OPC UA PubSub metadata  | `opcua_metadata_raw` | `opcua_metadata_mapping` |
 
-How identity and time reach the KQL engine depends on the message kind. `data` messages can either be an array of DataSet messages - the `DataSetWriterId` and `Timestamp` sit inside each element - so the `data` eventstream only needs to route the JSON body into `payload`. Its `metadata` messages (and all Azure IoT Operations messages) carry the identity in CloudEvents properties, so for those configure the eventstream to surface `subject`, `source` and `time` as the `Subject`, `Source` and `Timestamp` columns alongside `payload`. (If an eventstream can't map message properties to columns, emit the CloudEvent in structured mode - all attributes inside one JSON body - and read them from `payload` instead.)
+Both the `data` and the `metadata` messages carry their identity and time **inside the JSON body**, so each eventstream only has to route the raw body into the `payload` column - there are no message properties to surface as extra columns. The `OPCUATelemetryExpand` and `OPCUAMetaDataExpand` functions read the `DataSetWriterId`, `Timestamp` and `MetaData` straight out of `payload`.
+
+This works because Azure IoT Operations emits its CloudEvents identity (`subject`, `time`, etc.) as `ce-`-prefixed transport headers ([binary content mode](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/http-protocol-binding.md#31-binary-content-mode)) rather than inside the body - see the `cloudEventAttributes` setting on the [Kafka / Event Hubs](https://learn.microsoft.com/azure/iot-operations/connect-to-cloud/howto-configure-kafka-endpoint#advanced-settings) and [MQTT](https://learn.microsoft.com/azure/iot-operations/connect-to-cloud/howto-configure-mqtt-endpoint#advanced-settings) data flow endpoints. Because an Event Hubs data connection on Azure Data Explorer can only ingest the message body (not the `ce-` headers), add an AIO data flow [`map` transform](https://learn.microsoft.com/azure/iot-operations/connect-to-cloud/howto-dataflow-graphs-map) (see also [Create data flows -> Transformation](https://learn.microsoft.com/azure/iot-operations/connect-to-cloud/howto-create-dataflow#transformation)) that copies the dataset identity and timestamp into the body in the same wrapper shape the functions expect (`DataSetWriterId`, `Timestamp`, and a `Payload`/`MetaData` object). The same body then flows through the identical KQL on both Fabric and ADX.
 
 The Azure Data Explorer (ADX) cluster deployed by the solution consumes these Event Hubs through a dedicated `adx` consumer group. To let Fabric read the same data without interfering with ADX, create a separate consumer group for Fabric on each event hub.
 You will also need a connection string with at least `Listen` rights. The simplest option is the namespace-level `RootManageSharedAccessKey` policy: in the Azure portal, open your `<resourcesName>-EventHubs` namespace, select `Shared access policies` -> `RootManageSharedAccessKey` and copy the `Connection string-primary key`.

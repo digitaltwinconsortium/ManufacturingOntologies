@@ -41,7 +41,7 @@
   "UAStackTraceMask": 645,
   "ReversiblePubSubEncoding": false,
   "OmitNetworkMessageHeader": true,
-  "UseCloudEventsMetadataHeader": true,
+  "UseCloudEventsMetadataHeader": false,
   "AutoLoadPersistedNodes": true,
   "AzureOpenAIAPIEndpoint": null,
   "AzureOpenAIAPIKey": null,

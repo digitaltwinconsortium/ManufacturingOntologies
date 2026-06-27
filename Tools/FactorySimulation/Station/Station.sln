@@ -7,10 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Station", "Station.csproj",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A2784944-F23E-4528-B46F-4D258835BABA}"
 	ProjectSection(SolutionItems) = preProject
+		..\..\..\adx.md = ..\..\..\adx.md
 		..\..\..\Deployment\arm.json = ..\..\..\Deployment\arm.json
 		..\..\..\Deployment\Bootstrap.sh = ..\..\..\Deployment\Bootstrap.sh
 		..\..\ADXQueries\CalculateOEEForLine.kql = ..\..\ADXQueries\CalculateOEEForLine.kql
 		..\..\ADXQueries\CalculateOEEForStation.kql = ..\..\ADXQueries\CalculateOEEForStation.kql
+		..\..\..\cloudlib.md = ..\..\..\cloudlib.md
 		..\..\..\comparison.md = ..\..\..\comparison.md
 		..\..\ADXQueries\dashboard-ontologies.json = ..\..\ADXQueries\dashboard-ontologies.json
 		..\..\..\databricks.md = ..\..\..\databricks.md

@@ -1,11 +1,17 @@
 # Manufacturing Ontologies
 
-:exclamation: The reference solution on Azure that used to be part of this repo was moved to the Microsoft Learn site and is available [here](https://learn.microsoft.com/en-us/azure/iot/concepts-iot-industrial-solution-architecture).
-
-
 ## Introduction
 
 An ontology defines the language used to describe a system. In the manufacturing domain, these systems can represent a factory or plant but also enterprise applications or supply chains. There are several established ontologies in the manufacturing domain. Most of them have long been standardized. In this repository, we have focused on ISA95 to describe a factory ontology. The ontologies are available [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/tree/main/Ontologies).
+
+## Cloud Reference Solution Articles
+
+The following articles describe how to deploy and connect the reference solution to various Azure and cloud analytics services:
+
+- [Industrial IoT reference solution architecture](adx.md) describes the end-to-end industrial IoT reference solution architecture that uses Azure Data Explorer to store and analyze OPC UA telemetry for use cases such as condition monitoring, OEE calculation, and anomaly detection.
+- [Connect Microsoft Fabric to the Reference Solution](fabric.md) explains how to ingest and process the reference solution's OPC UA PubSub data in a Microsoft Fabric Eventhouse, mirroring the same tables, functions, and views used by Azure Data Explorer.
+- [Connect Azure Databricks to the Reference Solution](databricks.md) walks through storing and analyzing OPC UA PubSub telemetry in Azure Databricks using Delta Lake tables and Structured Streaming ingestion from Azure Event Hubs.
+- [Import OPC UA Information Models from the UA Cloud Library into Azure Services](cloudlib.md) describes how to import standardized OPC UA information models from the OPC Foundation's UA Cloud Library into your Azure services.
 
 ### Digital Twin Definition Language
 
@@ -18,7 +24,6 @@ The ontologies defined in this repository are also described by leveraging the W
 ### International Society of Automation 95 (ISA95/IEC 62264)
 
 ISA95 / IEC 62264 is one of the ontologies leveraged by this solution. It is a standard and described [here](https://en.wikipedia.org/wiki/ANSI/ISA-95) and [here](https://en.wikipedia.org/wiki/IEC_62264).
-
 
 ## ADT Generation tool for ISA95
 
@@ -98,7 +103,6 @@ There are different technical sheets to simplify data preparation:
 - The tool uses the 'x' information set in the `Components & Properties` sheet to apply conditional formatting from columns I to the end (depending on properties relevant for the models). If the cell is greyed-out, don't enter a value.
 
 <img src="Docs/Picture5.png" width="900" />
-
 
 ## License
 

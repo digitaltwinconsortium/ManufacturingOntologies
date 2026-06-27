@@ -1,5 +1,5 @@
 
-# Industrial IoT reference solution architecture
+# Industrial IoT reference solution
 
 Manufacturers want to deploy an overall industrial IoT solution on a global scale and connect all of their production sites to this solution to increase efficiencies for each individual production site.
 
@@ -32,7 +32,7 @@ Note
 
 To reduce cost, the deployment creates a single Linux VM for both the production line simulation and the edge infrastructure. In a production scenario, the production line simulation isn't required, and for the base OS you should use Azure Local.
 
-## Production Line Simulation
+## Run the production line simulation
 
 Use SSH to connect to the deployed VM by using the credentials you provide during the deployment. You might need to enable Just-in-time access in the Azure portal first. Go to the `/opt/ManufacturingOntologies-main/Tools/FactorySimulation` directory and run the **StartSimulation** shell script:
 

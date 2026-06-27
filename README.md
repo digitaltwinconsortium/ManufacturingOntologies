@@ -8,7 +8,7 @@ An ontology defines the language used to describe a system. In the manufacturing
 
 The following articles describe how to deploy and connect the reference solution to various Azure and cloud analytics services:
 
-- [Industrial IoT reference solution architecture](adx.md) describes the end-to-end industrial IoT reference solution architecture that uses Azure Data Explorer to store and analyze OPC UA telemetry for use cases such as condition monitoring, OEE calculation, and anomaly detection.
+- [Industrial IoT reference solution architecture](adx.md) describes the end-to-end industrial IoT reference solution that uses Azure Data Explorer to store and analyze OPC UA telemetry for use cases such as condition monitoring, OEE calculation, and anomaly detection.
 - [Connect Microsoft Fabric to the Reference Solution](fabric.md) explains how to ingest and process the reference solution's OPC UA PubSub data in a Microsoft Fabric Eventhouse, mirroring the same tables, functions, and views used by Azure Data Explorer.
 - [Connect Azure Databricks to the Reference Solution](databricks.md) walks through storing and analyzing OPC UA PubSub telemetry in Azure Databricks using Delta Lake tables and Structured Streaming ingestion from Azure Event Hubs.
 - [Import OPC UA Information Models from the UA Cloud Library into Azure Services](cloudlib.md) describes how to import standardized OPC UA information models from the OPC Foundation's UA Cloud Library into your Azure services.

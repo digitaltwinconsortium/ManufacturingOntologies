@@ -40,9 +40,8 @@ Use SSH to connect to the deployed VM by using the credentials you provide durin
 sudo ./StartSimulation.sh "<Your Event Hubs connection string>"
 ```
 
-`<Your Event Hubs connection string>` is your Event Hubs namespace connection string. To learn more, see [Get an Event Hubs connection string](/en-us/azure/event-hubs/event-hubs-get-connection-string). A connection string looks like: `Endpoint=sb://ontologies.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=abcdefgh=`
-
-Tip
+`<Your Event Hubs connection string>` is your Event Hubs namespace connection string. A connection string looks like:
+`Endpoint=sb://ontologies.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=abcdefgh=`
 
 If the external IP address for some Kubernetes services shows as `<pending>`, use the following command to assign the external IP address of the `traefik` service: `sudo kubectl patch service <theService> -n <the service's namespace> -p '{"spec": {"type": "LoadBalancer", "externalIPs":["<the traefik external IP address>"]}}'`.
 

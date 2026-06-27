@@ -24,7 +24,9 @@ Interoperability is the key to achieving a fast rollout of the solution architec
 
 Select the **Deploy** button to deploy all required resources to your Azure subscription:
 
-The deployment process prompts you to provide a password for the virtual machine (VM) that hosts the production line simulation and the Edge infrastructure. The password should include three of: a lowercase character, an uppercase character, a number, and a special character. The password length must be between 12 and 72 characters.
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdigitaltwinconsortium%2FManufacturingOntologies%2Fmain%2FDeployment%2Farm.json)
+
+The deployment process prompts you to provide a password for the virtual machine (VM) that hosts the production line simulation and the Edge infrastructure.
 
 Note
 

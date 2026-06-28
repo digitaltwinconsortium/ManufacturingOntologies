@@ -9,7 +9,7 @@ The solution must be as efficient as possible and enable all required use cases 
 
 Interoperability is the key to achieving a fast rollout of the solution architecture. The use of open standards such as OPC UA significantly helps to achieve this interoperability.
 
-![Architecture diagram of the industrial IoT reference solution](docs/arch.png)
+![Architecture diagram of the industrial IoT reference solution](Docs/arch.png)
 
 ## Components
 

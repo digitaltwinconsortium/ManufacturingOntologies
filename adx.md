@@ -14,8 +14,8 @@ Interoperability is the key to achieving a fast rollout of the solution architec
 - **Industrial assets**: A set of simulated OPC UA enabled production lines hosted in Docker containers.
 - [UA Cloud Publisher](https://github.com/barnstee/UA-CloudPublisher) Publishers data from your OPC UA-enabled assets to the cloud in OPC UA PubSub format.
 - [UA Cloud Commander](https://github.com/opcfoundation/UA-CloudCommander) Receives commands from the cloud and executes them on your OPC UA-enabled assets.
-- [Azure Event Hubs] is Azure's KAFKA broker implementation.
-- [Azure Data Explorer] is Azure's time-series database with rich analytics, graph support and built-in dashboards.
+- Azure Event Hubs is Azure's KAFKA broker implementation.
+- Azure Data Explorer is Azure's time-series database with rich analytics, graph support and built-in dashboards.
 - [UA Cloud Action](https://github.com/opcfoundation/UA-CloudAction) is an open-source reference cloud application that queries the Azure Data Explorer for a specific data value. The data value is the pressure in one of the simulated production line machines. It calls UA Cloud Commander via Azure Event Hubs when a certain threshold is reached (4,000 mbar). UA Cloud Commander then calls the OpenPressureReliefValve method on the machine via OPC UA.
 - [UA Cloud Library](https://github.com/opcfoundation/UA-CloudLibrary) is an online store of [OPC UA Information Models, hosted by the OPC Foundation](https://uacloudlibrary.opcfoundation.org/).
 - WoT-Connectivity Solution is a third-party containerized industrial connectivity solution supporting the WoT-Connectivity interface that translates from proprietary asset interfaces to OPC UA. The solution uses the W3C Web of Things descriptions as the schema to describe the industrial asset interface. Commercial implementations include ProsysOPC Forge and an open-source reference implementation is [UA Edge Translator](https://github.com/opcfoundation/ua-edgetranslator).

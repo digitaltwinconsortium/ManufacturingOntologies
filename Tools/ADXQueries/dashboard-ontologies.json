@@ -347,7 +347,7 @@
     },
     {
       "id": "1bccbda7-4250-4e72-9bb0-5ea48fba7a7c",
-      "title": "UA Cloud Publisher Munich Diagnostics",
+      "title": "Publisher Munich Diagnostics",
       "visualType": "table",
       "pageId": "1604d4fc-a7b5-4e47-82c6-640286103fde",
       "layout": {
@@ -387,7 +387,7 @@
     },
     {
       "id": "c2fa5519-6184-4dcd-bfc1-251a12347927",
-      "title": "UA Cloud Publisher Seattle Diagnostics",
+      "title": "Publisher Seattle Diagnostics",
       "visualType": "table",
       "pageId": "1604d4fc-a7b5-4e47-82c6-640286103fde",
       "layout": {

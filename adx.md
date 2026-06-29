@@ -13,7 +13,7 @@ Interoperability is the key to achieving a fast rollout of the solution architec
 
 ## Components
 
-- **Industrial assets**: A set of simulated OPC UA enabled production lines hosted in Docker containers found in the [FactorySimulation](Tools/FactorySimulation) directory.
+- **Industrial assets**: A set of simulated OPC UA enabled production lines hosted in Docker containers found in the [FactorySimulation](Tools/FactorySimulation/Station) directory.
 - [**UA Cloud Publisher**](https://github.com/barnstee/UA-CloudPublisher) Publishers data from your OPC UA-enabled assets to the cloud in OPC UA PubSub format.
 - [**UA Cloud Commander**](https://github.com/opcfoundation/UA-CloudCommander) Receives commands from the cloud and executes them on your OPC UA-enabled assets.
 - [**UA Cloud Action**](https://github.com/opcfoundation/UA-CloudAction) is an open-source reference cloud application that queries the Azure Data Explorer for a specific data value. The data value is the pressure in one of the simulated production line machines. It calls UA Cloud Commander via Azure Event Hubs when a certain threshold is reached (4,000 mbar). UA Cloud Commander then calls the OpenPressureReliefValve method on the machine via OPC UA.

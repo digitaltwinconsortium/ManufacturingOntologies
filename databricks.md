@@ -14,6 +14,20 @@ This article walks you through:
 4. Creating a last-known-value (LKV) view for OPC UA metadata
 5. Importing OPC UA Information Models from the [UA Cloud Library](https://uacloudlibrary.opcfoundation.org)
 
+## Automated deployment (recommended)
+
+You can let the reference solution deploy and configure Azure Databricks for you, as a **second analytics option next to Azure Data Explorer**. When you deploy the [ARM template](Deployment/arm.json), set the **Deploy Databricks** (`deployDatabricks`) parameter to `true`. ADX remains the default and is unaffected: Databricks reads the same `data` and `metadata` event hubs through a separate `databricks` consumer group, so both databases ingest the data side by side.
+
+With the option enabled, the template additionally provisions:
+
+- an **Azure Databricks workspace** named `<resourcesName>-Databricks`,
+- the `databricks` consumer group on each of the `data` and `metadata` event hubs,
+- a deployment script (running as the solution's managed identity) that imports the [`opcua_setup`](Tools/DatabricksQueries/opcua_setup.py) notebook and the [sample dashboard](Tools/DatabricksQueries/dashboard-ontologies.lvdash.json), creates a serverless SQL warehouse, publishes the dashboard, and starts a **continuous job** that runs the notebook.
+
+The notebook performs Steps 1-4 below automatically: it creates the Delta tables, ingests both event hubs, expands the OPC UA PubSub messages, and creates the `opcua_metadata_lkv` view together with the `CalculateOEEForStation`/`CalculateOEEForLine` functions used by the dashboard. Once the deployment finishes, open the published **Ontologies** dashboard in your workspace to explore condition monitoring, OEE, energy, production and diagnostics tiles for the Munich and Seattle production lines - the Databricks equivalent of the [ADX dashboard](Tools/ADXQueries/dashboard-ontologies.json). See [Use the sample dashboard](#use-the-sample-dashboard) for details.
+
+The remaining sections describe the same steps in detail, in case you prefer to configure an existing workspace manually.
+
 ## Prerequisites
 
 - An **Azure Databricks workspace** in your Azure subscription
@@ -400,6 +414,17 @@ WHERE m.DataSetName LIKE '%assembly%'
   AND t.Name = 'Status'
   AND t.Timestamp > current_timestamp() - INTERVAL 1 HOUR;
 ```
+
+## Use the sample dashboard
+
+The reference solution ships a sample **AI/BI dashboard**, [`dashboard-ontologies.lvdash.json`](Tools/DatabricksQueries/dashboard-ontologies.lvdash.json), that mirrors the use cases of the [Azure Data Explorer dashboard](Tools/ADXQueries/dashboard-ontologies.json): condition monitoring, OEE calculation, energy consumption, production and publisher diagnostics for the Munich and Seattle production lines.
+
+If you used the [automated deployment](#automated-deployment-recommended), the dashboard is already imported and published against a SQL warehouse - just open it from **Dashboards** in your workspace. To import it manually instead:
+
+1. In your workspace, click **Workspace**, navigate to a folder, then choose **Import** and upload `dashboard-ontologies.lvdash.json` (or use the [Workspace Import API](https://learn.microsoft.com/azure/databricks/dashboards/tutorials/workspace-dashboard-api) with `"format": "AUTO"` and a `.lvdash.json` path).
+2. Open the dashboard, attach it to a running **SQL warehouse**, and click **Publish**.
+
+The dashboard queries the `opcua_telemetry`, `opcua_metadata_lkv`, `CalculateOEEForStation` and `CalculateOEEForLine` objects created in the steps above (in the `hive_metastore.default` schema). Each tile filters on a fixed time window; adjust the `INTERVAL` in the dataset queries, or add a date-range dashboard parameter, to display a specific shift. The OEE cards use an ideal cycle time of 6000 ms (the default Munich line cycle time); change it in the OEE dataset queries if your simulation uses a different value.
 
 ## Summary
 

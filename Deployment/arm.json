@@ -22,6 +22,13 @@
       "metadata": {
         "description": "Password for the Virtual Machine."
       }
+    },
+    "deployDatabricks": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy Azure Databricks as a second analytics option next to Azure Data Explorer. When enabled, an Azure Databricks workspace is created and automatically configured with the OPC UA Delta tables, Event Hubs ingestion and a sample dashboard."
+      }
     }
   },
   "variables": {
@@ -35,7 +42,13 @@
     "azureRbacAzurekeyVaultSecretsUser": "4633458b-17de-408a-b874-0445c86b69e6",
     "adxClusterName": "[concat(parameters('resourcesName'), 'ADX')]",
     "adxDBName": "[concat(parameters('resourcesName'), '-DB')]",
-    "eventHubsNamespaceName": "[concat(parameters('resourcesName'), '-EventHubs')]"
+    "eventHubsNamespaceName": "[concat(parameters('resourcesName'), '-EventHubs')]",
+    "databricksWorkspaceName": "[concat(parameters('resourcesName'), '-Databricks')]",
+    "databricksManagedResourceGroupId": "[concat(subscription().id, '/resourceGroups/', parameters('resourcesName'), '-Databricks-managed')]",
+    "databricksSetupScriptUri": "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'SetupDatabricks.sh')]",
+    "databricksNotebookUri": "https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Tools/DatabricksQueries/opcua_setup.py",
+    "databricksDashboardUri": "https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Tools/DatabricksQueries/dashboard-ontologies.lvdash.json",
+    "contributorRoleId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacContributor'))]"
   },
   "resources": [
     {
@@ -1041,6 +1054,26 @@
       "properties": {}
     },
     {
+      "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
+      "apiVersion": "2021-11-01",
+      "condition": "[parameters('deployDatabricks')]",
+      "name": "[format('{0}/{1}/{2}', concat(parameters('resourcesName'), '-EventHubs'), 'data', 'databricks')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'data')]"
+      ],
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
+      "apiVersion": "2021-11-01",
+      "condition": "[parameters('deployDatabricks')]",
+      "name": "[format('{0}/{1}/{2}', concat(parameters('resourcesName'), '-EventHubs'), 'metadata', 'databricks')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'metadata')]"
+      ],
+      "properties": {}
+    },
+    {
       "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
       "name": "[concat(parameters('resourcesName'), '-Identity')]",
       "apiVersion": "2018-11-30",
@@ -1071,6 +1104,89 @@
         "role": "Admin",
         "tenantId": "[reference(concat(parameters('resourcesName'), '-Identity')).tenantId]",
         "principalType": "App"
+      }
+    },
+    {
+      "type": "Microsoft.Databricks/workspaces",
+      "apiVersion": "2024-05-01",
+      "condition": "[parameters('deployDatabricks')]",
+      "name": "[variables('databricksWorkspaceName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "premium"
+      },
+      "properties": {
+        "managedResourceGroupId": "[variables('databricksManagedResourceGroupId')]",
+        "publicNetworkAccess": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-10-01-preview",
+      "condition": "[parameters('deployDatabricks')]",
+      "name": "[guid(variables('contributorRoleId'), resourceGroup().id, variables('databricksWorkspaceName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[variables('contributorRoleId')]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2020-10-01",
+      "condition": "[parameters('deployDatabricks')]",
+      "name": "[concat(parameters('resourcesName'), '-DatabricksSetup')]",
+      "location": "[resourceGroup().location]",
+      "kind": "AzureCLI",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]": {}
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Databricks/workspaces', variables('databricksWorkspaceName'))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]",
+        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]",
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs/consumergroups', concat(parameters('resourcesName'), '-EventHubs'), 'data', 'databricks')]",
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs/consumergroups', concat(parameters('resourcesName'), '-EventHubs'), 'metadata', 'databricks')]",
+        "[resourceId('Microsoft.Authorization/roleAssignments', guid(variables('contributorRoleId'), resourceGroup().id, variables('databricksWorkspaceName')))]"
+      ],
+      "properties": {
+        "azCliVersion": "2.61.0",
+        "timeout": "PT45M",
+        "retentionInterval": "P1D",
+        "cleanupPreference": "OnSuccess",
+        "primaryScriptUri": "[variables('databricksSetupScriptUri')]",
+        "environmentVariables": [
+          {
+            "name": "DATABRICKS_WORKSPACE_URL",
+            "value": "[reference(resourceId('Microsoft.Databricks/workspaces', variables('databricksWorkspaceName')), '2024-05-01').workspaceUrl]"
+          },
+          {
+            "name": "WORKSPACE_RESOURCE_ID",
+            "value": "[resourceId('Microsoft.Databricks/workspaces', variables('databricksWorkspaceName'))]"
+          },
+          {
+            "name": "MANAGED_IDENTITY_CLIENT_ID",
+            "value": "[reference(concat(parameters('resourcesName'), '-Identity')).clientId]"
+          },
+          {
+            "name": "NOTEBOOK_URL",
+            "value": "[variables('databricksNotebookUri')]"
+          },
+          {
+            "name": "DASHBOARD_URL",
+            "value": "[variables('databricksDashboardUri')]"
+          },
+          {
+            "name": "EVENTHUBS_CONNECTION_STRING",
+            "secureValue": "[listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString]"
+          }
+        ]
       }
     }
   ]

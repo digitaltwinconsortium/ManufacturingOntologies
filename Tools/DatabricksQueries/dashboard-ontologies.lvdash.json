@@ -1,0 +1,1818 @@
+{
+  "datasets": [
+    {
+      "displayName": "00000001",
+      "name": "00000001",
+      "query": "SELECT round(`hive_metastore`.`default`.`CalculateOEEForStation`('assembly', 'munich', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
+    },
+    {
+      "displayName": "00000003",
+      "name": "00000003",
+      "query": "SELECT round(`hive_metastore`.`default`.`CalculateOEEForStation`('test', 'munich', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
+    },
+    {
+      "displayName": "00000005",
+      "name": "00000005",
+      "query": "SELECT round(`hive_metastore`.`default`.`CalculateOEEForStation`('packaging', 'munich', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
+    },
+    {
+      "displayName": "00000007",
+      "name": "00000007",
+      "query": "SELECT round(`hive_metastore`.`default`.`CalculateOEEForLine`('munich', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
+    },
+    {
+      "displayName": "00000009",
+      "name": "00000009",
+      "query": "SELECT round(`hive_metastore`.`default`.`CalculateOEEForStation`('assembly', 'seattle', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
+    },
+    {
+      "displayName": "0000000b",
+      "name": "0000000b",
+      "query": "SELECT round(`hive_metastore`.`default`.`CalculateOEEForStation`('test', 'seattle', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
+    },
+    {
+      "displayName": "0000000d",
+      "name": "0000000d",
+      "query": "SELECT round(`hive_metastore`.`default`.`CalculateOEEForStation`('packaging', 'seattle', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
+    },
+    {
+      "displayName": "0000000f",
+      "name": "0000000f",
+      "query": "SELECT round(`hive_metastore`.`default`.`CalculateOEEForLine`('seattle', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
+    },
+    {
+      "displayName": "00000011",
+      "name": "00000011",
+      "query": "SELECT round(AVG(CAST(t.Value AS DOUBLE)) * 1000, 2) AS metric\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS"
+    },
+    {
+      "displayName": "00000013",
+      "name": "00000013",
+      "query": "SELECT round(AVG(CAST(t.Value AS DOUBLE)) * 1000, 2) AS metric\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS"
+    },
+    {
+      "displayName": "00000015",
+      "name": "00000015",
+      "query": "SELECT round(AVG(CAST(t.Value AS DOUBLE)) * 1000, 2) AS metric\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS"
+    },
+    {
+      "displayName": "00000017",
+      "name": "00000017",
+      "query": "SELECT round(AVG(CAST(t.Value AS DOUBLE)) * 1000, 2) AS metric\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS"
+    },
+    {
+      "displayName": "00000019",
+      "name": "00000019",
+      "query": "SELECT round(AVG(CAST(t.Value AS DOUBLE)) * 1000, 2) AS metric\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS"
+    },
+    {
+      "displayName": "0000001b",
+      "name": "0000001b",
+      "query": "SELECT round(AVG(CAST(t.Value AS DOUBLE)) * 1000, 2) AS metric\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS"
+    },
+    {
+      "displayName": "0000001d",
+      "name": "0000001d",
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+    },
+    {
+      "displayName": "0000001f",
+      "name": "0000001f",
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+    },
+    {
+      "displayName": "00000021",
+      "name": "00000021",
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+    },
+    {
+      "displayName": "00000023",
+      "name": "00000023",
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+    },
+    {
+      "displayName": "00000025",
+      "name": "00000025",
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+    },
+    {
+      "displayName": "00000027",
+      "name": "00000027",
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+    },
+    {
+      "displayName": "00000029",
+      "name": "00000029",
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'ActualCycleTime'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+    },
+    {
+      "displayName": "0000002b",
+      "name": "0000002b",
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'ActualCycleTime'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+    },
+    {
+      "displayName": "0000002d",
+      "name": "0000002d",
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'ActualCycleTime'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+    },
+    {
+      "displayName": "0000002f",
+      "name": "0000002f",
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'ActualCycleTime'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+    },
+    {
+      "displayName": "00000031",
+      "name": "00000031",
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'ActualCycleTime'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+    },
+    {
+      "displayName": "00000033",
+      "name": "00000033",
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'ActualCycleTime'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+    },
+    {
+      "displayName": "00000035",
+      "name": "00000035",
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+    },
+    {
+      "displayName": "00000037",
+      "name": "00000037",
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'NumberOfManufacturedProducts'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+    },
+    {
+      "displayName": "00000039",
+      "name": "00000039",
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'NumberOfManufacturedProducts'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+    },
+    {
+      "displayName": "0000003b",
+      "name": "0000003b",
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'Pressure'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+    },
+    {
+      "displayName": "0000003d",
+      "name": "0000003d",
+      "query": "SELECT Name, NodeValue FROM (\n  SELECT t.Name AS Name, CAST(t.Value AS INT) AS NodeValue, t.Timestamp AS Timestamp,\n         ROW_NUMBER() OVER (PARTITION BY t.Name ORDER BY t.Timestamp DESC) AS rn\n  FROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\n  INNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\n  WHERE m.DataSetName LIKE '%publisher%' AND m.DataSetName LIKE '%munich%'\n    AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\n) WHERE rn = 1"
+    },
+    {
+      "displayName": "0000003f",
+      "name": "0000003f",
+      "query": "SELECT Name, NodeValue FROM (\n  SELECT t.Name AS Name, CAST(t.Value AS INT) AS NodeValue, t.Timestamp AS Timestamp,\n         ROW_NUMBER() OVER (PARTITION BY t.Name ORDER BY t.Timestamp DESC) AS rn\n  FROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\n  INNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\n  WHERE m.DataSetName LIKE '%publisher%' AND m.DataSetName LIKE '%seattle%'\n    AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\n) WHERE rn = 1"
+    }
+  ],
+  "pages": [
+    {
+      "displayName": "Ontologies",
+      "name": "ontologies",
+      "layout": [
+        {
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 2
+          },
+          "widget": {
+            "name": "00000002",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00000001",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "SUM(`metric`)",
+                      "name": "metric"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "value": {
+                  "fieldName": "metric",
+                  "displayName": "Assembly Munich OEE (%)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Assembly Munich OEE (%)"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 1,
+            "y": 0,
+            "width": 1,
+            "height": 2
+          },
+          "widget": {
+            "name": "00000004",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00000003",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "SUM(`metric`)",
+                      "name": "metric"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "value": {
+                  "fieldName": "metric",
+                  "displayName": "Test Munich OEE (%)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Test Munich OEE (%)"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 2,
+            "y": 0,
+            "width": 1,
+            "height": 2
+          },
+          "widget": {
+            "name": "00000006",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00000005",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "SUM(`metric`)",
+                      "name": "metric"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "value": {
+                  "fieldName": "metric",
+                  "displayName": "Packaging Munich OEE (%)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Packaging Munich OEE (%)"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 1,
+            "height": 2
+          },
+          "widget": {
+            "name": "00000008",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00000007",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "SUM(`metric`)",
+                      "name": "metric"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "value": {
+                  "fieldName": "metric",
+                  "displayName": "Munich Line OEE (%)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Munich Line OEE (%)"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 1,
+            "height": 2
+          },
+          "widget": {
+            "name": "0000000a",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00000009",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "SUM(`metric`)",
+                      "name": "metric"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "value": {
+                  "fieldName": "metric",
+                  "displayName": "Assembly Seattle OEE (%)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Assembly Seattle OEE (%)"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 1,
+            "y": 2,
+            "width": 1,
+            "height": 2
+          },
+          "widget": {
+            "name": "0000000c",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0000000b",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "SUM(`metric`)",
+                      "name": "metric"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "value": {
+                  "fieldName": "metric",
+                  "displayName": "Test Seattle OEE (%)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Test Seattle OEE (%)"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 2,
+            "y": 2,
+            "width": 1,
+            "height": 2
+          },
+          "widget": {
+            "name": "0000000e",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0000000d",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "SUM(`metric`)",
+                      "name": "metric"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "value": {
+                  "fieldName": "metric",
+                  "displayName": "Packaging Seattle OEE (%)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Packaging Seattle OEE (%)"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 3,
+            "y": 2,
+            "width": 1,
+            "height": 2
+          },
+          "widget": {
+            "name": "00000010",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0000000f",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "SUM(`metric`)",
+                      "name": "metric"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "value": {
+                  "fieldName": "metric",
+                  "displayName": "Seattle Line OEE (%)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Seattle Line OEE (%)"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 1,
+            "height": 2
+          },
+          "widget": {
+            "name": "00000012",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00000011",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "SUM(`metric`)",
+                      "name": "metric"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "value": {
+                  "fieldName": "metric",
+                  "displayName": "Assembly Munich Energy (W)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Assembly Munich Energy (W)"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 1,
+            "y": 4,
+            "width": 1,
+            "height": 2
+          },
+          "widget": {
+            "name": "00000014",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00000013",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "SUM(`metric`)",
+                      "name": "metric"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "value": {
+                  "fieldName": "metric",
+                  "displayName": "Test Munich Energy (W)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Test Munich Energy (W)"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 2,
+            "y": 4,
+            "width": 1,
+            "height": 2
+          },
+          "widget": {
+            "name": "00000016",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00000015",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "SUM(`metric`)",
+                      "name": "metric"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "value": {
+                  "fieldName": "metric",
+                  "displayName": "Packaging Munich Energy (W)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Packaging Munich Energy (W)"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 3,
+            "y": 4,
+            "width": 1,
+            "height": 2
+          },
+          "widget": {
+            "name": "00000018",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00000017",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "SUM(`metric`)",
+                      "name": "metric"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "value": {
+                  "fieldName": "metric",
+                  "displayName": "Assembly Seattle Energy (W)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Assembly Seattle Energy (W)"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 4,
+            "y": 4,
+            "width": 1,
+            "height": 2
+          },
+          "widget": {
+            "name": "0000001a",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00000019",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "SUM(`metric`)",
+                      "name": "metric"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "value": {
+                  "fieldName": "metric",
+                  "displayName": "Test Seattle Energy (W)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Test Seattle Energy (W)"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 5,
+            "y": 4,
+            "width": 1,
+            "height": 2
+          },
+          "widget": {
+            "name": "0000001c",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0000001b",
+                  "disaggregated": false,
+                  "fields": [
+                    {
+                      "expression": "SUM(`metric`)",
+                      "name": "metric"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "value": {
+                  "fieldName": "metric",
+                  "displayName": "Packaging Seattle Energy (W)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Packaging Seattle Energy (W)"
+              },
+              "version": 2,
+              "widgetType": "counter"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 6,
+            "height": 5
+          },
+          "widget": {
+            "name": "0000001e",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0000001d",
+                  "disaggregated": true,
+                  "fields": [
+                    {
+                      "expression": "`Timestamp`",
+                      "name": "Timestamp"
+                    },
+                    {
+                      "expression": "`NodeValue`",
+                      "name": "NodeValue"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "x": {
+                  "fieldName": "Timestamp",
+                  "displayName": "Timestamp",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "axis": {
+                    "title": "Timestamp"
+                  }
+                },
+                "y": {
+                  "fieldName": "NodeValue",
+                  "displayName": "Assembly Munich Status (0=ready, 1=in progress, 2=good part, 3=scrap, 4=fault)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "axis": {
+                    "title": "Assembly Munich Status (0=ready, 1=in progress, 2=good part, 3=scrap, 4=fault)"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Assembly Munich Status (0=ready, 1=in progress, 2=good part, 3=scrap, 4=fault)"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 11,
+            "width": 6,
+            "height": 5
+          },
+          "widget": {
+            "name": "00000020",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0000001f",
+                  "disaggregated": true,
+                  "fields": [
+                    {
+                      "expression": "`Timestamp`",
+                      "name": "Timestamp"
+                    },
+                    {
+                      "expression": "`NodeValue`",
+                      "name": "NodeValue"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "x": {
+                  "fieldName": "Timestamp",
+                  "displayName": "Timestamp",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "axis": {
+                    "title": "Timestamp"
+                  }
+                },
+                "y": {
+                  "fieldName": "NodeValue",
+                  "displayName": "Test Munich Status (0=ready, 1=in progress, 2=good part, 3=scrap, 4=fault)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "axis": {
+                    "title": "Test Munich Status (0=ready, 1=in progress, 2=good part, 3=scrap, 4=fault)"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Test Munich Status (0=ready, 1=in progress, 2=good part, 3=scrap, 4=fault)"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 16,
+            "width": 6,
+            "height": 5
+          },
+          "widget": {
+            "name": "00000022",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00000021",
+                  "disaggregated": true,
+                  "fields": [
+                    {
+                      "expression": "`Timestamp`",
+                      "name": "Timestamp"
+                    },
+                    {
+                      "expression": "`NodeValue`",
+                      "name": "NodeValue"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "x": {
+                  "fieldName": "Timestamp",
+                  "displayName": "Timestamp",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "axis": {
+                    "title": "Timestamp"
+                  }
+                },
+                "y": {
+                  "fieldName": "NodeValue",
+                  "displayName": "Packaging Munich Status (0=ready, 1=in progress, 2=good part, 3=scrap, 4=fault)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "axis": {
+                    "title": "Packaging Munich Status (0=ready, 1=in progress, 2=good part, 3=scrap, 4=fault)"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Packaging Munich Status (0=ready, 1=in progress, 2=good part, 3=scrap, 4=fault)"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 21,
+            "width": 6,
+            "height": 5
+          },
+          "widget": {
+            "name": "00000024",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00000023",
+                  "disaggregated": true,
+                  "fields": [
+                    {
+                      "expression": "`Timestamp`",
+                      "name": "Timestamp"
+                    },
+                    {
+                      "expression": "`NodeValue`",
+                      "name": "NodeValue"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "x": {
+                  "fieldName": "Timestamp",
+                  "displayName": "Timestamp",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "axis": {
+                    "title": "Timestamp"
+                  }
+                },
+                "y": {
+                  "fieldName": "NodeValue",
+                  "displayName": "Assembly Seattle Status (0=ready, 1=in progress, 2=good part, 3=scrap, 4=fault)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "axis": {
+                    "title": "Assembly Seattle Status (0=ready, 1=in progress, 2=good part, 3=scrap, 4=fault)"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Assembly Seattle Status (0=ready, 1=in progress, 2=good part, 3=scrap, 4=fault)"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 26,
+            "width": 6,
+            "height": 5
+          },
+          "widget": {
+            "name": "00000026",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00000025",
+                  "disaggregated": true,
+                  "fields": [
+                    {
+                      "expression": "`Timestamp`",
+                      "name": "Timestamp"
+                    },
+                    {
+                      "expression": "`NodeValue`",
+                      "name": "NodeValue"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "x": {
+                  "fieldName": "Timestamp",
+                  "displayName": "Timestamp",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "axis": {
+                    "title": "Timestamp"
+                  }
+                },
+                "y": {
+                  "fieldName": "NodeValue",
+                  "displayName": "Test Seattle Status (0=ready, 1=in progress, 2=good part, 3=scrap, 4=fault)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "axis": {
+                    "title": "Test Seattle Status (0=ready, 1=in progress, 2=good part, 3=scrap, 4=fault)"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Test Seattle Status (0=ready, 1=in progress, 2=good part, 3=scrap, 4=fault)"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 31,
+            "width": 6,
+            "height": 5
+          },
+          "widget": {
+            "name": "00000028",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00000027",
+                  "disaggregated": true,
+                  "fields": [
+                    {
+                      "expression": "`Timestamp`",
+                      "name": "Timestamp"
+                    },
+                    {
+                      "expression": "`NodeValue`",
+                      "name": "NodeValue"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "x": {
+                  "fieldName": "Timestamp",
+                  "displayName": "Timestamp",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "axis": {
+                    "title": "Timestamp"
+                  }
+                },
+                "y": {
+                  "fieldName": "NodeValue",
+                  "displayName": "Packaging Seattle Status (0=ready, 1=in progress, 2=good part, 3=scrap, 4=fault)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "axis": {
+                    "title": "Packaging Seattle Status (0=ready, 1=in progress, 2=good part, 3=scrap, 4=fault)"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Packaging Seattle Status (0=ready, 1=in progress, 2=good part, 3=scrap, 4=fault)"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 36,
+            "width": 6,
+            "height": 5
+          },
+          "widget": {
+            "name": "0000002a",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00000029",
+                  "disaggregated": true,
+                  "fields": [
+                    {
+                      "expression": "`Timestamp`",
+                      "name": "Timestamp"
+                    },
+                    {
+                      "expression": "`NodeValue`",
+                      "name": "NodeValue"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "x": {
+                  "fieldName": "Timestamp",
+                  "displayName": "Timestamp",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "axis": {
+                    "title": "Timestamp"
+                  }
+                },
+                "y": {
+                  "fieldName": "NodeValue",
+                  "displayName": "Assembly Munich Actual Cycle Time (ms)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "axis": {
+                    "title": "Assembly Munich Actual Cycle Time (ms)"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Assembly Munich Actual Cycle Time (ms)"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 41,
+            "width": 6,
+            "height": 5
+          },
+          "widget": {
+            "name": "0000002c",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0000002b",
+                  "disaggregated": true,
+                  "fields": [
+                    {
+                      "expression": "`Timestamp`",
+                      "name": "Timestamp"
+                    },
+                    {
+                      "expression": "`NodeValue`",
+                      "name": "NodeValue"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "x": {
+                  "fieldName": "Timestamp",
+                  "displayName": "Timestamp",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "axis": {
+                    "title": "Timestamp"
+                  }
+                },
+                "y": {
+                  "fieldName": "NodeValue",
+                  "displayName": "Test Munich Actual Cycle Time (ms)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "axis": {
+                    "title": "Test Munich Actual Cycle Time (ms)"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Test Munich Actual Cycle Time (ms)"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 46,
+            "width": 6,
+            "height": 5
+          },
+          "widget": {
+            "name": "0000002e",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0000002d",
+                  "disaggregated": true,
+                  "fields": [
+                    {
+                      "expression": "`Timestamp`",
+                      "name": "Timestamp"
+                    },
+                    {
+                      "expression": "`NodeValue`",
+                      "name": "NodeValue"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "x": {
+                  "fieldName": "Timestamp",
+                  "displayName": "Timestamp",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "axis": {
+                    "title": "Timestamp"
+                  }
+                },
+                "y": {
+                  "fieldName": "NodeValue",
+                  "displayName": "Packaging Munich Actual Cycle Time (ms)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "axis": {
+                    "title": "Packaging Munich Actual Cycle Time (ms)"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Packaging Munich Actual Cycle Time (ms)"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 51,
+            "width": 6,
+            "height": 5
+          },
+          "widget": {
+            "name": "00000030",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0000002f",
+                  "disaggregated": true,
+                  "fields": [
+                    {
+                      "expression": "`Timestamp`",
+                      "name": "Timestamp"
+                    },
+                    {
+                      "expression": "`NodeValue`",
+                      "name": "NodeValue"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "x": {
+                  "fieldName": "Timestamp",
+                  "displayName": "Timestamp",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "axis": {
+                    "title": "Timestamp"
+                  }
+                },
+                "y": {
+                  "fieldName": "NodeValue",
+                  "displayName": "Assembly Seattle Actual Cycle Time (ms)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "axis": {
+                    "title": "Assembly Seattle Actual Cycle Time (ms)"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Assembly Seattle Actual Cycle Time (ms)"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 56,
+            "width": 6,
+            "height": 5
+          },
+          "widget": {
+            "name": "00000032",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00000031",
+                  "disaggregated": true,
+                  "fields": [
+                    {
+                      "expression": "`Timestamp`",
+                      "name": "Timestamp"
+                    },
+                    {
+                      "expression": "`NodeValue`",
+                      "name": "NodeValue"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "x": {
+                  "fieldName": "Timestamp",
+                  "displayName": "Timestamp",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "axis": {
+                    "title": "Timestamp"
+                  }
+                },
+                "y": {
+                  "fieldName": "NodeValue",
+                  "displayName": "Test Seattle Actual Cycle Time (ms)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "axis": {
+                    "title": "Test Seattle Actual Cycle Time (ms)"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Test Seattle Actual Cycle Time (ms)"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 61,
+            "width": 6,
+            "height": 5
+          },
+          "widget": {
+            "name": "00000034",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00000033",
+                  "disaggregated": true,
+                  "fields": [
+                    {
+                      "expression": "`Timestamp`",
+                      "name": "Timestamp"
+                    },
+                    {
+                      "expression": "`NodeValue`",
+                      "name": "NodeValue"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "x": {
+                  "fieldName": "Timestamp",
+                  "displayName": "Timestamp",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "axis": {
+                    "title": "Timestamp"
+                  }
+                },
+                "y": {
+                  "fieldName": "NodeValue",
+                  "displayName": "Packaging Seattle Actual Cycle Time (ms)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "axis": {
+                    "title": "Packaging Seattle Actual Cycle Time (ms)"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Packaging Seattle Actual Cycle Time (ms)"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 66,
+            "width": 6,
+            "height": 5
+          },
+          "widget": {
+            "name": "00000036",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00000035",
+                  "disaggregated": true,
+                  "fields": [
+                    {
+                      "expression": "`Timestamp`",
+                      "name": "Timestamp"
+                    },
+                    {
+                      "expression": "`NodeValue`",
+                      "name": "NodeValue"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "x": {
+                  "fieldName": "Timestamp",
+                  "displayName": "Timestamp",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "axis": {
+                    "title": "Timestamp"
+                  }
+                },
+                "y": {
+                  "fieldName": "NodeValue",
+                  "displayName": "Assembly Munich Energy Consumption",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "axis": {
+                    "title": "Assembly Munich Energy Consumption"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Assembly Munich Energy Consumption"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 71,
+            "width": 6,
+            "height": 5
+          },
+          "widget": {
+            "name": "00000038",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00000037",
+                  "disaggregated": true,
+                  "fields": [
+                    {
+                      "expression": "`Timestamp`",
+                      "name": "Timestamp"
+                    },
+                    {
+                      "expression": "`NodeValue`",
+                      "name": "NodeValue"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "x": {
+                  "fieldName": "Timestamp",
+                  "displayName": "Timestamp",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "axis": {
+                    "title": "Timestamp"
+                  }
+                },
+                "y": {
+                  "fieldName": "NodeValue",
+                  "displayName": "Munich Production (number of manufactured products)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "axis": {
+                    "title": "Munich Production (number of manufactured products)"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Munich Production (number of manufactured products)"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 76,
+            "width": 6,
+            "height": 5
+          },
+          "widget": {
+            "name": "0000003a",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00000039",
+                  "disaggregated": true,
+                  "fields": [
+                    {
+                      "expression": "`Timestamp`",
+                      "name": "Timestamp"
+                    },
+                    {
+                      "expression": "`NodeValue`",
+                      "name": "NodeValue"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "x": {
+                  "fieldName": "Timestamp",
+                  "displayName": "Timestamp",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "axis": {
+                    "title": "Timestamp"
+                  }
+                },
+                "y": {
+                  "fieldName": "NodeValue",
+                  "displayName": "Seattle Production (number of manufactured products)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "axis": {
+                    "title": "Seattle Production (number of manufactured products)"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Seattle Production (number of manufactured products)"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 81,
+            "width": 6,
+            "height": 5
+          },
+          "widget": {
+            "name": "0000003c",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0000003b",
+                  "disaggregated": true,
+                  "fields": [
+                    {
+                      "expression": "`Timestamp`",
+                      "name": "Timestamp"
+                    },
+                    {
+                      "expression": "`NodeValue`",
+                      "name": "NodeValue"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "x": {
+                  "fieldName": "Timestamp",
+                  "displayName": "Timestamp",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "axis": {
+                    "title": "Timestamp"
+                  }
+                },
+                "y": {
+                  "fieldName": "NodeValue",
+                  "displayName": "Assembly Seattle Pressure",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "axis": {
+                    "title": "Assembly Seattle Pressure"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Assembly Seattle Pressure"
+              },
+              "version": 3,
+              "widgetType": "line"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 86,
+            "width": 3,
+            "height": 6
+          },
+          "widget": {
+            "name": "0000003e",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0000003d",
+                  "disaggregated": true,
+                  "fields": [
+                    {
+                      "expression": "`Name`",
+                      "name": "Name"
+                    },
+                    {
+                      "expression": "`NodeValue`",
+                      "name": "NodeValue"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "Name",
+                    "displayName": "Name",
+                    "type": "string",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "order": 0
+                  },
+                  {
+                    "fieldName": "NodeValue",
+                    "displayName": "Value",
+                    "type": "integer",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "order": 1
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Publisher Munich Diagnostics"
+              },
+              "itemsPerPage": 25,
+              "version": 1,
+              "widgetType": "table"
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 3,
+            "y": 86,
+            "width": 3,
+            "height": 6
+          },
+          "widget": {
+            "name": "00000040",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0000003f",
+                  "disaggregated": true,
+                  "fields": [
+                    {
+                      "expression": "`Name`",
+                      "name": "Name"
+                    },
+                    {
+                      "expression": "`NodeValue`",
+                      "name": "NodeValue"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "Name",
+                    "displayName": "Name",
+                    "type": "string",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "order": 0
+                  },
+                  {
+                    "fieldName": "NodeValue",
+                    "displayName": "Value",
+                    "type": "integer",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "order": 1
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Publisher Seattle Diagnostics"
+              },
+              "itemsPerPage": 25,
+              "version": 1,
+              "widgetType": "table"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

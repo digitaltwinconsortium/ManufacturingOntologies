@@ -20,7 +20,7 @@ Interoperability is the key to achieving a fast rollout of the solution architec
 - Azure Data Explorer is Azure's time-series database with rich analytics, graph support and built-in dashboards.
 - [UA Cloud Action](https://github.com/opcfoundation/UA-CloudAction) is an open-source reference cloud application that queries the Azure Data Explorer for a specific data value. The data value is the pressure in one of the simulated production line machines. It calls UA Cloud Commander via Azure Event Hubs when a certain threshold is reached (4,000 mbar). UA Cloud Commander then calls the OpenPressureReliefValve method on the machine via OPC UA.
 - [UA Cloud Library](https://github.com/opcfoundation/UA-CloudLibrary) is an online store of [OPC UA Information Models, hosted by the OPC Foundation](https://uacloudlibrary.opcfoundation.org/).
-- Optional: WoT-Connectivity Solution is a third-party containerized industrial connectivity solution supporting the WoT-Connectivity interface that translates from proprietary asset interfaces to OPC UA. The solution uses the W3C Web of Things descriptions as the schema to describe the industrial asset interface. Commercial implementations include ProsysOPC Forge and an open-source reference implementation is [UA Edge Translator](https://github.com/opcfoundation/ua-edgetranslator).
+- Optional: WoT-Connectivity Solution is a third-party containerized industrial connectivity solution supporting the [WoT-Connectivity](https://reference.opcfoundation.org/specs/OPC-10100-1/full) interface that translates from proprietary asset interfaces to OPC UA. The solution uses the W3C Web of Things descriptions as the schema to describe the industrial asset interface. Commercial implementations include ProsysOPC Forge and an open-source reference implementation is [UA Edge Translator](https://github.com/opcfoundation/ua-edgetranslator).
 
 ## Install the production line simulation and cloud services
 
@@ -30,9 +30,7 @@ Select the **Deploy** button to deploy all required resources to your Azure subs
 
 The deployment process prompts you to provide a password for the virtual machine (VM) that hosts the production line simulation and the Edge infrastructure.
 
-Note
-
-To reduce cost, the deployment creates a single Linux VM for both the production line simulation and the edge infrastructure. In a production scenario, the production line simulation isn't required, and for the base OS you should use Azure Local.
+To reduce cost, the deployment creates a single Linux VM for both the production line simulation and the edge infrastructure. In a production scenario, the production line simulation isn't required.
 
 ## Run the production line simulation
 
@@ -51,8 +49,6 @@ If the external IP address for some Kubernetes services shows as `<pending>`, us
 
 You can deploy a [sample dashboard](https://github.com/digitaltwinconsortium/ManufacturingOntologies/blob/main/Tools/ADXQueries/dashboard-ontologies.json). To learn how to deploy a dashboard, see [Visualize data with Azure Data Explorer dashboards &gt; create from file](/en-us/azure/data-explorer/azure-data-explorer-dashboards#to-create-new-dashboard-from-a-file). After you import the dashboard, update its data source. Specify the HTTPS endpoint of your Azure Data Explorer server cluster in the top-right corner of the dashboard. The HTTPS endpoint looks like: `https://<ADXInstanceName>.<AzureRegion>.kusto.windows.net/`.
 
-Note
-
 To display the OEE for a specific shift, select **Custom Time Range** in the **Time Range** drop-down in the top-left corner of the Azure Data Explorer Dashboard and enter the date and time from start to end of the shift you're interested in.
 
 The production line simulation is made up of several stations, using the station OPC UA information model, and a simple manufacturing execution system (MES). Both the stations and the MES are containerized for easy deployment.
@@ -70,8 +66,6 @@ You configure the simulation to include two production lines. The default config
 | Afternoon | 15:00 | 22:00 |
 | Night | 23:00 | 06:00 |
 
-Note
-
 Shift times are in local time, specifically the time zone the virtual machine (VM) hosting the production line simulation is set to.
 
 The station OPC UA server uses the following OPC UA node IDs for telemetry to the cloud:
@@ -88,8 +82,6 @@ The station OPC UA server uses the following OPC UA node IDs for telemetry to th
 - `i=434` - pressure
 
 The solution uses a digital feedback loop to manage the pressure in a simulated station. To implement the feedback loop, the solution triggers a command from the cloud on one of the OPC UA servers in the simulation. The trigger activates when simulated time-series pressure data reaches a certain threshold. You can see the pressure of the assembly machine in the Azure Data Explorer dashboard. The pressure is released at regular intervals for the Seattle production line.
-
-Note
 
 In a real-world deployment, something as critical as opening a pressure relief valve would be done on-premises. This example simply demonstrates how to achieve the digital feedback loop.
 

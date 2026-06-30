@@ -14,7 +14,9 @@
 # MAGIC
 # MAGIC The Event Hubs namespace connection string is supplied by the deployment as the
 # MAGIC `eventHubsConnectionString` widget (namespace-level `RootManageSharedAccessKey`, no `EntityPath`).
-# MAGIC The `azure-event-hubs-spark` Maven library is installed on the job cluster by the deployment.
+# MAGIC Ingestion uses the built-in Spark Kafka connector against the Event Hubs Kafka endpoint, so no
+# MAGIC extra Maven library is required and it also runs on Unity Catalog clusters and Databricks
+# MAGIC Runtime 13.3 LTS and later.
 
 # COMMAND ----------
 
@@ -102,38 +104,54 @@ spark.sql(
 # MAGIC %md
 # MAGIC ## Step 2: Ingest data from Azure Event Hubs
 # MAGIC
-# MAGIC Both the `data` and `metadata` messages carry their identity and timestamp inside the JSON body,
-# MAGIC so the streams only cast the raw body into the `payload` column. A dedicated `databricks` consumer
-# MAGIC group (created by the deployment) lets Databricks read the same event hubs without interfering with
-# MAGIC the Azure Data Explorer ingestion.
+# MAGIC Ingestion uses the built-in Spark **Kafka** connector against the Event Hubs Kafka endpoint
+# MAGIC (`<namespace>.servicebus.windows.net:9093`), so it requires no extra library and runs on Unity
+# MAGIC Catalog clusters and Databricks Runtime 13.3 LTS and later. Both the `data` and `metadata`
+# MAGIC messages carry their identity and timestamp inside the JSON body, so the streams only cast the
+# MAGIC Kafka `value` into the `payload` column. A dedicated `databricks` consumer group (created by the
+# MAGIC deployment) lets Databricks read the same event hubs without interfering with the Azure Data
+# MAGIC Explorer ingestion.
 
 # COMMAND ----------
 
-telemetry_connection_string = connection_string + ";EntityPath=data"
-metadata_connection_string = connection_string + ";EntityPath=metadata"
+import re
 
-eh_telemetry_conf = {
-    "eventhubs.connectionString": sc._jvm.org.apache.spark.eventhubs.EventHubsUtils.encrypt(
-        telemetry_connection_string
-    ),
-    "eventhubs.consumerGroup": "databricks",
-}
+# The deployment supplies the namespace-level connection string (no EntityPath). The Event Hubs
+# Kafka endpoint reuses it as the SASL password; the event hub name becomes the Kafka topic.
+endpoint_match = re.search(r"Endpoint=sb://([^/;]+)", connection_string)
+if not endpoint_match:
+    raise ValueError(
+        "Could not parse the Event Hubs namespace host from eventHubsConnectionString. Expected a "
+        "connection string containing 'Endpoint=sb://<namespace>.servicebus.windows.net/'."
+    )
+bootstrap_servers = f"{endpoint_match.group(1)}:9093"
 
-eh_metadata_conf = {
-    "eventhubs.connectionString": sc._jvm.org.apache.spark.eventhubs.EventHubsUtils.encrypt(
-        metadata_connection_string
-    ),
-    "eventhubs.consumerGroup": "databricks",
+eh_sasl = (
+    "kafkashaded.org.apache.kafka.common.security.plain.PlainLoginModule required "
+    f'username="$ConnectionString" password="{connection_string}";'
+)
+
+kafka_options = {
+    "kafka.bootstrap.servers": bootstrap_servers,
+    "kafka.security.protocol": "SASL_SSL",
+    "kafka.sasl.mechanism": "PLAIN",
+    "kafka.sasl.jaas.config": eh_sasl,
+    # Reuse the dedicated "databricks" consumer group created by the deployment so this ingestion
+    # does not interfere with the Azure Data Explorer "adx" consumer group on the same event hubs.
+    "kafka.group.id": "databricks",
+    "startingOffsets": "earliest",
+    "failOnDataLoss": "false",
 }
 
 # COMMAND ----------
 
-# Read the telemetry stream from the "data" event hub into the raw landing table.
+# Read the telemetry stream from the "data" event hub (Kafka topic) into the raw landing table.
 telemetry_stream = (
-    spark.readStream.format("eventhubs")
-    .options(**eh_telemetry_conf)
+    spark.readStream.format("kafka")
+    .option("subscribe", "data")
+    .options(**kafka_options)
     .load()
-    .selectExpr("CAST(body AS STRING) AS payload")
+    .selectExpr("CAST(value AS STRING) AS payload")
 )
 
 (
@@ -143,12 +161,13 @@ telemetry_stream = (
     .table("opcua_raw")
 )
 
-# Read the metadata stream from the "metadata" event hub into the raw landing table.
+# Read the metadata stream from the "metadata" event hub (Kafka topic) into the raw landing table.
 metadata_stream = (
-    spark.readStream.format("eventhubs")
-    .options(**eh_metadata_conf)
+    spark.readStream.format("kafka")
+    .option("subscribe", "metadata")
+    .options(**kafka_options)
     .load()
-    .selectExpr("CAST(body AS STRING) AS payload")
+    .selectExpr("CAST(value AS STRING) AS payload")
 )
 
 (

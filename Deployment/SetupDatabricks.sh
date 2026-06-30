@@ -28,19 +28,18 @@
 #   JOB_NAME=ManufacturingOntologies-OPCUA-Ingestion
 #   DATABRICKS_RUNTIME=12.2.x-scala2.12
 #   NODE_TYPE_ID=Standard_DS3_v2
-#   EVENTHUBS_SPARK_VERSION=2.3.22
 
 set -euo pipefail
 
-WORKSPACE_FOLDER="${WORKSPACE_FOLDER:-/Shared/ManufacturingOntologies}"
-WAREHOUSE_NAME="${WAREHOUSE_NAME:-ManufacturingOntologies}"
-JOB_NAME="${JOB_NAME:-ManufacturingOntologies-OPCUA-Ingestion}"
-DATABRICKS_RUNTIME="${DATABRICKS_RUNTIME:-12.2.x-scala2.12}"
-NODE_TYPE_ID="${NODE_TYPE_ID:-Standard_DS3_v2}"
-EVENTHUBS_SPARK_VERSION="${EVENTHUBS_SPARK_VERSION:-2.3.22}"
+# Exported so the python3 helpers and heredocs below can read them via os.environ.
+export WORKSPACE_FOLDER="${WORKSPACE_FOLDER:-/Shared/ManufacturingOntologies}"
+export WAREHOUSE_NAME="${WAREHOUSE_NAME:-ManufacturingOntologies}"
+export JOB_NAME="${JOB_NAME:-ManufacturingOntologies-OPCUA-Ingestion}"
+export DATABRICKS_RUNTIME="${DATABRICKS_RUNTIME:-12.2.x-scala2.12}"
+export NODE_TYPE_ID="${NODE_TYPE_ID:-Standard_DS3_v2}"
 
-NOTEBOOK_PATH="${WORKSPACE_FOLDER}/opcua_setup"
-DASHBOARD_PATH="${WORKSPACE_FOLDER}/dashboard-ontologies.lvdash.json"
+export NOTEBOOK_PATH="${WORKSPACE_FOLDER}/opcua_setup"
+export DASHBOARD_PATH="${WORKSPACE_FOLDER}/dashboard-ontologies.lvdash.json"
 
 # Programmatic id of the Azure Databricks login application (constant for all tenants).
 DATABRICKS_LOGIN_APP_ID="2ff814a6-3304-4ab8-85cb-cd0e6f879c1d"
@@ -227,21 +226,11 @@ settings = {
                 },
                 "custom_tags": {"ResourceClass": "SingleNode"},
             },
-            "libraries": [
-                {
-                    "maven": {
-                        "coordinates": "com.microsoft.azure:azure-event-hubs-spark_2.12:"
-                        + os.environ["EVENTHUBS_SPARK_VERSION"]
-                    }
-                }
-            ],
         }
     ],
 }
 print(json.dumps(settings))
 PY
-
-export JOB_NAME NOTEBOOK_PATH EVENTHUBS_CONNECTION_STRING DATABRICKS_RUNTIME NODE_TYPE_ID EVENTHUBS_SPARK_VERSION
 
 if [ -n "${EXISTING_JOB_ID}" ]; then
     echo "  resetting existing job ${EXISTING_JOB_ID}..."

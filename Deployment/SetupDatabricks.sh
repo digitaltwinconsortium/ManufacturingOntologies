@@ -52,8 +52,9 @@ echo "Logging in with the user-assigned managed identity..."
 az login --identity --username "${MANAGED_IDENTITY_CLIENT_ID}" --output none
 
 echo "Acquiring access tokens..."
-DATABRICKS_AAD_TOKEN="$(az account get-access-token --resource "${DATABRICKS_LOGIN_APP_ID}" --query accessToken -o tsv)"
-ARM_TOKEN="$(az account get-access-token --resource https://management.core.windows.net/ --query accessToken -o tsv)"
+# Exported so the python3-based api() helper below can read them via os.environ.
+export DATABRICKS_AAD_TOKEN="$(az account get-access-token --resource "${DATABRICKS_LOGIN_APP_ID}" --query accessToken -o tsv)"
+export ARM_TOKEN="$(az account get-access-token --resource https://management.core.windows.net/ --query accessToken -o tsv)"
 
 # Parse a top-level field out of a JSON document using Python (always present in the azure-cli image).
 json_get() {
@@ -61,24 +62,58 @@ json_get() {
 }
 
 # Call the Databricks REST API. Usage: api METHOD PATH [BODY_FILE]
+# Implemented with python3 (always present in the azure-cli image) because curl
+# is not included in current Microsoft.Resources/deploymentScripts images.
 api() {
     local method="$1"
     local path="$2"
     local body_file="${3:-}"
-    local url="https://${DATABRICKS_WORKSPACE_URL}${path}"
-    if [ -n "${body_file}" ]; then
-        curl -sS -X "${method}" "${url}" \
-            -H "Authorization: Bearer ${DATABRICKS_AAD_TOKEN}" \
-            -H "X-Databricks-Azure-SP-Management-Token: ${ARM_TOKEN}" \
-            -H "X-Databricks-Azure-Workspace-Resource-Id: ${WORKSPACE_RESOURCE_ID}" \
-            -H "Content-Type: application/json" \
-            --data "@${body_file}"
-    else
-        curl -sS -X "${method}" "${url}" \
-            -H "Authorization: Bearer ${DATABRICKS_AAD_TOKEN}" \
-            -H "X-Databricks-Azure-SP-Management-Token: ${ARM_TOKEN}" \
-            -H "X-Databricks-Azure-Workspace-Resource-Id: ${WORKSPACE_RESOURCE_ID}"
-    fi
+    DATABRICKS_API_URL="https://${DATABRICKS_WORKSPACE_URL}${path}" \
+    DATABRICKS_API_METHOD="${method}" \
+    DATABRICKS_API_BODY_FILE="${body_file}" \
+    python3 - <<'PY'
+import os, sys, urllib.error, urllib.request
+
+url = os.environ["DATABRICKS_API_URL"]
+method = os.environ["DATABRICKS_API_METHOD"]
+body_file = os.environ.get("DATABRICKS_API_BODY_FILE", "")
+
+data = None
+headers = {
+    "Authorization": "Bearer " + os.environ["DATABRICKS_AAD_TOKEN"],
+    "X-Databricks-Azure-SP-Management-Token": os.environ["ARM_TOKEN"],
+    "X-Databricks-Azure-Workspace-Resource-Id": os.environ["WORKSPACE_RESOURCE_ID"],
+}
+if body_file:
+    with open(body_file, "rb") as body:
+        data = body.read()
+    headers["Content-Type"] = "application/json"
+
+request = urllib.request.Request(url, data=data, headers=headers, method=method)
+try:
+    with urllib.request.urlopen(request) as response:
+        sys.stdout.buffer.write(response.read())
+except urllib.error.HTTPError as error:
+    # Match `curl -sS` (without -f): emit the response body and exit 0 so callers
+    # that parse the payload keep working unchanged.
+    sys.stdout.buffer.write(error.read())
+except urllib.error.URLError:
+    # Connection-level failure: exit non-zero like curl so the reachability retry
+    # loop keeps polling until the workspace control plane is ready.
+    sys.exit(1)
+PY
+}
+
+# Download a URL to a local file using python3 (curl is not available in the image).
+# Usage: download URL DEST_FILE
+download() {
+    DOWNLOAD_URL="$1" DOWNLOAD_DEST="$2" python3 - <<'PY'
+import os, shutil, urllib.request
+
+with urllib.request.urlopen(os.environ["DOWNLOAD_URL"]) as response, \
+        open(os.environ["DOWNLOAD_DEST"], "wb") as destination:
+    shutil.copyfileobj(response, destination)
+PY
 }
 
 echo "Waiting for the Databricks workspace control plane to become reachable..."
@@ -99,7 +134,7 @@ PY
 api POST "/api/2.0/workspace/mkdirs" "${TMP_DIR}/mkdirs.json" >/dev/null
 
 echo "Downloading and importing the opcua_setup notebook..."
-curl -sSL "${NOTEBOOK_URL}" -o "${TMP_DIR}/opcua_setup.py"
+download "${NOTEBOOK_URL}" "${TMP_DIR}/opcua_setup.py"
 python3 - "${NOTEBOOK_PATH}" "${TMP_DIR}/opcua_setup.py" >"${TMP_DIR}/import_notebook.json" <<'PY'
 import base64, json, sys
 path, source = sys.argv[1], sys.argv[2]
@@ -115,7 +150,7 @@ PY
 api POST "/api/2.0/workspace/import" "${TMP_DIR}/import_notebook.json" >/dev/null
 
 echo "Downloading and importing the AI/BI dashboard..."
-curl -sSL "${DASHBOARD_URL}" -o "${TMP_DIR}/dashboard.lvdash.json"
+download "${DASHBOARD_URL}" "${TMP_DIR}/dashboard.lvdash.json"
 python3 - "${DASHBOARD_PATH}" "${TMP_DIR}/dashboard.lvdash.json" >"${TMP_DIR}/import_dashboard.json" <<'PY'
 import base64, json, sys
 path, source = sys.argv[1], sys.argv[2]

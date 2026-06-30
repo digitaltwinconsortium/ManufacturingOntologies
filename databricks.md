@@ -20,7 +20,7 @@ With the option enabled, the template additionally provisions:
 - a deployment script (running as the solution's managed identity) that imports the [`opcua_setup`](Tools/DatabricksQueries/opcua_setup.py) notebook and the [sample dashboard](Tools/DatabricksQueries/dashboard-ontologies.lvdash.json), creates a serverless SQL warehouse, publishes the dashboard, and starts a **continuous job** that runs the notebook.
 
 The notebook creates the Delta tables, ingests both event hubs, expands the OPC UA PubSub messages, and creates the `opcua_metadata_lkv` view together with the `CalculateOEEForStation`/`CalculateOEEForLine` functions used by the dashboard.
-Everything is created in a Unity Catalog schema (`main.ontologies` by default; override with the `UC_CATALOG`/`UC_SCHEMA` deployment settings), since the legacy `hive_metastore` catalog is disabled on Unity Catalog-only workspaces.
+Everything is created in a Unity Catalog schema named `ontologies` in your **workspace catalog** by default (the deployment resolves the catalog from the SQL warehouse's `current_catalog()`; override it with the `UC_CATALOG`/`UC_SCHEMA` deployment settings), since the legacy `hive_metastore` catalog is disabled on Unity Catalog-only workspaces and the built-in `main` catalog isn't available on workspaces that use Default Storage.
 Once the deployment finishes, open the published **Ontologies** dashboard in your workspace to explore condition monitoring, OEE, energy, production and diagnostics tiles for the Munich and Seattle production lines - the Databricks equivalent of the [ADX dashboard](Tools/ADXQueries/dashboard-ontologies.json). See [Use the sample dashboard](#use-the-sample-dashboard) for details.
 
 ## Use the sample dashboard
@@ -32,8 +32,9 @@ The reference solution ships a sample **AI/BI dashboard** that mirrors the use c
 With your data flowing into Delta Lake, you can query it using SQL or PySpark. Here is an example query that joins metadata and telemetry — equivalent to the ADX/Fabric queries. Because the telemetry `Subject` is the numeric `DataSetWriterId`, the station and production line are matched on the metadata `DataSetName` (built from the OPC UA server's ApplicationUri and NodeId) and then joined to the telemetry on `Subject`. (With Azure IoT Operations, the station and line usually aren't encoded in `DataSetName`, so point these filters at whatever your asset or dataset naming carries instead.)
 
 ```sql
--- The notebook creates these objects in the `main.ontologies` Unity Catalog schema by default.
-USE CATALOG main;
+-- The notebook creates these objects in the `ontologies` schema of your workspace catalog by default.
+-- Replace <your_catalog> with your workspace catalog name (run `SELECT current_catalog()` to find it).
+USE CATALOG `<your_catalog>`;
 USE SCHEMA ontologies;
 
 -- Find the status of all assembly stations in Munich in the last hour

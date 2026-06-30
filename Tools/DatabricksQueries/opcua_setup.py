@@ -22,12 +22,12 @@
 
 dbutils.widgets.text("eventHubsConnectionString", "")
 dbutils.widgets.text("checkpointRoot", "dbfs:/opcua/checkpoints")
-dbutils.widgets.text("catalog", "main")
+dbutils.widgets.text("catalog", "")
 dbutils.widgets.text("schema", "ontologies")
 
 connection_string = dbutils.widgets.get("eventHubsConnectionString").strip()
 checkpoint_root = dbutils.widgets.get("checkpointRoot").strip().rstrip("/")
-catalog = dbutils.widgets.get("catalog").strip() or "main"
+catalog = dbutils.widgets.get("catalog").strip()
 schema = dbutils.widgets.get("schema").strip() or "ontologies"
 
 if not connection_string:
@@ -41,17 +41,13 @@ if not connection_string:
 # Every object below is also created and referenced with its fully-qualified `{catalog}`.`{schema}`
 # name so it never depends on the session default (notebook %sql / `.table()` contexts can differ).
 #
-# Create the catalog first. On many Unity Catalog workspaces the built-in `main` catalog isn't
-# writable by the job's identity (or the workspace uses a different default catalog), which would
-# make the `CREATE SCHEMA` below - and therefore the tables, view and OEE functions the dashboard
-# depends on - fail and abort the whole run. `CREATE CATALOG IF NOT EXISTS` makes the target catalog
-# exist and owned by this principal; it is a no-op when the catalog already exists and is accessible.
-try:
-    spark.sql(f"CREATE CATALOG IF NOT EXISTS `{catalog}`")
-except Exception as catalog_error:
-    # The catalog already exists but is managed/owned elsewhere (for example the built-in `main`).
-    # That's fine as long as we can use it and create the schema below; surface a hint otherwise.
-    print(f"Note: could not create catalog `{catalog}` ({catalog_error}); assuming it already exists.")
+# Resolve the catalog. The built-in `main` catalog doesn't exist (and can't be created) on Unity
+# Catalog workspaces that use Default Storage with no metastore storage root, so when no catalog is
+# provided fall back to the cluster's current catalog (the workspace catalog), which already exists
+# and is writable. The deployment passes the same resolved catalog, so the notebook, the warehouse-
+# side objects and the dashboard all use the same namespace.
+if not catalog:
+    catalog = spark.sql("SELECT current_catalog()").collect()[0][0]
 
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS `{catalog}`.`{schema}`")
 spark.sql(f"USE CATALOG `{catalog}`")

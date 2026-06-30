@@ -39,7 +39,11 @@ export WAREHOUSE_NAME="${WAREHOUSE_NAME:-ManufacturingOntologies}"
 export JOB_NAME="${JOB_NAME:-ManufacturingOntologies-OPCUA-Ingestion}"
 export DATABRICKS_RUNTIME="${DATABRICKS_RUNTIME:-12.2.x-scala2.12}"
 export NODE_TYPE_ID="${NODE_TYPE_ID:-Standard_DS3_v2}"
-export UC_CATALOG="${UC_CATALOG:-main}"
+# UC_CATALOG is intentionally left unset by default here. Many Unity Catalog workspaces use Default
+# Storage with no metastore storage root, where the built-in `main` catalog doesn't exist and can't be
+# created without a managed location. When UC_CATALOG isn't provided, we resolve it below from the SQL
+# warehouse's current catalog (the workspace catalog), which already exists and is writable.
+export UC_CATALOG="${UC_CATALOG:-}"
 export UC_SCHEMA="${UC_SCHEMA:-ontologies}"
 
 export NOTEBOOK_PATH="${WORKSPACE_FOLDER}/opcua_setup"
@@ -152,6 +156,71 @@ print(json.dumps({
 PY
 api POST "/api/2.0/workspace/import" "${TMP_DIR}/import_notebook.json" >/dev/null
 
+echo "Creating or reusing the '${WAREHOUSE_NAME}' SQL warehouse..."
+WAREHOUSE_ID="$(api GET "/api/2.0/sql/warehouses" | python3 -c "import json,sys,os; d=json.load(sys.stdin); print(next((w['id'] for w in d.get('warehouses', []) if w.get('name')==os.environ['WAREHOUSE_NAME']), ''))")"
+if [ -z "${WAREHOUSE_ID}" ]; then
+    python3 - "${WAREHOUSE_NAME}" >"${TMP_DIR}/warehouse.json" <<'PY'
+import json, sys
+print(json.dumps({
+    "name": sys.argv[1],
+    "cluster_size": "2X-Small",
+    "min_num_clusters": 1,
+    "max_num_clusters": 1,
+    "auto_stop_mins": 10,
+    "enable_serverless_compute": True,
+    "warehouse_type": "PRO",
+}))
+PY
+    WAREHOUSE_ID="$(api POST "/api/2.0/sql/warehouses" "${TMP_DIR}/warehouse.json" | json_get id)"
+fi
+echo "  warehouse id: ${WAREHOUSE_ID}"
+
+# Runs a single SQL statement on the warehouse and waits for it to finish. Echoes the first column of
+# the first result row (empty for DDL). Usage: result="$(run_sql "<SQL>")"
+run_sql() {
+    local statement="$1"
+    python3 - "${WAREHOUSE_ID}" "${statement}" >"${TMP_DIR}/sql_request.json" <<'PY'
+import json, sys
+print(json.dumps({"warehouse_id": sys.argv[1], "statement": sys.argv[2], "wait_timeout": "50s"}))
+PY
+    local response state statement_id
+    response="$(api POST "/api/2.0/sql/statements" "${TMP_DIR}/sql_request.json")"
+    state="$(printf '%s' "${response}" | python3 -c "import json,sys; print(json.load(sys.stdin).get('status',{}).get('state',''))")"
+    statement_id="$(printf '%s' "${response}" | json_get statement_id)"
+
+    # Poll while the statement is still running (statements that exceed wait_timeout return PENDING/RUNNING).
+    while [ "${state}" = "PENDING" ] || [ "${state}" = "RUNNING" ]; do
+        sleep 5
+        response="$(api GET "/api/2.0/sql/statements/${statement_id}")"
+        state="$(printf '%s' "${response}" | python3 -c "import json,sys; print(json.load(sys.stdin).get('status',{}).get('state',''))")"
+    done
+
+    if [ "${state}" != "SUCCEEDED" ]; then
+        local message
+        message="$(printf '%s' "${response}" | python3 -c "import json,sys; print(json.load(sys.stdin).get('status',{}).get('error',{}).get('message',''))")"
+        echo "ERROR: warehouse SQL statement failed (state=${state}): ${message}" >&2
+        echo "       Statement: ${statement}" >&2
+        echo "       Ensure the deployment identity can CREATE on catalog '${UC_CATALOG}' and schema '${UC_SCHEMA}', or set UC_CATALOG to a catalog you own." >&2
+        exit 1
+    fi
+
+    # Return the first cell of the first row, if any (used to read current_catalog()).
+    printf '%s' "${response}" | python3 -c "import json,sys; d=json.load(sys.stdin); r=(d.get('result') or {}).get('data_array') or []; print(r[0][0] if r and r[0] else '')"
+}
+
+# Resolve the target Unity Catalog catalog. If the caller didn't set UC_CATALOG, use the warehouse's
+# current catalog (the workspace catalog), which exists and is writable. This avoids the built-in
+# `main` catalog, which doesn't exist (and can't be created) on Default Storage metastores.
+if [ -z "${UC_CATALOG}" ]; then
+    UC_CATALOG="$(run_sql "SELECT current_catalog()")"
+    if [ -z "${UC_CATALOG}" ] || [ "${UC_CATALOG}" = "spark_catalog" ]; then
+        echo "ERROR: could not resolve a usable Unity Catalog catalog from the warehouse (got '${UC_CATALOG}'). Set UC_CATALOG to a catalog you own." >&2
+        exit 1
+    fi
+    export UC_CATALOG
+fi
+echo "Using Unity Catalog catalog '${UC_CATALOG}', schema '${UC_SCHEMA}'."
+
 echo "Downloading and importing the AI/BI dashboard..."
 download "${DASHBOARD_URL}" "${TMP_DIR}/dashboard.lvdash.json"
 # Repoint the dashboard's Unity Catalog namespace to match the notebook job (the file ships with
@@ -187,68 +256,19 @@ ENCODED_DASHBOARD_PATH="$(python3 -c "import urllib.parse,sys; print(urllib.pars
 DASHBOARD_RESOURCE_ID="$(api GET "/api/2.0/workspace/get-status?path=${ENCODED_DASHBOARD_PATH}" | json_get resource_id)"
 echo "  dashboard resource id: ${DASHBOARD_RESOURCE_ID}"
 
-echo "Creating or reusing the '${WAREHOUSE_NAME}' SQL warehouse..."
-WAREHOUSE_ID="$(api GET "/api/2.0/sql/warehouses" | python3 -c "import json,sys,os; d=json.load(sys.stdin); print(next((w['id'] for w in d.get('warehouses', []) if w.get('name')==os.environ['WAREHOUSE_NAME']), ''))")"
-if [ -z "${WAREHOUSE_ID}" ]; then
-    python3 - "${WAREHOUSE_NAME}" >"${TMP_DIR}/warehouse.json" <<'PY'
-import json, sys
-print(json.dumps({
-    "name": sys.argv[1],
-    "cluster_size": "2X-Small",
-    "min_num_clusters": 1,
-    "max_num_clusters": 1,
-    "auto_stop_mins": 10,
-    "enable_serverless_compute": True,
-    "warehouse_type": "PRO",
-}))
-PY
-    WAREHOUSE_ID="$(api POST "/api/2.0/sql/warehouses" "${TMP_DIR}/warehouse.json" | json_get id)"
-fi
-echo "  warehouse id: ${WAREHOUSE_ID}"
-
-# Create the schema objects the dashboard depends on (catalog, schema, tables, last-known-value view
-# and the OEE functions) synchronously through the SQL warehouse - the same compute and identity the
-# published dashboard uses. The continuous notebook job also creates these (idempotent CREATE OR
-# REPLACE), but doing it here guarantees they exist before the dashboard is published and surfaces any
-# permission problem during deployment instead of failing silently with [UNRESOLVED_ROUTINE] later.
-#
-# Runs a single SQL statement on the warehouse and waits for it to finish. Usage: run_sql "<SQL>"
-run_sql() {
-    local statement="$1"
-    python3 - "${WAREHOUSE_ID}" "${statement}" >"${TMP_DIR}/sql_request.json" <<'PY'
-import json, sys
-print(json.dumps({"warehouse_id": sys.argv[1], "statement": sys.argv[2], "wait_timeout": "50s"}))
-PY
-    local response state statement_id
-    response="$(api POST "/api/2.0/sql/statements" "${TMP_DIR}/sql_request.json")"
-    state="$(printf '%s' "${response}" | python3 -c "import json,sys; print(json.load(sys.stdin).get('status',{}).get('state',''))")"
-    statement_id="$(printf '%s' "${response}" | json_get statement_id)"
-
-    # Poll while the statement is still running (statements that exceed wait_timeout return PENDING/RUNNING).
-    while [ "${state}" = "PENDING" ] || [ "${state}" = "RUNNING" ]; do
-        sleep 5
-        response="$(api GET "/api/2.0/sql/statements/${statement_id}")"
-        state="$(printf '%s' "${response}" | python3 -c "import json,sys; print(json.load(sys.stdin).get('status',{}).get('state',''))")"
-    done
-
-    if [ "${state}" != "SUCCEEDED" ]; then
-        local message
-        message="$(printf '%s' "${response}" | python3 -c "import json,sys; print(json.load(sys.stdin).get('status',{}).get('error',{}).get('message',''))")"
-        echo "ERROR: warehouse SQL statement failed (state=${state}): ${message}" >&2
-        echo "       Statement: ${statement}" >&2
-        echo "       Ensure the deployment identity can CREATE on catalog '${UC_CATALOG}' and schema '${UC_SCHEMA}', or set UC_CATALOG to a catalog you own." >&2
-        exit 1
-    fi
-}
-
+# Create the schema objects the dashboard depends on (schema, tables, last-known-value view and the
+# OEE functions) synchronously through the SQL warehouse - the same compute and identity the published
+# dashboard uses. The continuous notebook job also creates these (idempotent CREATE OR REPLACE), but
+# doing it here guarantees they exist before the dashboard is published and surfaces any permission
+# problem during deployment instead of failing silently with [UNRESOLVED_ROUTINE] later. The catalog
+# itself was resolved (and is known to exist) above, so it is not created here.
 echo "Creating the '${UC_CATALOG}.${UC_SCHEMA}' schema objects and OEE functions on the warehouse..."
-run_sql "CREATE CATALOG IF NOT EXISTS \`${UC_CATALOG}\`"
-run_sql "CREATE SCHEMA IF NOT EXISTS \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`"
-run_sql "CREATE TABLE IF NOT EXISTS \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_telemetry (Subject STRING, Timestamp TIMESTAMP, Name STRING, Value STRING) USING DELTA"
-run_sql "CREATE TABLE IF NOT EXISTS \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata (Subject STRING, Timestamp TIMESTAMP, DataSetName STRING, MajorVersion BIGINT, MinorVersion BIGINT, Name STRING, BuiltInType INT, DataType STRING, ValueRank INT, Type STRING, DisplayName STRING, Workcell STRING, Line STRING, Area STRING, Site STRING, Enterprise STRING, NamespaceUri STRING, NodeId STRING) USING DELTA"
-run_sql "CREATE OR REPLACE VIEW \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata_lkv AS SELECT m.* FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata m INNER JOIN (SELECT Subject, Name, MAX(Timestamp) AS MaxTimestamp FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata GROUP BY Subject, Name) latest ON m.Subject = latest.Subject AND m.Name = latest.Name AND m.Timestamp = latest.MaxTimestamp"
-run_sql "CREATE OR REPLACE FUNCTION \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.CalculateOEEForStation(stationName STRING, location STRING, idealCycleTime INT, shiftStartTime TIMESTAMP, shiftEndTime TIMESTAMP) RETURNS DOUBLE RETURN SELECT CASE WHEN idealRunningTime > 0 THEN CAST(idealRunningTime - faultyTimeShift AS DOUBLE) / idealRunningTime ELSE 0 END * CASE WHEN (idealRunningTime - faultyTimeShift) > 0 THEN CAST(idealCycleTime AS DOUBLE) * (numProdShift + numScrapShift) / (idealRunningTime - faultyTimeShift) ELSE 0 END * CASE WHEN (numProdShift + numScrapShift) > 0 THEN CAST(numProdShift AS DOUBLE) / (numProdShift + numScrapShift) ELSE 0 END FROM (SELECT unix_millis(shiftEndTime) - unix_millis(shiftStartTime) AS idealRunningTime, (SELECT COALESCE(MAX(CAST(t.Value AS INT)), 0) - COALESCE(MIN(CAST(t.Value AS INT)), 0) FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata_lkv m INNER JOIN \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_telemetry t ON m.Subject = t.Subject WHERE m.DataSetName LIKE CONCAT('%', stationName, '%') AND m.DataSetName LIKE CONCAT('%', location, '%') AND t.Name = 'NumberOfManufacturedProducts' AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime) AS numProdShift, (SELECT COALESCE(MAX(CAST(t.Value AS INT)), 0) - COALESCE(MIN(CAST(t.Value AS INT)), 0) FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata_lkv m INNER JOIN \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_telemetry t ON m.Subject = t.Subject WHERE m.DataSetName LIKE CONCAT('%', stationName, '%') AND m.DataSetName LIKE CONCAT('%', location, '%') AND t.Name = 'NumberOfDiscardedProducts' AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime) AS numScrapShift, (SELECT COALESCE(SUM(CAST(t.Value AS INT)), 0) FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata_lkv m INNER JOIN \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_telemetry t ON m.Subject = t.Subject WHERE m.DataSetName LIKE CONCAT('%', stationName, '%') AND m.DataSetName LIKE CONCAT('%', location, '%') AND t.Name = 'FaultyTime' AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime) AS faultyTimeShift)"
-run_sql "CREATE OR REPLACE FUNCTION \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.CalculateOEEForLine(location STRING, idealCycleTime INT, shiftStartTime TIMESTAMP, shiftEndTime TIMESTAMP) RETURNS DOUBLE RETURN SELECT MIN(\`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.CalculateOEEForStation(station, location, idealCycleTime, shiftStartTime, shiftEndTime)) FROM (SELECT DISTINCT Workcell AS station FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata_lkv WHERE Site = location AND Workcell <> 'publisher')"
+run_sql "CREATE SCHEMA IF NOT EXISTS \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`" >/dev/null
+run_sql "CREATE TABLE IF NOT EXISTS \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_telemetry (Subject STRING, Timestamp TIMESTAMP, Name STRING, Value STRING) USING DELTA" >/dev/null
+run_sql "CREATE TABLE IF NOT EXISTS \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata (Subject STRING, Timestamp TIMESTAMP, DataSetName STRING, MajorVersion BIGINT, MinorVersion BIGINT, Name STRING, BuiltInType INT, DataType STRING, ValueRank INT, Type STRING, DisplayName STRING, Workcell STRING, Line STRING, Area STRING, Site STRING, Enterprise STRING, NamespaceUri STRING, NodeId STRING) USING DELTA" >/dev/null
+run_sql "CREATE OR REPLACE VIEW \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata_lkv AS SELECT m.* FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata m INNER JOIN (SELECT Subject, Name, MAX(Timestamp) AS MaxTimestamp FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata GROUP BY Subject, Name) latest ON m.Subject = latest.Subject AND m.Name = latest.Name AND m.Timestamp = latest.MaxTimestamp" >/dev/null
+run_sql "CREATE OR REPLACE FUNCTION \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.CalculateOEEForStation(stationName STRING, location STRING, idealCycleTime INT, shiftStartTime TIMESTAMP, shiftEndTime TIMESTAMP) RETURNS DOUBLE RETURN SELECT CASE WHEN idealRunningTime > 0 THEN CAST(idealRunningTime - faultyTimeShift AS DOUBLE) / idealRunningTime ELSE 0 END * CASE WHEN (idealRunningTime - faultyTimeShift) > 0 THEN CAST(idealCycleTime AS DOUBLE) * (numProdShift + numScrapShift) / (idealRunningTime - faultyTimeShift) ELSE 0 END * CASE WHEN (numProdShift + numScrapShift) > 0 THEN CAST(numProdShift AS DOUBLE) / (numProdShift + numScrapShift) ELSE 0 END FROM (SELECT unix_millis(shiftEndTime) - unix_millis(shiftStartTime) AS idealRunningTime, (SELECT COALESCE(MAX(CAST(t.Value AS INT)), 0) - COALESCE(MIN(CAST(t.Value AS INT)), 0) FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata_lkv m INNER JOIN \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_telemetry t ON m.Subject = t.Subject WHERE m.DataSetName LIKE CONCAT('%', stationName, '%') AND m.DataSetName LIKE CONCAT('%', location, '%') AND t.Name = 'NumberOfManufacturedProducts' AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime) AS numProdShift, (SELECT COALESCE(MAX(CAST(t.Value AS INT)), 0) - COALESCE(MIN(CAST(t.Value AS INT)), 0) FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata_lkv m INNER JOIN \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_telemetry t ON m.Subject = t.Subject WHERE m.DataSetName LIKE CONCAT('%', stationName, '%') AND m.DataSetName LIKE CONCAT('%', location, '%') AND t.Name = 'NumberOfDiscardedProducts' AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime) AS numScrapShift, (SELECT COALESCE(SUM(CAST(t.Value AS INT)), 0) FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata_lkv m INNER JOIN \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_telemetry t ON m.Subject = t.Subject WHERE m.DataSetName LIKE CONCAT('%', stationName, '%') AND m.DataSetName LIKE CONCAT('%', location, '%') AND t.Name = 'FaultyTime' AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime) AS faultyTimeShift)" >/dev/null
+run_sql "CREATE OR REPLACE FUNCTION \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.CalculateOEEForLine(location STRING, idealCycleTime INT, shiftStartTime TIMESTAMP, shiftEndTime TIMESTAMP) RETURNS DOUBLE RETURN SELECT MIN(\`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.CalculateOEEForStation(station, location, idealCycleTime, shiftStartTime, shiftEndTime)) FROM (SELECT DISTINCT Workcell AS station FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata_lkv WHERE Site = location AND Workcell <> 'publisher')" >/dev/null
 echo "  schema objects and OEE functions created."
 
 if [ -n "${DASHBOARD_RESOURCE_ID}" ] && [ -n "${WAREHOUSE_ID}" ]; then

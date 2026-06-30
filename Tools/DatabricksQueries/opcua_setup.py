@@ -110,7 +110,110 @@ spark.sql(
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Step 2: Ingest data from Azure Event Hubs
+# MAGIC ## Step 2: Last-known-value (LKV) view and OEE helper functions
+# MAGIC
+# MAGIC The LKV view is the Databricks equivalent of the Azure Data Explorer `opcua_metadata_lkv`
+# MAGIC materialized view. The two OEE functions reproduce `CalculateOEEForStation` and
+# MAGIC `CalculateOEEForLine` and are consumed by `dashboard-ontologies.lvdash.json`.
+# MAGIC
+# MAGIC These objects only depend on the tables existing (not on any data), so they are created here -
+# MAGIC before the ingestion streams start - so the dashboard can always resolve them even if a stream
+# MAGIC is still warming up or temporarily fails. They are `CREATE OR REPLACE`, so re-running the
+# MAGIC continuous job keeps them in sync.
+
+# COMMAND ----------
+
+spark.sql(
+    f"""
+    CREATE OR REPLACE VIEW `{catalog}`.`{schema}`.opcua_metadata_lkv AS
+    SELECT m.*
+    FROM `{catalog}`.`{schema}`.opcua_metadata m
+    INNER JOIN (
+      SELECT Subject, Name, MAX(Timestamp) AS Timestamp
+      FROM `{catalog}`.`{schema}`.opcua_metadata
+      GROUP BY Subject, Name
+    ) latest ON m.Subject = latest.Subject AND m.Name = latest.Name AND m.Timestamp = latest.Timestamp
+    """
+)
+
+# COMMAND ----------
+
+# Overall Equipment Effectiveness for a single station, see https://www.oee.com/calculating-oee/
+spark.sql(
+    f"""
+    CREATE OR REPLACE FUNCTION `{catalog}`.`{schema}`.CalculateOEEForStation(
+        stationName STRING,
+        location STRING,
+        idealCycleTime INT,
+        shiftStartTime TIMESTAMP,
+        shiftEndTime TIMESTAMP
+    )
+    RETURNS DOUBLE
+    RETURN
+      SELECT
+        CASE WHEN idealRunningTime > 0 THEN CAST(idealRunningTime - faultyTimeShift AS DOUBLE) / idealRunningTime ELSE 0 END
+        * CASE WHEN (idealRunningTime - faultyTimeShift) > 0 THEN CAST(idealCycleTime AS DOUBLE) * (numProdShift + numScrapShift) / (idealRunningTime - faultyTimeShift) ELSE 0 END
+        * CASE WHEN (numProdShift + numScrapShift) > 0 THEN CAST(numProdShift AS DOUBLE) / (numProdShift + numScrapShift) ELSE 0 END
+      FROM (
+        SELECT
+          unix_millis(shiftEndTime) - unix_millis(shiftStartTime) AS idealRunningTime,
+          (
+            SELECT COALESCE(MAX(CAST(t.Value AS INT)), 0) - COALESCE(MIN(CAST(t.Value AS INT)), 0)
+            FROM `{catalog}`.`{schema}`.opcua_metadata_lkv m
+            INNER JOIN `{catalog}`.`{schema}`.opcua_telemetry t ON m.Subject = t.Subject
+            WHERE m.DataSetName LIKE CONCAT('%', stationName, '%')
+              AND m.DataSetName LIKE CONCAT('%', location, '%')
+              AND t.Name = 'NumberOfManufacturedProducts'
+              AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime
+          ) AS numProdShift,
+          (
+            SELECT COALESCE(MAX(CAST(t.Value AS INT)), 0) - COALESCE(MIN(CAST(t.Value AS INT)), 0)
+            FROM `{catalog}`.`{schema}`.opcua_metadata_lkv m
+            INNER JOIN `{catalog}`.`{schema}`.opcua_telemetry t ON m.Subject = t.Subject
+            WHERE m.DataSetName LIKE CONCAT('%', stationName, '%')
+              AND m.DataSetName LIKE CONCAT('%', location, '%')
+              AND t.Name = 'NumberOfDiscardedProducts'
+              AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime
+          ) AS numScrapShift,
+          (
+            SELECT COALESCE(SUM(CAST(t.Value AS INT)), 0)
+            FROM `{catalog}`.`{schema}`.opcua_metadata_lkv m
+            INNER JOIN `{catalog}`.`{schema}`.opcua_telemetry t ON m.Subject = t.Subject
+            WHERE m.DataSetName LIKE CONCAT('%', stationName, '%')
+              AND m.DataSetName LIKE CONCAT('%', location, '%')
+              AND t.Name = 'FaultyTime'
+              AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime
+          ) AS faultyTimeShift
+      )
+    """
+)
+
+# COMMAND ----------
+
+# OEE for an entire production line is the minimum OEE across its stations.
+spark.sql(
+    f"""
+    CREATE OR REPLACE FUNCTION `{catalog}`.`{schema}`.CalculateOEEForLine(
+        location STRING,
+        idealCycleTime INT,
+        shiftStartTime TIMESTAMP,
+        shiftEndTime TIMESTAMP
+    )
+    RETURNS DOUBLE
+    RETURN
+      SELECT MIN(`{catalog}`.`{schema}`.CalculateOEEForStation(station, location, idealCycleTime, shiftStartTime, shiftEndTime))
+      FROM (
+        SELECT DISTINCT Workcell AS station
+        FROM `{catalog}`.`{schema}`.opcua_metadata_lkv
+        WHERE Site = location AND Workcell <> 'publisher'
+      )
+    """
+)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Step 3: Ingest data from Azure Event Hubs
 # MAGIC
 # MAGIC Ingestion uses the built-in Spark **Kafka** connector against the Event Hubs Kafka endpoint
 # MAGIC (`<namespace>.servicebus.windows.net:9093`), so it requires no extra library and runs on Unity
@@ -188,7 +291,7 @@ metadata_stream = (
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Step 3: Process and expand OPC UA PubSub messages
+# MAGIC ## Step 4: Process and expand OPC UA PubSub messages
 
 # COMMAND ----------
 
@@ -300,107 +403,6 @@ metadata_df = (
     .outputMode("append")
     .option("checkpointLocation", f"{checkpoint_root}/opcua_metadata")
     .table(f"`{catalog}`.`{schema}`.opcua_metadata")
-)
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ## Step 4: Last-known-value (LKV) view and OEE helper functions
-# MAGIC
-# MAGIC The LKV view is the Databricks equivalent of the Azure Data Explorer `opcua_metadata_lkv`
-# MAGIC materialized view. The two OEE functions reproduce `CalculateOEEForStation` and
-# MAGIC `CalculateOEEForLine` and are consumed by `dashboard-ontologies.lvdash.json`.
-
-# COMMAND ----------
-
-spark.sql(
-    f"""
-    CREATE OR REPLACE VIEW `{catalog}`.`{schema}`.opcua_metadata_lkv AS
-    SELECT m.*
-    FROM `{catalog}`.`{schema}`.opcua_metadata m
-    INNER JOIN (
-        SELECT Subject, Name, MAX(Timestamp) AS MaxTimestamp
-        FROM `{catalog}`.`{schema}`.opcua_metadata
-        GROUP BY Subject, Name
-    ) latest
-    ON m.Subject = latest.Subject
-    AND m.Name = latest.Name
-    AND m.Timestamp = latest.MaxTimestamp
-    """
-)
-
-# COMMAND ----------
-
-# Overall Equipment Effectiveness for a single station, see https://www.oee.com/calculating-oee/
-spark.sql(
-    f"""
-    CREATE OR REPLACE FUNCTION `{catalog}`.`{schema}`.CalculateOEEForStation(
-        stationName STRING,
-        location STRING,
-        idealCycleTime INT,
-        shiftStartTime TIMESTAMP,
-        shiftEndTime TIMESTAMP
-    )
-    RETURNS DOUBLE
-    RETURN
-      SELECT
-        CASE WHEN idealRunningTime > 0 THEN CAST(idealRunningTime - faultyTimeShift AS DOUBLE) / idealRunningTime ELSE 0 END
-        * CASE WHEN (idealRunningTime - faultyTimeShift) > 0 THEN CAST(idealCycleTime AS DOUBLE) * (numProdShift + numScrapShift) / (idealRunningTime - faultyTimeShift) ELSE 0 END
-        * CASE WHEN (numProdShift + numScrapShift) > 0 THEN CAST(numProdShift AS DOUBLE) / (numProdShift + numScrapShift) ELSE 0 END
-      FROM (
-        SELECT
-          unix_millis(shiftEndTime) - unix_millis(shiftStartTime) AS idealRunningTime,
-          (
-            SELECT COALESCE(MAX(CAST(t.Value AS INT)), 0) - COALESCE(MIN(CAST(t.Value AS INT)), 0)
-            FROM `{catalog}`.`{schema}`.opcua_metadata_lkv m
-            INNER JOIN `{catalog}`.`{schema}`.opcua_telemetry t ON m.Subject = t.Subject
-            WHERE m.DataSetName LIKE CONCAT('%', stationName, '%')
-              AND m.DataSetName LIKE CONCAT('%', location, '%')
-              AND t.Name = 'NumberOfManufacturedProducts'
-              AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime
-          ) AS numProdShift,
-          (
-            SELECT COALESCE(MAX(CAST(t.Value AS INT)), 0) - COALESCE(MIN(CAST(t.Value AS INT)), 0)
-            FROM `{catalog}`.`{schema}`.opcua_metadata_lkv m
-            INNER JOIN `{catalog}`.`{schema}`.opcua_telemetry t ON m.Subject = t.Subject
-            WHERE m.DataSetName LIKE CONCAT('%', stationName, '%')
-              AND m.DataSetName LIKE CONCAT('%', location, '%')
-              AND t.Name = 'NumberOfDiscardedProducts'
-              AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime
-          ) AS numScrapShift,
-          (
-            SELECT COALESCE(SUM(CAST(t.Value AS INT)), 0)
-            FROM `{catalog}`.`{schema}`.opcua_metadata_lkv m
-            INNER JOIN `{catalog}`.`{schema}`.opcua_telemetry t ON m.Subject = t.Subject
-            WHERE m.DataSetName LIKE CONCAT('%', stationName, '%')
-              AND m.DataSetName LIKE CONCAT('%', location, '%')
-              AND t.Name = 'FaultyTime'
-              AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime
-          ) AS faultyTimeShift
-      )
-    """
-)
-
-# COMMAND ----------
-
-# OEE for an entire production line is the minimum OEE across its stations.
-spark.sql(
-    f"""
-    CREATE OR REPLACE FUNCTION `{catalog}`.`{schema}`.CalculateOEEForLine(
-        location STRING,
-        idealCycleTime INT,
-        shiftStartTime TIMESTAMP,
-        shiftEndTime TIMESTAMP
-    )
-    RETURNS DOUBLE
-    RETURN
-      SELECT MIN(`{catalog}`.`{schema}`.CalculateOEEForStation(station, location, idealCycleTime, shiftStartTime, shiftEndTime))
-      FROM (
-        SELECT DISTINCT Workcell AS station
-        FROM `{catalog}`.`{schema}`.opcua_metadata_lkv
-        WHERE Site = location AND Workcell <> 'publisher'
-      )
-    """
 )
 
 # COMMAND ----------

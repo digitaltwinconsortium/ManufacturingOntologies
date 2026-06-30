@@ -1,0 +1,125 @@
+// OPC UA PubSub setup for a Microsoft Fabric Eventhouse KQL database.
+// Generated to mirror the Azure Data Explorer setup (Deployment/arm.json) so Fabric processes the OPC UA PubSub data identically to ADX.
+// SetupFabric.sh submits this against the Eventhouse Kusto management endpoint wrapped in: .execute database script <|
+
+// Create a landing table for the raw OPC UA telemetry JSON body
+.create table opcua_raw(payload: dynamic)
+
+// Create mapping from JSON ingestion to the landing table
+.create-or-alter table opcua_raw ingestion json mapping 'opcua_mapping' '[{"column":"payload","path":"$","datatype":"dynamic"}]'
+
+// Create our final OPC UA telemetry table (one row per field, keyed by Subject + Name)
+.create table opcua_telemetry (Subject: string, Timestamp: datetime, Name: string, Value: dynamic)
+
+// Expand telemetry into one row per field. Everything (identity, timestamp and values) lives in the JSON body, so the union just branches on the body shape: an array of DataSet messages (publishers usually batch several writers into one message) and a single DataSet message. Both carry the DataSetWriterId and Timestamp inside the body.
+.create-or-alter function OPCUATelemetryExpand() { union (opcua_raw | where gettype(payload) == "array" | mv-expand record = payload | mv-apply field = todynamic(record["Payload"]) on (extend key = tostring(bag_keys(field)[0]) | extend p = field[key] | project Name = key, Value = todynamic(p["Value"])) | project Subject = tostring(record["DataSetWriterId"]), Timestamp = todatetime(record["Timestamp"]), Name, Value), (opcua_raw | where gettype(payload) == "dictionary" | mv-apply field = todynamic(payload["Payload"]) on (extend key = tostring(bag_keys(field)[0]) | extend p = field[key] | project Name = key, Value = todynamic(p["Value"])) | project Subject = tostring(payload["DataSetWriterId"]), Timestamp = todatetime(payload["Timestamp"]), Name, Value) | project Subject, Timestamp, Name, Value }
+
+// Apply the telemetry expansion function to the OPC UA raw table
+.alter table opcua_telemetry policy update @'[{"Source": "opcua_raw", "Query": "OPCUATelemetryExpand()", "IsEnabled": "True"}]'
+
+// Create a landing table for the raw OPC UA metadata JSON body
+.create table opcua_metadata_raw(payload: dynamic)
+
+// Create mapping from JSON ingestion to the metadata landing table
+.create-or-alter table opcua_metadata_raw ingestion json mapping 'opcua_metadata_mapping' '[{"column":"payload","path":"$","datatype":"dynamic"}]'
+
+// Create our final OPC UA metadata table (one row per field; DataSetName is parsed into the ISA-95 hierarchy used by the OEE functions)
+.create table opcua_metadata(Subject: string, Timestamp: datetime, DataSetName: string, MajorVersion: long, MinorVersion: long, Name: string, BuiltInType: int, DataType: string, ValueRank: int, Type: string, DisplayName: string, Workcell: string, Line: string, Area: string, Site: string, Enterprise: string, NamespaceUri: string, NodeId: string)
+
+// Expand the metadata message. The body is the DataSetMetaData wrapped with its DataSetWriterId and Timestamp; mv-expand over Fields produces one row per field, keyed by Subject + Name. The DataSetName (ApplicationUri;NodeId) is parsed into the ISA-95 hierarchy.
+.create-or-alter function OPCUAMetaDataExpand() { opcua_metadata_raw | extend meta = todynamic(payload["MetaData"]) | parse tostring(meta["Name"]) with * ":" Workcell "." Line "." Area "." Site "." Enterprise ";nsu=" NamespaceUri ";" NodeId | extend DataSetName = tostring(meta["Name"]), MajorVersion = tolong(meta["ConfigurationVersion"]["MajorVersion"]), MinorVersion = tolong(meta["ConfigurationVersion"]["MinorVersion"]) | mv-expand Field = meta["Fields"] | project Subject = tostring(payload["DataSetWriterId"]), Timestamp = todatetime(payload["Timestamp"]), DataSetName, MajorVersion, MinorVersion, Name = tostring(Field["Name"]), BuiltInType = toint(Field["BuiltInType"]), DataType = tostring(Field["DataType"]), ValueRank = toint(Field["ValueRank"]), Type = tostring(Field["Description"]), DisplayName = tostring(Field["Name"]), Workcell, Line, Area, Site, Enterprise, NamespaceUri, NodeId }
+
+// Apply the raw metadata expansion function to the metadata landing table
+.alter table opcua_metadata policy update @'[{"Source": "opcua_metadata_raw", "Query": "OPCUAMetaDataExpand()", "IsEnabled": "True"}]'
+
+// Create a materialized view for the last known value (LKV) of our metadata
+.create materialized-view opcua_metadata_lkv on table opcua_metadata { opcua_metadata | summarize arg_max(Timestamp, *) by Subject, Name }
+
+.create table DTDL_models (context:string, id:string, type:string, displayname: string, description:string, comment:string, contenttype:string, contentid:string, writable:bool, schema:dynamic, contentname:string, contentdisplayname: string, contentdescription:string, contentcomment:string, target:string, extends: string, schemas:string)
+
+.create-or-alter function CalculateOEEForStation(stationName:string,location:string,idealCycleTime:int,shiftStartTime:datetime,shiftEndTime:datetime) {
+// calculation from https://www.oee.com/calculating-oee/
+let idealRunningTime = (shiftEndTime - shiftStartTime) / time(1ms); // [ms]
+let numProdEnd = toscalar(
+opcua_metadata_lkv
+| where DataSetName contains stationName
+| where DataSetName contains location
+| join kind=inner (opcua_telemetry
+| where Name == "NumberOfManufacturedProducts"
+| where Timestamp > shiftStartTime and Timestamp < shiftEndTime
+) on Subject
+| extend numProd = toint(Value)
+| summarize max(numProd));
+let numProdStart = toscalar(
+opcua_metadata_lkv
+| where DataSetName contains stationName
+| where DataSetName contains location
+| join kind=inner (opcua_telemetry
+| where Name == "NumberOfManufacturedProducts"
+| where Timestamp > shiftStartTime and Timestamp < shiftEndTime
+) on Subject
+| extend numProd = toint(Value)
+| summarize min(numProd));
+let numScrapEnd = toscalar(
+opcua_metadata_lkv
+| where DataSetName contains stationName
+| where DataSetName contains location
+| join kind=inner (opcua_telemetry
+| where Name == "NumberOfDiscardedProducts"
+| where Timestamp > shiftStartTime and Timestamp < shiftEndTime
+) on Subject
+| extend numDisc = toint(Value)
+| summarize max(numDisc));
+let numScrapStart = toscalar(
+opcua_metadata_lkv
+| where DataSetName contains stationName
+| where DataSetName contains location
+| join kind=inner (opcua_telemetry
+| where Name == "NumberOfDiscardedProducts"
+| where Timestamp > shiftStartTime and Timestamp < shiftEndTime
+) on Subject
+| extend numDisc = toint(Value)
+| summarize min(numDisc));
+let numProdShift = numProdEnd - numProdStart;
+let numScrapShift = numScrapEnd - numScrapStart;
+let actualCycleTime = toscalar(
+opcua_metadata_lkv
+| where DataSetName contains stationName
+| where DataSetName contains location
+| join kind=inner (opcua_telemetry
+| where Name == "ActualCycleTime"
+| where Timestamp > shiftStartTime and Timestamp < shiftEndTime
+) on Subject
+| extend cycleTime = toint(Value)
+| summarize avg(cycleTime));
+let faultyTimeShift = toscalar(
+opcua_metadata_lkv
+| where DataSetName contains stationName
+| where DataSetName contains location
+| join kind=inner (opcua_telemetry
+| where Name == "FaultyTime"
+| where Timestamp > shiftStartTime and Timestamp < shiftEndTime
+) on Subject
+| extend faultyTime = toint(Value)
+| summarize sum(faultyTime));
+let availability = todouble(idealRunningTime - faultyTimeShift) / todouble(idealRunningTime);
+let performance = todouble(idealCycleTime) * todouble(numProdShift + numScrapShift) / todouble(idealRunningTime - faultyTimeShift);
+let quality = todouble(numProdShift) / todouble(numProdShift + numScrapShift);
+let oee = availability * performance * quality;
+toscalar(oee)
+}
+
+.create-or-alter function CalculateOEEForLine(location:string,idealCycleTime:int,shiftStartTime:datetime,shiftEndTime:datetime) {
+let stations = opcua_metadata_lkv
+| where Site == location
+| where Workcell !="publisher"
+| summarize by Workcell
+| project station = tostring(Workcell);
+let oeeForStations = stations
+| partition hint.strategy=legacy by station
+(
+  extend oee = toscalar(CalculateOEEForStation(station, location, idealCycleTime, shiftStartTime, shiftEndTime))
+)
+| summarize min(oee);
+toscalar(oeeForStations)
+}

@@ -1,0 +1,189 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "resourcesName": {
+      "type": "string",
+      "minLength": 2,
+      "metadata": {
+        "description": "The resources base name used by the main (Azure Data Explorer) deployment, for example 'contoso'. The Fabric template reuses the managed identity, Event Hubs namespace, Container Apps environment and 'fabric' consumer groups created by that deployment, all named '<resourcesName>-*'. Deploy this template into the same resource group as the main deployment."
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "minLength": 2,
+      "metadata": {
+        "description": "User principal name or Entra object ID to add as a Microsoft Fabric capacity administrator alongside the solution's managed identity. Use the same value as the main deployment so you can administer the capacity from the Fabric portal."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Azure region for the Fabric capacity and Container App. Defaults to the resource group location."
+      }
+    }
+  },
+  "variables": {
+    "eventHubsNamespaceName": "[concat(parameters('resourcesName'), '-EventHubs')]",
+    "authRuleResourceId": "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', concat(parameters('resourcesName'), '-EventHubs'), 'RootManageSharedAccessKey')]",
+    "fabricCapacityName": "[toLower(concat(parameters('resourcesName'), 'fabric'))]",
+    "fabricWorkspaceName": "[concat(parameters('resourcesName'), '-Fabric')]",
+    "fabricSetupScriptUri": "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'SetupFabric.sh')]",
+    "fabricKqlUri": "https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Tools/FabricQueries/opcua_setup.kql",
+    "fabricDashboardUri": "https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Tools/ADXQueries/dashboard-ontologies.json",
+    "i3xFabricContainerAppName": "[concat(parameters('resourcesName'), '-i3x4kusto-fabric')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Fabric/capacities",
+      "apiVersion": "2023-11-01",
+      "name": "[variables('fabricCapacityName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "F2",
+        "tier": "Fabric"
+      },
+      "properties": {
+        "administration": {
+          "members": "[createArray(reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId, parameters('adminUsername'))]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2020-10-01",
+      "name": "[concat(parameters('resourcesName'), '-FabricSetup')]",
+      "location": "[parameters('location')]",
+      "kind": "AzureCLI",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]": {}
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Fabric/capacities', variables('fabricCapacityName'))]"
+      ],
+      "properties": {
+        "azCliVersion": "2.61.0",
+        "timeout": "PT1H",
+        "retentionInterval": "P1D",
+        "cleanupPreference": "OnSuccess",
+        "primaryScriptUri": "[variables('fabricSetupScriptUri')]",
+        "environmentVariables": [
+          {
+            "name": "MANAGED_IDENTITY_CLIENT_ID",
+            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').clientId]"
+          },
+          {
+            "name": "AZURE_TENANT_ID",
+            "value": "[subscription().tenantId]"
+          },
+          {
+            "name": "RESOURCES_NAME",
+            "value": "[parameters('resourcesName')]"
+          },
+          {
+            "name": "FABRIC_CAPACITY_NAME",
+            "value": "[variables('fabricCapacityName')]"
+          },
+          {
+            "name": "FABRIC_WORKSPACE_NAME",
+            "value": "[variables('fabricWorkspaceName')]"
+          },
+          {
+            "name": "EVENTHUBS_NAMESPACE",
+            "value": "[variables('eventHubsNamespaceName')]"
+          },
+          {
+            "name": "KQL_SCRIPT_URL",
+            "value": "[variables('fabricKqlUri')]"
+          },
+          {
+            "name": "DASHBOARD_URL",
+            "value": "[variables('fabricDashboardUri')]"
+          },
+          {
+            "name": "EVENTHUBS_CONNECTION_STRING",
+            "secureValue": "[listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString]"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2024-03-01",
+      "name": "[variables('i3xFabricContainerAppName')]",
+      "location": "[parameters('location')]",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]": {}
+        }
+      },
+      "properties": {
+        "workloadProfileName": "Consumption",
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
+        "configuration": {
+          "activeRevisionsMode": "Single",
+          "ingress": {
+            "external": true,
+            "transport": "Auto",
+            "targetPort": 8080,
+            "allowInsecure": false,
+            "traffic": [
+              {
+                "latestRevision": true,
+                "weight": 100
+              }
+            ]
+          }
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "i3x4kusto",
+              "image": "ghcr.io/azure-samples/i3x4kusto:main",
+              "env": [
+                {
+                  "name": "ADX_HOST",
+                  "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', concat(parameters('resourcesName'), '-FabricSetup')), '2020-10-01').outputs.queryServiceUri]"
+                },
+                {
+                  "name": "ADX_DB",
+                  "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', concat(parameters('resourcesName'), '-FabricSetup')), '2020-10-01').outputs.kqlDatabaseName]"
+                },
+                {
+                  "name": "ADX_APPLICATION_ID",
+                  "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').clientId]"
+                },
+                {
+                  "name": "AZURE_TENANT_ID",
+                  "value": "[subscription().tenantId]"
+                }
+              ],
+              "resources": {
+                "cpu": 0.5,
+                "memory": "1Gi"
+              }
+            }
+          ],
+          "scale": {
+            "minReplicas": 1,
+            "maxReplicas": 1
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deploymentScripts', concat(parameters('resourcesName'), '-FabricSetup'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "i3x4KustoFabricUrl": {
+      "type": "string",
+      "value": "[concat('https://', reference(resourceId('Microsoft.App/containerApps', variables('i3xFabricContainerAppName')), '2024-03-01').configuration.ingress.fqdn)]"
+    }
+  }
+}

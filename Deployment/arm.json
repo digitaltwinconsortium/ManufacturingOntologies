@@ -1075,6 +1075,24 @@
       "properties": {}
     },
     {
+      "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
+      "apiVersion": "2021-11-01",
+      "name": "[format('{0}/{1}/{2}', concat(parameters('resourcesName'), '-EventHubs'), 'data', 'fabric')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'data')]"
+      ],
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
+      "apiVersion": "2021-11-01",
+      "name": "[format('{0}/{1}/{2}', concat(parameters('resourcesName'), '-EventHubs'), 'metadata', 'fabric')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'metadata')]"
+      ],
+      "properties": {}
+    },
+    {
       "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
       "name": "[concat(parameters('resourcesName'), '-Identity')]",
       "apiVersion": "2018-11-30",

@@ -21,7 +21,7 @@ Interoperability is the key to achieving a fast rollout of the solution architec
 - **WoT-Connectivity Solution** is a third-party containerized industrial connectivity solution supporting the [WoT-Connectivity](https://reference.opcfoundation.org/specs/OPC-10100-1/full) interface that translates from proprietary asset interfaces to OPC UA. The solution uses the W3C Web of Things descriptions as the schema to describe the industrial asset interface. Commercial implementations include ProsysOPC Forge and an open-source reference implementation is [UA Edge Translator](https://github.com/opcfoundation/ua-edgetranslator).
 - [**Azure Event Hubs**](https://learn.microsoft.com/en-us/azure/event-hubs/azure-event-hubs-apache-kafka-overview) is Azure's Kafka message broker implementation.
 - [**Azure Data Explorer**](https://learn.microsoft.com/en-us/azure/data-explorer/data-explorer-overview) is Azure's time-series database with rich analytics, graph support and built-in dashboards.
-- [**Azure Databricks**](https://learn.microsoft.com/en-us/azure/databricks/databricks-overview) is Azure's unified analytics platform built on Apache Spark, with native support Kafka ingestion, Delta Lake, structured streaming, and scalable data engineering.
+- [**Azure Databricks**](https://learn.microsoft.com/en-us/azure/databricks/databricks-overview) is Azure's unified analytics platform built on Apache Spark, with native support Kafka ingestion, Delta Lake, structured streaming, and scalable data engineering. It can be optinoally deployed, see [Databricks](databricks.md).
 
 ## Install the production line simulation and cloud services
 
@@ -33,7 +33,7 @@ The deployment process prompts you to provide a password for the virtual machine
 
 To reduce cost, the deployment creates a single Linux VM for both the production line simulation and the edge infrastructure. In a production scenario, the production line simulation isn't required.
 
-### Optional: Add Microsoft Fabric as an analytics option
+## Optional: Add Microsoft Fabric as an analytics option
 
 Azure Data Explorer (and optionally Azure Databricks) are the analytics paths enabled by the deployment above. After it completes, you can optionally add **Microsoft Fabric** as a third analytics option by deploying Fabric services into the **same resource group**, using the same `resourcesName` and `adminUsername`. It reuses the managed identity, Event Hubs and Container Apps environment created above and provisions a Fabric capacity, Eventhouse, eventstreams, a Lakehouse, a Real-Time Dashboard and an I3X API. **See [Fabric](fabric.md)**.
 

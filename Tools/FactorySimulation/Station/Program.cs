@@ -582,7 +582,7 @@
                 try
                 {
                     MonitoredItemNotification change = e.NotificationValue as MonitoredItemNotification;
-                    if (change == null || change.Value == null)
+                    if (change == null || change.Value == null || change.Value.Value == null)
                     {
                         return;
                     }
@@ -650,7 +650,7 @@
                 try
                 {
                     MonitoredItemNotification change = e.NotificationValue as MonitoredItemNotification;
-                    if (change == null || change.Value == null)
+                    if (change == null || change.Value == null || change.Value.Value == null)
                     {
                         return;
                     }
@@ -717,7 +717,7 @@
                 try
                 {
                     MonitoredItemNotification change = e.NotificationValue as MonitoredItemNotification;
-                    if (change == null || change.Value == null)
+                    if (change == null || change.Value == null || change.Value.Value == null)
                     {
                         return;
                     }

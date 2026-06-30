@@ -40,6 +40,19 @@ if not connection_string:
 # UC-only workspaces, so create the target schema (if needed) and make it the session default.
 # Every object below is also created and referenced with its fully-qualified `{catalog}`.`{schema}`
 # name so it never depends on the session default (notebook %sql / `.table()` contexts can differ).
+#
+# Create the catalog first. On many Unity Catalog workspaces the built-in `main` catalog isn't
+# writable by the job's identity (or the workspace uses a different default catalog), which would
+# make the `CREATE SCHEMA` below - and therefore the tables, view and OEE functions the dashboard
+# depends on - fail and abort the whole run. `CREATE CATALOG IF NOT EXISTS` makes the target catalog
+# exist and owned by this principal; it is a no-op when the catalog already exists and is accessible.
+try:
+    spark.sql(f"CREATE CATALOG IF NOT EXISTS `{catalog}`")
+except Exception as catalog_error:
+    # The catalog already exists but is managed/owned elsewhere (for example the built-in `main`).
+    # That's fine as long as we can use it and create the schema below; surface a hint otherwise.
+    print(f"Note: could not create catalog `{catalog}` ({catalog_error}); assuming it already exists.")
+
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS `{catalog}`.`{schema}`")
 spark.sql(f"USE CATALOG `{catalog}`")
 spark.sql(f"USE SCHEMA `{schema}`")

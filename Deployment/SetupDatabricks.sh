@@ -206,6 +206,51 @@ PY
 fi
 echo "  warehouse id: ${WAREHOUSE_ID}"
 
+# Create the schema objects the dashboard depends on (catalog, schema, tables, last-known-value view
+# and the OEE functions) synchronously through the SQL warehouse - the same compute and identity the
+# published dashboard uses. The continuous notebook job also creates these (idempotent CREATE OR
+# REPLACE), but doing it here guarantees they exist before the dashboard is published and surfaces any
+# permission problem during deployment instead of failing silently with [UNRESOLVED_ROUTINE] later.
+#
+# Runs a single SQL statement on the warehouse and waits for it to finish. Usage: run_sql "<SQL>"
+run_sql() {
+    local statement="$1"
+    python3 - "${WAREHOUSE_ID}" "${statement}" >"${TMP_DIR}/sql_request.json" <<'PY'
+import json, sys
+print(json.dumps({"warehouse_id": sys.argv[1], "statement": sys.argv[2], "wait_timeout": "50s"}))
+PY
+    local response state statement_id
+    response="$(api POST "/api/2.0/sql/statements" "${TMP_DIR}/sql_request.json")"
+    state="$(printf '%s' "${response}" | python3 -c "import json,sys; print(json.load(sys.stdin).get('status',{}).get('state',''))")"
+    statement_id="$(printf '%s' "${response}" | json_get statement_id)"
+
+    # Poll while the statement is still running (statements that exceed wait_timeout return PENDING/RUNNING).
+    while [ "${state}" = "PENDING" ] || [ "${state}" = "RUNNING" ]; do
+        sleep 5
+        response="$(api GET "/api/2.0/sql/statements/${statement_id}")"
+        state="$(printf '%s' "${response}" | python3 -c "import json,sys; print(json.load(sys.stdin).get('status',{}).get('state',''))")"
+    done
+
+    if [ "${state}" != "SUCCEEDED" ]; then
+        local message
+        message="$(printf '%s' "${response}" | python3 -c "import json,sys; print(json.load(sys.stdin).get('status',{}).get('error',{}).get('message',''))")"
+        echo "ERROR: warehouse SQL statement failed (state=${state}): ${message}" >&2
+        echo "       Statement: ${statement}" >&2
+        echo "       Ensure the deployment identity can CREATE on catalog '${UC_CATALOG}' and schema '${UC_SCHEMA}', or set UC_CATALOG to a catalog you own." >&2
+        exit 1
+    fi
+}
+
+echo "Creating the '${UC_CATALOG}.${UC_SCHEMA}' schema objects and OEE functions on the warehouse..."
+run_sql "CREATE CATALOG IF NOT EXISTS \`${UC_CATALOG}\`"
+run_sql "CREATE SCHEMA IF NOT EXISTS \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`"
+run_sql "CREATE TABLE IF NOT EXISTS \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_telemetry (Subject STRING, Timestamp TIMESTAMP, Name STRING, Value STRING) USING DELTA"
+run_sql "CREATE TABLE IF NOT EXISTS \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata (Subject STRING, Timestamp TIMESTAMP, DataSetName STRING, MajorVersion BIGINT, MinorVersion BIGINT, Name STRING, BuiltInType INT, DataType STRING, ValueRank INT, Type STRING, DisplayName STRING, Workcell STRING, Line STRING, Area STRING, Site STRING, Enterprise STRING, NamespaceUri STRING, NodeId STRING) USING DELTA"
+run_sql "CREATE OR REPLACE VIEW \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata_lkv AS SELECT m.* FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata m INNER JOIN (SELECT Subject, Name, MAX(Timestamp) AS MaxTimestamp FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata GROUP BY Subject, Name) latest ON m.Subject = latest.Subject AND m.Name = latest.Name AND m.Timestamp = latest.MaxTimestamp"
+run_sql "CREATE OR REPLACE FUNCTION \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.CalculateOEEForStation(stationName STRING, location STRING, idealCycleTime INT, shiftStartTime TIMESTAMP, shiftEndTime TIMESTAMP) RETURNS DOUBLE RETURN SELECT CASE WHEN idealRunningTime > 0 THEN CAST(idealRunningTime - faultyTimeShift AS DOUBLE) / idealRunningTime ELSE 0 END * CASE WHEN (idealRunningTime - faultyTimeShift) > 0 THEN CAST(idealCycleTime AS DOUBLE) * (numProdShift + numScrapShift) / (idealRunningTime - faultyTimeShift) ELSE 0 END * CASE WHEN (numProdShift + numScrapShift) > 0 THEN CAST(numProdShift AS DOUBLE) / (numProdShift + numScrapShift) ELSE 0 END FROM (SELECT unix_millis(shiftEndTime) - unix_millis(shiftStartTime) AS idealRunningTime, (SELECT COALESCE(MAX(CAST(t.Value AS INT)), 0) - COALESCE(MIN(CAST(t.Value AS INT)), 0) FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata_lkv m INNER JOIN \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_telemetry t ON m.Subject = t.Subject WHERE m.DataSetName LIKE CONCAT('%', stationName, '%') AND m.DataSetName LIKE CONCAT('%', location, '%') AND t.Name = 'NumberOfManufacturedProducts' AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime) AS numProdShift, (SELECT COALESCE(MAX(CAST(t.Value AS INT)), 0) - COALESCE(MIN(CAST(t.Value AS INT)), 0) FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata_lkv m INNER JOIN \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_telemetry t ON m.Subject = t.Subject WHERE m.DataSetName LIKE CONCAT('%', stationName, '%') AND m.DataSetName LIKE CONCAT('%', location, '%') AND t.Name = 'NumberOfDiscardedProducts' AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime) AS numScrapShift, (SELECT COALESCE(SUM(CAST(t.Value AS INT)), 0) FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata_lkv m INNER JOIN \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_telemetry t ON m.Subject = t.Subject WHERE m.DataSetName LIKE CONCAT('%', stationName, '%') AND m.DataSetName LIKE CONCAT('%', location, '%') AND t.Name = 'FaultyTime' AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime) AS faultyTimeShift)"
+run_sql "CREATE OR REPLACE FUNCTION \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.CalculateOEEForLine(location STRING, idealCycleTime INT, shiftStartTime TIMESTAMP, shiftEndTime TIMESTAMP) RETURNS DOUBLE RETURN SELECT MIN(\`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.CalculateOEEForStation(station, location, idealCycleTime, shiftStartTime, shiftEndTime)) FROM (SELECT DISTINCT Workcell AS station FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata_lkv WHERE Site = location AND Workcell <> 'publisher')"
+echo "  schema objects and OEE functions created."
+
 if [ -n "${DASHBOARD_RESOURCE_ID}" ] && [ -n "${WAREHOUSE_ID}" ]; then
     echo "Publishing the dashboard against the warehouse..."
     python3 - "${WAREHOUSE_ID}" >"${TMP_DIR}/publish.json" <<'PY'

@@ -26,9 +26,9 @@
 #   WORKSPACE_FOLDER=/Shared/ManufacturingOntologies
 #   WAREHOUSE_NAME=ManufacturingOntologies
 #   JOB_NAME=ManufacturingOntologies-OPCUA-Ingestion
-#   DATABRICKS_RUNTIME=12.2.x-scala2.12
+#   DATABRICKS_RUNTIME=15.4.x-scala2.12
 #   NODE_TYPE_ID=Standard_DS3_v2
-#   UC_CATALOG=main
+#   UC_CATALOG=<workspace catalog>   (default: the SQL warehouse's current_catalog())
 #   UC_SCHEMA=ontologies
 
 set -euo pipefail
@@ -37,7 +37,9 @@ set -euo pipefail
 export WORKSPACE_FOLDER="${WORKSPACE_FOLDER:-/Shared/ManufacturingOntologies}"
 export WAREHOUSE_NAME="${WAREHOUSE_NAME:-ManufacturingOntologies}"
 export JOB_NAME="${JOB_NAME:-ManufacturingOntologies-OPCUA-Ingestion}"
-export DATABRICKS_RUNTIME="${DATABRICKS_RUNTIME:-12.2.x-scala2.12}"
+# Databricks Runtime 13.3 LTS or above is required on workspaces where legacy access / legacy DBFS are
+# disabled (older runtimes are rejected, and Unity Catalog volumes for checkpoints need 13.3+).
+export DATABRICKS_RUNTIME="${DATABRICKS_RUNTIME:-15.4.x-scala2.12}"
 export NODE_TYPE_ID="${NODE_TYPE_ID:-Standard_DS3_v2}"
 # UC_CATALOG is intentionally left unset by default here. Many Unity Catalog workspaces use Default
 # Storage with no metastore storage root, where the built-in `main` catalog doesn't exist and can't be
@@ -264,12 +266,26 @@ echo "  dashboard resource id: ${DASHBOARD_RESOURCE_ID}"
 # itself was resolved (and is known to exist) above, so it is not created here.
 echo "Creating the '${UC_CATALOG}.${UC_SCHEMA}' schema objects and OEE functions on the warehouse..."
 run_sql "CREATE SCHEMA IF NOT EXISTS \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`" >/dev/null
+run_sql "CREATE VOLUME IF NOT EXISTS \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.checkpoints" >/dev/null
 run_sql "CREATE TABLE IF NOT EXISTS \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_telemetry (Subject STRING, Timestamp TIMESTAMP, Name STRING, Value STRING) USING DELTA" >/dev/null
 run_sql "CREATE TABLE IF NOT EXISTS \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata (Subject STRING, Timestamp TIMESTAMP, DataSetName STRING, MajorVersion BIGINT, MinorVersion BIGINT, Name STRING, BuiltInType INT, DataType STRING, ValueRank INT, Type STRING, DisplayName STRING, Workcell STRING, Line STRING, Area STRING, Site STRING, Enterprise STRING, NamespaceUri STRING, NodeId STRING) USING DELTA" >/dev/null
 run_sql "CREATE OR REPLACE VIEW \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata_lkv AS SELECT m.* FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata m INNER JOIN (SELECT Subject, Name, MAX(Timestamp) AS MaxTimestamp FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata GROUP BY Subject, Name) latest ON m.Subject = latest.Subject AND m.Name = latest.Name AND m.Timestamp = latest.MaxTimestamp" >/dev/null
 run_sql "CREATE OR REPLACE FUNCTION \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.CalculateOEEForStation(stationName STRING, location STRING, idealCycleTime INT, shiftStartTime TIMESTAMP, shiftEndTime TIMESTAMP) RETURNS DOUBLE RETURN SELECT CASE WHEN idealRunningTime > 0 THEN CAST(idealRunningTime - faultyTimeShift AS DOUBLE) / idealRunningTime ELSE 0 END * CASE WHEN (idealRunningTime - faultyTimeShift) > 0 THEN CAST(idealCycleTime AS DOUBLE) * (numProdShift + numScrapShift) / (idealRunningTime - faultyTimeShift) ELSE 0 END * CASE WHEN (numProdShift + numScrapShift) > 0 THEN CAST(numProdShift AS DOUBLE) / (numProdShift + numScrapShift) ELSE 0 END FROM (SELECT unix_millis(shiftEndTime) - unix_millis(shiftStartTime) AS idealRunningTime, (SELECT COALESCE(MAX(CAST(t.Value AS INT)), 0) - COALESCE(MIN(CAST(t.Value AS INT)), 0) FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata_lkv m INNER JOIN \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_telemetry t ON m.Subject = t.Subject WHERE m.DataSetName LIKE CONCAT('%', stationName, '%') AND m.DataSetName LIKE CONCAT('%', location, '%') AND t.Name = 'NumberOfManufacturedProducts' AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime) AS numProdShift, (SELECT COALESCE(MAX(CAST(t.Value AS INT)), 0) - COALESCE(MIN(CAST(t.Value AS INT)), 0) FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata_lkv m INNER JOIN \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_telemetry t ON m.Subject = t.Subject WHERE m.DataSetName LIKE CONCAT('%', stationName, '%') AND m.DataSetName LIKE CONCAT('%', location, '%') AND t.Name = 'NumberOfDiscardedProducts' AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime) AS numScrapShift, (SELECT COALESCE(SUM(CAST(t.Value AS INT)), 0) FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata_lkv m INNER JOIN \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_telemetry t ON m.Subject = t.Subject WHERE m.DataSetName LIKE CONCAT('%', stationName, '%') AND m.DataSetName LIKE CONCAT('%', location, '%') AND t.Name = 'FaultyTime' AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime) AS faultyTimeShift)" >/dev/null
 run_sql "CREATE OR REPLACE FUNCTION \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.CalculateOEEForLine(location STRING, idealCycleTime INT, shiftStartTime TIMESTAMP, shiftEndTime TIMESTAMP) RETURNS DOUBLE RETURN SELECT MIN(\`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.CalculateOEEForStation(station, location, idealCycleTime, shiftStartTime, shiftEndTime)) FROM (SELECT DISTINCT Workcell AS station FROM \`${UC_CATALOG}\`.\`${UC_SCHEMA}\`.opcua_metadata_lkv WHERE Site = location AND Workcell <> 'publisher')" >/dev/null
 echo "  schema objects and OEE functions created."
+
+# Grant read/execute access so users and the dashboard's viewers can query the objects. The schema and
+# its objects are owned by the deployment's managed identity, so without these grants other principals
+# hit [INSUFFICIENT_PERMISSIONS] (USE SCHEMA) and the dashboard tiles return 0. Schema-level grants
+# inherit to all current and future tables, views and functions. Override the grantee with UC_GRANTEE
+# (default `account users`, the built-in group covering every workspace user).
+UC_GRANTEE="${UC_GRANTEE:-account users}"
+echo "Granting read/execute on '${UC_CATALOG}.${UC_SCHEMA}' to '${UC_GRANTEE}'..."
+run_sql "GRANT USE CATALOG ON CATALOG \`${UC_CATALOG}\` TO \`${UC_GRANTEE}\`" >/dev/null
+run_sql "GRANT USE SCHEMA ON SCHEMA \`${UC_CATALOG}\`.\`${UC_SCHEMA}\` TO \`${UC_GRANTEE}\`" >/dev/null
+run_sql "GRANT SELECT ON SCHEMA \`${UC_CATALOG}\`.\`${UC_SCHEMA}\` TO \`${UC_GRANTEE}\`" >/dev/null
+run_sql "GRANT EXECUTE ON SCHEMA \`${UC_CATALOG}\`.\`${UC_SCHEMA}\` TO \`${UC_GRANTEE}\`" >/dev/null
+echo "  read/execute granted."
 
 if [ -n "${DASHBOARD_RESOURCE_ID}" ] && [ -n "${WAREHOUSE_ID}" ]; then
     echo "Publishing the dashboard against the warehouse..."
@@ -297,7 +313,7 @@ settings = {
                 "notebook_path": os.environ["NOTEBOOK_PATH"],
                 "base_parameters": {
                     "eventHubsConnectionString": os.environ["EVENTHUBS_CONNECTION_STRING"],
-                    "checkpointRoot": "dbfs:/opcua/checkpoints",
+                    "checkpointRoot": "/Volumes/{0}/{1}/checkpoints".format(os.environ["UC_CATALOG"], os.environ["UC_SCHEMA"]),
                     "catalog": os.environ["UC_CATALOG"],
                     "schema": os.environ["UC_SCHEMA"],
                 },

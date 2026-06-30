@@ -21,7 +21,7 @@
 # COMMAND ----------
 
 dbutils.widgets.text("eventHubsConnectionString", "")
-dbutils.widgets.text("checkpointRoot", "dbfs:/opcua/checkpoints")
+dbutils.widgets.text("checkpointRoot", "")
 dbutils.widgets.text("catalog", "")
 dbutils.widgets.text("schema", "ontologies")
 
@@ -52,6 +52,13 @@ if not catalog:
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS `{catalog}`.`{schema}`")
 spark.sql(f"USE CATALOG `{catalog}`")
 spark.sql(f"USE SCHEMA `{schema}`")
+
+# Structured Streaming checkpoints must live in governed storage. The legacy DBFS root (dbfs:/...) is
+# disabled on modern workspaces, so default the checkpoints to a Unity Catalog volume under the target
+# schema. Volumes require Databricks Runtime 13.3 LTS or above.
+spark.sql(f"CREATE VOLUME IF NOT EXISTS `{catalog}`.`{schema}`.checkpoints")
+if not checkpoint_root:
+    checkpoint_root = f"/Volumes/{catalog}/{schema}/checkpoints"
 
 # COMMAND ----------
 

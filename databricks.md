@@ -1,5 +1,8 @@
 # Connect Azure Databricks to the Reference Solution
 
+> [!IMPORTANT]
+> This article is part of the [**OPC UA Reference Architecture**](README.md#opc-ua-reference-architecture), which uses **IEC 62541 standard OPC UA PubSub** to send telemetry data from the edge to the cloud. It is **not** the primary architecture. The primary architecture is [**Azure IoT Operations Overview**](https://learn.microsoft.com/en-us/azure/iot-operations/overview-iot-operations#architecture-overview), where an edge data flow sends telemetry data to the cloud over the endpoint's native protocol - so **OPC UA PubSub is not required between Azure IoT Operations and cloud endpoints**.
+
 ## Introduction
 
 Most Azure users looking to store and analyze OPC UA PubSub telemetry data sent from industrial sites via a cloud broker have a powerful cloud store and analytics platform in **Azure Databricks**. Databricks provides a unified analytics platform built on Apache Spark, with native support for Delta Lake, structured streaming, and scalable data engineering — making it an excellent fit for industrial IoT workloads.
@@ -8,7 +11,7 @@ This guide uses the same body-based message format as the Azure Data Explorer (A
 
 ## Automated deployment
 
-The reference solution deployment script can automatically deploy and configure Azure Databricks for you, as a **second analytics option next to Azure Data Explorer**. To enable Databricks, set the **Deploy Databricks** (`deployDatabricks`) parameter to `true`. ADX remains the default and is unaffected: Databricks reads the same `data` and `metadata` event hubs through a separate `databricks` consumer group, so both databases ingest the data side by side.
+The reference solution's deployment script can automatically deploy and configure Azure Databricks for you, as a **second analytics option next to Azure Data Explorer**. To enable Databricks, set the **Deploy Databricks** (`deployDatabricks`) parameter to `true`. ADX remains the default and is unaffected: Databricks reads the same `data` and `metadata` event hubs through a separate `databricks` consumer group, so both databases ingest the data side by side.
 
 With the option enabled, the template additionally provisions:
 

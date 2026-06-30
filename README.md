@@ -4,13 +4,28 @@
 
 An ontology defines the language used to describe a system. In the manufacturing domain, these systems can represent a factory or plant but also enterprise applications or supply chains. There are several established ontologies in the manufacturing domain. Most of them have long been standardized. In this repository, we have focused on ISA95 to describe a factory ontology. The ontologies are available [here](https://github.com/digitaltwinconsortium/ManufacturingOntologies/tree/main/Ontologies).
 
-## Industrial IoT Reference Solution
+## Azure IoT Operations primary reference architecture
 
-The following articles describe how to deploy and connect the reference solution to various Azure and cloud analytics services:
+The generic way to connect assets to the cloud is [Azure IoT Operations](https://learn.microsoft.com/azure/iot-operations/overview-iot-operations), a unified data plane for the edge that runs on Azure Arc-enabled Kubernetes. It connects, processes, and can contextualize data at the edge before sending it to the cloud. It takes telemetry from various sources straight to **Microsoft Fabric Real-Time Intelligence (RTI)**:
+
+> **Telemetry source → Connector(s) → MQTT broker → data flow → Microsoft Fabric Real-Time Intelligence**
+
+A data flow subscribes to the telemetry data on the built-in MQTT broker and writes it directly to Fabric eventstream's Kafka-compatible custom endpoint. From the eventstream, the data lands in a Fabric Eventhouse for dashboards, alerting, and analytics.
+
+To set this up, follow [Configure data flow endpoints for Microsoft Fabric Real-Time Intelligence](https://learn.microsoft.com/azure/iot-operations/connect-to-cloud/howto-configure-fabric-real-time-intelligence).
+
+## OPC UA Reference Architecture
+
+This repository describes the OPC UA Reference Architecture. A production line simulation publishes OPC UA PubSub telemetry to Azure Event Hubs, and the analytics services below ingest and analyze it for use cases such as condition monitoring, OEE calculation, and anomaly detection.
+
+> [!NOTE]
+> This article is part of the [**OPC UA Reference Architecture**](README.md#opc-ua-reference-architecture), which uses **IEC 62541 standard OPC UA PubSub** to send telemetry data from the edge to the cloud. It is **not** the primary architecture. The primary architecture is [**Azure IoT Operations Overview**](https://learn.microsoft.com/en-us/azure/iot-operations/overview-iot-operations#architecture-overview), where an edge data flow sends telemetry data to the cloud over the endpoint's native protocol - so **OPC UA PubSub is not required between Azure IoT Operations and cloud endpoints**.
+
+The following articles describe how to deploy and connect this reference solution to various Azure and cloud analytics services:
 
 - [Industrial IoT reference solution](adx.md) describes the end-to-end industrial IoT reference solution that uses Azure Data Explorer to store and analyze OPC UA telemetry for use cases such as condition monitoring, OEE calculation, and anomaly detection.
 - [Connect Azure Databricks to the reference solution](databricks.md) walks through storing and analyzing OPC UA PubSub telemetry in Azure Databricks using Delta Lake tables and Structured Streaming ingestion from Azure Event Hubs.
-- [Connect Microsoft Fabric to the reference solution](fabric.md) explains how to ingest and process the reference solution's OPC UA PubSub data in a Microsoft Fabric Eventhouse, mirroring the same tables, functions, and views used by Azure Data Explorer.
+- [Connect Microsoft Fabric to the reference solution](fabric.md) explains how to ingest and process the reference solution's OPC UA PubSub data in a Microsoft Fabric Eventhouse for Real-Time Intelligence, mirroring the same tables, functions, and views used by Azure Data Explorer.
 - [Import OPC UA Information Models from the UA Cloud Library into Azure services](cloudlib.md) describes how to import standardized OPC UA information models from the OPC Foundation's UA Cloud Library into Azure services.
 
 ### W3C Web of Things

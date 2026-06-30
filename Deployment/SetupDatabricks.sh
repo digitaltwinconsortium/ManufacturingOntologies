@@ -28,6 +28,8 @@
 #   JOB_NAME=ManufacturingOntologies-OPCUA-Ingestion
 #   DATABRICKS_RUNTIME=12.2.x-scala2.12
 #   NODE_TYPE_ID=Standard_DS3_v2
+#   UC_CATALOG=main
+#   UC_SCHEMA=ontologies
 
 set -euo pipefail
 
@@ -37,6 +39,8 @@ export WAREHOUSE_NAME="${WAREHOUSE_NAME:-ManufacturingOntologies}"
 export JOB_NAME="${JOB_NAME:-ManufacturingOntologies-OPCUA-Ingestion}"
 export DATABRICKS_RUNTIME="${DATABRICKS_RUNTIME:-12.2.x-scala2.12}"
 export NODE_TYPE_ID="${NODE_TYPE_ID:-Standard_DS3_v2}"
+export UC_CATALOG="${UC_CATALOG:-main}"
+export UC_SCHEMA="${UC_SCHEMA:-ontologies}"
 
 export NOTEBOOK_PATH="${WORKSPACE_FOLDER}/opcua_setup"
 export DASHBOARD_PATH="${WORKSPACE_FOLDER}/dashboard-ontologies.lvdash.json"
@@ -150,6 +154,21 @@ api POST "/api/2.0/workspace/import" "${TMP_DIR}/import_notebook.json" >/dev/nul
 
 echo "Downloading and importing the AI/BI dashboard..."
 download "${DASHBOARD_URL}" "${TMP_DIR}/dashboard.lvdash.json"
+# Repoint the dashboard's Unity Catalog namespace to match the notebook job (the file ships with
+# the `main`.`ontologies` default; this applies any UC_CATALOG/UC_SCHEMA override).
+python3 - "${TMP_DIR}/dashboard.lvdash.json" <<'PY'
+import os, sys
+
+path = sys.argv[1]
+with open(path, "r", encoding="utf-8") as f:
+    content = f.read()
+content = content.replace(
+    "`main`.`ontologies`",
+    "`{0}`.`{1}`".format(os.environ["UC_CATALOG"], os.environ["UC_SCHEMA"]),
+)
+with open(path, "w", encoding="utf-8") as f:
+    f.write(content)
+PY
 python3 - "${DASHBOARD_PATH}" "${TMP_DIR}/dashboard.lvdash.json" >"${TMP_DIR}/import_dashboard.json" <<'PY'
 import base64, json, sys
 path, source = sys.argv[1], sys.argv[2]
@@ -214,6 +233,8 @@ settings = {
                 "base_parameters": {
                     "eventHubsConnectionString": os.environ["EVENTHUBS_CONNECTION_STRING"],
                     "checkpointRoot": "dbfs:/opcua/checkpoints",
+                    "catalog": os.environ["UC_CATALOG"],
+                    "schema": os.environ["UC_SCHEMA"],
                 },
             },
             "new_cluster": {

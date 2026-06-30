@@ -3,162 +3,162 @@
     {
       "displayName": "00000001",
       "name": "00000001",
-      "query": "SELECT round(`hive_metastore`.`default`.`CalculateOEEForStation`('assembly', 'munich', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
+      "query": "SELECT round(`main`.`ontologies`.`CalculateOEEForStation`('assembly', 'munich', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
     },
     {
       "displayName": "00000003",
       "name": "00000003",
-      "query": "SELECT round(`hive_metastore`.`default`.`CalculateOEEForStation`('test', 'munich', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
+      "query": "SELECT round(`main`.`ontologies`.`CalculateOEEForStation`('test', 'munich', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
     },
     {
       "displayName": "00000005",
       "name": "00000005",
-      "query": "SELECT round(`hive_metastore`.`default`.`CalculateOEEForStation`('packaging', 'munich', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
+      "query": "SELECT round(`main`.`ontologies`.`CalculateOEEForStation`('packaging', 'munich', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
     },
     {
       "displayName": "00000007",
       "name": "00000007",
-      "query": "SELECT round(`hive_metastore`.`default`.`CalculateOEEForLine`('munich', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
+      "query": "SELECT round(`main`.`ontologies`.`CalculateOEEForLine`('munich', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
     },
     {
       "displayName": "00000009",
       "name": "00000009",
-      "query": "SELECT round(`hive_metastore`.`default`.`CalculateOEEForStation`('assembly', 'seattle', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
+      "query": "SELECT round(`main`.`ontologies`.`CalculateOEEForStation`('assembly', 'seattle', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
     },
     {
       "displayName": "0000000b",
       "name": "0000000b",
-      "query": "SELECT round(`hive_metastore`.`default`.`CalculateOEEForStation`('test', 'seattle', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
+      "query": "SELECT round(`main`.`ontologies`.`CalculateOEEForStation`('test', 'seattle', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
     },
     {
       "displayName": "0000000d",
       "name": "0000000d",
-      "query": "SELECT round(`hive_metastore`.`default`.`CalculateOEEForStation`('packaging', 'seattle', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
+      "query": "SELECT round(`main`.`ontologies`.`CalculateOEEForStation`('packaging', 'seattle', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
     },
     {
       "displayName": "0000000f",
       "name": "0000000f",
-      "query": "SELECT round(`hive_metastore`.`default`.`CalculateOEEForLine`('seattle', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
+      "query": "SELECT round(`main`.`ontologies`.`CalculateOEEForLine`('seattle', 6000, current_timestamp() - INTERVAL 4 HOURS, current_timestamp()) * 100, 2) AS metric"
     },
     {
       "displayName": "00000011",
       "name": "00000011",
-      "query": "SELECT round(AVG(CAST(t.Value AS DOUBLE)) * 1000, 2) AS metric\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS"
+      "query": "SELECT round(AVG(CAST(t.Value AS DOUBLE)) * 1000, 2) AS metric\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS"
     },
     {
       "displayName": "00000013",
       "name": "00000013",
-      "query": "SELECT round(AVG(CAST(t.Value AS DOUBLE)) * 1000, 2) AS metric\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS"
+      "query": "SELECT round(AVG(CAST(t.Value AS DOUBLE)) * 1000, 2) AS metric\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS"
     },
     {
       "displayName": "00000015",
       "name": "00000015",
-      "query": "SELECT round(AVG(CAST(t.Value AS DOUBLE)) * 1000, 2) AS metric\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS"
+      "query": "SELECT round(AVG(CAST(t.Value AS DOUBLE)) * 1000, 2) AS metric\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS"
     },
     {
       "displayName": "00000017",
       "name": "00000017",
-      "query": "SELECT round(AVG(CAST(t.Value AS DOUBLE)) * 1000, 2) AS metric\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS"
+      "query": "SELECT round(AVG(CAST(t.Value AS DOUBLE)) * 1000, 2) AS metric\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS"
     },
     {
       "displayName": "00000019",
       "name": "00000019",
-      "query": "SELECT round(AVG(CAST(t.Value AS DOUBLE)) * 1000, 2) AS metric\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS"
+      "query": "SELECT round(AVG(CAST(t.Value AS DOUBLE)) * 1000, 2) AS metric\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS"
     },
     {
       "displayName": "0000001b",
       "name": "0000001b",
-      "query": "SELECT round(AVG(CAST(t.Value AS DOUBLE)) * 1000, 2) AS metric\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS"
+      "query": "SELECT round(AVG(CAST(t.Value AS DOUBLE)) * 1000, 2) AS metric\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS"
     },
     {
       "displayName": "0000001d",
       "name": "0000001d",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "0000001f",
       "name": "0000001f",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "00000021",
       "name": "00000021",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "00000023",
       "name": "00000023",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "00000025",
       "name": "00000025",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "00000027",
       "name": "00000027",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "00000029",
       "name": "00000029",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'ActualCycleTime'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'ActualCycleTime'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "0000002b",
       "name": "0000002b",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'ActualCycleTime'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'ActualCycleTime'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "0000002d",
       "name": "0000002d",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'ActualCycleTime'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'ActualCycleTime'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "0000002f",
       "name": "0000002f",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'ActualCycleTime'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'ActualCycleTime'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "00000031",
       "name": "00000031",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'ActualCycleTime'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'ActualCycleTime'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "00000033",
       "name": "00000033",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'ActualCycleTime'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'ActualCycleTime'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "00000035",
       "name": "00000035",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS DOUBLE) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'EnergyConsumption'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "00000037",
       "name": "00000037",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'NumberOfManufacturedProducts'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'NumberOfManufacturedProducts'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "00000039",
       "name": "00000039",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'NumberOfManufacturedProducts'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'NumberOfManufacturedProducts'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "0000003b",
       "name": "0000003b",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\nINNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'Pressure'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'Pressure'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "0000003d",
       "name": "0000003d",
-      "query": "SELECT Name, NodeValue FROM (\n  SELECT t.Name AS Name, CAST(t.Value AS INT) AS NodeValue, t.Timestamp AS Timestamp,\n         ROW_NUMBER() OVER (PARTITION BY t.Name ORDER BY t.Timestamp DESC) AS rn\n  FROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\n  INNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\n  WHERE m.DataSetName LIKE '%publisher%' AND m.DataSetName LIKE '%munich%'\n    AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\n) WHERE rn = 1"
+      "query": "SELECT Name, NodeValue FROM (\n  SELECT t.Name AS Name, CAST(t.Value AS INT) AS NodeValue, t.Timestamp AS Timestamp,\n         ROW_NUMBER() OVER (PARTITION BY t.Name ORDER BY t.Timestamp DESC) AS rn\n  FROM `main`.`ontologies`.`opcua_metadata_lkv` m\n  INNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\n  WHERE m.DataSetName LIKE '%publisher%' AND m.DataSetName LIKE '%munich%'\n    AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\n) WHERE rn = 1"
     },
     {
       "displayName": "0000003f",
       "name": "0000003f",
-      "query": "SELECT Name, NodeValue FROM (\n  SELECT t.Name AS Name, CAST(t.Value AS INT) AS NodeValue, t.Timestamp AS Timestamp,\n         ROW_NUMBER() OVER (PARTITION BY t.Name ORDER BY t.Timestamp DESC) AS rn\n  FROM `hive_metastore`.`default`.`opcua_metadata_lkv` m\n  INNER JOIN `hive_metastore`.`default`.`opcua_telemetry` t ON m.Subject = t.Subject\n  WHERE m.DataSetName LIKE '%publisher%' AND m.DataSetName LIKE '%seattle%'\n    AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\n) WHERE rn = 1"
+      "query": "SELECT Name, NodeValue FROM (\n  SELECT t.Name AS Name, CAST(t.Value AS INT) AS NodeValue, t.Timestamp AS Timestamp,\n         ROW_NUMBER() OVER (PARTITION BY t.Name ORDER BY t.Timestamp DESC) AS rn\n  FROM `main`.`ontologies`.`opcua_metadata_lkv` m\n  INNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\n  WHERE m.DataSetName LIKE '%publisher%' AND m.DataSetName LIKE '%seattle%'\n    AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\n) WHERE rn = 1"
     }
   ],
   "pages": [

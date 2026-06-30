@@ -22,9 +22,13 @@
 
 dbutils.widgets.text("eventHubsConnectionString", "")
 dbutils.widgets.text("checkpointRoot", "dbfs:/opcua/checkpoints")
+dbutils.widgets.text("catalog", "main")
+dbutils.widgets.text("schema", "ontologies")
 
 connection_string = dbutils.widgets.get("eventHubsConnectionString").strip()
 checkpoint_root = dbutils.widgets.get("checkpointRoot").strip().rstrip("/")
+catalog = dbutils.widgets.get("catalog").strip() or "main"
+schema = dbutils.widgets.get("schema").strip() or "ontologies"
 
 if not connection_string:
     raise ValueError(
@@ -32,9 +36,12 @@ if not connection_string:
         "RootManageSharedAccessKey connection string of the <resourcesName>-EventHubs namespace."
     )
 
-# The reference solution uses the default Hive metastore database for the OPC UA tables.
-spark.sql("USE CATALOG hive_metastore")
-spark.sql("USE DATABASE default")
+# Store the OPC UA tables in Unity Catalog. The legacy hive_metastore catalog is disabled on
+# UC-only workspaces, so create the target schema (if needed) and make it the session default;
+# the unqualified table names below then resolve to `{catalog}`.`{schema}`.
+spark.sql(f"CREATE SCHEMA IF NOT EXISTS `{catalog}`.`{schema}`")
+spark.sql(f"USE CATALOG `{catalog}`")
+spark.sql(f"USE SCHEMA `{schema}`")
 
 # COMMAND ----------
 

@@ -15,13 +15,6 @@
       "metadata": {
         "description": "User principal name or Entra object ID to add as a Microsoft Fabric capacity administrator alongside the solution's managed identity. Use the same value as the main deployment so you can administer the capacity from the Fabric portal."
       }
-    },
-    "location": {
-      "type": "string",
-      "defaultValue": "[resourceGroup().location]",
-      "metadata": {
-        "description": "Azure region for the Fabric capacity and Container App. Defaults to the resource group location."
-      }
     }
   },
   "variables": {
@@ -39,7 +32,7 @@
       "type": "Microsoft.Fabric/capacities",
       "apiVersion": "2023-11-01",
       "name": "[variables('fabricCapacityName')]",
-      "location": "[parameters('location')]",
+      "location": "[resourceGroup().location]",
       "sku": {
         "name": "F2",
         "tier": "Fabric"
@@ -54,7 +47,7 @@
       "type": "Microsoft.Resources/deploymentScripts",
       "apiVersion": "2020-10-01",
       "name": "[concat(parameters('resourcesName'), '-FabricSetup')]",
-      "location": "[parameters('location')]",
+      "location": "[resourceGroup().location]",
       "kind": "AzureCLI",
       "identity": {
         "type": "UserAssigned",
@@ -115,7 +108,7 @@
       "type": "Microsoft.App/containerApps",
       "apiVersion": "2024-03-01",
       "name": "[variables('i3xFabricContainerAppName')]",
-      "location": "[parameters('location')]",
+      "location": "[resourceGroup().location]",
       "identity": {
         "type": "UserAssigned",
         "userAssignedIdentities": {

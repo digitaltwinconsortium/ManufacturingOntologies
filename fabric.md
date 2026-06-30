@@ -2,6 +2,8 @@
 
 [Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/get-started/microsoft-fabric-overview) is an all-in-one analytics solution that covers everything from data movement to data science, analytics, and business intelligence. It offers a comprehensive suite of services, including data lake, data engineering, and data integration, all in one place. You don't even need an Azure subscription for it, let alone deploy or manage any apps or services. You can get started with Microsoft Fabric [here](https://learn.microsoft.com/en-us/fabric/get-started/fabric-trial).
 
+![Architecture diagram of the industrial IoT reference solution](Docs/fabric.png)
+
 ## Automated deployment
 
 You can let the reference solution deploy and configure Microsoft Fabric for you, as a **third analytics option** next to Azure Data Explorer and Azure Databricks.
@@ -12,9 +14,9 @@ You can let the reference solution deploy and configure Microsoft Fabric for you
 > - **Tenant setting (required):** The Fabric setup script calls the Fabric REST APIs as the solution's user-assigned managed identity (`<resourcesName>-Identity`), so a Fabric tenant admin must enable **Service principals can use Fabric APIs** (Fabric admin portal -> Tenant settings -> Developer settings). That setting can only be scoped to **the whole organization** or to **specific security groups** - it can't target an identity by name - so to limit it, create a Microsoft Entra security group, add the managed identity to it, and select that group. Without this, the setup script's Fabric API calls fail with `401`/`403`. Allow a few minutes after changing the tenant setting for it to propagate. (If you deploy Fabric before the setting is in place, the setup step fails with `401`/`403`; fix the setting and redeploy the Fabric template - it is idempotent and reuses any items it already created.)
 > - **Capacity administration:** the solution's managed identity and the deployment's `adminUsername` are both added as capacity administrators, so you can administer the `<resourcesName>fabric` capacity from the Fabric portal as that user.
 
-Select the **Deploy to Fabric** button and supply the same `resourcesName` and `adminUsername`:
+Select the **Deploy to Azure** button and supply the same `resourcesName` and `adminUsername`:
 
-[![Deploy to Fabric](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdigitaltwinconsortium%2FManufacturingOntologies%2Fmain%2FDeployment%2Ffabric.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdigitaltwinconsortium%2FManufacturingOntologies%2Fmain%2FDeployment%2Ffabric.json)
 
 The Fabric template provisions:
 

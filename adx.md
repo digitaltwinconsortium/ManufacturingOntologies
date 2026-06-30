@@ -33,9 +33,9 @@ The deployment process prompts you to provide a password for the virtual machine
 
 To reduce cost, the deployment creates a single Linux VM for both the production line simulation and the edge infrastructure. In a production scenario, the production line simulation isn't required.
 
-### Optional: add Microsoft Fabric as an analytics option
+### Optional: Add Microsoft Fabric as an analytics option
 
-Azure Data Explorer (and optionally Azure Databricks) are the analytics paths enabled by the deployment above. After it completes, you can optionally add **Microsoft Fabric** as a third analytics option by deploying Fabric services into the **same resource group**, using the same `resourcesName` and `adminUsername`. It reuses the managed identity, Event Hubs and Container Apps environment created above and provisions a Fabric capacity, Eventhouse, eventstreams, a Lakehouse, a Real-Time Dashboard and an I3X API. **See [fabric.md](fabric.md)**.
+Azure Data Explorer (and optionally Azure Databricks) are the analytics paths enabled by the deployment above. After it completes, you can optionally add **Microsoft Fabric** as a third analytics option by deploying Fabric services into the **same resource group**, using the same `resourcesName` and `adminUsername`. It reuses the managed identity, Event Hubs and Container Apps environment created above and provisions a Fabric capacity, Eventhouse, eventstreams, a Lakehouse, a Real-Time Dashboard and an I3X API. **See [Fabric](fabric.md)**.
 
 ## Azure IoT Operations
 

@@ -37,8 +37,9 @@ if not connection_string:
     )
 
 # Store the OPC UA tables in Unity Catalog. The legacy hive_metastore catalog is disabled on
-# UC-only workspaces, so create the target schema (if needed) and make it the session default;
-# the unqualified table names below then resolve to `{catalog}`.`{schema}`.
+# UC-only workspaces, so create the target schema (if needed) and make it the session default.
+# Every object below is also created and referenced with its fully-qualified `{catalog}`.`{schema}`
+# name so it never depends on the session default (notebook %sql / `.table()` contexts can differ).
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS `{catalog}`.`{schema}`")
 spark.sql(f"USE CATALOG `{catalog}`")
 spark.sql(f"USE SCHEMA `{schema}`")
@@ -51,8 +52,8 @@ spark.sql(f"USE SCHEMA `{schema}`")
 # COMMAND ----------
 
 spark.sql(
-    """
-    CREATE TABLE IF NOT EXISTS opcua_raw (
+    f"""
+    CREATE TABLE IF NOT EXISTS `{catalog}`.`{schema}`.opcua_raw (
       payload STRING
     )
     USING DELTA
@@ -60,8 +61,8 @@ spark.sql(
 )
 
 spark.sql(
-    """
-    CREATE TABLE IF NOT EXISTS opcua_telemetry (
+    f"""
+    CREATE TABLE IF NOT EXISTS `{catalog}`.`{schema}`.opcua_telemetry (
       Subject STRING,
       Timestamp TIMESTAMP,
       Name STRING,
@@ -72,8 +73,8 @@ spark.sql(
 )
 
 spark.sql(
-    """
-    CREATE TABLE IF NOT EXISTS opcua_metadata_raw (
+    f"""
+    CREATE TABLE IF NOT EXISTS `{catalog}`.`{schema}`.opcua_metadata_raw (
       payload STRING
     )
     USING DELTA
@@ -81,8 +82,8 @@ spark.sql(
 )
 
 spark.sql(
-    """
-    CREATE TABLE IF NOT EXISTS opcua_metadata (
+    f"""
+    CREATE TABLE IF NOT EXISTS `{catalog}`.`{schema}`.opcua_metadata (
       Subject STRING,
       Timestamp TIMESTAMP,
       DataSetName STRING,
@@ -165,7 +166,7 @@ telemetry_stream = (
     telemetry_stream.writeStream.format("delta")
     .outputMode("append")
     .option("checkpointLocation", f"{checkpoint_root}/opcua_raw")
-    .table("opcua_raw")
+    .table(f"`{catalog}`.`{schema}`.opcua_raw")
 )
 
 # Read the metadata stream from the "metadata" event hub (Kafka topic) into the raw landing table.
@@ -181,7 +182,7 @@ metadata_stream = (
     metadata_stream.writeStream.format("delta")
     .outputMode("append")
     .option("checkpointLocation", f"{checkpoint_root}/opcua_metadata_raw")
-    .table("opcua_metadata_raw")
+    .table(f"`{catalog}`.`{schema}`.opcua_metadata_raw")
 )
 
 # COMMAND ----------
@@ -208,7 +209,7 @@ dataset_schema = (
     "Payload:map<string,struct<Value:string>>>"
 )
 
-raw_df = spark.readStream.format("delta").table("opcua_raw")
+raw_df = spark.readStream.format("delta").table(f"`{catalog}`.`{schema}`.opcua_raw")
 
 normalized_df = raw_df.withColumn(
     "messages",
@@ -237,14 +238,14 @@ telemetry_df = (
     telemetry_df.writeStream.format("delta")
     .outputMode("append")
     .option("checkpointLocation", f"{checkpoint_root}/opcua_telemetry")
-    .table("opcua_telemetry")
+    .table(f"`{catalog}`.`{schema}`.opcua_telemetry")
 )
 
 # COMMAND ----------
 
 # 3b. Metadata expansion: expand the Fields array into one row per field and parse the DataSetName
 # into the ISA-95 hierarchy columns.
-metadata_raw_stream = spark.readStream.format("delta").table("opcua_metadata_raw")
+metadata_raw_stream = spark.readStream.format("delta").table(f"`{catalog}`.`{schema}`.opcua_metadata_raw")
 
 metadata_parsed = metadata_raw_stream.withColumn(
     "p",
@@ -298,7 +299,7 @@ metadata_df = (
     metadata_df.writeStream.format("delta")
     .outputMode("append")
     .option("checkpointLocation", f"{checkpoint_root}/opcua_metadata")
-    .table("opcua_metadata")
+    .table(f"`{catalog}`.`{schema}`.opcua_metadata")
 )
 
 # COMMAND ----------
@@ -312,86 +313,95 @@ metadata_df = (
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC CREATE OR REPLACE VIEW opcua_metadata_lkv AS
-# MAGIC SELECT m.*
-# MAGIC FROM opcua_metadata m
-# MAGIC INNER JOIN (
-# MAGIC     SELECT Subject, Name, MAX(Timestamp) AS MaxTimestamp
-# MAGIC     FROM opcua_metadata
-# MAGIC     GROUP BY Subject, Name
-# MAGIC ) latest
-# MAGIC ON m.Subject = latest.Subject
-# MAGIC AND m.Name = latest.Name
-# MAGIC AND m.Timestamp = latest.MaxTimestamp;
+spark.sql(
+    f"""
+    CREATE OR REPLACE VIEW `{catalog}`.`{schema}`.opcua_metadata_lkv AS
+    SELECT m.*
+    FROM `{catalog}`.`{schema}`.opcua_metadata m
+    INNER JOIN (
+        SELECT Subject, Name, MAX(Timestamp) AS MaxTimestamp
+        FROM `{catalog}`.`{schema}`.opcua_metadata
+        GROUP BY Subject, Name
+    ) latest
+    ON m.Subject = latest.Subject
+    AND m.Name = latest.Name
+    AND m.Timestamp = latest.MaxTimestamp
+    """
+)
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC -- Overall Equipment Effectiveness for a single station, see https://www.oee.com/calculating-oee/
-# MAGIC CREATE OR REPLACE FUNCTION CalculateOEEForStation(
-# MAGIC     stationName STRING,
-# MAGIC     location STRING,
-# MAGIC     idealCycleTime INT,
-# MAGIC     shiftStartTime TIMESTAMP,
-# MAGIC     shiftEndTime TIMESTAMP
-# MAGIC )
-# MAGIC RETURNS DOUBLE
-# MAGIC RETURN
-# MAGIC   SELECT
-# MAGIC     CASE WHEN idealRunningTime > 0 THEN CAST(idealRunningTime - faultyTimeShift AS DOUBLE) / idealRunningTime ELSE 0 END
-# MAGIC     * CASE WHEN (idealRunningTime - faultyTimeShift) > 0 THEN CAST(idealCycleTime AS DOUBLE) * (numProdShift + numScrapShift) / (idealRunningTime - faultyTimeShift) ELSE 0 END
-# MAGIC     * CASE WHEN (numProdShift + numScrapShift) > 0 THEN CAST(numProdShift AS DOUBLE) / (numProdShift + numScrapShift) ELSE 0 END
-# MAGIC   FROM (
-# MAGIC     SELECT
-# MAGIC       unix_millis(shiftEndTime) - unix_millis(shiftStartTime) AS idealRunningTime,
-# MAGIC       (
-# MAGIC         SELECT COALESCE(MAX(CAST(t.Value AS INT)), 0) - COALESCE(MIN(CAST(t.Value AS INT)), 0)
-# MAGIC         FROM opcua_metadata_lkv m
-# MAGIC         INNER JOIN opcua_telemetry t ON m.Subject = t.Subject
-# MAGIC         WHERE m.DataSetName LIKE CONCAT('%', stationName, '%')
-# MAGIC           AND m.DataSetName LIKE CONCAT('%', location, '%')
-# MAGIC           AND t.Name = 'NumberOfManufacturedProducts'
-# MAGIC           AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime
-# MAGIC       ) AS numProdShift,
-# MAGIC       (
-# MAGIC         SELECT COALESCE(MAX(CAST(t.Value AS INT)), 0) - COALESCE(MIN(CAST(t.Value AS INT)), 0)
-# MAGIC         FROM opcua_metadata_lkv m
-# MAGIC         INNER JOIN opcua_telemetry t ON m.Subject = t.Subject
-# MAGIC         WHERE m.DataSetName LIKE CONCAT('%', stationName, '%')
-# MAGIC           AND m.DataSetName LIKE CONCAT('%', location, '%')
-# MAGIC           AND t.Name = 'NumberOfDiscardedProducts'
-# MAGIC           AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime
-# MAGIC       ) AS numScrapShift,
-# MAGIC       (
-# MAGIC         SELECT COALESCE(SUM(CAST(t.Value AS INT)), 0)
-# MAGIC         FROM opcua_metadata_lkv m
-# MAGIC         INNER JOIN opcua_telemetry t ON m.Subject = t.Subject
-# MAGIC         WHERE m.DataSetName LIKE CONCAT('%', stationName, '%')
-# MAGIC           AND m.DataSetName LIKE CONCAT('%', location, '%')
-# MAGIC           AND t.Name = 'FaultyTime'
-# MAGIC           AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime
-# MAGIC       ) AS faultyTimeShift
-# MAGIC   );
+# Overall Equipment Effectiveness for a single station, see https://www.oee.com/calculating-oee/
+spark.sql(
+    f"""
+    CREATE OR REPLACE FUNCTION `{catalog}`.`{schema}`.CalculateOEEForStation(
+        stationName STRING,
+        location STRING,
+        idealCycleTime INT,
+        shiftStartTime TIMESTAMP,
+        shiftEndTime TIMESTAMP
+    )
+    RETURNS DOUBLE
+    RETURN
+      SELECT
+        CASE WHEN idealRunningTime > 0 THEN CAST(idealRunningTime - faultyTimeShift AS DOUBLE) / idealRunningTime ELSE 0 END
+        * CASE WHEN (idealRunningTime - faultyTimeShift) > 0 THEN CAST(idealCycleTime AS DOUBLE) * (numProdShift + numScrapShift) / (idealRunningTime - faultyTimeShift) ELSE 0 END
+        * CASE WHEN (numProdShift + numScrapShift) > 0 THEN CAST(numProdShift AS DOUBLE) / (numProdShift + numScrapShift) ELSE 0 END
+      FROM (
+        SELECT
+          unix_millis(shiftEndTime) - unix_millis(shiftStartTime) AS idealRunningTime,
+          (
+            SELECT COALESCE(MAX(CAST(t.Value AS INT)), 0) - COALESCE(MIN(CAST(t.Value AS INT)), 0)
+            FROM `{catalog}`.`{schema}`.opcua_metadata_lkv m
+            INNER JOIN `{catalog}`.`{schema}`.opcua_telemetry t ON m.Subject = t.Subject
+            WHERE m.DataSetName LIKE CONCAT('%', stationName, '%')
+              AND m.DataSetName LIKE CONCAT('%', location, '%')
+              AND t.Name = 'NumberOfManufacturedProducts'
+              AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime
+          ) AS numProdShift,
+          (
+            SELECT COALESCE(MAX(CAST(t.Value AS INT)), 0) - COALESCE(MIN(CAST(t.Value AS INT)), 0)
+            FROM `{catalog}`.`{schema}`.opcua_metadata_lkv m
+            INNER JOIN `{catalog}`.`{schema}`.opcua_telemetry t ON m.Subject = t.Subject
+            WHERE m.DataSetName LIKE CONCAT('%', stationName, '%')
+              AND m.DataSetName LIKE CONCAT('%', location, '%')
+              AND t.Name = 'NumberOfDiscardedProducts'
+              AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime
+          ) AS numScrapShift,
+          (
+            SELECT COALESCE(SUM(CAST(t.Value AS INT)), 0)
+            FROM `{catalog}`.`{schema}`.opcua_metadata_lkv m
+            INNER JOIN `{catalog}`.`{schema}`.opcua_telemetry t ON m.Subject = t.Subject
+            WHERE m.DataSetName LIKE CONCAT('%', stationName, '%')
+              AND m.DataSetName LIKE CONCAT('%', location, '%')
+              AND t.Name = 'FaultyTime'
+              AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime
+          ) AS faultyTimeShift
+      )
+    """
+)
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC -- OEE for an entire production line is the minimum OEE across its stations.
-# MAGIC CREATE OR REPLACE FUNCTION CalculateOEEForLine(
-# MAGIC     location STRING,
-# MAGIC     idealCycleTime INT,
-# MAGIC     shiftStartTime TIMESTAMP,
-# MAGIC     shiftEndTime TIMESTAMP
-# MAGIC )
-# MAGIC RETURNS DOUBLE
-# MAGIC RETURN
-# MAGIC   SELECT MIN(CalculateOEEForStation(station, location, idealCycleTime, shiftStartTime, shiftEndTime))
-# MAGIC   FROM (
-# MAGIC     SELECT DISTINCT Workcell AS station
-# MAGIC     FROM opcua_metadata_lkv
-# MAGIC     WHERE Site = location AND Workcell <> 'publisher'
-# MAGIC   );
+# OEE for an entire production line is the minimum OEE across its stations.
+spark.sql(
+    f"""
+    CREATE OR REPLACE FUNCTION `{catalog}`.`{schema}`.CalculateOEEForLine(
+        location STRING,
+        idealCycleTime INT,
+        shiftStartTime TIMESTAMP,
+        shiftEndTime TIMESTAMP
+    )
+    RETURNS DOUBLE
+    RETURN
+      SELECT MIN(`{catalog}`.`{schema}`.CalculateOEEForStation(station, location, idealCycleTime, shiftStartTime, shiftEndTime))
+      FROM (
+        SELECT DISTINCT Workcell AS station
+        FROM `{catalog}`.`{schema}`.opcua_metadata_lkv
+        WHERE Site = location AND Workcell <> 'publisher'
+      )
+    """
+)
 
 # COMMAND ----------
 

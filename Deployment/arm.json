@@ -29,13 +29,6 @@
       "metadata": {
         "description": "Deploy Azure Databricks as a second analytics option next to Azure Data Explorer. When enabled, an Azure Databricks workspace is created and automatically configured with the OPC UA Delta tables, Event Hubs ingestion and a sample dashboard."
       }
-    },
-    "i3x4KustoImage": {
-      "type": "string",
-      "defaultValue": "ghcr.io/azure-samples/i3x4kusto:main",
-      "metadata": {
-        "description": "Container image for the I3X4Kusto API wrapper that exposes the Azure Data Explorer 'ontologies' database through the I3X API."
-      }
     }
   },
   "variables": {
@@ -1230,7 +1223,7 @@
           "containers": [
             {
               "name": "i3x4kusto",
-              "image": "[parameters('i3x4KustoImage')]",
+              "image": "ghcr.io/azure-samples/i3x4kusto:main",
               "env": [
                 {
                   "name": "ADX_HOST",

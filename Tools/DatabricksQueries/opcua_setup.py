@@ -49,8 +49,12 @@ if not connection_string:
 if not catalog:
     catalog = spark.sql("SELECT current_catalog()").collect()[0][0]
 
-spark.sql(f"CREATE SCHEMA IF NOT EXISTS `{catalog}`.`{schema}`")
+# Switch the active catalog to the Unity Catalog catalog *before* creating the schema. If the cluster's
+# default catalog is `spark_catalog` (the Hive metastore), a `CREATE SCHEMA <catalog>.<schema>` is parsed
+# as a Hive namespace and fails with REQUIRES_SINGLE_PART_NAMESPACE. USE CATALOG makes the multi-part
+# Unity Catalog name resolve correctly.
 spark.sql(f"USE CATALOG `{catalog}`")
+spark.sql(f"CREATE SCHEMA IF NOT EXISTS `{catalog}`.`{schema}`")
 spark.sql(f"USE SCHEMA `{schema}`")
 
 # Structured Streaming checkpoints must live in governed storage. The legacy DBFS root (dbfs:/...) is

@@ -322,6 +322,13 @@ settings = {
                 "spark_version": os.environ["DATABRICKS_RUNTIME"],
                 "node_type_id": os.environ["NODE_TYPE_ID"],
                 "num_workers": 0,
+                # Unity Catalog is only accessible from clusters with a UC-compatible access mode.
+                # A cluster with no data_security_mode defaults to the legacy no-isolation mode, where
+                # `USE CATALOG <workspace-catalog>` fails with CATALOG_NOT_FOUND. Streaming workloads
+                # require single-user (dedicated) access mode specifically, so use SINGLE_USER and run
+                # the cluster as the deployment's managed identity (the job's run-as principal).
+                "data_security_mode": "SINGLE_USER",
+                "single_user_name": os.environ["MANAGED_IDENTITY_CLIENT_ID"],
                 "spark_conf": {
                     "spark.databricks.cluster.profile": "singleNode",
                     "spark.master": "local[*]",

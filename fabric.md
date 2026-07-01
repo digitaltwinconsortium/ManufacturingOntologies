@@ -1,7 +1,7 @@
 # Connect Microsoft Fabric to the Reference Solution
 
-> [!IMPORTANT]
-> This article is part of the [**OPC UA Reference Architecture**](README.md#opc-ua-reference-architecture), which uses **IEC 62541 standard OPC UA PubSub** to send telemetry data from the edge to the cloud. It is **not** the primary architecture. The primary architecture is [**Azure IoT Operations Overview**](https://learn.microsoft.com/en-us/azure/iot-operations/overview-iot-operations#architecture-overview), where an edge data flow sends telemetry data to the cloud over the endpoint's native protocol - so **OPC UA PubSub is not required between Azure IoT Operations and cloud endpoints**.
+> [!NOTE]
+> This article is part of the **OPC UA Reference Solution**, which uses **IEC 62541 standard OPC UA PubSub** to send telemetry data from the edge to the cloud. It is **different** from the default configuration of Azure IoT Operations, which is described at [**Azure IoT Operations Overview**](https://learn.microsoft.com/en-us/azure/iot-operations/overview-iot-operations#architecture-overview), where an edge data flow sends telemetry data to the cloud over the endpoint's native protocol. Therefore, **OPC UA PubSub is not required between Azure IoT Operations and cloud endpoints**.
 
 [Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/get-started/microsoft-fabric-overview) is an all-in-one analytics solution that covers everything from data movement to data science, analytics, and business intelligence. It offers a comprehensive suite of services, including data lake, data engineering, and data integration, all in one place. You don't even need an Azure subscription for it, let alone deploy or manage any apps or services. You can get started with Microsoft Fabric [here](https://learn.microsoft.com/en-us/fabric/get-started/fabric-trial).
 
@@ -20,6 +20,10 @@ The reference solution's deployment script can automatically deploy and configur
 Select the **Deploy to Azure** button and supply the same `resourcesName` and `adminUsername`:
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdigitaltwinconsortium%2FManufacturingOntologies%2Fmain%2FDeployment%2Ffabric.json)
+
+The deployment process prompts you to provide a password for the virtual machine (VM) that hosts the production line simulation and the Edge infrastructure.
+
+To reduce cost, the deployment creates a single Linux VM for both the production line simulation and the edge infrastructure. In a production scenario, the production line simulation isn't required.
 
 The Fabric template provisions:
 

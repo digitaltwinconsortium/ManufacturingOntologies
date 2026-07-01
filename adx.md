@@ -1,32 +1,10 @@
 
-# OPC UA reference solution
+# Connect Azure Data Explorer to the Reference Solution
 
-> [!IMPORTANT]
-> This article is part of the [**OPC UA Reference Architecture**](README.md#opc-ua-reference-architecture), which uses **IEC 62541 standard OPC UA PubSub** to send telemetry data from the edge to the cloud. It is **not** the primary architecture. The primary architecture is [**Azure IoT Operations Overview**](https://learn.microsoft.com/en-us/azure/iot-operations/overview-iot-operations#architecture-overview), where an edge data flow sends telemetry data to the cloud over the endpoint's native protocol - so **OPC UA PubSub is not required between Azure IoT Operations and cloud endpoints**.
+> [!NOTE]
+> This article is part of the **OPC UA Reference Solution**, which uses **IEC 62541 standard OPC UA PubSub** to send telemetry data from the edge to the cloud. It is **different** from the default configuration of Azure IoT Operations, which is described at [**Azure IoT Operations Overview**](https://learn.microsoft.com/en-us/azure/iot-operations/overview-iot-operations#architecture-overview), where an edge data flow sends telemetry data to the cloud over the endpoint's native protocol. Therefore, **OPC UA PubSub is not required between Azure IoT Operations and cloud endpoints**.
 
-Manufacturers want to deploy an overall industrial IoT solution on a global scale and connect all of their production sites to this solution to increase efficiencies for each individual production site.
-
-These increased efficiencies lead to faster production and lower energy consumption, which all lead to lowering the cost for the produced goods while increasing their quality in most cases.
-
-The solution must be as efficient as possible and enable all required use cases such as condition monitoring, overall equipment effectiveness (OEE) calculation, forecasting, and anomaly detection. By using the insights gained from these use cases, you can then create a digital feedback loop which can then apply optimizations and other changes to the production processes.
-
-Interoperability is the key to achieving a fast rollout of the solution architecture. The use of open standards such as OPC UA significantly helps to achieve this interoperability.
-
-![Architecture diagram of the OPC UA reference solution](Docs/arch.png)
-
-## Components
-
-- **Industrial assets**: A set of simulated and OPC UA-enabled production line stations and MES, hosted in Docker containers found in the [Station](Tools/FactorySimulation/Station) directory.
-- [**UA Cloud Publisher**](https://github.com/barnstee/UA-CloudPublisher) Publishers data from your OPC UA-enabled assets to the cloud in OPC UA PubSub format.
-- [**UA Cloud Commander**](https://github.com/opcfoundation/UA-CloudCommander) Receives commands from the cloud and executes them on your OPC UA-enabled assets.
-- [**UA Cloud Action**](https://github.com/opcfoundation/UA-CloudAction) is an open-source reference cloud application that queries the Azure Data Explorer for a specific data value. The data value is the pressure in one of the simulated production line machines. It calls UA Cloud Commander via Azure Event Hubs when a certain threshold is reached (4,000 mbar). UA Cloud Commander then calls the OpenPressureReliefValve method on the machine via OPC UA.
-- [**UA Cloud Library**](https://github.com/opcfoundation/UA-CloudLibrary) is an online store of [OPC UA Information Models, hosted by the OPC Foundation](https://uacloudlibrary.opcfoundation.org/).
-- **WoT-Connectivity Solution** is a third-party containerized industrial connectivity solution supporting the [WoT-Connectivity](https://reference.opcfoundation.org/specs/OPC-10100-1/full) interface that translates from proprietary asset interfaces to OPC UA. The solution uses the W3C Web of Things descriptions as the schema to describe the industrial asset interface. Commercial implementations include ProsysOPC Forge and an open-source reference implementation is [UA Edge Translator](https://github.com/opcfoundation/ua-edgetranslator).
-- [**Azure Event Hubs**](https://learn.microsoft.com/en-us/azure/event-hubs/azure-event-hubs-apache-kafka-overview) is Azure's Kafka message broker implementation.
-- [**Azure Data Explorer**](https://learn.microsoft.com/en-us/azure/data-explorer/data-explorer-overview) is Azure's time-series database with rich analytics, graph support and built-in dashboards.
-- [**Azure Databricks**](https://learn.microsoft.com/en-us/azure/databricks/databricks-overview) is Azure's unified analytics platform built on Apache Spark, with native support Kafka ingestion, Delta Lake, structured streaming, and scalable data engineering. It can be optinoally deployed. **See [Databricks](databricks.md)**.
-
-## Install the production line simulation and cloud services
+## Automated deployment
 
 Select the **Deploy** button to deploy all required resources to your Azure subscription:
 
@@ -35,89 +13,6 @@ Select the **Deploy** button to deploy all required resources to your Azure subs
 The deployment process prompts you to provide a password for the virtual machine (VM) that hosts the production line simulation and the Edge infrastructure.
 
 To reduce cost, the deployment creates a single Linux VM for both the production line simulation and the edge infrastructure. In a production scenario, the production line simulation isn't required.
-
-## Optional: Add Microsoft Fabric as an analytics option
-
-Azure Data Explorer (and optionally Azure Databricks) are the analytics paths enabled by the deployment above. After it completes, you can optionally add **Microsoft Fabric** as a third analytics option by deploying Fabric services into the **same resource group**, using the same `resourcesName` and `adminUsername`. It reuses the managed identity, Event Hubs and Container Apps environment created above and provisions a Fabric capacity, Eventhouse, eventstreams, a Lakehouse, a Real-Time Dashboard and an I3X API. **See [Fabric](fabric.md)**.
-
-## Azure IoT Operations
-
-The ADX update policies that expand the raw data (`OPCUATelemetryExpand` and `OPCUAMetaDataExpand`, created by the deployment) read the dataset identity and timestamp **from the message body**. They expect each event hub message to be an OPC UA PubSub DataSet message shaped like this:
-
-```json
-{
-  "DataSetWriterId": "<dataset / writer id>",
-  "Timestamp": "2024-01-01T00:00:00Z",
-  "Payload": { "<FieldName>": { "Value": "<value>" } }
-}
-```
-
-(metadata messages carry a `MetaData` object instead of `Payload`). With Azure IoT Operations, the identity instead arrives in the CloudEvent attributes (`subject`, `time`) as `ce-`/MQTT user properties, so it is missing from the body. The steps below add a data flow `map` transform that copies those attributes into the body, so ADX - and the identical logic on Fabric and Databricks - keeps working unchanged.
-
-1. **Keep the CloudEvent attributes available to the data flow.** On the endpoints this flow uses (the local MQTT broker source and the Event Hubs/Kafka destination), set `cloudEventAttributes` to `Propagate` so `subject`, `time`, and the other attributes survive as message metadata. For the MQTT source endpoint:
-
-   ```json
-   {
-     "endpointType": "Mqtt",
-     "mqttSettings": {
-       "host": "aio-broker:18883",
-       "cloudEventAttributes": "Propagate"
-     }
-   }
-   ```
-
-   The Event Hubs (Kafka) destination endpoint takes the same `"cloudEventAttributes": "Propagate"` under `kafkaSettings`. See the advanced settings for the [MQTT](https://learn.microsoft.com/azure/iot-operations/connect-to-cloud/howto-configure-mqtt-endpoint#advanced-settings) and [Kafka / Event Hubs](https://learn.microsoft.com/azure/iot-operations/connect-to-cloud/howto-configure-kafka-endpoint#advanced-settings) endpoints.
-
-2. **Create the data flow.** Create a data flow whose source is the AIO MQTT broker topic carrying the OPC UA telemetry and whose destination is the `data` event hub (and a second, identical flow for the `metadata` event hub). Every data flow must use the local MQTT broker endpoint as its source or destination. You can use the [operations experience](https://iotoperations.azure.com/) visual editor, `az iot ops dataflow apply --config-file <file>.json`, or Bicep - see [Create data flows](https://learn.microsoft.com/azure/iot-operations/connect-to-cloud/howto-create-dataflow).
-
-3. **Add the map transform.** Add a `BuiltInTransformation` operation between the source and destination. The first rule wraps every incoming dataset value field under `Payload`; the next two copy the CloudEvent identity and timestamp from the message metadata into the body:
-
-   ```json
-   {
-     "operationType": "BuiltInTransformation",
-     "builtInTransformationSettings": {
-       "map": [
-         {
-           "inputs": ["*"],
-           "output": "Payload.*",
-           "description": "Wrap all dataset value fields under Payload"
-         },
-         {
-           "inputs": ["$metadata.user_properties.subject"],
-           "output": "DataSetWriterId",
-           "description": "CloudEvent subject -> dataset identity"
-         },
-         {
-           "inputs": ["$metadata.user_properties.time"],
-           "output": "Timestamp",
-           "description": "CloudEvent time -> Timestamp"
-         }
-       ]
-     }
-   }
-   ```
-
-   Notes:
-   - The wildcard rule must be the **first** rule and only one is allowed per map. `"inputs": ["*"]` with `"output": "Payload.*"` nests all top-level fields under `Payload` - see the [map transform](https://learn.microsoft.com/azure/iot-operations/connect-to-cloud/howto-dataflow-graphs-map) and the [expressions reference](https://learn.microsoft.com/azure/iot-operations/connect-to-cloud/concept-dataflow-graphs-expressions#wildcards).
-   - `$metadata.user_properties.<attribute>` reads a CloudEvent attribute (an MQTT user property). In the operations experience editor, enter it with a leading `@`, for example `@$metadata.user_properties.subject`. Adjust the path to match how your endpoint surfaces the attribute (a bare `subject` user property on MQTT, or a `ce-subject` header on Kafka / Event Hubs).
-   - The expansion reads `Payload.<Field>.Value`, so each value must be an object with a `Value` member (the native OPC UA dataset shape). If your connector emits flat values, add a per-field rule (or an expression) that wraps each as `{ "Value": ... }`.
-
-4. **Repeat for metadata.** In the metadata flow, wrap the incoming metadata under `MetaData` (`"output": "MetaData.*"`) and set the same `DataSetWriterId`/`Timestamp`. Shape the `MetaData` object to match `OPCUAMetaDataExpand` - a `Name`, a `ConfigurationVersion` with `MajorVersion`/`MinorVersion`, and a `Fields` array - as defined by the `OPCUA-parsing-script` in [Deployment/arm.json](Deployment/arm.json).
-
-After the transform, each event hub message carries the `DataSetWriterId`, `Timestamp`, and `Payload`/`MetaData` the update policy expects, so the existing ADX expansion - and the identical logic on Fabric and Databricks - works without change.
-
-## Run the production line simulation
-
-Use SSH to connect to the deployed VM by using the credentials you provide during the deployment. You might need to enable Just-in-time access in the Azure portal first. Go to the `/opt/ManufacturingOntologies-main/Tools/FactorySimulation` directory and run the **StartSimulation** shell script:
-
-```bash
-sudo ./StartSimulation.sh "<Your Event Hubs connection string>"
-```
-
-`<Your Event Hubs connection string>` is your Event Hubs namespace connection string. A connection string looks like:
-`Endpoint=sb://ontologies.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=abcdefgh=`
-
-If the external IP address for some Kubernetes services shows as `<pending>`, use the following command to assign the external IP address of the `traefik` service: `sudo kubectl patch service <theService> -n <the service's namespace> -p '{"spec": {"type": "LoadBalancer", "externalIPs":["<the traefik external IP address>"]}}'`.
 
 ## Use cases for condition monitoring, OEE calculation, anomaly detection, and predictions in Azure Data Explorer
 

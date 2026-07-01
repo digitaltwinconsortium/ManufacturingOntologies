@@ -1,13 +1,7 @@
 # Connect Azure Databricks to the Reference Solution
 
-> [!IMPORTANT]
-> This article is part of the [**OPC UA Reference Architecture**](README.md#opc-ua-reference-architecture), which uses **IEC 62541 standard OPC UA PubSub** to send telemetry data from the edge to the cloud. It is **not** the primary architecture. The primary architecture is [**Azure IoT Operations Overview**](https://learn.microsoft.com/en-us/azure/iot-operations/overview-iot-operations#architecture-overview), where an edge data flow sends telemetry data to the cloud over the endpoint's native protocol - so **OPC UA PubSub is not required between Azure IoT Operations and cloud endpoints**.
-
-## Introduction
-
-Most Azure users looking to store and analyze OPC UA PubSub telemetry data sent from industrial sites via a cloud broker have a powerful cloud store and analytics platform in **Azure Databricks**. Databricks provides a unified analytics platform built on Apache Spark, with native support for Delta Lake, structured streaming, and scalable data engineering — making it an excellent fit for industrial IoT workloads.
-
-This guide uses the same body-based message format as the Azure Data Explorer (ADX) and Microsoft Fabric guides, so a **single configuration drives all three databases**. Every telemetry and metadata message carries its identity (`DataSetWriterId`), timestamp and payload **inside the JSON body**. The same `data` and `metadata` event hubs therefore feed ADX, Fabric, and Databricks identically, and the Databricks expansion below mirrors the ADX/Fabric expansion functions.
+> [!NOTE]
+> This article is part of the **OPC UA Reference Solution**, which uses **IEC 62541 standard OPC UA PubSub** to send telemetry data from the edge to the cloud. It is **different** from the default configuration of Azure IoT Operations, which is described at [**Azure IoT Operations Overview**](https://learn.microsoft.com/en-us/azure/iot-operations/overview-iot-operations#architecture-overview), where an edge data flow sends telemetry data to the cloud over the endpoint's native protocol. Therefore, **OPC UA PubSub is not required between Azure IoT Operations and cloud endpoints**.
 
 ## Automated deployment
 
@@ -22,6 +16,14 @@ With the option enabled, the template additionally provisions:
 The notebook creates the Delta tables, ingests both event hubs, expands the OPC UA PubSub messages, and creates the `opcua_metadata_lkv` view together with the `CalculateOEEForStation`/`CalculateOEEForLine` functions used by the dashboard.
 Everything is created in a Unity Catalog schema named `ontologies` in your **workspace catalog** by default (the deployment resolves the catalog from the SQL warehouse's `current_catalog()`; override it with the `UC_CATALOG`/`UC_SCHEMA` deployment settings), since the legacy `hive_metastore` catalog is disabled on Unity Catalog-only workspaces and the built-in `main` catalog isn't available on workspaces that use Default Storage.
 Once the deployment finishes, open the published **Ontologies** dashboard in your workspace to explore condition monitoring, OEE, energy, production and diagnostics tiles for the Munich and Seattle production lines - the Databricks equivalent of the [ADX dashboard](Tools/ADXQueries/dashboard-ontologies.json). See [Use the sample dashboard](#use-the-sample-dashboard) for details.
+
+Select the **Deploy** button to deploy all required resources to your Azure subscription:
+
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdigitaltwinconsortium%2FManufacturingOntologies%2Fmain%2FDeployment%2Farm.json)
+
+The deployment process prompts you to provide a password for the virtual machine (VM) that hosts the production line simulation and the Edge infrastructure.
+
+To reduce cost, the deployment creates a single Linux VM for both the production line simulation and the edge infrastructure. In a production scenario, the production line simulation isn't required.
 
 ## Use the sample dashboard
 

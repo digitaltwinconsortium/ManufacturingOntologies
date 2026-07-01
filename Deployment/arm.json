@@ -29,6 +29,13 @@
       "metadata": {
         "description": "Deploy Azure Databricks as a second analytics option next to Azure Data Explorer. When enabled, an Azure Databricks workspace is created and automatically configured with the OPC UA Delta tables, Event Hubs ingestion and a sample dashboard."
       }
+    },
+    "deployFabricCapacity": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Provision a Microsoft Fabric F2 capacity (named '<resourcesName>fabric') as part of the main deployment. Enable this if you plan to use Microsoft Fabric, especially if you have never used Fabric before: having the capacity in place first lets a Fabric tenant admin enable the 'Service principals can use Fabric APIs' tenant setting in the Fabric admin portal before you deploy the Fabric template. Leave disabled for Azure Data Explorer- or Databricks-only deployments to avoid the Fabric capacity cost; the Fabric template still provisions the capacity itself if it was not pre-created here."
+      }
     }
   },
   "variables": {
@@ -42,6 +49,7 @@
     "azureRbacAzurekeyVaultSecretsUser": "4633458b-17de-408a-b874-0445c86b69e6",
     "adxClusterName": "[concat(parameters('resourcesName'), 'ADX')]",
     "adxDBName": "[concat(parameters('resourcesName'), '-DB')]",
+    "fabricCapacityName": "[toLower(concat(parameters('resourcesName'), 'fabric'))]",
     "eventHubsNamespaceName": "[concat(parameters('resourcesName'), '-EventHubs')]",
     "databricksWorkspaceName": "[concat(parameters('resourcesName'), '-Databricks')]",
     "databricksManagedResourceGroupId": "[concat(subscription().id, '/resourceGroups/', parameters('resourcesName'), '-Databricks-managed')]",
@@ -1056,6 +1064,25 @@
         "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'metadata')]"
       ],
       "properties": {}
+    },
+    {
+      "type": "Microsoft.Fabric/capacities",
+      "apiVersion": "2023-11-01",
+      "condition": "[parameters('deployFabricCapacity')]",
+      "name": "[variables('fabricCapacityName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "F2",
+        "tier": "Fabric"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+      ],
+      "properties": {
+        "administration": {
+          "members": "[createArray(reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId, parameters('adminUsername'))]"
+        }
+      }
     },
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",

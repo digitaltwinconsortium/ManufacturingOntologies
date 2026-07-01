@@ -1,0 +1,9 @@
+# Ensure shell scripts always use LF line endings, even when checked out on Windows.
+# These scripts are downloaded from GitHub raw and executed on Linux (the deployment VM and
+# Databricks/Fabric setup); CRLF endings break the shebang (`#!/bin/bash: No such file or directory`)
+# and `sed`/`cd` behavior.
+*.sh text eol=lf
+
+# Kubernetes/YAML manifests and shell-consumed configs are also executed on Linux.
+*.yaml text eol=lf
+*.yml text eol=lf

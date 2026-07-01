@@ -17,6 +17,11 @@ name=${tmp%.servicebus*}   # remove suffix starting with ".servicebus"
 echo .
 echo Event Hubs name: $name
 
+# Resolve paths relative to this script's own location, not the caller's working directory, so the
+# relative "./PublisherConfig" and "../../Deployment" copies below work whether this script is run
+# from its own folder (manual use) or invoked by Bootstrap.sh from a different directory.
+cd "$(dirname "$0")" || exit 1
+
 echo .
 echo Copying config files...
 mkdir -p /mnt/c/K3s

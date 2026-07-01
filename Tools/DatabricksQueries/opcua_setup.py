@@ -177,33 +177,22 @@ spark.sql(
       FROM (
         SELECT
           unix_millis(shiftEndTime) - unix_millis(shiftStartTime) AS idealRunningTime,
-          (
-            SELECT COALESCE(MAX(CAST(t.Value AS INT)), 0) - COALESCE(MIN(CAST(t.Value AS INT)), 0)
-            FROM `{catalog}`.`{schema}`.opcua_metadata_lkv m
-            INNER JOIN `{catalog}`.`{schema}`.opcua_telemetry t ON m.Subject = t.Subject
-            WHERE m.DataSetName LIKE CONCAT('%', stationName, '%')
-              AND m.DataSetName LIKE CONCAT('%', location, '%')
-              AND t.Name = 'NumberOfManufacturedProducts'
-              AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime
-          ) AS numProdShift,
-          (
-            SELECT COALESCE(MAX(CAST(t.Value AS INT)), 0) - COALESCE(MIN(CAST(t.Value AS INT)), 0)
-            FROM `{catalog}`.`{schema}`.opcua_metadata_lkv m
-            INNER JOIN `{catalog}`.`{schema}`.opcua_telemetry t ON m.Subject = t.Subject
-            WHERE m.DataSetName LIKE CONCAT('%', stationName, '%')
-              AND m.DataSetName LIKE CONCAT('%', location, '%')
-              AND t.Name = 'NumberOfDiscardedProducts'
-              AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime
-          ) AS numScrapShift,
-          (
-            SELECT COALESCE(SUM(CAST(t.Value AS INT)), 0)
-            FROM `{catalog}`.`{schema}`.opcua_metadata_lkv m
-            INNER JOIN `{catalog}`.`{schema}`.opcua_telemetry t ON m.Subject = t.Subject
-            WHERE m.DataSetName LIKE CONCAT('%', stationName, '%')
-              AND m.DataSetName LIKE CONCAT('%', location, '%')
-              AND t.Name = 'FaultyTime'
-              AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime
-          ) AS faultyTimeShift
+          COALESCE(prod.numProdShift, 0) AS numProdShift,
+          COALESCE(prod.numScrapShift, 0) AS numScrapShift,
+          COALESCE(prod.faultyTimeShift, 0) AS faultyTimeShift
+        FROM (
+          SELECT
+            MAX(CASE WHEN t.Name = 'NumberOfManufacturedProducts' THEN CAST(t.Value AS INT) END)
+              - MIN(CASE WHEN t.Name = 'NumberOfManufacturedProducts' THEN CAST(t.Value AS INT) END) AS numProdShift,
+            MAX(CASE WHEN t.Name = 'NumberOfDiscardedProducts' THEN CAST(t.Value AS INT) END)
+              - MIN(CASE WHEN t.Name = 'NumberOfDiscardedProducts' THEN CAST(t.Value AS INT) END) AS numScrapShift,
+            SUM(CASE WHEN t.Name = 'FaultyTime' THEN CAST(t.Value AS INT) END) AS faultyTimeShift
+          FROM `{catalog}`.`{schema}`.opcua_metadata_lkv m
+          INNER JOIN `{catalog}`.`{schema}`.opcua_telemetry t ON m.Subject = t.Subject
+          WHERE m.DataSetName LIKE CONCAT('%', stationName, '%')
+            AND m.DataSetName LIKE CONCAT('%', location, '%')
+            AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime
+        ) prod
       )
     """
 )

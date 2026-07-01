@@ -848,7 +848,8 @@
       "apiVersion": "2022-11-01",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('resourcesName'), '-VM')]"
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('resourcesName'), '-VM')]",
+        "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubsNamespaceName'))]"
       ],
       "tags": {
         "displayName": "Run Bootstrap (Linux)"
@@ -864,7 +865,7 @@
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "bash Bootstrap.sh"
+          "commandToExecute": "[concat('bash Bootstrap.sh ''', listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString, '''')]"
         }
       }
     },

@@ -9,6 +9,14 @@ set -u
 set -o pipefail
 
 # --------------------------
+# Arguments
+# --------------------------
+# $1 (optional): the Event Hubs namespace RootManageSharedAccessKey connection string. When provided
+# (the ARM deployment passes it automatically), the production line simulation is started at the end
+# of this script. Captured before logging is enabled below so the secret is not written to the log.
+EVENTHUBS_CONNECTION_STRING="${1:-}"
+
+# --------------------------
 # Logging (like Start-Transcript)
 # --------------------------
 sudo mkdir -p /var/log/bootstrap
@@ -121,6 +129,37 @@ echo "To use kubectl as a non-root user, either export KUBECONFIG or copy kubeco
 echo "Example:"
 echo "  export KUBECONFIG=/etc/rancher/k3s/k3s.yaml"
 echo "  kubectl get nodes"
+
+# --------------------------
+# Start the production line simulation
+# --------------------------
+# When the Event Hubs connection string was supplied as $1 (the ARM deployment passes it), start the
+# Munich/Seattle production lines and UA-CloudPublisher (for GDS push) automatically so no manual step is required.
+# StartSimulation.sh injects the connection string into the publisher config and the K8s manifests and
+# applies them; it uses kubectl, so point KUBECONFIG at the K3s admin kubeconfig.
+echo
+echo "=== Starting production line simulation ==="
+if [ -n "${EVENTHUBS_CONNECTION_STRING}" ]; then
+  START_SIM="${FACTORY_SIM_DIR}/StartSimulation.sh"
+  if [ -f "${START_SIM}" ]; then
+    # StartSimulation.sh is authored on Windows; ensure LF line endings and the executable bit.
+    try sudo sed -i 's/\r$//' "${START_SIM}"
+    try sudo chmod +x "${START_SIM}"
+    # Invoke StartSimulation.sh directly (not via the try helper) so the connection string, passed as
+    # an argument, is never echoed to the bootstrap log.
+    echo ">>> Starting simulation (connection string redacted)"
+    if sudo env KUBECONFIG=/etc/rancher/k3s/k3s.yaml bash "${START_SIM}" "${EVENTHUBS_CONNECTION_STRING}"; then
+      echo "Simulation started."
+    else
+      echo "!!! WARNING: StartSimulation.sh failed (rc=$?)."
+    fi
+  else
+    echo "!!! WARNING: ${START_SIM} not found; cannot start the simulation automatically."
+  fi
+else
+  echo "No Event Hubs connection string was passed to Bootstrap.sh; skipping automatic simulation start."
+  echo "To start it manually, run: ${FACTORY_SIM_DIR}/StartSimulation.sh '<eventhubs-connection-string>'"
+fi
 
 echo
 echo "=== Bootstrap finished: $(date -Is) ==="

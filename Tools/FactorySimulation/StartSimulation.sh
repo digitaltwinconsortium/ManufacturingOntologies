@@ -7,7 +7,7 @@ then
     echo "Argument must be of the form: Endpoint=sb://[eventhubnamespace].servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=[key]"
     exit 1
 else
-    echo "Argument passed = $1"
+    echo "Connection string received (redacted)."
 fi
 
 connectionstring=$1
@@ -15,7 +15,6 @@ tmp=${1#*//}   # remove prefix ending in "//"
 name=${tmp%.servicebus*}   # remove suffix starting with ".servicebus"
 
 echo .
-echo Events Hub connection string: $connectionstring
 echo Event Hubs name: $name
 
 echo .

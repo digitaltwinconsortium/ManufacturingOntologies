@@ -34,7 +34,7 @@
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "Provision a Microsoft Fabric F2 capacity (named '<resourcesName>fabric') as part of the main deployment. Enable this if you plan to use Microsoft Fabric, especially if you have never used Fabric before: having the capacity in place first lets a Fabric tenant admin enable the 'Service principals can use Fabric APIs' tenant setting in the Fabric admin portal before you deploy the Fabric template. Leave disabled for Azure Data Explorer- or Databricks-only deployments to avoid the Fabric capacity cost; the Fabric template still provisions the capacity itself if it was not pre-created here."
+        "description": "Provision a Microsoft Fabric F2 capacity as part of the main deployment. Enable this if you plan to use Microsoft Fabric, especially if you have never used Fabric before: having the capacity in place first lets a Fabric tenant admin enable the Service principals can use Fabric APIs tenant setting in the Fabric admin portal before you deploy the Fabric template. Leave disabled for Azure Data Explorer- or Databricks-only deployments to avoid the Fabric capacity cost; the Fabric template still provisions the capacity itself if it was not pre-created here."
       }
     }
   },
@@ -1080,7 +1080,7 @@
       ],
       "properties": {
         "administration": {
-          "members": "[createArray(reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId, parameters('adminUsername'))]"
+          "members": "[createArray(reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId)]"
         }
       }
     },

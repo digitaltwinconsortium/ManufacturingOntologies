@@ -8,13 +8,6 @@
       "metadata": {
         "description": "The resources base name used by the main (Azure Data Explorer) deployment, for example 'contoso'. The Fabric template reuses the managed identity, Event Hubs namespace, Container Apps environment and 'fabric' consumer groups created by that deployment, all named '<resourcesName>-*'. Deploy this template into the same resource group as the main deployment."
       }
-    },
-    "adminUsername": {
-      "type": "string",
-      "minLength": 2,
-      "metadata": {
-        "description": "User principal name or Entra object ID to add as a Microsoft Fabric capacity administrator alongside the solution's managed identity. Use the same value as the main deployment so you can administer the capacity from the Fabric portal."
-      }
     }
   },
   "variables": {
@@ -39,7 +32,7 @@
       },
       "properties": {
         "administration": {
-          "members": "[createArray(reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId, parameters('adminUsername'))]"
+          "members": "[createArray(reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId)]"
         }
       }
     },

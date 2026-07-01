@@ -20,40 +20,6 @@ You can deploy a [sample dashboard](https://github.com/digitaltwinconsortium/Man
 
 To display the OEE for a specific shift, select **Custom Time Range** in the **Time Range** drop-down in the top-left corner of the Azure Data Explorer Dashboard and enter the date and time from start to end of the shift you're interested in.
 
-The production line simulation is made up of several stations, using the station OPC UA information model, and a simple manufacturing execution system (MES). Both the stations and the MES are containerized for easy deployment.
-
-You configure the simulation to include two production lines. The default configuration is:
-
-| Production Line | Ideal Cycle Time (in seconds) |
-| --- | --- |
-| Munich | 6 |
-| Seattle | 10 |
-
-| Shift Name | Start | End |
-| --- | --- | --- |
-| Morning | 07:00 | 14:00 |
-| Afternoon | 15:00 | 22:00 |
-| Night | 23:00 | 06:00 |
-
-Shift times are in local time, specifically the time zone the virtual machine (VM) hosting the production line simulation is set to.
-
-The station OPC UA server uses the following OPC UA node IDs for telemetry to the cloud:
-
-- `i=379` - manufactured product serial number
-- `i=385` - number of manufactured products
-- `i=391` - number of discarded products
-- `i=398` - running time
-- `i=399` - faulty time
-- `i=400` - status (0=station ready to do work, 1=work in progress, 2=work done and good part manufactured, 3=work done and scrap manufactured, 4=station in fault state)
-- `i=406` - energy consumption
-- `i=412` - ideal cycle time
-- `i=418` - actual cycle time
-- `i=434` - pressure
-
-The solution uses a digital feedback loop to manage the pressure in a simulated station. To implement the feedback loop, the solution triggers a command from the cloud on one of the OPC UA servers in the simulation. The trigger activates when simulated time-series pressure data reaches a certain threshold. You can see the pressure of the assembly machine in the Azure Data Explorer dashboard. The pressure is released at regular intervals for the Seattle production line.
-
-In a real-world deployment, something as critical as opening a pressure relief valve would be done on-premises. This example simply demonstrates how to achieve the digital feedback loop.
-
 ## Render the built-in Unified NameSpace (UNS) and ISA-95 model graph in Kusto Explorer
 
 This solution implements a Unified Namespace (UNS), based on the OPC UA metadata sent to the Azure Data Explorer time-series database in the cloud. This OPC UA metadata includes the ISA-95 asset hierarchy. You can visualize the resulting graph in the [Kusto Explorer tool](/en-us/azure/data-explorer/kusto/tools/kusto-explorer).

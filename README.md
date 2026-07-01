@@ -26,6 +26,38 @@ The following articles describe how to deploy and connect this reference solutio
 - [Connect Microsoft Fabric to the reference solution](fabric.md) explains how to ingest and process the reference solution's OPC UA PubSub data in a Microsoft Fabric Eventhouse for Real-Time Intelligence, mirroring the same tables, functions, and views used by Azure Data Explorer.
 - [Import OPC UA Information Models from the UA Cloud Library into Azure services](cloudlib.md) describes how to import standardized OPC UA information models from the OPC Foundation's UA Cloud Library into Azure services.
 
+## Production line simulation
+
+The production line simulation is made up of several stations, using the station OPC UA information model, and a simple manufacturing execution system (MES). Both the stations and the MES are containerized for easy deployment. Their configuration is:
+
+| Production Line | Ideal Cycle Time (in seconds) |
+| --- | --- |
+| Munich | 6 |
+| Seattle | 10 |
+
+| Shift Name | Start | End |
+| --- | --- | --- |
+| Morning | 07:00 | 14:00 |
+| Afternoon | 15:00 | 22:00 |
+| Night | 23:00 | 06:00 |
+
+Shift times are in local time, specifically the time zone the virtual machine (VM) hosting the production line simulation is set to.
+
+The station OPC UA server uses the following OPC UA node IDs for telemetry to the cloud:
+
+- `i=379` - manufactured product serial number
+- `i=385` - number of manufactured products
+- `i=391` - number of discarded products
+- `i=398` - running time
+- `i=399` - faulty time
+- `i=400` - status (0=station ready to do work, 1=work in progress, 2=work done and good part manufactured, 3=work done and scrap manufactured, 4=station in fault state)
+- `i=406` - energy consumption
+- `i=412` - ideal cycle time
+- `i=418` - actual cycle time
+- `i=434` - pressure
+
+The solution uses a digital feedback loop to manage the pressure in a simulated station. To implement the feedback loop, the solution triggers a command from the cloud on one of the OPC UA servers in the simulation. The trigger activates when simulated time-series pressure data reaches a certain threshold. You can see the pressure of the assembly machine in the Azure Data Explorer dashboard. The pressure is released at regular intervals for the Seattle production line. In a real-world deployment, something as critical as opening a pressure relief valve would be done on-premises. This example simply demonstrates how to achieve the digital feedback loop.
+
 ## Azure IoT Operations configuration for OPC UA PubSub
 
 The ADX update policies that expand the raw data (`OPCUATelemetryExpand` and `OPCUAMetaDataExpand`, created by the deployment) read the dataset identity and timestamp **from the message body**. They expect each event hub message to be an OPC UA PubSub DataSet message shaped like this:

@@ -34,7 +34,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue\n"
+        "text": "(opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftGapBand(_startTime, _endTime, 4))\n"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1172,7 +1172,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue"
+        "text": "(opcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftGapBand(_startTime, _endTime, 4))"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1228,7 +1228,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue\n"
+        "text": "(opcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftGapBand(_startTime, _endTime, 4))\n"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1284,7 +1284,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue\n"
+        "text": "(opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftGapBand(_startTime, _endTime, 4))\n"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1340,7 +1340,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue"
+        "text": "(opcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftGapBand(_startTime, _endTime, 4))"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1396,7 +1396,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue\n"
+        "text": "(opcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftGapBand(_startTime, _endTime, 4))\n"
       },
       "visualOptions": {
         "multipleYAxes": {

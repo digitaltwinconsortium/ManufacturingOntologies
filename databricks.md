@@ -1,8 +1,5 @@
 # Connect Azure Databricks to the Reference Solution
 
-> [!NOTE]
-> This article is part of the **OPC UA Reference Solution**, which uses **IEC 62541 standard OPC UA PubSub** to send telemetry data from the edge to the cloud. It is **different** from the default configuration of Azure IoT Operations, which is described at [**Azure IoT Operations Overview**](https://learn.microsoft.com/en-us/azure/iot-operations/overview-iot-operations#architecture-overview), where an edge data flow sends telemetry data to the cloud over the endpoint's native protocol. Therefore, OPC UA PubSub is **not required** between Azure IoT Operations and cloud endpoints.
-
 ## Automated deployment
 
 The reference solution's deployment script can automatically deploy and configure Azure Databricks for you, as a **second analytics option next to Azure Data Explorer**. To enable Databricks, set the **Deploy Databricks** (`deployDatabricks`) parameter to `true`. ADX remains the default and is unaffected: Databricks reads the same `data` and `metadata` event hubs through a separate `databricks` consumer group, so both databases ingest the data side by side.

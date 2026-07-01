@@ -285,7 +285,7 @@ telemetry_stream = (
     telemetry_stream.writeStream.format("delta")
     .outputMode("append")
     .option("checkpointLocation", f"{checkpoint_root}/opcua_raw")
-    .table(f"`{catalog}`.`{schema}`.opcua_raw")
+    .toTable(f"{catalog}.{schema}.opcua_raw")
 )
 
 # Read the metadata stream from the "metadata" event hub (Kafka topic) into the raw landing table.
@@ -301,7 +301,7 @@ metadata_stream = (
     metadata_stream.writeStream.format("delta")
     .outputMode("append")
     .option("checkpointLocation", f"{checkpoint_root}/opcua_metadata_raw")
-    .table(f"`{catalog}`.`{schema}`.opcua_metadata_raw")
+    .toTable(f"{catalog}.{schema}.opcua_metadata_raw")
 )
 
 # COMMAND ----------
@@ -328,7 +328,7 @@ dataset_schema = (
     "Payload:map<string,struct<Value:string>>>"
 )
 
-raw_df = spark.readStream.format("delta").table(f"`{catalog}`.`{schema}`.opcua_raw")
+raw_df = spark.readStream.format("delta").table(f"{catalog}.{schema}.opcua_raw")
 
 normalized_df = raw_df.withColumn(
     "messages",
@@ -357,14 +357,14 @@ telemetry_df = (
     telemetry_df.writeStream.format("delta")
     .outputMode("append")
     .option("checkpointLocation", f"{checkpoint_root}/opcua_telemetry")
-    .table(f"`{catalog}`.`{schema}`.opcua_telemetry")
+    .toTable(f"{catalog}.{schema}.opcua_telemetry")
 )
 
 # COMMAND ----------
 
 # 3b. Metadata expansion: expand the Fields array into one row per field and parse the DataSetName
 # into the ISA-95 hierarchy columns.
-metadata_raw_stream = spark.readStream.format("delta").table(f"`{catalog}`.`{schema}`.opcua_metadata_raw")
+metadata_raw_stream = spark.readStream.format("delta").table(f"{catalog}.{schema}.opcua_metadata_raw")
 
 metadata_parsed = metadata_raw_stream.withColumn(
     "p",
@@ -418,7 +418,7 @@ metadata_df = (
     metadata_df.writeStream.format("delta")
     .outputMode("append")
     .option("checkpointLocation", f"{checkpoint_root}/opcua_metadata")
-    .table(f"`{catalog}`.`{schema}`.opcua_metadata")
+    .toTable(f"{catalog}.{schema}.opcua_metadata")
 )
 
 # COMMAND ----------

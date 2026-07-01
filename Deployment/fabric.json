@@ -6,7 +6,7 @@
       "type": "string",
       "minLength": 2,
       "metadata": {
-        "description": "The resources base name used by the main (Azure Data Explorer) deployment, for example 'contoso'. The Fabric template reuses the managed identity, Event Hubs namespace, Container Apps environment and 'fabric' consumer groups created by that deployment, all named '<resourcesName>-*'. Deploy this template into the same resource group as the main deployment."
+        "description": "The resources base name used by the main (Azure Data Explorer) deployment, for example contoso. The Fabric template reuses the managed identity, Event Hubs namespace, Container Apps environment and fabric consumer groups created by that deployment. Deploy this template into the same resource group as the main deployment."
       }
     }
   },

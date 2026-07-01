@@ -1719,31 +1719,44 @@
                 "columns": [
                   {
                     "fieldName": "Name",
-                    "displayName": "Name",
+                    "title": "Name",
                     "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 0,
+                    "allowSearch": false,
+                    "alignContent": "left",
                     "booleanValues": [
                       "false",
                       "true"
-                    ],
-                    "order": 0
+                    ]
                   },
                   {
                     "fieldName": "NodeValue",
-                    "displayName": "Value",
+                    "title": "Value",
                     "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 1,
+                    "allowSearch": false,
+                    "alignContent": "right",
                     "booleanValues": [
                       "false",
                       "true"
-                    ],
-                    "order": 1
+                    ]
                   }
                 ]
               },
+              "invisibleColumns": [],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": false,
               "frame": {
                 "showTitle": true,
                 "title": "Publisher Munich Diagnostics"
               },
-              "itemsPerPage": 25,
               "version": 1,
               "widgetType": "table"
             }
@@ -1782,31 +1795,44 @@
                 "columns": [
                   {
                     "fieldName": "Name",
-                    "displayName": "Name",
+                    "title": "Name",
                     "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 0,
+                    "allowSearch": false,
+                    "alignContent": "left",
                     "booleanValues": [
                       "false",
                       "true"
-                    ],
-                    "order": 0
+                    ]
                   },
                   {
                     "fieldName": "NodeValue",
-                    "displayName": "Value",
+                    "title": "Value",
                     "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 1,
+                    "allowSearch": false,
+                    "alignContent": "right",
                     "booleanValues": [
                       "false",
                       "true"
-                    ],
-                    "order": 1
+                    ]
                   }
                 ]
               },
+              "invisibleColumns": [],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": false,
               "frame": {
                 "showTitle": true,
                 "title": "Publisher Seattle Diagnostics"
               },
-              "itemsPerPage": 25,
               "version": 1,
               "widgetType": "table"
             }

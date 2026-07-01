@@ -112,7 +112,7 @@ toscalar(oee)
 .create-or-alter function CalculateOEEForLine(location:string,idealCycleTime:int,shiftStartTime:datetime,shiftEndTime:datetime) {
 let stations = opcua_metadata_lkv
 | where Site == location
-| where Workcell !="publisher"
+| where Workcell !in ("publisher", "mes", "commander")
 | summarize by Workcell
 | project station = tostring(Workcell);
 let oeeForStations = stations

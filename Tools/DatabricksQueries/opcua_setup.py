@@ -219,7 +219,11 @@ spark.sql(
       FROM (
         SELECT DISTINCT Workcell AS station
         FROM `{catalog}`.`{schema}`.opcua_metadata_lkv
-        WHERE Site = location AND Workcell <> 'publisher'
+        WHERE Site = location
+          -- Only aggregate the actual production stations. The publisher also monitors the
+          -- MES and commander servers, which have no production counters and would otherwise
+          -- return an OEE of 0 and drag the line MIN() to 0.
+          AND Workcell NOT IN ('publisher', 'mes', 'commander')
       )
     """
 )

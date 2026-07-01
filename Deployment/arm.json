@@ -849,7 +849,9 @@
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', parameters('resourcesName'), '-VM')]",
-        "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubsNamespaceName'))]"
+        "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubsNamespaceName'))]",
+        "[resourceId('Microsoft.Kusto/Clusters/Databases/DataConnections', variables('adxClusterName'), 'ontologies', 'EventHubDataConnection')]",
+        "[resourceId('Microsoft.Kusto/Clusters/Databases/DataConnections', variables('adxClusterName'), 'ontologies', 'EventHubMetadataConnection')]"
       ],
       "tags": {
         "displayName": "Run Bootstrap (Linux)"

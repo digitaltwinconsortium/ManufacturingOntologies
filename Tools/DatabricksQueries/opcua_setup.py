@@ -182,16 +182,21 @@ spark.sql(
           COALESCE(prod.faultyTimeShift, 0) AS faultyTimeShift
         FROM (
           SELECT
-            MAX(CASE WHEN t.Name = 'NumberOfManufacturedProducts' THEN CAST(t.Value AS INT) END)
-              - MIN(CASE WHEN t.Name = 'NumberOfManufacturedProducts' THEN CAST(t.Value AS INT) END) AS numProdShift,
-            MAX(CASE WHEN t.Name = 'NumberOfDiscardedProducts' THEN CAST(t.Value AS INT) END)
-              - MIN(CASE WHEN t.Name = 'NumberOfDiscardedProducts' THEN CAST(t.Value AS INT) END) AS numScrapShift,
-            SUM(CASE WHEN t.Name = 'FaultyTime' THEN CAST(t.Value AS INT) END) AS faultyTimeShift
-          FROM `{catalog}`.`{schema}`.opcua_metadata_lkv m
-          INNER JOIN `{catalog}`.`{schema}`.opcua_telemetry t ON m.Subject = t.Subject
-          WHERE m.DataSetName LIKE CONCAT('%', stationName, '%')
-            AND m.DataSetName LIKE CONCAT('%', location, '%')
-            AND t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime
+            MAX(CASE WHEN t.Name = 'NumberOfManufacturedProducts' THEN try_cast(t.Value AS DOUBLE) END)
+              - MIN(CASE WHEN t.Name = 'NumberOfManufacturedProducts' THEN try_cast(t.Value AS DOUBLE) END) AS numProdShift,
+            MAX(CASE WHEN t.Name = 'NumberOfDiscardedProducts' THEN try_cast(t.Value AS DOUBLE) END)
+              - MIN(CASE WHEN t.Name = 'NumberOfDiscardedProducts' THEN try_cast(t.Value AS DOUBLE) END) AS numScrapShift,
+            SUM(CASE WHEN t.Name = 'FaultyTime' THEN try_cast(t.Value AS DOUBLE) END) AS faultyTimeShift
+          FROM `{catalog}`.`{schema}`.opcua_telemetry t
+          -- Restrict to the writers (Subjects) of the target station/location. Use DISTINCT Subjects so
+          -- the SUM below is not multiplied by the several metadata rows each writer has in the LKV view.
+          INNER JOIN (
+            SELECT DISTINCT Subject
+            FROM `{catalog}`.`{schema}`.opcua_metadata_lkv
+            WHERE DataSetName LIKE CONCAT('%', stationName, '%')
+              AND DataSetName LIKE CONCAT('%', location, '%')
+          ) m ON m.Subject = t.Subject
+          WHERE t.Timestamp > shiftStartTime AND t.Timestamp < shiftEndTime
         ) prod
       )
     """

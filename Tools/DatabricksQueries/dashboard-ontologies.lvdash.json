@@ -73,32 +73,32 @@
     {
       "displayName": "0000001d",
       "name": "0000001d",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, try_cast(t.Value AS DOUBLE) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "0000001f",
       "name": "0000001f",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, try_cast(t.Value AS DOUBLE) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "00000021",
       "name": "00000021",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, try_cast(t.Value AS DOUBLE) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "00000023",
       "name": "00000023",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, try_cast(t.Value AS DOUBLE) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "00000025",
       "name": "00000025",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, try_cast(t.Value AS DOUBLE) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%test%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "00000027",
       "name": "00000027",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, try_cast(t.Value AS DOUBLE) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'Status'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "00000029",
@@ -138,27 +138,27 @@
     {
       "displayName": "00000037",
       "name": "00000037",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'NumberOfManufacturedProducts'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, try_cast(t.Value AS DOUBLE) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%munich%'\n  AND t.Name = 'NumberOfManufacturedProducts'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "00000039",
       "name": "00000039",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'NumberOfManufacturedProducts'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, try_cast(t.Value AS DOUBLE) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%packaging%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'NumberOfManufacturedProducts'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "0000003b",
       "name": "0000003b",
-      "query": "SELECT t.Timestamp AS Timestamp, CAST(t.Value AS INT) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'Pressure'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
+      "query": "SELECT t.Timestamp AS Timestamp, try_cast(t.Value AS DOUBLE) AS NodeValue\nFROM `main`.`ontologies`.`opcua_metadata_lkv` m\nINNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\nWHERE m.DataSetName LIKE '%assembly%' AND m.DataSetName LIKE '%seattle%'\n  AND t.Name = 'Pressure'\n  AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\nORDER BY t.Timestamp"
     },
     {
       "displayName": "0000003d",
       "name": "0000003d",
-      "query": "SELECT Name, NodeValue FROM (\n  SELECT t.Name AS Name, CAST(t.Value AS INT) AS NodeValue, t.Timestamp AS Timestamp,\n         ROW_NUMBER() OVER (PARTITION BY t.Name ORDER BY t.Timestamp DESC) AS rn\n  FROM `main`.`ontologies`.`opcua_metadata_lkv` m\n  INNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\n  WHERE m.DataSetName LIKE '%publisher%' AND m.DataSetName LIKE '%munich%'\n    AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\n) WHERE rn = 1"
+      "query": "SELECT Name, NodeValue FROM (\n  SELECT t.Name AS Name, try_cast(t.Value AS DOUBLE) AS NodeValue, t.Timestamp AS Timestamp,\n         ROW_NUMBER() OVER (PARTITION BY t.Name ORDER BY t.Timestamp DESC) AS rn\n  FROM `main`.`ontologies`.`opcua_metadata_lkv` m\n  INNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\n  WHERE m.DataSetName LIKE '%publisher%' AND m.DataSetName LIKE '%munich%'\n    AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\n) WHERE rn = 1"
     },
     {
       "displayName": "0000003f",
       "name": "0000003f",
-      "query": "SELECT Name, NodeValue FROM (\n  SELECT t.Name AS Name, CAST(t.Value AS INT) AS NodeValue, t.Timestamp AS Timestamp,\n         ROW_NUMBER() OVER (PARTITION BY t.Name ORDER BY t.Timestamp DESC) AS rn\n  FROM `main`.`ontologies`.`opcua_metadata_lkv` m\n  INNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\n  WHERE m.DataSetName LIKE '%publisher%' AND m.DataSetName LIKE '%seattle%'\n    AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\n) WHERE rn = 1"
+      "query": "SELECT Name, NodeValue FROM (\n  SELECT t.Name AS Name, try_cast(t.Value AS DOUBLE) AS NodeValue, t.Timestamp AS Timestamp,\n         ROW_NUMBER() OVER (PARTITION BY t.Name ORDER BY t.Timestamp DESC) AS rn\n  FROM `main`.`ontologies`.`opcua_metadata_lkv` m\n  INNER JOIN `main`.`ontologies`.`opcua_telemetry` t ON m.Subject = t.Subject\n  WHERE m.DataSetName LIKE '%publisher%' AND m.DataSetName LIKE '%seattle%'\n    AND t.Timestamp > current_timestamp() - INTERVAL 4 HOURS\n) WHERE rn = 1"
     }
   ],
   "pages": [

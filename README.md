@@ -46,7 +46,7 @@ The production line simulation is made up of several stations, using the station
 | Afternoon | 15:00 | 22:00 |
 | Night | 23:00 | 06:00 |
 
-Shift times are in local time, specifically the time zone the virtual machine (VM) hosting the production line simulation is set to.
+Shift times are in time zone of Seattle and Munich.
 
 The station OPC UA server uses the following OPC UA node IDs for telemetry to the cloud:
 

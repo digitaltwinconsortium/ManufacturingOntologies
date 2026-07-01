@@ -97,6 +97,8 @@ spec:
           value: "mes"
         - name: StationURI
           value: "opc.tcp://mes.seattle/"
+        - name: FactoryTimeZone
+          value: "America/Los_Angeles"
         - name: ProductionLineName
           value: "seattle"
         - name: OPCUA_USERNAME

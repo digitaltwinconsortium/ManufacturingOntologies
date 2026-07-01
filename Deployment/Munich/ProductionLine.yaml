@@ -97,6 +97,8 @@ spec:
           value: "mes"
         - name: StationURI
           value: "opc.tcp://mes.munich/"
+        - name: FactoryTimeZone
+          value: "Europe/Berlin"
         - name: ProductionLineName
           value: "munich"
         - name: OPCUA_USERNAME

@@ -46,6 +46,7 @@
 
         private static ManualResetEvent m_quitEvent;
         private static DateTime m_lastActivity = DateTime.MinValue;
+        private static DateTime m_lastOutsideShiftLog = DateTime.MinValue;
 
         private const int c_Assembly = 0;
         private const int c_Test = 1;
@@ -299,18 +300,49 @@
             await m_sessionPackaging.EndpointConnectAsync(m_endpoints[c_Packaging], m_appConfiguration, Telemetry).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Resolves the timezone used to evaluate the production shift windows.
+        /// The factory timezone can be configured via the FactoryTimeZone environment
+        /// variable (IANA id like "Europe/Berlin" or Windows id like "W. Europe Standard Time").
+        /// Falls back to the machine local timezone (previous behavior) if unset or unresolvable.
+        /// </summary>
+        private static TimeZoneInfo ResolveFactoryTimeZone()
+        {
+            string timeZoneId = Environment.GetEnvironmentVariable("FactoryTimeZone");
+            if (string.IsNullOrWhiteSpace(timeZoneId))
+            {
+                return TimeZoneInfo.Local;
+            }
+
+            try
+            {
+                return TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Could not resolve FactoryTimeZone '{TimeZoneId}', falling back to machine local time ({LocalTimeZone})", timeZoneId, TimeZoneInfo.Local.Id);
+                return TimeZoneInfo.Local;
+            }
+        }
+
         private static async void MesLogicAsync(object state)
         {
             try
             {
-                // check if the production line is supposed to be running right now
+                // check if the production line is supposed to be running right now.
+                // Shift windows in ShiftTimes.csv are authored in the factory's wall-clock
+                // time, so evaluate "now" in the configured factory timezone (env var
+                // FactoryTimeZone, IANA or Windows id). This prevents the line from stalling
+                // silently when the MES container runs in a different timezone than the factory.
+                TimeZoneInfo factoryTimeZone = ResolveFactoryTimeZone();
+                DateTime now = TimeZoneInfo.ConvertTime(DateTime.UtcNow, TimeZoneInfo.Utc, factoryTimeZone);
+
                 bool productionShouldBeRunning = false;
                 foreach (Tuple<string, string, string> shift in ShiftTimes)
                 {
-                    // checked in local time!
-                    DateTime shiftStart = DateTime.Parse(shift.Item2);
-                    DateTime shiftEnd = DateTime.Parse(shift.Item3);
-                    DateTime now = DateTime.Now;
+                    // shift start/end are parsed against today's date in the factory timezone
+                    DateTime shiftStart = now.Date.Add(DateTime.Parse(shift.Item2).TimeOfDay);
+                    DateTime shiftEnd = now.Date.Add(DateTime.Parse(shift.Item3).TimeOfDay);
 
                     // check if the shift goes into the next day
                     if (shiftEnd < shiftStart)
@@ -338,6 +370,14 @@
                 {
                     if (!productionShouldBeRunning)
                     {
+                        // Make the paused state observable instead of silent, but throttle to
+                        // avoid flooding the log every c_updateRate tick.
+                        if (m_lastOutsideShiftLog + TimeSpan.FromMinutes(5) < DateTime.UtcNow)
+                        {
+                            Log.Information("Outside all configured shift windows \u2014 production paused (factory time {Now:HH:mm}, timezone {TimeZone})", now, factoryTimeZone.Id);
+                            m_lastOutsideShiftLog = DateTime.UtcNow;
+                        }
+
                         m_lastActivity = DateTime.UtcNow;
                         return;
                     }

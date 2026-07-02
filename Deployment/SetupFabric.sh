@@ -50,11 +50,26 @@ echo "Logging in with the user-assigned managed identity..."
 az login --identity --username "${MANAGED_IDENTITY_CLIENT_ID}" --output none
 
 echo "Acquiring a Microsoft Fabric access token..."
-# The Fabric REST APIs authenticate against the Power BI service audience
-# (https://analysis.windows.net/powerbi/api), NOT https://api.fabric.microsoft.com.
-# Requesting the wrong audience yields a token the Fabric API rejects with 401
-# "The caller is not authenticated to access this resource".
+# The Fabric REST APIs accept a token for the Power BI service audience. Both
+# https://analysis.windows.net/powerbi/api and https://api.fabric.microsoft.com are
+# valid App ID URIs for this audience; we use the Power BI one.
 export FABRIC_TOKEN="$(az account get-access-token --resource https://analysis.windows.net/powerbi/api --query accessToken -o tsv)"
+
+# Diagnostics: decode the (unverified) JWT claims so the deployment log shows exactly
+# which identity/audience Fabric will see. This makes 401 root-causing possible without
+# guessing (look for aud, appid/azp, oid, tid).
+python3 - <<'PY' || true
+import base64, json, os
+tok = os.environ.get("FABRIC_TOKEN", "")
+try:
+    payload = tok.split(".")[1]
+    payload += "=" * (-len(payload) % 4)
+    claims = json.loads(base64.urlsafe_b64decode(payload))
+    keep = {k: claims.get(k) for k in ("aud", "appid", "azp", "oid", "tid", "idtyp", "roles") if k in claims}
+    print("  Fabric token claims:", json.dumps(keep))
+except Exception as exc:
+    print("  Could not decode Fabric token claims:", exc)
+PY
 
 # Derive the Event Hubs namespace fully-qualified host from the connection string.
 export EVENTHUBS_FQDN="$(python3 -c "import os,re; m=re.search(r'Endpoint=sb://([^/;]+)', os.environ['EVENTHUBS_CONNECTION_STRING']); print(m.group(1) if m else '')")"

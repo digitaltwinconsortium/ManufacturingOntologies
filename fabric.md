@@ -8,14 +8,13 @@
 
 The reference solution's deployment script can automatically deploy and configure Microsoft Fabric for you, as a **third analytics option** next to Azure Data Explorer and Azure Databricks.
 
-**Prerequisites and notes**
+**Prerequisites (required)**
 >
-> - **Deploy the main solution first (required).** Fabric reuses the managed identity (`<resourcesName>-Identity`), Event Hubs namespace, Container Apps environment and the `fabric` capacity created by the ADX/Databricks deployment. Deploy that first (see [adx.md](adx.md)) and note the `resourcesName` you used, then deploy the Fabric template **into the same resource group**:
-> - **Enable Microsoft Fabric for the tenant (required).** Deploying the F2 capacity in Azure does **not** turn Fabric on for your tenant. If `fabric.microsoft.com` keeps switching back to Power BI, a Fabric admin still needs to enable Fabric: **Fabric portal -> Settings (gear) -> Admin portal -> Tenant settings -> Microsoft Fabric -> "Users can create Fabric items" -> On -> Apply** (requires the *Fabric administrator* role; can be scoped to the whole organization or to specific security groups). Alternatively enable it just for this capacity: **Admin portal -> Capacity settings -> select `<resourcesName>fabric` -> Delegate tenant settings -> Microsoft Fabric -> check "Override tenant admin selection" -> enable "Users can create Fabric items" -> Apply.** See [Enable Microsoft Fabric for your organization](https://learn.microsoft.com/fabric/admin/fabric-switch).
-> - **Tenant setting (required):** The Fabric setup script calls the Fabric REST APIs as the solution's user-assigned managed identity (`<resourcesName>-Identity`), so a Fabric tenant admin must enable **Service principals can use Fabric APIs** (Fabric admin portal -> Tenant settings -> Developer settings). Allow a few minutes after changing the tenant setting for it to propagate. If you deploy Fabric before the setting is in place, the setup step fails with `401`/`403`; fix the setting and redeploy the Fabric template - it is idempotent and reuses any items it already created.
-> - **Capacity administration:** The solution's managed identity (`<resourcesName>-Identity`) is set as the capacity administrator, so the setup script can manage the `<resourcesName>fabric` capacity. To administer it from the Fabric portal as yourself, add your account as a capacity admin afterwards from the Fabric admin portal (Capacity settings -> your capacity -> Admin permissions).
+> - **Deploy the main solution first:** Fabric reuses the managed identity (`<resourcesName>-Identity`), Event Hubs namespace, Container Apps environment and the `fabric` capacity created by the ADX/Databricks deployment. Deploy that first (see [adx.md](adx.md)).
+> - **Enable Fabric for the tenant:** Deploying the F2 capacity in Azure does **not** turn Fabric on for your tenant. If `fabric.microsoft.com` keeps switching back to Power BI, a Fabric admin still needs to enable Fabric: Fabric portal -> Settings (gear) -> Admin portal -> Tenant settings -> Microsoft Fabric -> **Users can create Fabric items** -> Enabled (requires the *Fabric administrator* role).
+> - **Enable the Fabric API setting:** The Fabric setup script calls the Fabric REST APIs as the solution's user-assigned managed identity (`<resourcesName>-Identity`), so a Fabric tenant admin must enable **Service principals can use Fabric APIs** (Fabric admin portal -> Tenant settings -> Developer settings). Allow a few minutes after changing the tenant setting for it to propagate. If you deploy Fabric before the setting is in place, the setup step fails with `401`/`403`; fix the setting and redeploy the Fabric template - it is idempotent and reuses any items it already created.
 
-Select the **Deploy to Azure** button and supply the same `resourcesName` you used for the main deployment:
+Select the **Deploy to Azure** button and choose the **same resource group you used for the main deployment**:
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdigitaltwinconsortium%2FManufacturingOntologies%2Fmain%2FDeployment%2Ffabric.json)
 
@@ -25,8 +24,7 @@ To reduce cost, the deployment creates a single Linux VM for both the production
 
 The Fabric template provisions:
 
-- a **Microsoft Fabric F-SKU capacity** named `<resourcesName>fabric` (`F2` - the smallest and cheapest SKU), unless you already created it in the main deployment via `deployFabricCapacity`, in which case the existing capacity is reused,
-- a deployment script (running as the solution's managed identity) that creates a Fabric workspace (`<resourcesName>-Fabric`) assigned to that capacity, an **Eventhouse** (`opcua`)
+- a deployment script (running as the solution's managed identity) that creates a Fabric workspace (`<resourcesName>-Fabric`) assigned to the existing Fabric capacity deployed earlier, an **Eventhouse** (`opcua`)
 - an **I3X (Information Interoperability) API** container app named `<resourcesName>-i3x4kusto-fabric` (the same `ghcr.io/azure-samples/i3x4kusto:main` image used for ADX) that exposes the Eventhouse over the I3X REST API. Its URL is returned as the `i3x4KustoFabricUrl` template output.
 
 ## Use the sample dashboard

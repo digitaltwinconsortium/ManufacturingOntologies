@@ -1,24 +1,17 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "parameters": {
-    "resourcesName": {
-      "type": "string",
-      "minLength": 2,
-      "metadata": {
-        "description": "The resources base name used by the main (Azure Data Explorer) deployment, for example contoso. The Fabric template reuses the managed identity, Event Hubs namespace, Container Apps environment and fabric consumer groups created by that deployment. Deploy this template into the same resource group as the main deployment."
-      }
-    }
-  },
+  "parameters": {},
   "variables": {
-    "eventHubsNamespaceName": "[concat(parameters('resourcesName'), '-EventHubs')]",
-    "authRuleResourceId": "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', concat(parameters('resourcesName'), '-EventHubs'), 'RootManageSharedAccessKey')]",
-    "fabricCapacityName": "[toLower(concat(parameters('resourcesName'), 'fabric'))]",
-    "fabricWorkspaceName": "[concat(parameters('resourcesName'), '-Fabric')]",
+    "resourcesName": "[resourceGroup().name]",
+    "eventHubsNamespaceName": "[concat(variables('resourcesName'), '-EventHubs')]",
+    "authRuleResourceId": "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', concat(variables('resourcesName'), '-EventHubs'), 'RootManageSharedAccessKey')]",
+    "fabricCapacityName": "[toLower(concat(variables('resourcesName'), 'fabric'))]",
+    "fabricWorkspaceName": "[concat(variables('resourcesName'), '-Fabric')]",
     "fabricSetupScriptUri": "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'SetupFabric.sh')]",
     "fabricKqlUri": "https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Tools/FabricQueries/opcua_setup.kql",
     "fabricDashboardUri": "https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Tools/ADXQueries/dashboard-ontologies.json",
-    "i3xFabricContainerAppName": "[concat(parameters('resourcesName'), '-i3x4kusto-fabric')]"
+    "i3xFabricContainerAppName": "[concat(variables('resourcesName'), '-i3x4kusto-fabric')]"
   },
   "resources": [
     {
@@ -32,20 +25,20 @@
       },
       "properties": {
         "administration": {
-          "members": "[createArray(reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId)]"
+          "members": "[createArray(reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), '2018-11-30').principalId)]"
         }
       }
     },
     {
       "type": "Microsoft.Resources/deploymentScripts",
       "apiVersion": "2020-10-01",
-      "name": "[concat(parameters('resourcesName'), '-FabricSetup')]",
+      "name": "[concat(variables('resourcesName'), '-FabricSetup')]",
       "location": "[resourceGroup().location]",
       "kind": "AzureCLI",
       "identity": {
         "type": "UserAssigned",
         "userAssignedIdentities": {
-          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]": {}
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]": {}
         }
       },
       "dependsOn": [
@@ -60,7 +53,7 @@
         "environmentVariables": [
           {
             "name": "MANAGED_IDENTITY_CLIENT_ID",
-            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').clientId]"
+            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), '2018-11-30').clientId]"
           },
           {
             "name": "AZURE_TENANT_ID",
@@ -68,7 +61,7 @@
           },
           {
             "name": "RESOURCES_NAME",
-            "value": "[parameters('resourcesName')]"
+            "value": "[variables('resourcesName')]"
           },
           {
             "name": "FABRIC_CAPACITY_NAME",
@@ -105,12 +98,12 @@
       "identity": {
         "type": "UserAssigned",
         "userAssignedIdentities": {
-          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]": {}
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]": {}
         }
       },
       "properties": {
         "workloadProfileName": "Consumption",
-        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
         "configuration": {
           "activeRevisionsMode": "Single",
           "ingress": {
@@ -134,15 +127,15 @@
               "env": [
                 {
                   "name": "ADX_HOST",
-                  "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', concat(parameters('resourcesName'), '-FabricSetup')), '2020-10-01').outputs.queryServiceUri]"
+                  "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', concat(variables('resourcesName'), '-FabricSetup')), '2020-10-01').outputs.queryServiceUri]"
                 },
                 {
                   "name": "ADX_DB",
-                  "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', concat(parameters('resourcesName'), '-FabricSetup')), '2020-10-01').outputs.kqlDatabaseName]"
+                  "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', concat(variables('resourcesName'), '-FabricSetup')), '2020-10-01').outputs.kqlDatabaseName]"
                 },
                 {
                   "name": "ADX_APPLICATION_ID",
-                  "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').clientId]"
+                  "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), '2018-11-30').clientId]"
                 },
                 {
                   "name": "AZURE_TENANT_ID",
@@ -162,7 +155,7 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Resources/deploymentScripts', concat(parameters('resourcesName'), '-FabricSetup'))]"
+        "[resourceId('Microsoft.Resources/deploymentScripts', concat(variables('resourcesName'), '-FabricSetup'))]"
       ]
     }
   ],

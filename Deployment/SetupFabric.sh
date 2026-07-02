@@ -50,7 +50,11 @@ echo "Logging in with the user-assigned managed identity..."
 az login --identity --username "${MANAGED_IDENTITY_CLIENT_ID}" --output none
 
 echo "Acquiring a Microsoft Fabric access token..."
-export FABRIC_TOKEN="$(az account get-access-token --resource https://api.fabric.microsoft.com --query accessToken -o tsv)"
+# The Fabric REST APIs authenticate against the Power BI service audience
+# (https://analysis.windows.net/powerbi/api), NOT https://api.fabric.microsoft.com.
+# Requesting the wrong audience yields a token the Fabric API rejects with 401
+# "The caller is not authenticated to access this resource".
+export FABRIC_TOKEN="$(az account get-access-token --resource https://analysis.windows.net/powerbi/api --query accessToken -o tsv)"
 
 # Derive the Event Hubs namespace fully-qualified host from the connection string.
 export EVENTHUBS_FQDN="$(python3 -c "import os,re; m=re.search(r'Endpoint=sb://([^/;]+)', os.environ['EVENTHUBS_CONNECTION_STRING']); print(m.group(1) if m else '')")"
@@ -119,6 +123,27 @@ json_get() {
 find_by_name() {
 	FIND_NAME="$1" python3 -c "import json,sys,os; d=json.load(sys.stdin); print(next((i['id'] for i in d.get('value', []) if i.get('displayName','')==os.environ['FIND_NAME']), ''))"
 }
+
+# ---------------------------------------------------------------------------
+# Preflight: verify the managed identity is allowed to call the Fabric APIs
+# ---------------------------------------------------------------------------
+# A valid Entra token still gets rejected with 401/403 unless a Fabric tenant
+# admin has enabled "Service principals can use Fabric APIs" and scoped it to
+# include this managed identity. Check that up front so the failure is a single
+# clear message instead of a cascade of downstream errors.
+echo "Verifying the managed identity can call the Fabric APIs..."
+if ! fabric GET "/workspaces" >/dev/null 2>"${TMP_DIR}/preflight.err"; then
+	echo "ERROR: The managed identity is not authorized to call the Microsoft Fabric APIs." >&2
+	echo "       A Fabric tenant admin must enable the tenant setting" >&2
+	echo "       'Service principals can use Fabric APIs' (Fabric admin portal -> Tenant settings ->" >&2
+	echo "       Developer settings) and scope it to the whole organization or to a security group" >&2
+	echo "       that contains this managed identity ('${RESOURCES_NAME}-Identity')." >&2
+	echo "       Allow a few minutes for the setting to propagate, then redeploy the Fabric template" >&2
+	echo "       (it is idempotent). See fabric.md for details." >&2
+	echo "       Underlying Fabric API response:" >&2
+	sed 's/^/         /' "${TMP_DIR}/preflight.err" >&2 || true
+	exit 1
+fi
 
 # ---------------------------------------------------------------------------
 # Step 1: Workspace + capacity assignment

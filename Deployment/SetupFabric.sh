@@ -37,9 +37,10 @@
 
 set -euo pipefail
 
-EVENTHOUSE_NAME="${EVENTHOUSE_NAME:-opcua}"
-LAKEHOUSE_NAME="${LAKEHOUSE_NAME:-opcua_lake}"
-FABRIC_CONSUMER_GROUP="${FABRIC_CONSUMER_GROUP:-fabric}"
+# Exported so the inline python3 heredocs below can read them via os.environ.
+export EVENTHOUSE_NAME="${EVENTHOUSE_NAME:-opcua}"
+export LAKEHOUSE_NAME="${LAKEHOUSE_NAME:-opcua_lake}"
+export FABRIC_CONSUMER_GROUP="${FABRIC_CONSUMER_GROUP:-fabric}"
 DATA_EVENTSTREAM_NAME="eventstream_opcua_data"
 METADATA_EVENTSTREAM_NAME="eventstream_opcua_metadata"
 

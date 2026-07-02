@@ -1,5 +1,7 @@
 # Connect Azure Databricks to the Reference Solution
 
+![Architecture diagram of the reference solution](Docs/arch.png)
+
 ## Automated deployment
 
 The reference solution's deployment script can automatically deploy and configure Azure Databricks for you, as a **second analytics option next to Azure Data Explorer**. To enable Databricks, set the **Deploy Databricks** (`deployDatabricks`) parameter to `true`. ADX remains the default and is unaffected: Databricks reads the same `data` and `metadata` event hubs through a separate `databricks` consumer group, so both databases ingest the data side by side.

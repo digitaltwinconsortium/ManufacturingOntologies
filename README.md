@@ -17,8 +17,6 @@ The solution must be as efficient as possible and enable all required use cases 
 
 Interoperability is the key enabler for these requirements. The use of open standards such as OPC UA significantly helps to achieve this interoperability, which lead to the establishment of the [OPC Foundation Cloud Initiative](https://opcfoundation.org/cloud). This OPC UA Reference Solution is Microsoft's implementation of the Cloud Initiative's reference architecture.
 
-![Architecture diagram of the OPC UA reference solution](Docs/arch.png)
-
 The following articles describe how to deploy this reference solution as well as how to connect it to various Microsoft services:
 
 - [Connect Azure Data Explorer to the reference solution](adx.md) describes the end-to-end industrial IoT reference solution that uses Azure Data Explorer to store and analyze OPC UA telemetry for use cases such as condition monitoring, OEE calculation, and anomaly detection.

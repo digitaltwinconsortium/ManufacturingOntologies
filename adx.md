@@ -1,6 +1,8 @@
 
 # Connect Azure Data Explorer to the Reference Solution
 
+![Architecture diagram of the reference solution](Docs/arch.png)
+
 ## Automated deployment
 
 Select the **Deploy** button to deploy all required resources to your Azure subscription:

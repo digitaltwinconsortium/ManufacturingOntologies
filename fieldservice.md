@@ -1,5 +1,7 @@
 # Connect Microsoft Dynamics 365 Field Service to the Reference Solution
 
+![Architecture diagram of the reference solution](Docs/fieldservice.png)
+
 This integration showcases the following scenarios:
 
 - Upload assets from the manufacturing ontologies solution to Dynamics 365 Field Service.

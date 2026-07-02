@@ -2,7 +2,7 @@
 
 [Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/get-started/microsoft-fabric-overview) is an all-in-one analytics solution that covers everything from data movement to data science, analytics, and business intelligence. It offers a comprehensive suite of services, including data lake, data engineering, and data integration, all in one place. You don't even need an Azure subscription for it, let alone deploy or manage any apps or services. You can get started with Microsoft Fabric [here](https://learn.microsoft.com/en-us/fabric/get-started/fabric-trial).
 
-![Architecture diagram of the industrial IoT reference solution](Docs/fabric.png)
+![Architecture diagram of the reference solution](Docs/fabric.png)
 
 ## Automated deployment
 

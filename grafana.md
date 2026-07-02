@@ -2,6 +2,8 @@
 
 You can use Azure Managed Grafana to create a dashboard on Azure for the solution described in this article. Use Grafana within manufacturing to create dashboards that display real-time data. The following steps show you how to enable Grafana on Azure and create a dashboard with the simulated production line data from Azure Data Explorer.
 
+![Architecture diagram of the reference solution](Docs/grafana.png)
+
 ## Enable the Azure Managed Grafana service
 
 To create an Azure Managed Grafana service and configure it with permissions to access the ontologies database:

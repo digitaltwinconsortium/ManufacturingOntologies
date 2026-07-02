@@ -2,7 +2,7 @@
 
 To connect the solution Power BI, you need access to a Power BI subscription.
 
-![Architecture diagram of the reference solution](Docs/powerpi.png)
+![Architecture diagram of the reference solution](Docs/powerbi.png)
 
 To create the Power BI dashboard, complete the following steps:
 

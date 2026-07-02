@@ -181,7 +181,23 @@ if [ -z "${WORKSPACE_ID}" ]; then
 import json, os
 print(json.dumps({"displayName": os.environ["FABRIC_WORKSPACE_NAME"]}))
 PY
-	WORKSPACE_ID="$(fabric POST "/workspaces" "${TMP_DIR}/workspace.json" | json_get id)"
+	# Creating a workspace requires the separate "Service principals can create
+	# workspaces, connections, and deployment pipelines" tenant setting (disabled by
+	# default), which is distinct from "Service principals can use Fabric APIs". If only
+	# the latter is on, read calls above succeed but this POST returns 401.
+	if ! fabric POST "/workspaces" "${TMP_DIR}/workspace.json" >"${TMP_DIR}/workspace_resp.json" 2>"${TMP_DIR}/workspace.err"; then
+		echo "ERROR: Creating the Fabric workspace failed." >&2
+		echo "       The managed identity can call the Fabric APIs (the reads above succeeded) but is" >&2
+		echo "       not allowed to CREATE a workspace. A Fabric tenant admin must also enable the" >&2
+		echo "       tenant setting 'Service principals can create workspaces, connections, and" >&2
+		echo "       deployment pipelines' (Fabric admin portal -> Tenant settings -> Developer" >&2
+		echo "       settings; disabled by default) and scope it to include '${RESOURCES_NAME}-Identity'." >&2
+		echo "       Allow a few minutes to propagate, then redeploy the Fabric template (idempotent)." >&2
+		echo "       Underlying Fabric API response:" >&2
+		sed 's/^/         /' "${TMP_DIR}/workspace.err" >&2 || true
+		exit 1
+	fi
+	WORKSPACE_ID="$(json_get id <"${TMP_DIR}/workspace_resp.json")"
 fi
 echo "  workspace id: ${WORKSPACE_ID}"
 

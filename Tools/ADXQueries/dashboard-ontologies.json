@@ -34,7 +34,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "(opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, \"Europe/Berlin\"))\n"
+        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'Europe/Berlin') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, tzOffset))\n"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -511,7 +511,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "(opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 6000, \"Europe/Berlin\"))"
+        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'Europe/Berlin') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 6000, tzOffset))"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -872,7 +872,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "(opcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 6000, \"Europe/Berlin\"))\n"
+        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'Europe/Berlin') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 6000, tzOffset))\n"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -932,7 +932,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "(opcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 6000, \"Europe/Berlin\"))\n"
+        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'Europe/Berlin') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 6000, tzOffset))\n"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -992,7 +992,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "(opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 10000, \"America/Los_Angeles\"))"
+        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'America/Los_Angeles') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 10000, tzOffset))"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1052,7 +1052,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "(opcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 10000, \"America/Los_Angeles\"))"
+        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'America/Los_Angeles') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 10000, tzOffset))"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1112,7 +1112,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "(opcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 10000, \"America/Los_Angeles\"))\n"
+        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'America/Los_Angeles') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 10000, tzOffset))\n"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1172,7 +1172,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "(opcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, \"Europe/Berlin\"))"
+        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'Europe/Berlin') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, tzOffset))"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1228,7 +1228,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "(opcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, \"Europe/Berlin\"))\n"
+        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'Europe/Berlin') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, tzOffset))\n"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1284,7 +1284,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "(opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, \"America/Los_Angeles\"))\n"
+        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'America/Los_Angeles') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, tzOffset))\n"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1340,7 +1340,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "(opcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, \"America/Los_Angeles\"))"
+        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'America/Los_Angeles') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, tzOffset))"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1396,7 +1396,7 @@
           "_endTime",
           "_startTime"
         ],
-        "text": "(opcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, \"America/Los_Angeles\"))\n"
+        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'America/Los_Angeles') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, tzOffset))\n"
       },
       "visualOptions": {
         "multipleYAxes": {

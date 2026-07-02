@@ -121,5 +121,4 @@ let oeeForStations = stations
 toscalar(oeeForStations)
 }
 
-// Shades the production-shift breaks (14:00-15:00 and 06:00-07:00 in factory-local time) so the dashboard shows why no data is flowing. tzOffset (a DST-aware timespan) is computed per site by the callers.
-.create-or-alter function ShiftBreak(startTime:datetime,endTime:datetime,bandValue:real,tzOffset:timespan) { range Timestamp1 from startTime to endTime step 1m | extend localHourOfDay = hourofday(Timestamp1 + tzOffset) | extend Break = iff(localHourOfDay == 14 or localHourOfDay == 6, bandValue, real(null)) | project Timestamp1, Break }
+.create-or-alter function ShiftBreak(startTime:datetime,endTime:datetime,bandValue:real,tzOffset:timespan) { print Steps = range(startTime, endTime, 1m) | mv-expand Timestamp1 = Steps to typeof(datetime) | extend localHourOfDay = hourofday(Timestamp1 + tzOffset) | extend Break = iff(localHourOfDay == 14 or localHourOfDay == 6, bandValue, real(null)) | project Timestamp1, Break }

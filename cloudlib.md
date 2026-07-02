@@ -1,4 +1,4 @@
-# Import an OPC UA Information Models from the UA Cloud Library into Azure Services
+# Import OPC UA Information Models from the UA Cloud Library
 
 The UA Cloud Library is a standardized, Internet‑hosted (by the OPC Foundation) repository for OPC UA information models. It was developed by a joint working group of the OPC Foundation and CESMII to make OPC UA models globally discoverable, reusable, and accessible via web APIs.
 

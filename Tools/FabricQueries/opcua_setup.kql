@@ -116,20 +116,10 @@ let stations = opcua_metadata_lkv
 | summarize by Workcell
 | project station = tostring(Workcell);
 let oeeForStations = stations
-| partition hint.strategy=legacy by station
-(
-  extend oee = toscalar(CalculateOEEForStation(station, location, idealCycleTime, shiftStartTime, shiftEndTime))
-)
+| partition hint.strategy=legacy by station ( extend oee = toscalar(CalculateOEEForStation(station, location, idealCycleTime, shiftStartTime, shiftEndTime)) )
 | summarize min(oee);
 toscalar(oeeForStations)
 }
 
-// Shades the periods between production shifts so it is clear on the dashboard why no data is flowing.
-.create-or-alter function ShiftBreak(startTime:datetime,endTime:datetime,bandValue:real,tzOffset:timespan) {
-// Shift schedule (factory-local time): Morning 07:00-14:00, Afternoon 15:00-22:00, Night 23:00-06:00.
-// Breaks with no production: 14:00-15:00 and 06:00-07:00. Timestamps are UTC; tzOffset is the production line's current offset from UTC, which the callers compute per site with datetime_utc_to_local() so it is DST-aware.
-range Timestamp1 from startTime to endTime step 1m
-| extend localHourOfDay = hourofday(Timestamp1 + tzOffset)
-| extend ShiftBreak = iff(localHourOfDay == 14 or localHourOfDay == 6, bandValue, real(null))
-| project Timestamp1, ShiftBreak
-}
+// Shades the production-shift breaks (14:00-15:00 and 06:00-07:00 in factory-local time) so the dashboard shows why no data is flowing. tzOffset (a DST-aware timespan) is computed per site by the callers.
+.create-or-alter function ShiftBreak(startTime:datetime,endTime:datetime,bandValue:real,tzOffset:timespan) { range Timestamp1 from startTime to endTime step 1m | extend localHourOfDay = hourofday(Timestamp1 + tzOffset) | extend Break = iff(localHourOfDay == 14 or localHourOfDay == 6, bandValue, real(null)) | project Timestamp1, Break }

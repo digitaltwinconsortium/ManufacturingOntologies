@@ -125,12 +125,11 @@ toscalar(oeeForStations)
 }
 
 // Shades the periods between production shifts so it is clear on the dashboard why no data is flowing.
-.create-or-alter function ShiftGapBand(startTime:datetime,endTime:datetime,bandValue:real) {
+.create-or-alter function ShiftBreak(startTime:datetime,endTime:datetime,bandValue:real,timezone:string) {
 // Shift schedule (factory-local time): Morning 07:00-14:00, Afternoon 15:00-22:00, Night 23:00-06:00.
-// Gaps with no production: 14:00-15:00 and 06:00-07:00. Timestamps are UTC; tzOffsetHours converts UTC to the deployed FactoryTimeZone (Europe/Berlin ~ +1).
-let tzOffsetHours = 1;
+// Breaks with no production: 14:00-15:00 and 06:00-07:00. Timestamps are UTC; datetime_utc_to_local converts to the production line's timezone (e.g. Europe/Berlin, America/Los_Angeles) and handles DST.
 range Timestamp1 from startTime to endTime step 1m
-| extend localHourOfDay = hourofday(Timestamp1 + tzOffsetHours * 1h)
-| extend GapBand = iff(localHourOfDay == 14 or localHourOfDay == 6, bandValue, real(null))
-| project Timestamp1, GapBand
+| extend localHourOfDay = hourofday(datetime_utc_to_local(Timestamp1, timezone))
+| extend ShiftBreak = iff(localHourOfDay == 14 or localHourOfDay == 6, bandValue, real(null))
+| project Timestamp1, ShiftBreak
 }

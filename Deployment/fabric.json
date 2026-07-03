@@ -2,15 +2,16 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "forceUpdateTime": {
+    "baseTime": {
       "type": "string",
       "defaultValue": "[utcNow()]",
       "metadata": {
-        "description": "Do not set manually. Defaults to the current UTC time so the Fabric setup deployment script re-runs on every deployment (deployment scripts otherwise run only once and are skipped on redeploy, which would silently create nothing)."
+        "description": "Do not provide a value! This value is set automatically to the current UTC time and is used only to make the Fabric setup deployment script run on every deployment. (utcNow() can only be used in a parameter default, so it is surfaced to the template through the 'forceUpdateTime' variable.)"
       }
     }
   },
   "variables": {
+    "forceUpdateTime": "[parameters('baseTime')]",
     "resourcesName": "[resourceGroup().name]",
     "eventHubsNamespaceName": "[concat(variables('resourcesName'), '-EventHubs')]",
     "authRuleResourceId": "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', concat(variables('resourcesName'), '-EventHubs'), 'RootManageSharedAccessKey')]",
@@ -54,7 +55,7 @@
       ],
       "properties": {
         "azCliVersion": "2.61.0",
-        "forceUpdateTag": "[parameters('forceUpdateTime')]",
+        "forceUpdateTag": "[variables('forceUpdateTime')]",
         "timeout": "PT1H",
         "retentionInterval": "P1D",
         "cleanupPreference": "OnSuccess",

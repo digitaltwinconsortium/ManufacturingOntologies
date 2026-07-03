@@ -140,6 +140,25 @@ find_by_name() {
 	FIND_NAME="$1" python3 -c "import json,sys,os; d=json.load(sys.stdin); print(next((i['id'] for i in d.get('value', []) if i.get('displayName','')==os.environ['FIND_NAME']), ''))"
 }
 
+# Find a Fabric connection id by display name, paging through ALL connections. The connections list
+# is tenant-wide and paginated, so a single page (what find_by_name sees) can miss a connection that
+# exists on a later page - which previously caused a 'DuplicateConnectionName' 409 on recreate.
+find_connection_id_by_name() {
+	local name="$1"
+	local path="/connections"
+	while [ -n "${path}" ]; do
+		fabric GET "${path}" >"${TMP_DIR}/connections_page.json"
+		local match
+		match="$(FIND_NAME="${name}" python3 -c "import json,sys,os; d=json.load(open('${TMP_DIR}/connections_page.json')); print(next((i['id'] for i in d.get('value', []) if i.get('displayName','')==os.environ['FIND_NAME']), ''))")"
+		if [ -n "${match}" ]; then
+			printf '%s' "${match}"
+			return 0
+		fi
+		path="$(python3 -c "import json; d=json.load(open('${TMP_DIR}/connections_page.json')); print(d.get('continuationUri','') or '')")"
+	done
+	return 0
+}
+
 # ---------------------------------------------------------------------------
 # Preflight: verify the managed identity is allowed to call the Fabric APIs
 # ---------------------------------------------------------------------------
@@ -430,11 +449,22 @@ create_eventstream() {
 	# connection from an earlier run can linger under the same name; reusing it makes the eventstream
 	# reference a dead id ("cloud connection can no longer be found"). Recreating guarantees the
 	# eventstream (created right after, in this same run) points at a live connection.
+	# Delete any existing connection with this display name (searching ALL pages), then create a fresh
+	# one. Reusing a possibly-broken connection makes the eventstream reference a dead id; a stale name
+	# left behind causes a 'DuplicateConnectionName' 409 on recreate. Loop until the name is free.
 	local connection_id
-	connection_id="$(fabric GET "/connections" | find_by_name "${stream_name}-source")"
-	if [ -n "${connection_id}" ]; then
+	local attempt
+	for attempt in 1 2 3 4 5; do
+		connection_id="$(find_connection_id_by_name "${stream_name}-source")"
+		if [ -z "${connection_id}" ]; then
+			break
+		fi
 		echo "    removing stale Event Hubs connection '${stream_name}-source' (${connection_id})..."
-		fabric DELETE "/connections/${connection_id}" >/dev/null 2>&1 || echo "    warning: could not delete existing connection '${stream_name}-source'; will attempt to recreate anyway."
+		fabric DELETE "/connections/${connection_id}" >/dev/null 2>&1 || echo "    warning: could not delete existing connection '${stream_name}-source' (attempt ${attempt})."
+		sleep 3
+	done
+	if [ -n "${connection_id}" ]; then
+		echo "    warning: connection '${stream_name}-source' still present after delete attempts; create may fail with a duplicate-name error." >&2
 	fi
 	DISPLAY_NAME="${stream_name}-source" EH="${event_hub}" \
 	EH_META_FILE="${TMP_DIR}/eh_conn_meta.json" \

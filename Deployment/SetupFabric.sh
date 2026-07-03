@@ -402,18 +402,43 @@ if chosen_method is None:
 	sys.stderr.write("\n")
 	sys.exit(2)
 
-# The token for SharedAccessSignature / key for Key credentials is the Event Hub connection string
-# (namespace SAS key + EntityPath), which is what these connectors accept.
-eh_token = conn_str if "entitypath=" in conn_str.lower() else conn_str.rstrip(";") + ";EntityPath=" + event_hub_name
+# Generate an Event Hubs SAS token from the namespace connection string. Fabric's
+# SharedAccessSignature credential expects an actual SAS token string (not a connection string);
+# passing the connection string fails with IncorrectCredentials/AccessUnauthorized.
+import base64, hashlib, hmac, time, urllib.parse
+
+def parse_conn_str(cs):
+	parts = {}
+	for seg in cs.split(";"):
+		if "=" in seg:
+			k, v = seg.split("=", 1)
+			parts[k.strip().lower()] = v.strip()
+	return parts
+
+cs_parts = parse_conn_str(conn_str)
+key_name = cs_parts.get("sharedaccesskeyname", "")
+key_value = cs_parts.get("sharedaccesskey", "")
+if not key_name or not key_value:
+	sys.stderr.write("ERROR: EVENTHUBS_CONNECTION_STRING is missing SharedAccessKeyName/SharedAccessKey; cannot build a SAS token.\n")
+	sys.exit(4)
+
+# Scope the token to the specific event hub: https://<namespace>/<eventHubName>
+resource_uri = "https://%s/%s" % (namespace_fqdn, event_hub_name)
+encoded_uri = urllib.parse.quote_plus(resource_uri)
+expiry = str(int(time.time()) + 365 * 24 * 60 * 60)  # 1 year
+string_to_sign = (encoded_uri + "\n" + expiry).encode("utf-8")
+signature = base64.b64encode(hmac.new(key_value.encode("utf-8"), string_to_sign, hashlib.sha256).digest())
+sas_token = "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s" % (
+	encoded_uri, urllib.parse.quote(signature), expiry, key_name)
 
 # Build the credential using whatever type the connector supports (prefer SAS, then Key, then Basic).
 supported_creds = [c.lower() for c in (meta.get("supportedCredentialTypes") or [])]
 if not supported_creds or "sharedaccesssignature" in supported_creds:
-	credentials = {"credentialType": "SharedAccessSignature", "token": eh_token}
+	credentials = {"credentialType": "SharedAccessSignature", "token": sas_token}
 elif "key" in supported_creds:
-	credentials = {"credentialType": "Key", "key": eh_token}
+	credentials = {"credentialType": "Key", "key": key_value}
 elif "basic" in supported_creds:
-	credentials = {"credentialType": "Basic", "username": "RootManageSharedAccessKey", "password": eh_token}
+	credentials = {"credentialType": "Basic", "username": key_name, "password": key_value}
 else:
 	sys.stderr.write("ERROR: The Event Hubs connector ('%s') does not support a credential type this script can supply.\n" % meta.get("type", ""))
 	sys.stderr.write("       Supported credential types: %s\n" % ", ".join(meta.get("supportedCredentialTypes") or []))

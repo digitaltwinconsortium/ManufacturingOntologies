@@ -297,9 +297,9 @@ done
 # failed with 'Kind: AzureEventHubs is not supported'; the connector is actually named 'EventHub').
 echo "Discovering the Azure Event Hubs connection type from the Fabric API..."
 fabric GET "/connections/supportedConnectionTypes?showAllCreationMethods=true" >"${TMP_DIR}/supported_conn_types.json"
-python3 - <"${TMP_DIR}/supported_conn_types.json" >"${TMP_DIR}/eh_conn_meta.json" <<'PY'
-import json, sys
-data = json.load(sys.stdin)
+SUPPORTED_TYPES_FILE="${TMP_DIR}/supported_conn_types.json" python3 - >"${TMP_DIR}/eh_conn_meta.json" <<'PY'
+import json, os
+data = json.load(open(os.environ["SUPPORTED_TYPES_FILE"]))
 types = data.get("value", [])
 def score(t):
 	n = (t.get("type", "") or "").lower()
@@ -318,7 +318,7 @@ for t in types:
 	s = score(t)
 	if s > best_score:
 		best, best_score = t, s
-json.dump(best or {}, sys.stdout)
+print(json.dumps(best or {}))
 PY
 EH_CONN_TYPE="$(json_get type <"${TMP_DIR}/eh_conn_meta.json")"
 if [ -z "${EH_CONN_TYPE}" ]; then

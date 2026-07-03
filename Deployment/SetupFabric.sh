@@ -556,7 +556,7 @@ PY
 
 	# The eventstream topology: Azure Event Hub source -> Eventhouse DirectIngestion destination.
 	ES_NAME="${stream_name}" CONNECTION_ID="${connection_id}" CONSUMER_GROUP="${FABRIC_CONSUMER_GROUP}" \
-	WORKSPACE_ID="${WORKSPACE_ID}" EVENTHOUSE_ID="${EVENTHOUSE_ID}" \
+	WORKSPACE_ID="${WORKSPACE_ID}" EVENTHOUSE_ID="${EVENTHOUSE_ID}" KQL_DATABASE_ID="${KQL_DATABASE_ID}" \
 	RAW_TABLE="${raw_table}" MAPPING="${mapping}" \
 	CREATE_FILE="${TMP_DIR}/eventstream_create.json" \
 	python3 - <<'PY'
@@ -589,9 +589,12 @@ topology = {
 			"name": os.environ["ES_NAME"] + "-eventhouse",
 			"type": "Eventhouse",
 			"properties": {
+				# itemId is the KQL DATABASE item id. Although the API docs describe it as the
+				# "Eventhouse item id", in practice the DirectIngestion destination resolves the
+				# Eventhouse/KQL database (and ingests) only when itemId points at the KQL database.
 				"dataIngestionMode": "DirectIngestion",
 				"workspaceId": os.environ["WORKSPACE_ID"],
-				"itemId": os.environ["EVENTHOUSE_ID"],
+				"itemId": os.environ["KQL_DATABASE_ID"],
 				"tableName": os.environ["RAW_TABLE"],
 				"connectionName": os.environ["ES_NAME"] + "-ingest",
 				"mappingRuleName": os.environ["MAPPING"],
@@ -626,7 +629,7 @@ PY
 	local new_es
 	new_es="$(fabric GET "/workspaces/${WORKSPACE_ID}/eventstreams" | find_by_name "${stream_name}")"
 	if [ -n "${new_es}" ]; then
-		echo "    verifying eventstream '${stream_name}' destination (expected Eventhouse itemId=${EVENTHOUSE_ID}):"
+		echo "    verifying eventstream '${stream_name}' destination (expected KQL database itemId=${KQL_DATABASE_ID}):"
 		fabric GET "/workspaces/${WORKSPACE_ID}/eventstreams/${new_es}/topology" \
 			| python3 -c "import json,sys; d=json.load(sys.stdin); [print('      destination', x.get('name'), 'itemId=', x.get('properties',{}).get('itemId'), 'status=', x.get('status'), 'error=', json.dumps(x.get('error'))) for x in d.get('destinations', [])]" || true
 	fi
@@ -635,6 +638,49 @@ PY
 echo "Creating the OPC UA eventstreams..."
 create_eventstream "${DATA_EVENTSTREAM_NAME}" "data" "opcua_raw" "opcua_mapping"
 create_eventstream "${METADATA_EVENTSTREAM_NAME}" "metadata" "opcua_metadata_raw" "opcua_metadata_mapping"
+
+# The Eventhouse DirectIngestion connection provisions asynchronously and is briefly reported as
+# 'Warning' right after the eventstream is created; ingestion into opcua_raw starts once it becomes
+# healthy (usually within a couple of minutes). Poll opcua_raw for rows so the deployment confirms
+# data is actually flowing rather than leaving it ambiguous. This is best-effort (non-fatal): if no
+# rows appear in the window it may just need a little longer, or the source may not be producing yet.
+echo "Waiting for data to start flowing into 'opcua_raw' (DirectIngestion connection initializes asynchronously)..."
+OPCUA_ROWS="0"
+for _ in $(seq 1 24); do
+	sleep 15
+	OPCUA_ROWS="$(KUSTO_DB="${KQL_DATABASE_NAME}" KUSTO_URI="${QUERY_URI}" python3 - <<'PY'
+import json, os, sys, urllib.error, urllib.request
+body = json.dumps({"db": os.environ["KUSTO_DB"], "csl": "opcua_raw | count"}).encode("utf-8")
+req = urllib.request.Request(
+	os.environ["KUSTO_URI"].rstrip("/") + "/v1/rest/query",
+	data=body,
+	headers={"Authorization": "Bearer " + os.environ["KUSTO_TOKEN"], "Content-Type": "application/json", "Accept": "application/json"},
+	method="POST",
+)
+try:
+	with urllib.request.urlopen(req) as response:
+		result = json.loads(response.read() or b"{}")
+	count = 0
+	for table in result.get("Tables", []):
+		for row in table.get("Rows", []):
+			if row:
+				count = row[0]
+	print(count)
+except Exception:
+	print(0)
+PY
+)"
+	if [ "${OPCUA_ROWS}" != "0" ] && [ -n "${OPCUA_ROWS}" ]; then
+		break
+	fi
+done
+if [ "${OPCUA_ROWS}" != "0" ] && [ -n "${OPCUA_ROWS}" ]; then
+	echo "  ingestion confirmed: 'opcua_raw' now has ${OPCUA_ROWS} rows."
+else
+	echo "  note: no rows in 'opcua_raw' yet. The DirectIngestion connection may still be initializing;"
+	echo "        wait a few minutes and check 'opcua_raw | count'. Also confirm the edge/simulation is"
+	echo "        publishing to the '${EVENTHUBS_NAMESPACE}' event hubs."
+fi
 
 # ---------------------------------------------------------------------------
 # Step 5: Lakehouse + OneLake shortcuts

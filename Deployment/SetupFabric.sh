@@ -334,13 +334,13 @@ create_eventstream() {
 	local stream_name="$1" event_hub="$2" raw_table="$3" mapping="$4"
 	echo "  creating eventstream '${stream_name}' (${event_hub} -> ${raw_table})..."
 
-	# Idempotency: the deployment script re-runs on every deployment, so skip an eventstream
-	# that already exists (recreating it would return a conflict, and that error is fatal).
+	# Idempotency: the deployment script re-runs on every deployment. If the eventstream already
+	# exists we update its definition (below) instead of recreating it, so fixes to the topology
+	# take effect on redeploy without requiring a manual delete.
 	local existing_es
 	existing_es="$(fabric GET "/workspaces/${WORKSPACE_ID}/eventstreams" | find_by_name "${stream_name}")"
 	if [ -n "${existing_es}" ]; then
-		echo "    eventstream '${stream_name}' already exists (${existing_es}); skipping."
-		return 0
+		echo "    eventstream '${stream_name}' already exists (${existing_es}); its definition will be updated."
 	fi
 
 	# A Fabric connection for the Azure Event Hubs source. The connector's exact creation method
@@ -468,8 +468,10 @@ PY
 
 	# The eventstream topology: Azure Event Hub source -> Eventhouse DirectIngestion destination.
 	ES_NAME="${stream_name}" CONNECTION_ID="${connection_id}" CONSUMER_GROUP="${FABRIC_CONSUMER_GROUP}" \
-	WORKSPACE_ID="${WORKSPACE_ID}" EVENTHOUSE_ID="${EVENTHOUSE_ID}" RAW_TABLE="${raw_table}" MAPPING="${mapping}" \
-	python3 - >"${TMP_DIR}/eventstream.json" <<'PY'
+	WORKSPACE_ID="${WORKSPACE_ID}" EVENTHOUSE_ID="${EVENTHOUSE_ID}" \
+	RAW_TABLE="${raw_table}" MAPPING="${mapping}" \
+	CREATE_FILE="${TMP_DIR}/eventstream_create.json" UPDATE_FILE="${TMP_DIR}/eventstream_update.json" \
+	python3 - <<'PY'
 import base64, json, os
 
 source_node = os.environ["ES_NAME"] + "-source"
@@ -518,18 +520,23 @@ platform = base64.b64encode(json.dumps({
 	"metadata": {"type": "Eventstream", "displayName": os.environ["ES_NAME"]},
 	"config": {"version": "2.0", "logicalId": "00000000-0000-0000-0000-000000000000"},
 }).encode("utf-8")).decode()
-print(json.dumps({
+parts = [
+	{"path": "eventstream.json", "payload": definition, "payloadType": "InlineBase64"},
+	{"path": ".platform", "payload": platform, "payloadType": "InlineBase64"},
+]
+# Create body (POST /items) and updateDefinition body (POST /items/{id}/updateDefinition).
+open(os.environ["CREATE_FILE"], "w").write(json.dumps({
 	"displayName": os.environ["ES_NAME"],
 	"type": "Eventstream",
-	"definition": {
-		"parts": [
-			{"path": "eventstream.json", "payload": definition, "payloadType": "InlineBase64"},
-			{"path": ".platform", "payload": platform, "payloadType": "InlineBase64"},
-		]
-	},
+	"definition": {"parts": parts},
 }))
+open(os.environ["UPDATE_FILE"], "w").write(json.dumps({"definition": {"parts": parts}}))
 PY
-	fabric POST "/workspaces/${WORKSPACE_ID}/items" "${TMP_DIR}/eventstream.json" >/dev/null || { echo "    error: could not create eventstream ${stream_name}. Without it the Eventhouse tables stay empty. See the Fabric API error above." >&2; exit 1; }
+	if [ -n "${existing_es}" ]; then
+		fabric POST "/workspaces/${WORKSPACE_ID}/eventstreams/${existing_es}/updateDefinition" "${TMP_DIR}/eventstream_update.json" >/dev/null || { echo "    error: could not update eventstream ${stream_name}. See the Fabric API error above." >&2; exit 1; }
+	else
+		fabric POST "/workspaces/${WORKSPACE_ID}/items" "${TMP_DIR}/eventstream_create.json" >/dev/null || { echo "    error: could not create eventstream ${stream_name}. Without it the Eventhouse tables stay empty. See the Fabric API error above." >&2; exit 1; }
+	fi
 }
 
 echo "Creating the OPC UA eventstreams..."

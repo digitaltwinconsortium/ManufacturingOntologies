@@ -121,4 +121,4 @@ let oeeForStations = stations
 toscalar(oeeForStations)
 }
 
-.create-or-alter function ShiftBreak(startTime:datetime,endTime:datetime,bandValue:real,tzOffset:timespan) { print Steps = range(startTime, endTime, 1m) | mv-expand Timestamp1 = Steps to typeof(datetime) | extend localHourOfDay = hourofday(Timestamp1 + tzOffset) | extend Break = iff(localHourOfDay == 14 or localHourOfDay == 6, bandValue, real(null)) | project Timestamp1, Break }
+.create-or-alter function ShiftBreak(startTime:datetime,endTime:datetime,bandValue:real,tzOffset:timespan) { print Steps = range(startTime, endTime, 1m) | mv-expand Timestamp1 = Steps to typeof(datetime) | extend localHourOfDay = hourofday(Timestamp1 + tzOffset) | where localHourOfDay == 14 or localHourOfDay == 6 | extend Break = bandValue | project Timestamp1, Break }

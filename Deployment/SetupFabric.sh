@@ -286,9 +286,9 @@ done
 # Step 4: Event Hubs connection + eventstreams (Eventhouse DirectIngestion)
 #
 # NOTE: The Fabric connection and eventstream-topology payloads are the most version-sensitive
-# part of the Fabric API. They are attempted best-effort: if the live API rejects a payload, the
-# script logs guidance and continues, leaving the Eventhouse/KQL/Lakehouse in place so the two
-# eventstreams can be completed manually following fabric.md.
+# part of the Fabric API, and they are what actually pump data into the Eventhouse. If either
+# call fails the script now stops with the underlying Fabric API error, because a deployment that
+# "succeeds" while leaving these out produces an Eventhouse whose tables are silently empty.
 # ---------------------------------------------------------------------------
 
 create_eventstream() {
@@ -322,7 +322,7 @@ print(json.dumps({
 }))
 PY
 	local connection_id
-	connection_id="$(fabric POST "/connections" "${TMP_DIR}/connection.json" | json_get id)" || { echo "    warning: could not create the Event Hubs connection for ${stream_name}; create the eventstream manually (see fabric.md)."; return 0; }
+	connection_id="$(fabric POST "/connections" "${TMP_DIR}/connection.json" | json_get id)" || { echo "    error: could not create the Event Hubs connection for ${stream_name}. Without it the Eventhouse tables stay empty. See the Fabric API error above." >&2; exit 1; }
 
 	# The eventstream topology: Azure Event Hub source -> Eventhouse DirectIngestion destination.
 	ES_NAME="${stream_name}" CONNECTION_ID="${connection_id}" CONSUMER_GROUP="${FABRIC_CONSUMER_GROUP}" \
@@ -331,6 +331,7 @@ PY
 import base64, json, os
 
 source_node = os.environ["ES_NAME"] + "-source"
+stream_node = os.environ["ES_NAME"] + "-stream"
 topology = {
 	"sources": [
 		{
@@ -341,6 +342,14 @@ topology = {
 				"consumerGroupName": os.environ["CONSUMER_GROUP"],
 				"inputSerialization": {"type": "Json", "properties": {"encoding": "UTF8"}},
 			},
+		}
+	],
+	"streams": [
+		{
+			"name": stream_node,
+			"type": "DefaultStream",
+			"properties": {},
+			"inputNodes": [{"name": source_node}],
 		}
 	],
 	"destinations": [
@@ -355,11 +364,11 @@ topology = {
 				"connectionName": os.environ["ES_NAME"] + "-ingest",
 				"mappingRuleName": os.environ["MAPPING"],
 			},
-			"inputNodes": [{"name": source_node}],
+			"inputNodes": [{"name": stream_node}],
 		}
 	],
 	"operators": [],
-	"compatibilityLevel": "1.0",
+	"compatibilityLevel": "1.1",
 }
 definition = base64.b64encode(json.dumps(topology).encode("utf-8")).decode()
 platform = base64.b64encode(json.dumps({
@@ -378,7 +387,7 @@ print(json.dumps({
 	},
 }))
 PY
-	fabric POST "/workspaces/${WORKSPACE_ID}/items" "${TMP_DIR}/eventstream.json" >/dev/null || echo "    warning: could not create eventstream ${stream_name}; create it manually (see fabric.md)."
+	fabric POST "/workspaces/${WORKSPACE_ID}/items" "${TMP_DIR}/eventstream.json" >/dev/null || { echo "    error: could not create eventstream ${stream_name}. Without it the Eventhouse tables stay empty. See the Fabric API error above." >&2; exit 1; }
 }
 
 echo "Creating the OPC UA eventstreams..."

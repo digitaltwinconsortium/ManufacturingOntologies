@@ -19,7 +19,7 @@
   "BrokerMetadataTopic": "metadata",
   "SendUAMetadata": true,
   "SendUAStatus": false,
-  "MetadataSendInterval": 43200,
+  "MetadataSendInterval": 300,
   "BrokerCommandTopic": null,
   "BrokerDataReceivedTopic": null,
   "BrokerResponseTopic": null,

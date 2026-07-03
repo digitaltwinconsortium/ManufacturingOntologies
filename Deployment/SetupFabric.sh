@@ -231,10 +231,27 @@ if [ -z "${EVENTHOUSE_ID}" ]; then
 fi
 echo "  eventhouse id: ${EVENTHOUSE_ID}"
 
-# The eventhouse auto-creates a default KQL database with the same name. Read its query endpoint and id.
-EVENTHOUSE_DETAILS="$(fabric GET "/workspaces/${WORKSPACE_ID}/eventhouses/${EVENTHOUSE_ID}")"
-QUERY_URI="$(echo "${EVENTHOUSE_DETAILS}" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('properties',{}).get('queryServiceUri',''))")"
-KQL_DATABASE_ID="$(echo "${EVENTHOUSE_DETAILS}" | python3 -c "import json,sys; d=json.load(sys.stdin); ids=d.get('properties',{}).get('databasesItemIds',[]); print(ids[0] if ids else '')")"
+# The eventhouse auto-creates a default KQL database, but its query endpoint and database id are
+# populated asynchronously - they are often empty right after creation. Poll until both are present,
+# otherwise the KQL setup below would POST to an empty query URI and silently create nothing (which
+# leaves the tables empty and the eventstream destination unable to resolve the KQL database).
+echo "Waiting for the eventhouse query endpoint and KQL database to become available..."
+QUERY_URI=""
+KQL_DATABASE_ID=""
+for _ in $(seq 1 60); do
+	EVENTHOUSE_DETAILS="$(fabric GET "/workspaces/${WORKSPACE_ID}/eventhouses/${EVENTHOUSE_ID}")"
+	QUERY_URI="$(echo "${EVENTHOUSE_DETAILS}" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('properties',{}).get('queryServiceUri',''))")"
+	KQL_DATABASE_ID="$(echo "${EVENTHOUSE_DETAILS}" | python3 -c "import json,sys; d=json.load(sys.stdin); ids=d.get('properties',{}).get('databasesItemIds',[]); print(ids[0] if ids else '')")"
+	if [ -n "${QUERY_URI}" ] && [ -n "${KQL_DATABASE_ID}" ]; then
+		break
+	fi
+	sleep 5
+done
+if [ -z "${QUERY_URI}" ] || [ -z "${KQL_DATABASE_ID}" ]; then
+	echo "ERROR: The eventhouse '${EVENTHOUSE_NAME}' did not expose a query endpoint / KQL database in time." >&2
+	echo "       queryServiceUri='${QUERY_URI}' databasesItemIds[0]='${KQL_DATABASE_ID}'. Cannot create tables or ingest." >&2
+	exit 1
+fi
 KQL_DATABASE_NAME="$(fabric GET "/workspaces/${WORKSPACE_ID}/kqlDatabases/${KQL_DATABASE_ID}" | json_get displayName)"
 echo "  KQL database: ${KQL_DATABASE_NAME} (${KQL_DATABASE_ID})"
 echo "  query endpoint: ${QUERY_URI}"
@@ -255,7 +272,7 @@ PY
 
 # Submit the whole file as one database script via the Kusto management API.
 KUSTO_DB="${KQL_DATABASE_NAME}" KUSTO_URI="${QUERY_URI}" python3 - "${TMP_DIR}/opcua_setup.kql" <<'PY'
-import json, os, sys, urllib.request
+import json, os, sys, urllib.error, urllib.request
 
 with open(sys.argv[1], "r", encoding="utf-8") as f:
 	kql = f.read()
@@ -267,8 +284,12 @@ req = urllib.request.Request(
 	headers={"Authorization": "Bearer " + os.environ["KUSTO_TOKEN"], "Content-Type": "application/json", "Accept": "application/json"},
 	method="POST",
 )
-with urllib.request.urlopen(req) as response:
-	response.read()
+try:
+	with urllib.request.urlopen(req) as response:
+		response.read()
+except urllib.error.HTTPError as error:
+	sys.stderr.write("Kusto management call failed HTTP %s: %s\n" % (error.code, error.read().decode("utf-8", "replace")))
+	sys.exit(1)
 PY
 
 # Enable OneLake availability on the final tables so the Lakehouse shortcuts can read them as Parquet.

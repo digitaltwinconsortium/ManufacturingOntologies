@@ -291,49 +291,44 @@ done
 # "succeeds" while leaving these out produces an Eventhouse whose tables are silently empty.
 # ---------------------------------------------------------------------------
 
-# Discover the exact Fabric connection identifiers for Azure Event Hubs. The connection
-# "type", the creation-method "name", and the parameter names (namespace / event hub name)
-# are connector-specific and evolve over time, so we read them from the live API instead of
-# hardcoding (hardcoded values previously failed with 'Kind: AzureEventHubs is not supported').
+# Discover the exact Fabric connection metadata for Azure Event Hubs. The connection "type",
+# the creation-method "name", and the parameter names are connector-specific and evolve over
+# time, so we read them from the live API instead of hardcoding (hardcoded values previously
+# failed with 'Kind: AzureEventHubs is not supported'; the connector is actually named 'EventHub').
 echo "Discovering the Azure Event Hubs connection type from the Fabric API..."
-EH_CONN_INFO="$(fabric GET "/connections/supportedConnectionTypes?showAllCreationMethods=true" | python3 -c "
+fabric GET "/connections/supportedConnectionTypes?showAllCreationMethods=true" >"${TMP_DIR}/supported_conn_types.json"
+python3 - <"${TMP_DIR}/supported_conn_types.json" >"${TMP_DIR}/eh_conn_meta.json" <<'PY'
 import json, sys
 data = json.load(sys.stdin)
+types = data.get("value", [])
+def score(t):
+	n = (t.get("type", "") or "").lower()
+	if "iothub" in n:
+		return -1
+	if n == "eventhub":
+		return 3
+	if n == "eventhubs":
+		return 2
+	if "eventhub" in n:
+		return 1
+	return -1
 best = None
-for ct in data.get('value', []):
-	t = ct.get('type', '')
-	if 'eventhub' in t.lower():
-		# Prefer the connector whose type is exactly an Event Hubs connector (not IoT Hub etc.).
-		if best is None or t.lower() == 'azureeventhubs':
-			best = ct
-if not best:
-	sys.exit(0)
-methods = best.get('creationMethods') or []
-method = methods[0] if methods else {}
-params = [p.get('name', '') for p in (method.get('parameters') or [])]
-def pick(cands):
-	for c in cands:
-		for p in params:
-			if p.lower() == c:
-				return p
-	return ''
-ns = pick(['namespace', 'servername', 'server', 'host'])
-eh = pick(['eventhubname', 'entitypath', 'eventhub', 'path'])
-print('\t'.join([best.get('type', ''), method.get('name', ''), ns, eh]))
-")"
-EH_CONN_TYPE="$(printf '%s' "${EH_CONN_INFO}" | cut -f1)"
-EH_CONN_METHOD="$(printf '%s' "${EH_CONN_INFO}" | cut -f2)"
-EH_CONN_NS_PARAM="$(printf '%s' "${EH_CONN_INFO}" | cut -f3)"
-EH_CONN_HUB_PARAM="$(printf '%s' "${EH_CONN_INFO}" | cut -f4)"
-if [ -z "${EH_CONN_TYPE}" ] || [ -z "${EH_CONN_METHOD}" ] || [ -z "${EH_CONN_NS_PARAM}" ] || [ -z "${EH_CONN_HUB_PARAM}" ]; then
-	echo "ERROR: Could not find an Azure Event Hubs connector in the Fabric supported connection types," >&2
-	echo "       or it did not expose the expected namespace/event-hub parameters. Without a valid" >&2
-	echo "       connection the eventstreams cannot be created and the Eventhouse tables stay empty." >&2
-	echo "       Supported connection types returned by the API:" >&2
-	fabric GET "/connections/supportedConnectionTypes?showAllCreationMethods=true" | python3 -c "import json,sys; print('\n'.join(sorted({c.get('type','') for c in json.load(sys.stdin).get('value', [])})))" | sed 's/^/         /' >&2 || true
+best_score = 0
+for t in types:
+	s = score(t)
+	if s > best_score:
+		best, best_score = t, s
+json.dump(best or {}, sys.stdout)
+PY
+EH_CONN_TYPE="$(json_get type <"${TMP_DIR}/eh_conn_meta.json")"
+if [ -z "${EH_CONN_TYPE}" ]; then
+	echo "ERROR: Could not find an Azure Event Hubs connector in the Fabric supported connection types." >&2
+	echo "       Without a valid connection the eventstreams cannot be created and the Eventhouse" >&2
+	echo "       tables stay empty. Supported connection types returned by the API:" >&2
+	python3 -c "import json,sys; print('\n'.join(sorted(c.get('type','') for c in json.load(open(sys.argv[1])).get('value', []))))" "${TMP_DIR}/supported_conn_types.json" | sed 's/^/         /' >&2 || true
 	exit 1
 fi
-echo "  using connection type '${EH_CONN_TYPE}' (method '${EH_CONN_METHOD}', params '${EH_CONN_NS_PARAM}'/'${EH_CONN_HUB_PARAM}')."
+echo "  using Event Hubs connector type '${EH_CONN_TYPE}'."
 
 create_eventstream() {
 	local stream_name="$1" event_hub="$2" raw_table="$3" mapping="$4"
@@ -348,28 +343,72 @@ create_eventstream() {
 		return 0
 	fi
 
-	# A Fabric connection for the Azure Event Hubs source (namespace + event hub + SAS key).
+	# A Fabric connection for the Azure Event Hubs source. The connector's exact creation method
+	# and parameter names were discovered above (eh_conn_meta.json); build the parameters from
+	# that schema, mapping our namespace / event hub name onto whatever names the connector uses.
 	# Reuse an existing connection with the same display name so repeat deployments don't conflict.
 	local connection_id
 	connection_id="$(fabric GET "/connections" | find_by_name "${stream_name}-source")"
 	if [ -n "${connection_id}" ]; then
 		echo "    reusing existing Event Hubs connection '${stream_name}-source' (${connection_id})."
 	else
-	ES_NAME="${stream_name}" EH="${event_hub}" \
-	EH_CONN_TYPE="${EH_CONN_TYPE}" EH_CONN_METHOD="${EH_CONN_METHOD}" \
-	EH_CONN_NS_PARAM="${EH_CONN_NS_PARAM}" EH_CONN_HUB_PARAM="${EH_CONN_HUB_PARAM}" \
+	DISPLAY_NAME="${stream_name}-source" EH="${event_hub}" \
+	EH_META_FILE="${TMP_DIR}/eh_conn_meta.json" \
 	python3 - >"${TMP_DIR}/connection.json" <<'PY'
-import json, os
+import json, os, sys
+
+meta = json.load(open(os.environ["EH_META_FILE"]))
+namespace_fqdn = os.environ["EVENTHUBS_FQDN"]
+event_hub_name = os.environ["EH"]
+conn_str = os.environ["EVENTHUBS_CONNECTION_STRING"]
+
+# Known aliases the Event Hubs connector might use for its parameters, mapped to our values.
+NAMESPACE_ALIASES = {"server", "servername", "namespace", "host", "hostname",
+					 "fullyqualifiednamespace", "endpoint", "eventhubnamespace"}
+EVENTHUB_ALIASES = {"eventhubname", "entitypath", "eventhub", "path", "eventhubentitypath", "hub"}
+# Some connectors take a single connection string (with the entity path embedded) instead.
+CONNSTR_ALIASES = {"connectionstring", "eventhubconnectionstring", "sharedaccesssignature"}
+
+methods = meta.get("creationMethods") or []
+chosen_method, chosen_params, missing = None, None, None
+for method in methods:
+	params = method.get("parameters") or []
+	built, unmapped = [], []
+	for p in params:
+		name = p.get("name", "")
+		low = name.lower()
+		required = p.get("required", False)
+		if low in NAMESPACE_ALIASES:
+			built.append({"dataType": "Text", "name": name, "value": namespace_fqdn})
+		elif low in EVENTHUB_ALIASES:
+			built.append({"dataType": "Text", "name": name, "value": event_hub_name})
+		elif low in CONNSTR_ALIASES:
+			# Ensure the entity path is present for a namespace-level connection string.
+			v = conn_str if "entitypath=" in conn_str.lower() else conn_str.rstrip(";") + ";EntityPath=" + event_hub_name
+			built.append({"dataType": "Text", "name": name, "value": v})
+		elif required:
+			unmapped.append(name)
+	if not unmapped:
+		chosen_method, chosen_params = method, built
+		break
+	if missing is None:
+		missing = unmapped
+
+if chosen_method is None:
+	sys.stderr.write("ERROR: The Event Hubs connector ('%s') requires parameters this script could not map.\n" % meta.get("type", ""))
+	sys.stderr.write("       Unmapped required parameters: %s\n" % ", ".join(missing or []))
+	sys.stderr.write("       Full connector creation-method schema:\n")
+	sys.stderr.write(json.dumps(methods, indent=2))
+	sys.stderr.write("\n")
+	sys.exit(2)
+
 print(json.dumps({
 	"connectivityType": "ShareableCloud",
-	"displayName": os.environ["ES_NAME"] + "-source",
+	"displayName": os.environ["DISPLAY_NAME"],
 	"connectionDetails": {
-		"type": os.environ["EH_CONN_TYPE"],
-		"creationMethod": os.environ["EH_CONN_METHOD"],
-		"parameters": [
-			{"dataType": "Text", "name": os.environ["EH_CONN_NS_PARAM"], "value": os.environ["EVENTHUBS_FQDN"]},
-			{"dataType": "Text", "name": os.environ["EH_CONN_HUB_PARAM"], "value": os.environ["EH"]},
-		],
+		"type": meta["type"],
+		"creationMethod": chosen_method.get("name", ""),
+		"parameters": chosen_params,
 	},
 	"credentialDetails": {
 		"singleSignOnType": "None",
@@ -378,7 +417,7 @@ print(json.dumps({
 		"credentials": {
 			"credentialType": "SharedAccessSignature",
 			"sasKeyName": "RootManageSharedAccessKey",
-			"sasKey": os.environ["EVENTHUBS_CONNECTION_STRING"],
+			"sasKey": conn_str,
 		},
 	},
 }))

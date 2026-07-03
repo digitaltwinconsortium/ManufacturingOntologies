@@ -19,9 +19,8 @@ Select the **Deploy to Azure** button and choose the **same resource group you u
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdigitaltwinconsortium%2FManufacturingOntologies%2Fmain%2FDeployment%2Ffabric.json)
 
-The deployment process prompts you to provide a password for the virtual machine (VM) that hosts the production line simulation and the Edge infrastructure.
-
-To reduce cost, the deployment creates a single Linux VM for both the production line simulation and the edge infrastructure. In a production scenario, the production line simulation isn't required.
+> [!IMPORTANT]
+> **Getting access to the workspace.**: A Fabric administrator can open the Fabric portal -> **Admin portal -> Workspaces**, find `<resourcesName>-Fabric`, and use **Access -> Add admins, members or contributors** to add you as an **Admin**.
 
 The Fabric template provisions:
 

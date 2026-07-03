@@ -360,9 +360,9 @@ create_eventstream() {
 	echo "  creating eventstream '${stream_name}' (${event_hub} -> ${raw_table})..."
 
 	# Idempotency: the deployment script re-runs on every deployment. Delete an existing eventstream
-	# and recreate it from scratch so the current topology always wins. The source connection is
-	# reused (not deleted) below so its id stays stable and the eventstream never references a
-	# connection that was removed on a previous run.
+	# first (so nothing references its connection), then recreate the source connection and the
+	# eventstream from scratch, so the current topology always wins and the eventstream can never
+	# reference a stale/removed connection.
 	local existing_es
 	existing_es="$(fabric GET "/workspaces/${WORKSPACE_ID}/eventstreams" | find_by_name "${stream_name}")"
 	if [ -n "${existing_es}" ]; then
@@ -373,13 +373,17 @@ create_eventstream() {
 	# A Fabric connection for the Azure Event Hubs source. The connector's exact creation method
 	# and parameter names were discovered above (eh_conn_meta.json); build the parameters from
 	# that schema, mapping our namespace / event hub name onto whatever names the connector uses.
-	# Reuse an existing connection (stable id) so the eventstream never ends up referencing a
-	# connection id that was deleted on a previous run.
+	# Delete any existing connection with this display name, then create a fresh one and use its
+	# returned id. Fabric connections are tenant-level and survive workspace deletion, so a broken
+	# connection from an earlier run can linger under the same name; reusing it makes the eventstream
+	# reference a dead id ("cloud connection can no longer be found"). Recreating guarantees the
+	# eventstream (created right after, in this same run) points at a live connection.
 	local connection_id
 	connection_id="$(fabric GET "/connections" | find_by_name "${stream_name}-source")"
 	if [ -n "${connection_id}" ]; then
-		echo "    reusing existing Event Hubs connection '${stream_name}-source' (${connection_id})."
-	else
+		echo "    removing stale Event Hubs connection '${stream_name}-source' (${connection_id})..."
+		fabric DELETE "/connections/${connection_id}" >/dev/null 2>&1 || echo "    warning: could not delete existing connection '${stream_name}-source'; will attempt to recreate anyway."
+	fi
 	DISPLAY_NAME="${stream_name}-source" EH="${event_hub}" \
 	EH_META_FILE="${TMP_DIR}/eh_conn_meta.json" \
 	python3 - >"${TMP_DIR}/connection.json" <<'PY'
@@ -492,7 +496,11 @@ print(json.dumps({
 }))
 PY
 	connection_id="$(fabric POST "/connections" "${TMP_DIR}/connection.json" | json_get id)" || { echo "    error: could not create the Event Hubs connection for ${stream_name}. Without it the Eventhouse tables stay empty. See the Fabric API error above." >&2; exit 1; }
+	if [ -z "${connection_id}" ]; then
+		echo "    error: creating the Event Hubs connection for ${stream_name} returned no id." >&2
+		exit 1
 	fi
+	echo "    created Event Hubs connection '${stream_name}-source' (${connection_id})."
 
 	# The eventstream topology: Azure Event Hub source -> Eventhouse DirectIngestion destination.
 	ES_NAME="${stream_name}" CONNECTION_ID="${connection_id}" CONSUMER_GROUP="${FABRIC_CONSUMER_GROUP}" \

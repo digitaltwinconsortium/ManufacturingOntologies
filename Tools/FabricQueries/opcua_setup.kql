@@ -35,8 +35,6 @@
 // Create a materialized view for the last known value (LKV) of our metadata
 .create materialized-view opcua_metadata_lkv on table opcua_metadata { opcua_metadata | summarize arg_max(Timestamp, *) by Subject, Name }
 
-.create table DTDL_models (context:string, id:string, type:string, displayname: string, description:string, comment:string, contenttype:string, contentid:string, writable:bool, schema:dynamic, contentname:string, contentdisplayname: string, contentdescription:string, contentcomment:string, target:string, extends: string, schemas:string)
-
 .create-or-alter function CalculateOEEForStation(stationName:string,location:string,idealCycleTime:int,shiftStartTime:datetime,shiftEndTime:datetime) {
 // calculation from https://www.oee.com/calculating-oee/
 let idealRunningTime = (shiftEndTime - shiftStartTime) / time(1ms); // [ms]

@@ -342,11 +342,13 @@ print("  ingestion tables present: opcua_raw, opcua_metadata_raw")
 PY
 
 # Enable OneLake availability on the final tables so the Lakehouse shortcuts can read them as Parquet.
+# TargetLatencyInMinutes=5 (the documented minimum) keeps low-volume tables (e.g. metadata) fresh;
+# without it the adaptive batcher can delay writes up to ~3 hours while it waits for larger files.
 for TABLE in opcua_telemetry opcua_metadata; do
 	KUSTO_DB="${KQL_DATABASE_NAME}" KUSTO_URI="${QUERY_URI}" KUSTO_TABLE="${TABLE}" python3 - <<'PY' || echo "  warning: could not enable OneLake availability on ${TABLE} (enable it manually if needed)."
 import json, os, urllib.request
 
-csl = ".alter table " + os.environ["KUSTO_TABLE"] + " policy mirroring dataformat=parquet with (IsEnabled=true)"
+csl = ".alter-merge table " + os.environ["KUSTO_TABLE"] + " policy mirroring dataformat=parquet with (IsEnabled=true, TargetLatencyInMinutes=5)"
 body = json.dumps({"db": os.environ["KUSTO_DB"], "csl": csl}).encode("utf-8")
 req = urllib.request.Request(
 	os.environ["KUSTO_URI"].rstrip("/") + "/v1/rest/mgmt",

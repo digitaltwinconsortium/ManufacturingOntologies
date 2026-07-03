@@ -44,6 +44,11 @@ export FABRIC_CONSUMER_GROUP="${FABRIC_CONSUMER_GROUP:-fabric}"
 DATA_EVENTSTREAM_NAME="eventstream_opcua_data"
 METADATA_EVENTSTREAM_NAME="eventstream_opcua_metadata"
 
+# Fabric connection display names are unique per tenant and connections outlive the workspace, so a
+# fixed name collides across redeploys ('DuplicateConnectionName'). Give each deployment's connections
+# a unique suffix so creation never conflicts; the eventstream references the freshly created id.
+CONN_SUFFIX="$(python3 -c "import secrets; print(secrets.token_hex(4))" 2>/dev/null || date +%s)"
+
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "${TMP_DIR}"' EXIT
 
@@ -140,23 +145,17 @@ find_by_name() {
 	FIND_NAME="$1" python3 -c "import json,sys,os; d=json.load(sys.stdin); print(next((i['id'] for i in d.get('value', []) if i.get('displayName','')==os.environ['FIND_NAME']), ''))"
 }
 
-# Find a Fabric connection id by display name, paging through ALL connections. The connections list
-# is tenant-wide and paginated, so a single page (what find_by_name sees) can miss a connection that
-# exists on a later page - which previously caused a 'DuplicateConnectionName' 409 on recreate.
-find_connection_id_by_name() {
-	local name="$1"
+# List the ids of all Fabric connections whose display name starts with PREFIX, paging through ALL
+# connections (the tenant-wide list is paginated). Used to clean up connections left by earlier
+# deployments so they don't accumulate. Prints one id per line.
+list_connection_ids_by_prefix() {
+	local prefix="$1"
 	local path="/connections"
 	while [ -n "${path}" ]; do
 		fabric GET "${path}" >"${TMP_DIR}/connections_page.json"
-		local match
-		match="$(FIND_NAME="${name}" python3 -c "import json,sys,os; d=json.load(open('${TMP_DIR}/connections_page.json')); print(next((i['id'] for i in d.get('value', []) if i.get('displayName','')==os.environ['FIND_NAME']), ''))")"
-		if [ -n "${match}" ]; then
-			printf '%s' "${match}"
-			return 0
-		fi
+		FIND_PREFIX="${prefix}" python3 -c "import json,os; d=json.load(open('${TMP_DIR}/connections_page.json')); [print(i['id']) for i in d.get('value', []) if i.get('displayName','').startswith(os.environ['FIND_PREFIX'])]"
 		path="$(python3 -c "import json; d=json.load(open('${TMP_DIR}/connections_page.json')); print(d.get('continuationUri','') or '')")"
 	done
-	return 0
 }
 
 # ---------------------------------------------------------------------------
@@ -444,29 +443,21 @@ create_eventstream() {
 	# A Fabric connection for the Azure Event Hubs source. The connector's exact creation method
 	# and parameter names were discovered above (eh_conn_meta.json); build the parameters from
 	# that schema, mapping our namespace / event hub name onto whatever names the connector uses.
-	# Delete any existing connection with this display name, then create a fresh one and use its
-	# returned id. Fabric connections are tenant-level and survive workspace deletion, so a broken
-	# connection from an earlier run can linger under the same name; reusing it makes the eventstream
-	# reference a dead id ("cloud connection can no longer be found"). Recreating guarantees the
-	# eventstream (created right after, in this same run) points at a live connection.
-	# Delete any existing connection with this display name (searching ALL pages), then create a fresh
-	# one. Reusing a possibly-broken connection makes the eventstream reference a dead id; a stale name
-	# left behind causes a 'DuplicateConnectionName' 409 on recreate. Loop until the name is free.
-	local connection_id
-	local attempt
-	for attempt in 1 2 3 4 5; do
-		connection_id="$(find_connection_id_by_name "${stream_name}-source")"
-		if [ -z "${connection_id}" ]; then
-			break
-		fi
-		echo "    removing stale Event Hubs connection '${stream_name}-source' (${connection_id})..."
-		fabric DELETE "/connections/${connection_id}" >/dev/null 2>&1 || echo "    warning: could not delete existing connection '${stream_name}-source' (attempt ${attempt})."
-		sleep 3
+	# The display name is made unique per deployment (CONN_SUFFIX) because Fabric connection names are
+	# tenant-unique and connections outlive the workspace, so a fixed name collides across redeploys
+	# ('DuplicateConnectionName'). Best-effort delete older connections with the same prefix first so
+	# they don't accumulate; then create a fresh, uniquely named connection and use its id.
+	local conn_display="${stream_name}-source-${CONN_SUFFIX}"
+	# Best-effort: delete connections left by earlier deployments that share the '<stream>-source'
+	# prefix (both the old fixed name and previous unique-suffixed ones) so they don't accumulate.
+	local old_id
+	list_connection_ids_by_prefix "${stream_name}-source" | while read -r old_id; do
+		[ -n "${old_id}" ] || continue
+		echo "    deleting older Event Hubs connection ${old_id} (prefix '${stream_name}-source')..."
+		fabric DELETE "/connections/${old_id}" >/dev/null 2>&1 || echo "    warning: could not delete older connection ${old_id} (leaving it as an orphan)."
 	done
-	if [ -n "${connection_id}" ]; then
-		echo "    warning: connection '${stream_name}-source' still present after delete attempts; create may fail with a duplicate-name error." >&2
-	fi
-	DISPLAY_NAME="${stream_name}-source" EH="${event_hub}" \
+	local connection_id
+	DISPLAY_NAME="${conn_display}" EH="${event_hub}" \
 	EH_META_FILE="${TMP_DIR}/eh_conn_meta.json" \
 	python3 - >"${TMP_DIR}/connection.json" <<'PY'
 import json, os, sys

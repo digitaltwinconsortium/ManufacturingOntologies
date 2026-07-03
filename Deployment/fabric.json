@@ -1,7 +1,15 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "parameters": {},
+  "parameters": {
+    "forceUpdateTime": {
+      "type": "string",
+      "defaultValue": "[utcNow()]",
+      "metadata": {
+        "description": "Do not set manually. Defaults to the current UTC time so the Fabric setup deployment script re-runs on every deployment (deployment scripts otherwise run only once and are skipped on redeploy, which would silently create nothing)."
+      }
+    }
+  },
   "variables": {
     "resourcesName": "[resourceGroup().name]",
     "eventHubsNamespaceName": "[concat(variables('resourcesName'), '-EventHubs')]",
@@ -46,6 +54,7 @@
       ],
       "properties": {
         "azCliVersion": "2.61.0",
+        "forceUpdateTag": "[parameters('forceUpdateTime')]",
         "timeout": "PT1H",
         "retentionInterval": "P1D",
         "cleanupPreference": "OnSuccess",

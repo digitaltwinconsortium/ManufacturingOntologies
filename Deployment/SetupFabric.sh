@@ -295,7 +295,22 @@ create_eventstream() {
 	local stream_name="$1" event_hub="$2" raw_table="$3" mapping="$4"
 	echo "  creating eventstream '${stream_name}' (${event_hub} -> ${raw_table})..."
 
+	# Idempotency: the deployment script re-runs on every deployment, so skip an eventstream
+	# that already exists (recreating it would return a conflict, and that error is fatal).
+	local existing_es
+	existing_es="$(fabric GET "/workspaces/${WORKSPACE_ID}/eventstreams" | find_by_name "${stream_name}")"
+	if [ -n "${existing_es}" ]; then
+		echo "    eventstream '${stream_name}' already exists (${existing_es}); skipping."
+		return 0
+	fi
+
 	# A Fabric connection for the Azure Event Hubs source (namespace + event hub + SAS key).
+	# Reuse an existing connection with the same display name so repeat deployments don't conflict.
+	local connection_id
+	connection_id="$(fabric GET "/connections" | find_by_name "${stream_name}-source")"
+	if [ -n "${connection_id}" ]; then
+		echo "    reusing existing Event Hubs connection '${stream_name}-source' (${connection_id})."
+	else
 	ES_NAME="${stream_name}" EH="${event_hub}" python3 - >"${TMP_DIR}/connection.json" <<'PY'
 import json, os
 print(json.dumps({
@@ -321,8 +336,8 @@ print(json.dumps({
 	},
 }))
 PY
-	local connection_id
 	connection_id="$(fabric POST "/connections" "${TMP_DIR}/connection.json" | json_get id)" || { echo "    error: could not create the Event Hubs connection for ${stream_name}. Without it the Eventhouse tables stay empty. See the Fabric API error above." >&2; exit 1; }
+	fi
 
 	# The eventstream topology: Azure Event Hub source -> Eventhouse DirectIngestion destination.
 	ES_NAME="${stream_name}" CONNECTION_ID="${connection_id}" CONSUMER_GROUP="${FABRIC_CONSUMER_GROUP}" \

@@ -220,7 +220,14 @@ if [ -z "${EVENTHOUSE_ID}" ]; then
 import json, os
 print(json.dumps({"displayName": os.environ["EVENTHOUSE_NAME"]}))
 PY
-	EVENTHOUSE_ID="$(fabric POST "/workspaces/${WORKSPACE_ID}/eventhouses" "${TMP_DIR}/eventhouse.json" | json_get id)"
+	fabric POST "/workspaces/${WORKSPACE_ID}/eventhouses" "${TMP_DIR}/eventhouse.json" >/dev/null || { echo "ERROR: Failed to create the Eventhouse '${EVENTHOUSE_NAME}'. See the Fabric API error above." >&2; exit 1; }
+	# Always re-fetch by name to get the authoritative item id (don't trust the create/LRO response id,
+	# which the eventstream destination's itemId depends on to resolve the Eventhouse and KQL database).
+	EVENTHOUSE_ID="$(fabric GET "/workspaces/${WORKSPACE_ID}/eventhouses" | find_by_name "${EVENTHOUSE_NAME}")"
+fi
+if [ -z "${EVENTHOUSE_ID}" ]; then
+	echo "ERROR: Could not resolve the Eventhouse '${EVENTHOUSE_NAME}' item id after creation." >&2
+	exit 1
 fi
 echo "  eventhouse id: ${EVENTHOUSE_ID}"
 
@@ -330,23 +337,44 @@ if [ -z "${EH_CONN_TYPE}" ]; then
 fi
 echo "  using Event Hubs connector type '${EH_CONN_TYPE}'."
 
+# Best-effort: make sure the '${FABRIC_CONSUMER_GROUP}' consumer group exists on the Event Hubs the
+# eventstreams bind to. The main deployment (arm.json) already creates these, so this is only a safety
+# net for environments where it doesn't. It is non-fatal: if the managed identity lacks Event Hubs
+# management rights the create is skipped with a warning (the group is expected to already exist).
+ensure_consumer_group() {
+	local hub="$1"
+	if az eventhubs eventhub consumer-group show --resource-group "${RESOURCES_NAME}" --namespace-name "${EVENTHUBS_NAMESPACE}" --eventhub-name "${hub}" --name "${FABRIC_CONSUMER_GROUP}" >/dev/null 2>&1; then
+		echo "  consumer group '${FABRIC_CONSUMER_GROUP}' already exists on event hub '${hub}'."
+		return 0
+	fi
+	echo "  creating consumer group '${FABRIC_CONSUMER_GROUP}' on event hub '${hub}'..."
+	az eventhubs eventhub consumer-group create --resource-group "${RESOURCES_NAME}" --namespace-name "${EVENTHUBS_NAMESPACE}" --eventhub-name "${hub}" --name "${FABRIC_CONSUMER_GROUP}" >/dev/null 2>&1 \
+		|| echo "  warning: could not create/verify consumer group '${FABRIC_CONSUMER_GROUP}' on event hub '${hub}' (it is expected to already exist from the main deployment; continuing)."
+}
+echo "Ensuring the '${FABRIC_CONSUMER_GROUP}' consumer group exists on the Event Hubs..."
+ensure_consumer_group "data"
+ensure_consumer_group "metadata"
+
 create_eventstream() {
 	local stream_name="$1" event_hub="$2" raw_table="$3" mapping="$4"
 	echo "  creating eventstream '${stream_name}' (${event_hub} -> ${raw_table})..."
 
-	# Idempotency: the deployment script re-runs on every deployment. If the eventstream already
-	# exists we update its definition (below) instead of recreating it, so fixes to the topology
-	# take effect on redeploy without requiring a manual delete.
+	# Idempotency: the deployment script re-runs on every deployment. Delete an existing eventstream
+	# and recreate it from scratch so the current topology always wins. The source connection is
+	# reused (not deleted) below so its id stays stable and the eventstream never references a
+	# connection that was removed on a previous run.
 	local existing_es
 	existing_es="$(fabric GET "/workspaces/${WORKSPACE_ID}/eventstreams" | find_by_name "${stream_name}")"
 	if [ -n "${existing_es}" ]; then
-		echo "    eventstream '${stream_name}' already exists (${existing_es}); its definition will be updated."
+		echo "    deleting existing eventstream '${stream_name}' (${existing_es}) so it can be recreated cleanly..."
+		fabric DELETE "/workspaces/${WORKSPACE_ID}/eventstreams/${existing_es}" >/dev/null || { echo "    error: could not delete the existing eventstream ${stream_name}. See the Fabric API error above." >&2; exit 1; }
 	fi
 
 	# A Fabric connection for the Azure Event Hubs source. The connector's exact creation method
 	# and parameter names were discovered above (eh_conn_meta.json); build the parameters from
 	# that schema, mapping our namespace / event hub name onto whatever names the connector uses.
-	# Reuse an existing connection with the same display name so repeat deployments don't conflict.
+	# Reuse an existing connection (stable id) so the eventstream never ends up referencing a
+	# connection id that was deleted on a previous run.
 	local connection_id
 	connection_id="$(fabric GET "/connections" | find_by_name "${stream_name}-source")"
 	if [ -n "${connection_id}" ]; then
@@ -470,7 +498,7 @@ PY
 	ES_NAME="${stream_name}" CONNECTION_ID="${connection_id}" CONSUMER_GROUP="${FABRIC_CONSUMER_GROUP}" \
 	WORKSPACE_ID="${WORKSPACE_ID}" EVENTHOUSE_ID="${EVENTHOUSE_ID}" \
 	RAW_TABLE="${raw_table}" MAPPING="${mapping}" \
-	CREATE_FILE="${TMP_DIR}/eventstream_create.json" UPDATE_FILE="${TMP_DIR}/eventstream_update.json" \
+	CREATE_FILE="${TMP_DIR}/eventstream_create.json" \
 	python3 - <<'PY'
 import base64, json, os
 
@@ -524,18 +552,22 @@ parts = [
 	{"path": "eventstream.json", "payload": definition, "payloadType": "InlineBase64"},
 	{"path": ".platform", "payload": platform, "payloadType": "InlineBase64"},
 ]
-# Create body (POST /items) and updateDefinition body (POST /items/{id}/updateDefinition).
 open(os.environ["CREATE_FILE"], "w").write(json.dumps({
 	"displayName": os.environ["ES_NAME"],
 	"type": "Eventstream",
 	"definition": {"parts": parts},
 }))
-open(os.environ["UPDATE_FILE"], "w").write(json.dumps({"definition": {"parts": parts}}))
 PY
-	if [ -n "${existing_es}" ]; then
-		fabric POST "/workspaces/${WORKSPACE_ID}/eventstreams/${existing_es}/updateDefinition" "${TMP_DIR}/eventstream_update.json" >/dev/null || { echo "    error: could not update eventstream ${stream_name}. See the Fabric API error above." >&2; exit 1; }
-	else
-		fabric POST "/workspaces/${WORKSPACE_ID}/items" "${TMP_DIR}/eventstream_create.json" >/dev/null || { echo "    error: could not create eventstream ${stream_name}. Without it the Eventhouse tables stay empty. See the Fabric API error above." >&2; exit 1; }
+	fabric POST "/workspaces/${WORKSPACE_ID}/items" "${TMP_DIR}/eventstream_create.json" >/dev/null || { echo "    error: could not create eventstream ${stream_name}. Without it the Eventhouse tables stay empty. See the Fabric API error above." >&2; exit 1; }
+
+	# Diagnostic: print the destination itemId the eventstream actually stored, next to the expected
+	# Eventhouse id, so any mismatch (which surfaces as 'Item not found' in the portal) is visible.
+	local new_es
+	new_es="$(fabric GET "/workspaces/${WORKSPACE_ID}/eventstreams" | find_by_name "${stream_name}")"
+	if [ -n "${new_es}" ]; then
+		echo "    verifying eventstream '${stream_name}' destination (expected Eventhouse itemId=${EVENTHOUSE_ID}):"
+		fabric GET "/workspaces/${WORKSPACE_ID}/eventstreams/${new_es}/topology" \
+			| python3 -c "import json,sys; d=json.load(sys.stdin); [print('      destination', x.get('name'), 'itemId=', x.get('properties',{}).get('itemId'), 'status=', x.get('status')) for x in d.get('destinations', [])]" || true
 	fi
 }
 

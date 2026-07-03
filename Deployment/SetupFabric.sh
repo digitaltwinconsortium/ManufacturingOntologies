@@ -292,6 +292,37 @@ except urllib.error.HTTPError as error:
 	sys.exit(1)
 PY
 
+# Verify the raw ingestion tables actually exist before wiring the eventstreams. If they are missing
+# the DirectIngestion destination has no target and goes into a 'Warning' state with empty tables.
+echo "Verifying the OPC UA ingestion tables exist in the KQL database..."
+KUSTO_DB="${KQL_DATABASE_NAME}" KUSTO_URI="${QUERY_URI}" python3 - <<'PY'
+import json, os, sys, urllib.error, urllib.request
+csl = ".show tables | project TableName | where TableName in ('opcua_raw', 'opcua_metadata_raw')"
+body = json.dumps({"db": os.environ["KUSTO_DB"], "csl": csl}).encode("utf-8")
+req = urllib.request.Request(
+	os.environ["KUSTO_URI"].rstrip("/") + "/v1/rest/query",
+	data=body,
+	headers={"Authorization": "Bearer " + os.environ["KUSTO_TOKEN"], "Content-Type": "application/json", "Accept": "application/json"},
+	method="POST",
+)
+try:
+	with urllib.request.urlopen(req) as response:
+		result = json.loads(response.read() or b"{}")
+except urllib.error.HTTPError as error:
+	sys.stderr.write("Could not query the KQL database for tables HTTP %s: %s\n" % (error.code, error.read().decode("utf-8", "replace")))
+	sys.exit(1)
+found = set()
+for table in result.get("Tables", []):
+	for row in table.get("Rows", []):
+		if row:
+			found.add(row[0])
+missing = {"opcua_raw", "opcua_metadata_raw"} - found
+if missing:
+	sys.stderr.write("ERROR: KQL setup did not create expected tables: %s. The DirectIngestion destination would stay empty.\n" % ", ".join(sorted(missing)))
+	sys.exit(1)
+print("  ingestion tables present: opcua_raw, opcua_metadata_raw")
+PY
+
 # Enable OneLake availability on the final tables so the Lakehouse shortcuts can read them as Parquet.
 for TABLE in opcua_telemetry opcua_metadata; do
 	KUSTO_DB="${KQL_DATABASE_NAME}" KUSTO_URI="${QUERY_URI}" KUSTO_TABLE="${TABLE}" python3 - <<'PY' || echo "  warning: could not enable OneLake availability on ${TABLE} (enable it manually if needed)."
@@ -589,14 +620,15 @@ open(os.environ["CREATE_FILE"], "w").write(json.dumps({
 PY
 	fabric POST "/workspaces/${WORKSPACE_ID}/items" "${TMP_DIR}/eventstream_create.json" >/dev/null || { echo "    error: could not create eventstream ${stream_name}. Without it the Eventhouse tables stay empty. See the Fabric API error above." >&2; exit 1; }
 
-	# Diagnostic: print the destination itemId the eventstream actually stored, next to the expected
-	# Eventhouse id, so any mismatch (which surfaces as 'Item not found' in the portal) is visible.
+	# Diagnostic: print the destination itemId + status + any error the eventstream stored, so a
+	# 'Warning'/'Failed' destination (which surfaces as empty tables / 'Item not found' in the portal)
+	# reveals its underlying cause in the deployment log.
 	local new_es
 	new_es="$(fabric GET "/workspaces/${WORKSPACE_ID}/eventstreams" | find_by_name "${stream_name}")"
 	if [ -n "${new_es}" ]; then
 		echo "    verifying eventstream '${stream_name}' destination (expected Eventhouse itemId=${EVENTHOUSE_ID}):"
 		fabric GET "/workspaces/${WORKSPACE_ID}/eventstreams/${new_es}/topology" \
-			| python3 -c "import json,sys; d=json.load(sys.stdin); [print('      destination', x.get('name'), 'itemId=', x.get('properties',{}).get('itemId'), 'status=', x.get('status')) for x in d.get('destinations', [])]" || true
+			| python3 -c "import json,sys; d=json.load(sys.stdin); [print('      destination', x.get('name'), 'itemId=', x.get('properties',{}).get('itemId'), 'status=', x.get('status'), 'error=', json.dumps(x.get('error'))) for x in d.get('destinations', [])]" || true
 	fi
 }
 

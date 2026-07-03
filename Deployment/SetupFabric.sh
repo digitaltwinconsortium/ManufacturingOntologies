@@ -402,6 +402,23 @@ if chosen_method is None:
 	sys.stderr.write("\n")
 	sys.exit(2)
 
+# The token for SharedAccessSignature / key for Key credentials is the Event Hub connection string
+# (namespace SAS key + EntityPath), which is what these connectors accept.
+eh_token = conn_str if "entitypath=" in conn_str.lower() else conn_str.rstrip(";") + ";EntityPath=" + event_hub_name
+
+# Build the credential using whatever type the connector supports (prefer SAS, then Key, then Basic).
+supported_creds = [c.lower() for c in (meta.get("supportedCredentialTypes") or [])]
+if not supported_creds or "sharedaccesssignature" in supported_creds:
+	credentials = {"credentialType": "SharedAccessSignature", "token": eh_token}
+elif "key" in supported_creds:
+	credentials = {"credentialType": "Key", "key": eh_token}
+elif "basic" in supported_creds:
+	credentials = {"credentialType": "Basic", "username": "RootManageSharedAccessKey", "password": eh_token}
+else:
+	sys.stderr.write("ERROR: The Event Hubs connector ('%s') does not support a credential type this script can supply.\n" % meta.get("type", ""))
+	sys.stderr.write("       Supported credential types: %s\n" % ", ".join(meta.get("supportedCredentialTypes") or []))
+	sys.exit(3)
+
 print(json.dumps({
 	"connectivityType": "ShareableCloud",
 	"displayName": os.environ["DISPLAY_NAME"],
@@ -413,12 +430,11 @@ print(json.dumps({
 	"credentialDetails": {
 		"singleSignOnType": "None",
 		"connectionEncryption": "NotEncrypted",
-		"skipTestConnection": False,
-		"credentials": {
-			"credentialType": "SharedAccessSignature",
-			"sasKeyName": "RootManageSharedAccessKey",
-			"sasKey": conn_str,
-		},
+		# The deployment-script container generally can't perform the live data-source test
+		# against Event Hubs, so skip it when the connector allows (ingestion is validated later
+		# by the eventstream). Otherwise the create fails with DM_GWPipeline_Gateway_DataSourceAccessError.
+		"skipTestConnection": bool(meta.get("supportsSkipTestConnection", False)),
+		"credentials": credentials,
 	},
 }))
 PY

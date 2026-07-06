@@ -881,8 +881,8 @@
         "[resourceId('Microsoft.Kusto/Clusters/Databases/DataConnections', variables('adxClusterName'), 'ontologies', 'EventHubMetadataConnection')]",
         "[resourceId('Microsoft.EventHub/namespaces/eventhubs', variables('eventHubsNamespaceName'), 'data')]",
         "[resourceId('Microsoft.EventHub/namespaces/eventhubs', variables('eventHubsNamespaceName'), 'metadata')]",
-        "[resourceId('Microsoft.Authorization/roleAssignments', guid(variables('eventHubsDataSenderRoleId'), resourceGroup().id, 'aio'))]",
-        "[resourceId('Microsoft.Authorization/roleAssignments', guid(variables('contributorRoleId'), resourceGroup().id, concat(parameters('resourcesName'), '-Identity')))]",
+        "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId, variables('eventHubsDataSenderRoleId')))]",
+        "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId, variables('contributorRoleId')))]",
         "[resourceId('Microsoft.DeviceRegistry/schemaRegistries', variables('aioSchemaRegistryName'))]"
       ],
       "tags": {
@@ -1093,7 +1093,7 @@
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-10-01-preview",
-      "name": "[guid(variables('eventHubsDataSenderRoleId'), resourceGroup().id, 'aio')]",
+      "name": "[guid(resourceGroup().id, reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId, variables('eventHubsDataSenderRoleId'))]",
       "dependsOn": [
         "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubsNamespaceName'))]",
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
@@ -1214,7 +1214,7 @@
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-10-01-preview",
-      "name": "[guid(variables('contributorRoleId'), resourceGroup().id, concat(parameters('resourcesName'), '-Identity'))]",
+      "name": "[guid(resourceGroup().id, reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId, variables('contributorRoleId'))]",
       "dependsOn": [
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
       ],
@@ -1266,20 +1266,6 @@
       }
     },
     {
-      "type": "Microsoft.Authorization/roleAssignments",
-      "apiVersion": "2020-10-01-preview",
-      "condition": "[parameters('deployDatabricks')]",
-      "name": "[guid(variables('contributorRoleId'), resourceGroup().id, variables('databricksWorkspaceName'))]",
-      "dependsOn": [
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
-      ],
-      "properties": {
-        "roleDefinitionId": "[variables('contributorRoleId')]",
-        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId]",
-        "principalType": "ServicePrincipal"
-      }
-    },
-    {
       "type": "Microsoft.Resources/deploymentScripts",
       "apiVersion": "2020-10-01",
       "condition": "[parameters('deployDatabricks')]",
@@ -1298,7 +1284,7 @@
         "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]",
         "[resourceId('Microsoft.EventHub/namespaces/eventhubs/consumergroups', concat(parameters('resourcesName'), '-EventHubs'), 'data', 'databricks')]",
         "[resourceId('Microsoft.EventHub/namespaces/eventhubs/consumergroups', concat(parameters('resourcesName'), '-EventHubs'), 'metadata', 'databricks')]",
-        "[resourceId('Microsoft.Authorization/roleAssignments', guid(variables('contributorRoleId'), resourceGroup().id, variables('databricksWorkspaceName')))]"
+        "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId, variables('contributorRoleId')))]"
       ],
       "properties": {
         "azCliVersion": "2.61.0",

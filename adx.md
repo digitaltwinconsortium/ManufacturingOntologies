@@ -19,7 +19,7 @@ You can deploy a [sample dashboard](https://github.com/digitaltwinconsortium/Man
 
 To display the OEE for a specific shift, select **Custom Time Range** in the **Time Range** drop-down in the top-left corner of the Azure Data Explorer Dashboard and enter the date and time from start to end of the shift you're interested in.
 
-## I3X API:
+## I3X API
 
 An **I3X API** container app named `<resourcesName>-i3x4kusto` is deployed, exposing ADX over the I3X REST API. Its URL can be retrieved from the Azure portal and the Swagger endpoint is accessible by adding /swagger to its URL.
 

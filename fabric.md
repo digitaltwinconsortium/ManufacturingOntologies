@@ -22,7 +22,7 @@ Select the **Deploy to Azure** button and choose the **same resource group you u
 > [!IMPORTANT]
 > **Getting access to the workspace.**: A Fabric administrator can open the Fabric portal -> **Admin portal -> Workspaces**, find `<resourcesName>-Fabric`, and use **Access -> Add admins, members or contributors** to add you as an **Admin**.
 
-## I3X API:
+## I3X API
 
 An **I3X API** container app named `<resourcesName>-i3x4kusto-fabric` is deployed, exposing the Eventhouse over the I3X REST API. Its URL can be retrieved from the Azure portal and the Swagger endpoint is accessible by adding /swagger to its URL.
 

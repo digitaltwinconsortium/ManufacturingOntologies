@@ -38,7 +38,9 @@ export KUBECONFIG="${KUBECONFIG_PATH}"
 # Derived Azure resource names (must match Deployment/arm.json).
 CLUSTER_NAME="${RESOURCES_NAME}-Arc"
 AIO_INSTANCE_NAME="${RESOURCES_NAME}-AIO"
-SCHEMA_REGISTRY_NAME="${RESOURCES_NAME}-SchemaRegistry"
+# Schema registry name must be lowercase (^[a-z0-9][a-z0-9-]*[a-z0-9]$), matching arm.json's
+# toLower(concat(resourcesName, '-schemaregistry')).
+SCHEMA_REGISTRY_NAME="$(printf '%s-schemaregistry' "${RESOURCES_NAME}" | tr '[:upper:]' '[:lower:]')"
 # The AIO data flows write to the SAME event hubs that Azure Data Explorer, Microsoft Fabric
 # and Azure Databricks already consume, so the existing OPC UA PubSub expansion policies
 # (OPCUATelemetryExpand / OPCUAMetaDataExpand) parse the AIO output unchanged.

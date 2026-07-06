@@ -67,7 +67,7 @@
     "i3xContainerAppName": "[concat(parameters('resourcesName'), '-i3x4kusto')]",
     "azureRbacAzureEventHubsDataSender": "2b629674-e913-4c01-ae53-ef4638d8f975",
     "aioStorageAccountName": "[toLower(take(concat(replace(parameters('resourcesName'), '-', ''), 'aiostorage'), 24))]",
-    "aioSchemaRegistryName": "[concat(parameters('resourcesName'), '-SchemaRegistry')]",
+    "aioSchemaRegistryName": "[toLower(concat(parameters('resourcesName'), '-schemaregistry'))]",
     "aioSchemaRegistryNamespace": "[toLower(concat(replace(parameters('resourcesName'), '-', ''), 'aiosr'))]",
     "aioSetupScriptUri": "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'SetupAzureIoTOperations.sh')]",
     "eventHubsDataSenderRoleId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacAzureEventHubsDataSender'))]"
@@ -820,7 +820,7 @@
       },
       "properties": {
         "hardwareProfile": {
-          "vmSize": "Standard_D4s_v5"
+          "vmSize": "Standard_E2as_v6"
         },
         "storageProfile": {
           "imageReference": {

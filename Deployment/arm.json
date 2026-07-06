@@ -839,8 +839,7 @@
             "deleteOption": "Delete",
             "diskSizeGB": 64
           },
-          "dataDisks": [],
-          "diskControllerType": "SCSI"
+          "dataDisks": []
         },
         "osProfile": {
           "computerName": "[parameters('resourcesName')]",

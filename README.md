@@ -22,6 +22,8 @@ Interoperability is the key enabler for these requirements. The use of open stan
 This reference solution uses Azure Arc. It needs the `custom-locations` application object ID that needs to be passed to the deployment script. You can retrieve it with the following command:
 
 ```azurecli
+az login --tenant <tenant_id>
+az account set --subscription <subscription_id>
 az ad sp show --id bc313c14-388c-4e7d-a58e-70017303ee3b --query id -o tsv
 ```
 

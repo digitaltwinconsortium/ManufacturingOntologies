@@ -34,14 +34,14 @@
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "Provision a Microsoft Fabric F2 capacity as part of the main deployment. Enable this if you plan to use Microsoft Fabric, especially if you have never used Fabric before: having the capacity in place first lets a Fabric tenant admin enable the Service principals can use Fabric APIs tenant setting in the Fabric admin portal before you deploy the Fabric template. Leave disabled for Azure Data Explorer- or Databricks-only deployments to avoid the Fabric capacity cost; the Fabric template still provisions the capacity itself if it was not pre-created here."
+        "description": "Provision a Microsoft Fabric F2 capacity as part of the main deployment. Enable this if you plan to deploy Microsoft Fabric after the main deployment."
       }
     },
     "customLocationsOid": {
       "type": "string",
       "minLength": 36,
       "metadata": {
-        "description": "Object ID of the 'custom-locations' Microsoft Entra application. Required: Azure Arc + Azure IoT Operations are always installed on the simulation VM, and enabling Arc custom-locations needs this object ID. Obtain it by running (as a Microsoft Entra user, not a managed identity): az ad sp show --id bc313c14-388c-4e7d-a58e-70017303ee3b --query id -o tsv. It is passed to the VM so Arc custom-locations can be enabled non-interactively with the deployment's managed identity."
+        "description": "Object ID of the 'custom-locations' Microsoft Entra application. Obtain it by running az ad sp show --id bc313c14-388c-4e7d-a58e-70017303ee3b --query id -o tsv from the Azure CLI."
       }
     }
   },

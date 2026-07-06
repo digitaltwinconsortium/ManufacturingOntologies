@@ -881,8 +881,8 @@
         "[resourceId('Microsoft.Kusto/Clusters/Databases/DataConnections', variables('adxClusterName'), 'ontologies', 'EventHubMetadataConnection')]",
         "[resourceId('Microsoft.EventHub/namespaces/eventhubs', variables('eventHubsNamespaceName'), 'data')]",
         "[resourceId('Microsoft.EventHub/namespaces/eventhubs', variables('eventHubsNamespaceName'), 'metadata')]",
-        "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId, variables('eventHubsDataSenderRoleId')))]",
-        "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId, variables('contributorRoleId')))]",
+        "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), variables('eventHubsDataSenderRoleId')))]",
+        "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), variables('contributorRoleId')))]",
         "[resourceId('Microsoft.DeviceRegistry/schemaRegistries', variables('aioSchemaRegistryName'))]"
       ],
       "tags": {
@@ -1093,7 +1093,7 @@
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-10-01-preview",
-      "name": "[guid(resourceGroup().id, reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId, variables('eventHubsDataSenderRoleId'))]",
+      "name": "[guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), variables('eventHubsDataSenderRoleId'))]",
       "dependsOn": [
         "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubsNamespaceName'))]",
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
@@ -1214,7 +1214,7 @@
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-10-01-preview",
-      "name": "[guid(resourceGroup().id, reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId, variables('contributorRoleId'))]",
+      "name": "[guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), variables('contributorRoleId'))]",
       "dependsOn": [
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
       ],
@@ -1284,7 +1284,7 @@
         "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]",
         "[resourceId('Microsoft.EventHub/namespaces/eventhubs/consumergroups', concat(parameters('resourcesName'), '-EventHubs'), 'data', 'databricks')]",
         "[resourceId('Microsoft.EventHub/namespaces/eventhubs/consumergroups', concat(parameters('resourcesName'), '-EventHubs'), 'metadata', 'databricks')]",
-        "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId, variables('contributorRoleId')))]"
+        "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), variables('contributorRoleId')))]"
       ],
       "properties": {
         "azCliVersion": "2.61.0",

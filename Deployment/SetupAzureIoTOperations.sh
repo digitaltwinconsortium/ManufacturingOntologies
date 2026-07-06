@@ -119,7 +119,9 @@ run() {
 # --------------------------
 echo
 echo "=== Logging in to Azure with the managed identity ==="
-if ! az login --identity --username "${MANAGED_IDENTITY_CLIENT_ID}" --allow-no-subscriptions >/dev/null; then
+# Newer Azure CLI removed '--username' for managed-identity login; use '--client-id' for a
+# user-assigned managed identity.
+if ! az login --identity --client-id "${MANAGED_IDENTITY_CLIENT_ID}" --allow-no-subscriptions >/dev/null; then
   echo "!!! ERROR: az login --identity failed. Aborting AIO setup."
   exit 1
 fi

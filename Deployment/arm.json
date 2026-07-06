@@ -882,6 +882,7 @@
         "[resourceId('Microsoft.EventHub/namespaces/eventhubs', variables('eventHubsNamespaceName'), 'data')]",
         "[resourceId('Microsoft.EventHub/namespaces/eventhubs', variables('eventHubsNamespaceName'), 'metadata')]",
         "[resourceId('Microsoft.Authorization/roleAssignments', guid(variables('eventHubsDataSenderRoleId'), resourceGroup().id, 'aio'))]",
+        "[resourceId('Microsoft.Authorization/roleAssignments', guid(variables('contributorRoleId'), resourceGroup().id, concat(parameters('resourcesName'), '-Identity')))]",
         "[resourceId('Microsoft.DeviceRegistry/schemaRegistries', variables('aioSchemaRegistryName'))]"
       ],
       "tags": {
@@ -1209,6 +1210,19 @@
       "name": "[concat(parameters('resourcesName'), '-Identity')]",
       "apiVersion": "2018-11-30",
       "location": "[resourceGroup().location]"
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-10-01-preview",
+      "name": "[guid(variables('contributorRoleId'), resourceGroup().id, concat(parameters('resourcesName'), '-Identity'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[variables('contributorRoleId')]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId]",
+        "principalType": "ServicePrincipal"
+      }
     },
     {
       "type": "Microsoft.Authorization/roleAssignments",

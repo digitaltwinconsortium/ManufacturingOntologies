@@ -7,7 +7,7 @@ An ontology defines the language used to describe a system. In the manufacturing
 > [!NOTE]
 > This article is the **Microsoft OPC UA Reference Solution**, which uses **IEC 62541 standard OPC UA PubSub** to send telemetry data from the edge to the cloud. It is **different** from the default telemetry configuration of Azure IoT Operations, which also caters for scenarions where no OPC UA-enabled telemetry sources are involved, i.e. OPC UA PubSub is **not required** between Azure IoT Operations and cloud endpoints. The Azure IoT Operations architecture is described at [**Azure IoT Operations Overview**](https://learn.microsoft.com/en-us/azure/iot-operations/overview-iot-operations#architecture-overview).
 
-## OPC UA Reference Solution
+## About this OPC UA reference solution
 
 Manufacturers want to use an industrial IoT solution that doesn't lock them in to walled-garden ecosystems. In addition, they want to deploy this solution on a global scale and connect all of their production sites to it to increase efficiencies for each individual site.
 
@@ -19,11 +19,13 @@ Interoperability is the key enabler for these requirements. The use of open stan
 
 ## Prerequisites
 
-Azure Arc needs the `custom-locations` application object ID — you compute it once, up front, and pass it to the deployment script. You can retrieve it with the following command:
+This reference solution uses Azure Arc. It needs the `custom-locations` application object ID that needs to be passed to the deployment script. You can retrieve it with the following command:
 
 ```azurecli
 az ad sp show --id bc313c14-388c-4e7d-a58e-70017303ee3b --query id -o tsv
 ```
+
+## Articles in this reference solution
 
 The following articles describe how to deploy this reference solution as well as how to connect it to various Microsoft services:
 

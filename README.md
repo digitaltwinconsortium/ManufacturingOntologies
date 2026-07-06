@@ -19,12 +19,23 @@ Interoperability is the key enabler for these requirements. The use of open stan
 
 ## Prerequisites
 
-This reference solution uses Azure Arc. It needs the `custom-locations` application object ID that needs to be passed to the deployment script. You can retrieve it with the following Azure CLI commands:
+This reference solution deploys Azure Arc, which requires the `custom-locations` application object ID that needs to be passed to the deployment script. You can retrieve it with the following Azure CLI commands:
 
 ```azurecli
 az login --tenant <tenant_id>
 az account set --subscription <subscription_id>
 az ad sp show --id bc313c14-388c-4e7d-a58e-70017303ee3b --query id -o tsv
+```
+
+The reference solution also deploys Azure IoT Operations, which requires the following resource providers to be registered in the subscription. Registering a resource provider is a subscription-scope action, so it must be done once by a subscription Owner or Contributor before deployment:
+
+```azurecli
+az provider register --namespace Microsoft.ExtendedLocation
+az provider register --namespace Microsoft.Kubernetes
+az provider register --namespace Microsoft.KubernetesConfiguration
+az provider register --namespace Microsoft.IoTOperations
+az provider register --namespace Microsoft.DeviceRegistry
+az provider register --namespace Microsoft.SecretSyncController
 ```
 
 ## Articles in this reference solution

@@ -41,6 +41,9 @@ AIO_INSTANCE_NAME="${RESOURCES_NAME}-AIO"
 # Schema registry name must be lowercase (^[a-z0-9][a-z0-9-]*[a-z0-9]$), matching arm.json's
 # toLower(concat(resourcesName, '-schemaregistry')).
 SCHEMA_REGISTRY_NAME="$(printf '%s-schemaregistry' "${RESOURCES_NAME}" | tr '[:upper:]' '[:lower:]')"
+# Azure IoT Operations requires a Device Registry namespace (one per instance) passed to
+# 'az iot ops create --ns-resource-id'. Name must be lowercase.
+AIO_NAMESPACE_NAME="$(printf '%s-aions' "${RESOURCES_NAME}" | tr '[:upper:]' '[:lower:]')"
 # The AIO data flows write to the SAME event hubs that Azure Data Explorer, Microsoft Fabric
 # and Azure Databricks already consume, so the existing OPC UA PubSub expansion policies
 # (OPCUATelemetryExpand / OPCUAMetaDataExpand) parse the AIO output unchanged.
@@ -145,12 +148,37 @@ fi
 # --------------------------
 # 3. Register the resource providers AIO/Arc need
 # --------------------------
+# NOTE: Registering a resource provider is a SUBSCRIPTION-scope action
+# (Microsoft.Features/.../register/action). The deployment's user-assigned managed identity is
+# only granted rights at the resource-group scope, so these registrations may fail with
+# AuthorizationFailed. That is fine IF the providers are already registered on the subscription.
+# 'az iot ops init' REQUIRES these providers to be registered, so if any are still not
+# registered after this step, the script warns with the exact command a subscription
+# Owner/Contributor must run once.
 echo
 echo "=== Registering resource providers ==="
-for rp in Microsoft.ExtendedLocation Microsoft.Kubernetes Microsoft.KubernetesConfiguration \
-		  Microsoft.IoTOperations Microsoft.DeviceRegistry Microsoft.SecretSyncController; do
+AIO_PROVIDERS="Microsoft.ExtendedLocation Microsoft.Kubernetes Microsoft.KubernetesConfiguration Microsoft.IoTOperations Microsoft.DeviceRegistry Microsoft.SecretSyncController"
+for rp in ${AIO_PROVIDERS}; do
   run az provider register -n "${rp}"
 done
+
+# Verify registration state; collect any that are not registered.
+unregistered=""
+for rp in ${AIO_PROVIDERS}; do
+  state="$(az provider show -n "${rp}" --query registrationState -o tsv 2>/dev/null)"
+  if [ "${state}" != "Registered" ]; then
+	unregistered="${unregistered} ${rp}"
+  fi
+done
+if [ -n "${unregistered}" ]; then
+  echo "!!! WARNING: the following resource providers are NOT registered on subscription ${SUBSCRIPTION_ID}:${unregistered}"
+  echo "    'az iot ops init' will fail until they are registered. This is a subscription-scope"
+  echo "    prerequisite (see the Prerequisites section of the repository README); a subscription"
+  echo "    Owner/Contributor must run this once (the deployment managed identity cannot):"
+  for rp in ${unregistered}; do
+	echo "      az provider register --namespace ${rp} --subscription ${SUBSCRIPTION_ID}"
+  done
+fi
 
 # --------------------------
 # 4. Prepare the cluster host (watch/instance and file-descriptor limits)
@@ -233,13 +261,33 @@ if [ -z "${SCHEMA_REGISTRY_ID}" ]; then
 	--query id -o tsv 2>/dev/null)"
 fi
 
+# 'az iot ops create' requires a Device Registry namespace (--ns-resource-id). Create it
+# (idempotent: reuse if it already exists) and capture its resource id.
+echo
+echo "=== Creating the Device Registry namespace for Azure IoT Operations ==="
+run az iot ops ns create \
+  --name "${AIO_NAMESPACE_NAME}" \
+  --resource-group "${RESOURCE_GROUP}"
+NAMESPACE_ID="$(az iot ops ns show \
+  --name "${AIO_NAMESPACE_NAME}" \
+  --resource-group "${RESOURCE_GROUP}" \
+  --query id -o tsv 2>/dev/null)"
+if [ -z "${NAMESPACE_ID}" ]; then
+  NAMESPACE_ID="$(az resource show \
+	--resource-group "${RESOURCE_GROUP}" \
+	--name "${AIO_NAMESPACE_NAME}" \
+	--resource-type Microsoft.DeviceRegistry/namespaces \
+	--query id -o tsv 2>/dev/null)"
+fi
+
 echo
 echo "=== Creating the Azure IoT Operations instance ==="
 run az iot ops create \
   --resource-group "${RESOURCE_GROUP}" \
   --cluster "${CLUSTER_NAME}" \
   --name "${AIO_INSTANCE_NAME}" \
-  --sr-resource-id "${SCHEMA_REGISTRY_ID}"
+  --sr-resource-id "${SCHEMA_REGISTRY_ID}" \
+  --ns-resource-id "${NAMESPACE_ID}"
 
 # --------------------------
 # 8. Enable managed-identity secret/identity access for the AIO instance
@@ -382,30 +430,11 @@ for line in "${LINES[@]}"; do
 	  --name "${safe_name}-ep" \
 	  --endpoint-address "${endpoint_address}"
 
-	# Build the asset config with one data point per OpcNodes entry. The NodeId is kept verbatim
-	# as the data point dataSource; a sanitized, unique name is generated for each point.
-	asset_config="${AIO_CONFIG_DIR}/asset-${line}-${safe_name}.json"
-	jq --arg ep "${safe_name}-ep" --argjson idx "${idx}" '
-	  {
-		enabled: true,
-		endpointRef: $ep,
-		datasets: [
-		  {
-			name: "telemetry",
-			dataPoints: [
-			  ( .[$idx].OpcNodes // [] )
-			  | to_entries[]
-			  | {
-				  name: ("node-" + (.key|tostring)),
-				  dataSource: .value.Id,
-				  dataPointConfiguration: ( { samplingInterval: (.value.OpcSamplingInterval // 1000) } | tojson )
-				}
-			]
-		  }
-		]
-	  }
-	' "${persistency}" > "${asset_config}"
-
+	# Create the asset, then add a dataset (destination = the local MQTT topic that the
+	# telemetry data flow subscribes to) and one data point per OpcNodes entry. The current CLI
+	# uses 'ns asset opcua create' + 'dataset add' + 'datapoint add' (no --config-file). The
+	# NodeId is passed verbatim as the data point --data-source; sampling interval comes from
+	# OpcSamplingInterval in persistency.json.
 	node_count="$(jq -r ".[${idx}].OpcNodes | length" "${persistency}")"
 	echo ">>> ${safe_name}: ${node_count} data point(s) from persistency.json"
 
@@ -414,8 +443,32 @@ for line in "${LINES[@]}"; do
 	  --instance "${AIO_INSTANCE_NAME}" \
 	  --device "${safe_name}" \
 	  --endpoint "${safe_name}-ep" \
-	  --name "${safe_name}-asset" \
-	  --config-file "${asset_config}"
+	  --name "${safe_name}-asset"
+
+	# Dataset whose destination is the MQTT topic consumed by the telemetry data flow.
+	run az iot ops ns asset opcua dataset add \
+	  --resource-group "${RESOURCE_GROUP}" \
+	  --instance "${AIO_INSTANCE_NAME}" \
+	  --asset "${safe_name}-asset" \
+	  --name "telemetry" \
+	  --dest topic="azure-iot-operations/data/${safe_name}" qos=Qos1 retain=Never
+
+	# Add each OPC UA node as a data point (NodeId -> --data-source, interval -> --sampling-int).
+	node_i=0
+	while [ "${node_i}" -lt "${node_count}" ]; do
+	  node_id="$(jq -r ".[${idx}].OpcNodes[${node_i}].Id" "${persistency}")"
+	  sampling="$(jq -r ".[${idx}].OpcNodes[${node_i}].OpcSamplingInterval // 1000" "${persistency}")"
+	  run az iot ops ns asset opcua datapoint add \
+		--resource-group "${RESOURCE_GROUP}" \
+		--instance "${AIO_INSTANCE_NAME}" \
+		--asset "${safe_name}-asset" \
+		--dataset "telemetry" \
+		--name "node-${node_i}" \
+		--data-source "${node_id}" \
+		--sampling-int "${sampling}" \
+		--replace true
+	  node_i=$((node_i + 1))
+	done
 
 	idx=$((idx + 1))
   done

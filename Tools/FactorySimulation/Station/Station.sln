@@ -9,7 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\adx.md = ..\..\..\adx.md
 		..\..\..\Deployment\arm.json = ..\..\..\Deployment\arm.json
-		..\..\..\azureiotoperations.md = ..\..\..\azureiotoperations.md
 		..\..\..\Deployment\Bootstrap.sh = ..\..\..\Deployment\Bootstrap.sh
 		..\..\ADXQueries\CalculateOEEForLine.kql = ..\..\ADXQueries\CalculateOEEForLine.kql
 		..\..\ADXQueries\CalculateOEEForStation.kql = ..\..\ADXQueries\CalculateOEEForStation.kql

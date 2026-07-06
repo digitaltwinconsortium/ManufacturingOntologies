@@ -17,9 +17,16 @@ The solution must be as efficient as possible and enable all required use cases 
 
 Interoperability is the key enabler for these requirements. The use of open standards such as OPC UA significantly helps to achieve this interoperability, which lead to the establishment of the [OPC Foundation Cloud Initiative](https://opcfoundation.org/cloud). This OPC UA Reference Solution is Microsoft's implementation of the Cloud Initiative's reference architecture.
 
+## Prerequisites
+
+Azure Arc needs the `custom-locations` application object ID — you compute it once, up front, and pass it to the deployment script. You can retrieve it with the following command:
+
+```azurecli
+az ad sp show --id bc313c14-388c-4e7d-a58e-70017303ee3b --query id -o tsv
+```
+
 The following articles describe how to deploy this reference solution as well as how to connect it to various Microsoft services:
 
-- [Connect Azure IoT Operations to the reference solution](azureiotoperations.md) describes how to deploy Azure Arc and Azure IoT Operations onto the simulation VM and connect its OPC UA connector to the factory simulation, forwarding data to the same Event Hubs namespace.
 - [Connect Azure Data Explorer to the reference solution](adx.md) describes the end-to-end industrial IoT reference solution that uses Azure Data Explorer to store and analyze OPC UA telemetry for use cases such as condition monitoring, OEE calculation, and anomaly detection.
 - [Connect Azure Databricks to the reference solution](databricks.md) walks through storing and analyzing OPC UA PubSub telemetry in Azure Databricks using Delta Lake tables and Structured Streaming ingestion from Azure Event Hubs.
 - [Connect Microsoft Fabric to the reference solution](fabric.md) explains how to ingest and process the reference solution's OPC UA PubSub data in a Microsoft Fabric Eventhouse for Real-Time Intelligence, mirroring the same tables, functions, and views used by Azure Data Explorer.
@@ -61,6 +68,23 @@ The station OPC UA server uses the following OPC UA node IDs for telemetry to th
 - `i=434` - pressure
 
 The solution uses a digital feedback loop to manage the pressure in a simulated station. To implement the feedback loop, the solution triggers a command from the cloud on one of the OPC UA servers in the simulation. The trigger activates when simulated time-series pressure data reaches a certain threshold. You can see the pressure of the assembly machine in the Azure Data Explorer dashboard. The pressure is released at regular intervals for the Seattle production line. In a real-world deployment, something as critical as opening a pressure relief valve would be done on-premises. This example simply demonstrates how to achieve the digital feedback loop.
+
+## OPC UA certificate trust
+
+The simulation stations accept anonymous/untrusted OPC UA sessions **only until a CA certificate is pushed to them via OPC UA Part 12 Server Push**. After that, each station accepts a client certificate only if its **issuer matches a certificate in the station's `pki/issuer/certs` store**. Azure IoT Operation's connector for OPC UA uses a self-signed application instance certificate, so without extra configuration the stations would **reject** it once provisioned.
+
+The deployment script establishes the required two-way (mutual) trust automatically, after Azure IoT Operations is installed:
+
+1. **Stations trust AIO.** AIO's connector certificate is a self-signed, cert-manager-managed application instance certificate stored in the Kubernetes secret `aio-opc-opcuabroker-default-application-cert` (namespace `azure-iot-operations`) — you **retrieve** it, you don't generate it.
+
+   The script copies this certificate into each station's issuer certs and trusted certs store.
+
+2. **AIO trusts the stations.** The script adds all CA certificates found in the GDS Certificate Authority (CA) store to AIO's connector trust list.
+
+   AIO stores this in the `aio-opc-ua-broker-trust-list` secret.
+
+> [!NOTE]
+> This is the automated equivalent of the mutual-trust procedure in [Configure OPC UA certificates infrastructure for the connector for OPC UA](https://learn.microsoft.com/azure/iot-operations/discover-manage-assets/howto-configure-opc-ua-certificates-infrastructure).
 
 ## W3C Web of Things
 

@@ -42,7 +42,7 @@
   "ReversiblePubSubEncoding": false,
   "OmitNetworkMessageHeader": true,
   "UseCloudEventsMetadataHeader": false,
-  "AutoLoadPersistedNodes": true,
+  "AutoLoadPersistedNodes": false,
   "AzureOpenAIAPIEndpoint": null,
   "AzureOpenAIAPIKey": null,
   "AzureOpenAIDeploymentName": null

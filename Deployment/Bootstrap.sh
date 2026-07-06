@@ -14,7 +14,17 @@ set -o pipefail
 # $1 (optional): the Event Hubs namespace RootManageSharedAccessKey connection string. When provided
 # (the ARM deployment passes it automatically), the production line simulation is started at the end
 # of this script. Captured before logging is enabled below so the secret is not written to the log.
+#
+# $2-$8: Azure IoT Operations onboarding context, passed by the ARM deployment. Azure Arc + Azure IoT
+# Operations are always set up on the K3s cluster after the simulation starts.
 EVENTHUBS_CONNECTION_STRING="${1:-}"
+AIO_RESOURCE_GROUP="${2:-}"
+AIO_LOCATION="${3:-}"
+AIO_RESOURCES_NAME="${4:-}"
+AIO_MANAGED_IDENTITY_CLIENT_ID="${5:-}"
+AIO_SUBSCRIPTION_ID="${6:-}"
+AIO_CUSTOM_LOCATIONS_OID="${7:-}"
+AIO_EVENTHUBS_HOST="${8:-}"
 
 # --------------------------
 # Logging (like Start-Transcript)
@@ -159,6 +169,36 @@ if [ -n "${EVENTHUBS_CONNECTION_STRING}" ]; then
 else
   echo "No Event Hubs connection string was passed to Bootstrap.sh; skipping automatic simulation start."
   echo "To start it manually, run: ${FACTORY_SIM_DIR}/StartSimulation.sh '<eventhubs-connection-string>'"
+fi
+
+# --------------------------
+# Deploy Azure Arc + Azure IoT Operations
+# --------------------------
+# Arc-enable the K3s cluster and install AIO so its OPC UA connector reads the simulation
+# servers and forwards their data to the same Event Hubs namespace.
+# AIO authenticates to Azure with the VM's managed identity, so no secret is passed here.
+echo
+echo "=== Azure IoT Operations ==="
+# The CustomScript extension downloads SetupAzureIoTOperations.sh next to Bootstrap.sh; fall
+# back to the copy in the downloaded repo if it is not present in the working directory.
+AIO_SCRIPT="./SetupAzureIoTOperations.sh"
+if [ ! -f "${AIO_SCRIPT}" ]; then
+  AIO_SCRIPT="${DEST_DIR}/Deployment/SetupAzureIoTOperations.sh"
+fi
+if [ -f "${AIO_SCRIPT}" ]; then
+  # Authored on Windows; ensure LF line endings and the executable bit.
+  try sudo sed -i 's/\r$//' "${AIO_SCRIPT}"
+  try sudo chmod +x "${AIO_SCRIPT}"
+  try sudo env KUBECONFIG=/etc/rancher/k3s/k3s.yaml bash "${AIO_SCRIPT}" \
+    "${AIO_RESOURCE_GROUP}" \
+    "${AIO_LOCATION}" \
+    "${AIO_RESOURCES_NAME}" \
+    "${AIO_MANAGED_IDENTITY_CLIENT_ID}" \
+    "${AIO_SUBSCRIPTION_ID}" \
+    "${AIO_CUSTOM_LOCATIONS_OID}" \
+    "${AIO_EVENTHUBS_HOST}"
+else
+  echo "!!! WARNING: SetupAzureIoTOperations.sh not found; cannot set up Azure IoT Operations."
 fi
 
 echo

@@ -19,6 +19,10 @@ You can deploy a [sample dashboard](https://github.com/digitaltwinconsortium/Man
 
 To display the OEE for a specific shift, select **Custom Time Range** in the **Time Range** drop-down in the top-left corner of the Azure Data Explorer Dashboard and enter the date and time from start to end of the shift you're interested in.
 
+## I3X API:
+
+An **I3X API** container app named `<resourcesName>-i3x4kusto` is deployed, exposing ADX over the I3X REST API. Its URL can be retrieved from the Azure portal and the Swagger endpoint is accessible by adding /swagger to its URL.
+
 ## Render the built-in Unified NameSpace (UNS) and ISA-95 model graph in Kusto Explorer
 
 This solution implements a Unified Namespace (UNS), based on the OPC UA metadata sent to the Azure Data Explorer time-series database in the cloud. This OPC UA metadata includes the ISA-95 asset hierarchy. You can visualize the resulting graph in the [Kusto Explorer tool](/en-us/azure/data-explorer/kusto/tools/kusto-explorer).

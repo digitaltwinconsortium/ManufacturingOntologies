@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\adx.md = ..\..\..\adx.md
 		..\..\..\Deployment\arm.json = ..\..\..\Deployment\arm.json
+		..\..\..\azureiotoperations.md = ..\..\..\azureiotoperations.md
 		..\..\..\Deployment\Bootstrap.sh = ..\..\..\Deployment\Bootstrap.sh
 		..\..\ADXQueries\CalculateOEEForLine.kql = ..\..\ADXQueries\CalculateOEEForLine.kql
 		..\..\ADXQueries\CalculateOEEForStation.kql = ..\..\ADXQueries\CalculateOEEForStation.kql
@@ -28,11 +29,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\..\..\powerbi.md = ..\..\..\powerbi.md
 		..\..\..\README.md = ..\..\..\README.md
 		..\..\GrafanaDashboard\samplegrafanadashboard.json = ..\..\GrafanaDashboard\samplegrafanadashboard.json
+		..\..\..\Deployment\SetupAzureIoTOperations.sh = ..\..\..\Deployment\SetupAzureIoTOperations.sh
 		..\..\..\Deployment\SetupDatabricks.sh = ..\..\..\Deployment\SetupDatabricks.sh
 		..\..\..\Deployment\SetupFabric.sh = ..\..\..\Deployment\SetupFabric.sh
 		..\StartSimulation.sh = ..\StartSimulation.sh
 		..\StopSimulation.sh = ..\StopSimulation.sh
-		..\..\..\Deployment\UA-CloudPublisher.yaml = ..\..\..\Deployment\UA-CloudPublisher.yaml
 	EndProjectSection
 EndProject
 Global

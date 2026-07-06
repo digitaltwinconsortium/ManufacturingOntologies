@@ -22,10 +22,9 @@ Select the **Deploy to Azure** button and choose the **same resource group you u
 > [!IMPORTANT]
 > **Getting access to the workspace.**: A Fabric administrator can open the Fabric portal -> **Admin portal -> Workspaces**, find `<resourcesName>-Fabric`, and use **Access -> Add admins, members or contributors** to add you as an **Admin**.
 
-The Fabric template provisions:
+## I3X API:
 
-- a deployment script (running as the solution's managed identity) that creates a Fabric workspace (`<resourcesName>-Fabric`) assigned to the existing Fabric capacity deployed earlier, an **Eventhouse** (`opcua`)
-- an **I3X (Information Interoperability) API** container app named `<resourcesName>-i3x4kusto-fabric` (the same `ghcr.io/azure-samples/i3x4kusto:main` image used for ADX) that exposes the Eventhouse over the I3X REST API. Its URL is returned as the `i3x4KustoFabricUrl` template output.
+An **I3X API** container app named `<resourcesName>-i3x4kusto-fabric` is deployed, exposing the Eventhouse over the I3X REST API. Its URL can be retrieved from the Azure portal and the Swagger endpoint is accessible by adding /swagger to its URL.
 
 ## Use the sample dashboard
 

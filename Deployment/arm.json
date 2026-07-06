@@ -36,6 +36,13 @@
       "metadata": {
         "description": "Provision a Microsoft Fabric F2 capacity as part of the main deployment. Enable this if you plan to use Microsoft Fabric, especially if you have never used Fabric before: having the capacity in place first lets a Fabric tenant admin enable the Service principals can use Fabric APIs tenant setting in the Fabric admin portal before you deploy the Fabric template. Leave disabled for Azure Data Explorer- or Databricks-only deployments to avoid the Fabric capacity cost; the Fabric template still provisions the capacity itself if it was not pre-created here."
       }
+    },
+    "customLocationsOid": {
+      "type": "string",
+      "minLength": 36,
+      "metadata": {
+        "description": "Object ID of the 'custom-locations' Microsoft Entra application. Required: Azure Arc + Azure IoT Operations are always installed on the simulation VM, and enabling Arc custom-locations needs this object ID. Obtain it by running (as a Microsoft Entra user, not a managed identity): az ad sp show --id bc313c14-388c-4e7d-a58e-70017303ee3b --query id -o tsv. It is passed to the VM so Arc custom-locations can be enabled non-interactively with the deployment's managed identity."
+      }
     }
   },
   "variables": {
@@ -57,7 +64,13 @@
     "databricksNotebookUri": "https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Tools/DatabricksQueries/opcua_setup.py",
     "databricksDashboardUri": "https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Tools/DatabricksQueries/dashboard-ontologies.lvdash.json",
     "contributorRoleId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacContributor'))]",
-    "i3xContainerAppName": "[concat(parameters('resourcesName'), '-i3x4kusto')]"
+    "i3xContainerAppName": "[concat(parameters('resourcesName'), '-i3x4kusto')]",
+    "azureRbacAzureEventHubsDataSender": "2b629674-e913-4c01-ae53-ef4638d8f975",
+    "aioStorageAccountName": "[toLower(take(concat(replace(parameters('resourcesName'), '-', ''), 'aiostorage'), 24))]",
+    "aioSchemaRegistryName": "[concat(parameters('resourcesName'), '-SchemaRegistry')]",
+    "aioSchemaRegistryNamespace": "[toLower(concat(replace(parameters('resourcesName'), '-', ''), 'aiosr'))]",
+    "aioSetupScriptUri": "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'SetupAzureIoTOperations.sh')]",
+    "eventHubsDataSenderRoleId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacAzureEventHubsDataSender'))]"
   },
   "resources": [
     {
@@ -799,15 +812,21 @@
       "type": "microsoft.compute/virtualmachines",
       "name": "[concat(parameters('resourcesName'), '-VM')]",
       "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]": {}
+        }
+      },
       "properties": {
         "hardwareProfile": {
-          "vmSize": "Standard_D2ps_v6"
+          "vmSize": "Standard_D4s_v5"
         },
         "storageProfile": {
           "imageReference": {
             "publisher": "canonical",
             "offer": "ubuntu-24_04-lts",
-            "sku": "minimal-arm64",
+            "sku": "server",
             "version": "latest"
           },
           "osDisk": {
@@ -818,7 +837,7 @@
               "storageAccountType": "StandardSSD_LRS"
             },
             "deleteOption": "Delete",
-            "diskSizeGB": 30
+            "diskSizeGB": 64
           },
           "dataDisks": [],
           "diskControllerType": "SCSI"
@@ -847,7 +866,8 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('resourcesName'), '-IF'))]"
+        "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('resourcesName'), '-IF'))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
       ]
     },
     {
@@ -859,7 +879,11 @@
         "[concat('Microsoft.Compute/virtualMachines/', parameters('resourcesName'), '-VM')]",
         "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubsNamespaceName'))]",
         "[resourceId('Microsoft.Kusto/Clusters/Databases/DataConnections', variables('adxClusterName'), 'ontologies', 'EventHubDataConnection')]",
-        "[resourceId('Microsoft.Kusto/Clusters/Databases/DataConnections', variables('adxClusterName'), 'ontologies', 'EventHubMetadataConnection')]"
+        "[resourceId('Microsoft.Kusto/Clusters/Databases/DataConnections', variables('adxClusterName'), 'ontologies', 'EventHubMetadataConnection')]",
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', variables('eventHubsNamespaceName'), 'data')]",
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', variables('eventHubsNamespaceName'), 'metadata')]",
+        "[resourceId('Microsoft.Authorization/roleAssignments', guid(variables('eventHubsDataSenderRoleId'), resourceGroup().id, variables('eventHubsNamespaceName'), 'aio'))]",
+        "[resourceId('Microsoft.DeviceRegistry/schemaRegistries', variables('aioSchemaRegistryName'))]"
       ],
       "tags": {
         "displayName": "Run Bootstrap (Linux)"
@@ -871,11 +895,12 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
           "fileUris": [
-            "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'Bootstrap.sh')]"
+            "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'Bootstrap.sh')]",
+            "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'SetupAzureIoTOperations.sh')]"
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[concat('bash Bootstrap.sh ''', listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString, '''')]"
+          "commandToExecute": "[concat('bash Bootstrap.sh ''', listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString, ''' ''', resourceGroup().name, ''' ''', resourceGroup().location, ''' ''', parameters('resourcesName'), ''' ''', reference(concat(parameters('resourcesName'), '-Identity')).clientId, ''' ''', subscription().subscriptionId, ''' ''', parameters('customLocationsOid'), ''' ''', concat(variables('eventHubsNamespaceName'), '.servicebus.windows.net'), '''')]"
         }
       }
     },
@@ -1064,6 +1089,65 @@
         "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'metadata')]"
       ],
       "properties": {}
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-10-01-preview",
+      "name": "[guid(variables('eventHubsDataSenderRoleId'), resourceGroup().id, variables('eventHubsNamespaceName'), 'aio')]",
+      "scope": "[format('Microsoft.EventHub/namespaces/{0}', variables('eventHubsNamespaceName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubsNamespaceName'))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[variables('eventHubsDataSenderRoleId')]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-05-01",
+      "name": "[variables('aioStorageAccountName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "isHnsEnabled": true,
+        "allowBlobPublicAccess": false,
+        "minimumTlsVersion": "TLS1_2",
+        "supportsHttpsTrafficOnly": true
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2023-05-01",
+      "name": "[concat(variables('aioStorageAccountName'), '/default/schemas')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('aioStorageAccountName'))]"
+      ],
+      "properties": {
+        "publicAccess": "None"
+      }
+    },
+    {
+      "type": "Microsoft.DeviceRegistry/schemaRegistries",
+      "apiVersion": "2024-09-01-preview",
+      "name": "[variables('aioSchemaRegistryName')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "namespace": "[variables('aioSchemaRegistryNamespace')]",
+        "storageAccountContainerUrl": "[concat('https://', variables('aioStorageAccountName'), '.blob.core.windows.net/schemas')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('aioStorageAccountName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices/containers', variables('aioStorageAccountName'), 'default', 'schemas')]"
+      ]
     },
     {
       "type": "Microsoft.Fabric/capacities",

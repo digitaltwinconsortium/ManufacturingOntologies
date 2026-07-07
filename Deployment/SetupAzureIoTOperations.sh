@@ -256,6 +256,26 @@ run az connectedk8s enable-features \
 # --------------------------
 echo
 echo "=== Initializing Azure IoT Operations foundation ==="
+# 'az iot ops init' and 'az iot ops create' hard-fail unless the Arc-connected cluster
+# reports connectivityStatus='Connected'. The k3s restart above (to apply the OIDC issuer
+# config) bounces the Arc agent pods and resets that heartbeat, so 'az connectedk8s connect'
+# returning is not enough - wait for connectivity to re-establish before installing AIO.
+arc_connected=false
+arc_wait_seconds=0
+while [ "${arc_wait_seconds}" -lt 600 ]; do
+  arc_status="$(az connectedk8s show --name "${CLUSTER_NAME}" --resource-group "${RESOURCE_GROUP}" --query connectivityStatus -o tsv 2>/dev/null)"
+  if [ "${arc_status}" = "Connected" ]; then
+    arc_connected=true
+    echo ">>> Arc cluster '${CLUSTER_NAME}' is Connected after ${arc_wait_seconds}s"
+    break
+  fi
+  echo ">>> Waiting for Arc connectivity (status='${arc_status:-unknown}', ${arc_wait_seconds}s elapsed)..."
+  sleep 15
+  arc_wait_seconds=$((arc_wait_seconds + 15))
+done
+if [ "${arc_connected}" != "true" ]; then
+  echo "!!! WARNING: Arc cluster '${CLUSTER_NAME}' did not reach 'Connected' within 600s; 'az iot ops init' may fail."
+fi
 run az iot ops init \
   --resource-group "${RESOURCE_GROUP}" \
   --cluster "${CLUSTER_NAME}"

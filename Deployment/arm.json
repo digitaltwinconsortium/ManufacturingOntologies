@@ -401,6 +401,9 @@
           "virtualNetworkRules": [
             {
               "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(parameters('resourcesName'), '-Network-CA'), concat(parameters('resourcesName'), '-Subnet-CA'))]"
+            },
+            {
+              "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(parameters('resourcesName'), '-Network'), concat(parameters('resourcesName'), '-Subnet'))]"
             }
           ]
         },
@@ -419,7 +422,8 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/virtualNetworks', concat(parameters('resourcesName'), '-Network-CA'))]"
+        "[resourceId('Microsoft.Network/virtualNetworks', concat(parameters('resourcesName'), '-Network-CA'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', concat(parameters('resourcesName'), '-Network'))]"
       ]
     },
     {
@@ -735,6 +739,14 @@
             "name": "[concat(parameters('resourcesName'), '-Subnet')]",
             "properties": {
               "addressPrefix": "[variables('subnetPrefix')]",
+              "serviceEndpoints": [
+                {
+                  "service": "Microsoft.KeyVault",
+                  "locations": [
+                    "*"
+                  ]
+                }
+              ],
               "networkSecurityGroup": {
                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(parameters('resourcesName'), '-NSG'))]"
               }

@@ -13,6 +13,9 @@ The deployment process prompts you to provide a password for the virtual machine
 
 To reduce cost, the deployment creates a single Linux VM for both the production line simulation and the edge infrastructure. In a production scenario, the production line simulation isn't required.
 
+> [!NOTE]
+> Please be patient! The deployment can take up to 90 minutes to complete. After the deployment is complete, you can access the VM via SSH using the credentials you provided during deployment.
+
 ## Use cases for condition monitoring, OEE calculation, anomaly detection, and predictions in Azure Data Explorer
 
 You can deploy a [sample dashboard](https://github.com/digitaltwinconsortium/ManufacturingOntologies/blob/main/Tools/ADXQueries/dashboard-ontologies.json). To learn how to deploy a dashboard, see [Visualize data with Azure Data Explorer dashboards &gt; create from file](/en-us/azure/data-explorer/azure-data-explorer-dashboards#to-create-new-dashboard-from-a-file). After you import the dashboard, update its data source. Specify the HTTPS endpoint of your Azure Data Explorer server cluster in the top-right corner of the dashboard. The HTTPS endpoint looks like: `https://<ADXInstanceName>.<AzureRegion>.kusto.windows.net/`.

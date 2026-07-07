@@ -472,9 +472,9 @@ for line in "${LINES[@]}"; do
 	  --endpoint-address "${endpoint_address}"
 
 	# Create the asset, then add a dataset (destination = the local MQTT topic that the
-	# telemetry data flow subscribes to) and one data point per OpcNodes entry. The current CLI
-	# uses 'ns asset opcua create' + 'dataset add' + 'datapoint add' (no --config-file). The
-	# NodeId is passed verbatim as the data point --data-source; sampling interval comes from
+	# telemetry data flow subscribes to) and import all OpcNodes as data points in one batch. The
+	# current CLI uses 'ns asset opcua create' + 'dataset add' + 'datapoint import --input-file'.
+	# The NodeId is passed verbatim as the data point dataSource; sampling interval comes from
 	# OpcSamplingInterval in persistency.json.
 	node_count="$(jq -r ".[${idx}].OpcNodes | length" "${persistency}")"
 	echo ">>> ${safe_name}: ${node_count} data point(s) from persistency.json"
@@ -494,22 +494,27 @@ for line in "${LINES[@]}"; do
 	  --name "telemetry" \
 	  --dest topic="azure-iot-operations/data/${safe_name}" qos=Qos1 retain=Never ttl=3600
 
-	# Add each OPC UA node as a data point (NodeId -> --data-source, interval -> --sampling-int).
-	node_i=0
-	while [ "${node_i}" -lt "${node_count}" ]; do
-	  node_id="$(jq -r ".[${idx}].OpcNodes[${node_i}].Id" "${persistency}")"
-	  sampling="$(jq -r ".[${idx}].OpcNodes[${node_i}].OpcSamplingInterval // 1000" "${persistency}")"
-	  run az iot ops ns asset opcua datapoint add \
-		--resource-group "${RESOURCE_GROUP}" \
-		--instance "${AIO_INSTANCE_NAME}" \
-		--asset "${safe_name}-asset" \
-		--dataset "telemetry" \
-		--name "node-${node_i}" \
-		--data-source "${node_id}" \
-		--sampling-int "${sampling}" \
-		--replace true
-	  node_i=$((node_i + 1))
-	done
+	# Add ALL OPC UA nodes in a single batch import instead of one slow ARM call per node
+	# (per-node 'datapoint add' made the run exceed the CustomScript extension timeout). The
+	# import file is a JSON array of { name, dataSource=NodeId, dataPointConfiguration }.
+	datapoints_file="${AIO_CONFIG_DIR}/datapoints-${line}-${safe_name}.json"
+	jq --argjson idx "${idx}" '
+	  ( .[$idx].OpcNodes // [] )
+	  | to_entries
+	  | map({
+		  name: ("node-" + (.key|tostring)),
+		  dataSource: .value.Id,
+		  dataPointConfiguration: ( { samplingInterval: (.value.OpcSamplingInterval // 1000) } | tojson )
+		})
+	' "${persistency}" > "${datapoints_file}"
+
+	run az iot ops ns asset opcua datapoint import \
+	  --resource-group "${RESOURCE_GROUP}" \
+	  --instance "${AIO_INSTANCE_NAME}" \
+	  --asset "${safe_name}-asset" \
+	  --dataset "telemetry" \
+	  --input-file "${datapoints_file}" \
+	  --replace true
 
 	idx=$((idx + 1))
   done

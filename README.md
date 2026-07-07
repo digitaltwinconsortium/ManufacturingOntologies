@@ -102,16 +102,14 @@ The deployment script establishes the required two-way (mutual) trust automatica
 When you browse the Kubernetes resources of the Arc-enabled cluster (or the Azure IoT Operations instance) in the Azure portal, you are prompted for a **service account bearer token**. Generate one by logging on to the VM deployed via SSH and then running the following commands:
 
 ```bash
-export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+# Create a service account (in the default namespace).
+sudo kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml create serviceaccount arc-portal-user -n default
 
-# 1. Create a service account (in the default namespace).
-sudo kubectl create serviceaccount arc-portal-user -n default
+# Grant it cluster-admin so it can view all resources.
+sudo kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml create clusterrolebinding arc-portal-user-binding --clusterrole cluster-admin --serviceaccount default:arc-portal-user
 
-# 2. Grant it cluster-admin so it can view all resources.
-sudo kubectl create clusterrolebinding arc-portal-user-binding --clusterrole cluster-admin --serviceaccount default:arc-portal-user
-
-# 3. Create a long-lived token secret for the service account.
-sudo kubectl apply -f - <<EOF
+# Create a long-lived token secret for the service account.
+sudo kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml apply -f - <<EOF
 apiVersion: v1
 kind: Secret
 metadata:
@@ -121,8 +119,8 @@ metadata:
 type: kubernetes.io/service-account-token
 EOF
 
-# 4. Print the token, then paste it into the portal's "Service account bearer token" prompt.
-sudo kubectl get secret arc-portal-user-secret -o jsonpath='{$.data.token}' | base64 -d
+# Print the token, then paste it into the portal's "Service account bearer token" prompt.
+sudo kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml get secret arc-portal-user-secret -o jsonpath='{$.data.token}' | base64 -d
 ```
 
 > [!NOTE]

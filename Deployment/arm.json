@@ -820,7 +820,7 @@
       },
       "properties": {
         "hardwareProfile": {
-          "vmSize": "Standard_E2as_v6"
+          "vmSize": "Standard_E4as_v6"
         },
         "storageProfile": {
           "imageReference": {

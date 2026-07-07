@@ -24,7 +24,7 @@ Select the **Deploy to Azure** button and choose the **same resource group you u
 
 ## I3X API
 
-An **I3X API** container app named `<resourcesName>-i3x4kusto-fabric` is deployed, exposing the Eventhouse over the I3X REST API. Its URL can be retrieved from the Azure portal and the Swagger endpoint is accessible by adding /swagger to its URL.
+An [**I3X API**](https://i3x.dev) container app named `<resourcesName>-i3x4kusto-fabric` is deployed, exposing the Eventhouse over the I3X REST API. Its URL can be retrieved from the Azure portal and the Swagger endpoint is accessible by adding /swagger to its URL.
 
 ## Use the sample dashboard
 

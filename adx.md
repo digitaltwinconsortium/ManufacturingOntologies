@@ -21,7 +21,7 @@ To display the OEE for a specific shift, select **Custom Time Range** in the **T
 
 ## I3X API
 
-An **I3X API** container app named `<resourcesName>-i3x4kusto` is deployed, exposing ADX over the I3X REST API. Its URL can be retrieved from the Azure portal and the Swagger endpoint is accessible by adding /swagger to its URL.
+An [**I3X API**](https://i3x.dev) container app named `<resourcesName>-i3x4kusto` is deployed, exposing ADX over the I3X REST API. Its URL can be retrieved from the Azure portal and the Swagger endpoint is accessible by adding /swagger to its URL.
 
 ## Render the built-in Unified NameSpace (UNS) and ISA-95 model graph in Kusto Explorer
 

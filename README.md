@@ -34,6 +34,14 @@ az provider register --namespace Microsoft.DeviceRegistry
 az provider register --namespace Microsoft.SecretSyncController
 ```
 
+## Postrequisites
+
+The reference solution also deploys the Azure IoT Schema Registry, which requires the **IoT Operations Arc extension** service principal to be granted the **Azure Device Registry Administrator** role. A subscription Owner or User Access Administrator must create this role assignment by running the following **after** the deployment completes. Replace `<subscription_id>` and `<resource_group>` with your values and `<resources_name>` with the `resourcesName` deployment parameter in lowercase:
+
+```azurecli
+az role assignment create --assignee a2127957-50f2-44e9-8434-4fed4109fc30 --role "Azure Device Registry Administrator" --scope /subscriptions/<subscription_id>/resourceGroups/<resource_group>/providers/Microsoft.DeviceRegistry/schemaRegistries/<resources_name>-schemaregistry
+```
+
 ## Articles in this reference solution
 
 The following articles describe how to deploy this reference solution as well as how to connect it to various Microsoft services:

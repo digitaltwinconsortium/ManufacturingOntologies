@@ -110,12 +110,17 @@ if [ -z "${CUSTOM_LOCATIONS_OID}" ]; then
   exit 1
 fi
 
+# RUN_LAST_RC holds the exit code of the most recent `run` invocation. run() always
+# returns 0 (best-effort: warn but continue) so the script keeps going on failure;
+# callers that must branch on the real outcome inspect RUN_LAST_RC instead.
+RUN_LAST_RC=0
 # Helper: log a command, run it, warn (but continue) on failure.
 run() {
   echo
   echo ">>> $*"
   "$@"
   local rc=$?
+  RUN_LAST_RC=${rc}
   if [ "${rc}" -ne 0 ]; then
 	echo "!!! WARNING: command failed (rc=${rc}): $*"
   fi
@@ -712,6 +717,11 @@ echo
 echo "=== Enabling AIO secret sync (reusing ${RESOURCES_NAME}-KV) ==="
 KEY_VAULT_NAME="${RESOURCES_NAME}-KV"
 KEY_VAULT_ID="$(az keyvault show --name "${KEY_VAULT_NAME}" --resource-group "${RESOURCE_GROUP}" --query id -o tsv 2>/dev/null)"
+# Whether secret sync is enabled gates the OPC UA trust-list step below. Key off the
+# result of 'secretsync enable' (RUN_LAST_RC) rather than probing 'connector opcua trust
+# show': on a freshly enabled instance no trust list secret exists yet, so 'trust show'
+# returns non-zero and would wrongly report secret sync as disabled, skipping the trust add.
+secret_sync_enabled=false
 if [ -n "${KEY_VAULT_ID}" ] && [ -n "${MANAGED_IDENTITY_RESOURCE_ID}" ]; then
   run az iot ops secretsync enable \
     --instance "${AIO_INSTANCE_NAME}" \
@@ -719,6 +729,9 @@ if [ -n "${KEY_VAULT_ID}" ] && [ -n "${MANAGED_IDENTITY_RESOURCE_ID}" ]; then
     --mi-user-assigned "${MANAGED_IDENTITY_RESOURCE_ID}" \
     --kv-resource-id "${KEY_VAULT_ID}" \
     --skip-ra
+  if [ "${RUN_LAST_RC}" -eq 0 ]; then
+    secret_sync_enabled=true
+  fi
 else
   echo "!!! WARNING: could not resolve ${KEY_VAULT_NAME} or the managed identity; secret sync not enabled."
   echo "    The OPC UA trust list (below) requires secret sync and will be skipped."
@@ -726,12 +739,7 @@ fi
 
 echo
 echo "=== Adding UA Cloud Publisher's CA to AIO's OPC UA trust list ==="
-if az iot ops connector opcua trust show --instance "${AIO_INSTANCE_NAME}" --resource-group "${RESOURCE_GROUP}" >/dev/null 2>&1; then
-  secretsync_ready=true
-else
-  secretsync_ready=false
-fi
-if [ "${secretsync_ready}" != "true" ]; then
+if [ "${secret_sync_enabled}" != "true" ]; then
   echo "!!! NOTE: AIO secret sync is not enabled, so the OPC UA trust list cannot be updated."
   echo "    After enabling it, add each UA Cloud Publisher CA (from /mnt/c/K3s/PublisherConfig/<line>/PKI) with:"
   echo "      az iot ops connector opcua trust add --instance ${AIO_INSTANCE_NAME} \\"

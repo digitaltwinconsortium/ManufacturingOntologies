@@ -37,7 +37,8 @@ export KUBECONFIG="${KUBECONFIG_PATH}"
 
 # Derived Azure resource names (must match Deployment/arm.json).
 CLUSTER_NAME="${RESOURCES_NAME}-Arc"
-AIO_INSTANCE_NAME="${RESOURCES_NAME}-AIO"
+# The AIO instance name must be lowercase (^[a-z0-9][a-z0-9-]*[a-z0-9]$).
+AIO_INSTANCE_NAME="$(printf '%s-aio' "${RESOURCES_NAME}" | tr '[:upper:]' '[:lower:]')"
 # Schema registry name must be lowercase (^[a-z0-9][a-z0-9-]*[a-z0-9]$), matching arm.json's
 # toLower(concat(resourcesName, '-schemaregistry')).
 SCHEMA_REGISTRY_NAME="$(printf '%s-schemaregistry' "${RESOURCES_NAME}" | tr '[:upper:]' '[:lower:]')"
@@ -65,6 +66,10 @@ PUBLISHER_CONFIG_DIR="${REPO_DIR}/Tools/FactorySimulation/PublisherConfig"
 LINES=("Munich" "Seattle")
 # Default OPC UA port for endpoints whose persistency.json EndpointUrl omits it.
 OPC_UA_PORT="4840"
+# Stations (first dotted label of the OPC UA host) that must NOT be onboarded as AIO OPC UA
+# devices/assets: 'commander' is the UA Cloud Commander command/response server and 'mes' is the
+# MES server - neither is a telemetry source for the connector for OPC UA.
+EXCLUDED_STATIONS="commander mes"
 # Kubernetes namespaces the simulation stations run in (lower-cased line names).
 STATION_NAMESPACES=("munich" "seattle")
 # AIO's connector for OPC UA stores its application instance certificate (managed by
@@ -129,6 +134,8 @@ if ! az login --identity --client-id "${MANAGED_IDENTITY_CLIENT_ID}" --allow-no-
   exit 1
 fi
 run az account set --subscription "${SUBSCRIPTION_ID}"
+# Tenant ID is required by the Event Hubs (Kafka) dataflow endpoint's managed-identity auth.
+TENANT_ID="$(az account show --query tenantId -o tsv 2>/dev/null)"
 
 # --------------------------
 # 2. Install/refresh the required Azure CLI extensions
@@ -288,6 +295,27 @@ run az iot ops create \
   --name "${AIO_INSTANCE_NAME}" \
   --sr-resource-id "${SCHEMA_REGISTRY_ID}" \
   --ns-resource-id "${NAMESPACE_ID}"
+# NOTE: 'az iot ops create' may warn that the IoT Operations Arc extension service principal needs
+# the 'Azure Device Registry Administrator' role on the schema registry. The deployment's managed
+# identity cannot create that role assignment (it requires Microsoft.Authorization/roleAssignments
+# /write, a subscription-scope right the MI lacks). The instance is still created; if schema
+# operations later fail, a subscription Owner should grant that role on the schema registry.
+
+# --------------------------
+# 7b. Create an Azure Arc site (site manager) scoped to the resource group
+# --------------------------
+# A site groups Arc resources for OT users. Sites have a 1:1 relationship with a resource group, so
+# scoping the site to this resource group automatically collects the AIO instance (no explicit
+# assignment needed). The site is named after the resource group, as requested. The site name must
+# match ^[a-zA-Z0-9][a-zA-Z0-9-_]{2,22}[a-zA-Z0-9]$.
+echo
+echo "=== Creating an Azure Arc site named '${RESOURCE_GROUP}' (scoped to the resource group) ==="
+run az extension add --upgrade --yes --name site
+run az site create \
+  --name "${RESOURCE_GROUP}" \
+  --resource-group "${RESOURCE_GROUP}" \
+  --subscription "${SUBSCRIPTION_ID}" \
+  --display-name "${RESOURCE_GROUP}"
 
 # --------------------------
 # 8. Enable managed-identity secret/identity access for the AIO instance
@@ -329,6 +357,7 @@ cat > "${ENDPOINT_CONFIG}" <<EOF
 	  "method": "UserAssignedManagedIdentity",
 	  "userAssignedManagedIdentitySettings": {
 		"clientId": "${MANAGED_IDENTITY_CLIENT_ID}",
+		"tenantId": "${TENANT_ID}",
 		"scope": "https://${EVENTHUBS_HOST}/.default"
 	  }
 	},
@@ -403,6 +432,18 @@ for line in "${LINES[@]}"; do
 	endpoint_url="$(jq -r ".[${idx}].EndpointUrl" "${persistency}")"
 	# Host portion of opc.tcp://<host>[:port]/  ->  <host>
 	host="$(printf '%s' "${endpoint_url}" | sed -E 's#^opc\.tcp://##; s#/.*$##; s#:[0-9]+$##')"
+	# Station is the first dotted label of the host (e.g. 'commander.munich' -> 'commander').
+	station="$(printf '%s' "${host}" | cut -d. -f1 | tr '[:upper:]' '[:lower:]')"
+	# Skip non-telemetry servers: 'commander' is the UA Cloud Commander command/response server
+	# and 'mes' is the MES server; neither is onboarded as an AIO OPC UA device/asset.
+	case " ${EXCLUDED_STATIONS} " in
+	  *" ${station} "*)
+		echo
+		echo "--- skipping ${host} (station '${station}' excluded) ---"
+		idx=$((idx + 1))
+		continue
+		;;
+	esac
 	# Ensure the endpoint address carries an explicit port for the AIO connector.
 	if printf '%s' "${endpoint_url}" | grep -Eq '://[^/:]+:[0-9]+'; then
 	  endpoint_address="${endpoint_url%/}"
@@ -451,7 +492,7 @@ for line in "${LINES[@]}"; do
 	  --instance "${AIO_INSTANCE_NAME}" \
 	  --asset "${safe_name}-asset" \
 	  --name "telemetry" \
-	  --dest topic="azure-iot-operations/data/${safe_name}" qos=Qos1 retain=Never
+	  --dest topic="azure-iot-operations/data/${safe_name}" qos=Qos1 retain=Never ttl=3600
 
 	# Add each OPC UA node as a data point (NodeId -> --data-source, interval -> --sampling-int).
 	node_i=0
@@ -656,17 +697,52 @@ fi
 # 12c. Make AIO trust the stations. UA Cloud Publisher's PKI (its GDS CA, which signs the certs
 # the stations present) is host-mounted at /mnt/c/K3s/PublisherConfig/<line>/PKI. Add any CA
 # certificates found there to AIO's connector trust list so AIO trusts the stations.
+#
+# 'az iot ops connector opcua trust add' stores the trust list as a synced secret, so AIO secret
+# sync must be enabled first. We reuse the solution's existing Key Vault (<resourcesName>-KV) and
+# the shared user-assigned managed identity. The identity is pre-granted 'Key Vault Secrets User'
+# and 'Key Vault Reader' by the ARM template, so we pass --skip-ra (the identity cannot create the
+# Key Vault role assignments itself - that needs Microsoft.Authorization/roleAssignments/write).
+echo
+echo "=== Enabling AIO secret sync (reusing ${RESOURCES_NAME}-KV) ==="
+KEY_VAULT_NAME="${RESOURCES_NAME}-KV"
+KEY_VAULT_ID="$(az keyvault show --name "${KEY_VAULT_NAME}" --resource-group "${RESOURCE_GROUP}" --query id -o tsv 2>/dev/null)"
+if [ -n "${KEY_VAULT_ID}" ] && [ -n "${MANAGED_IDENTITY_RESOURCE_ID}" ]; then
+  run az iot ops secretsync enable \
+    --instance "${AIO_INSTANCE_NAME}" \
+    --resource-group "${RESOURCE_GROUP}" \
+    --mi-user-assigned "${MANAGED_IDENTITY_RESOURCE_ID}" \
+    --kv-resource-id "${KEY_VAULT_ID}" \
+    --skip-ra
+else
+  echo "!!! WARNING: could not resolve ${KEY_VAULT_NAME} or the managed identity; secret sync not enabled."
+  echo "    The OPC UA trust list (below) requires secret sync and will be skipped."
+fi
+
 echo
 echo "=== Adding UA Cloud Publisher's CA to AIO's OPC UA trust list ==="
-publisher_ca_found=false
-for line in "${LINES[@]}"; do
-  # The OPC UA .NET stack keeps issuer/CA certificates under <PKI>/issuer/certs.
-  for ca_dir in \
-    "/mnt/c/K3s/PublisherConfig/${line}/PKI/issuer/certs" \
-    "/mnt/c/K3s/PublisherConfig/${line}/PKI/trusted/certs"; do
+if az iot ops connector opcua trust show --instance "${AIO_INSTANCE_NAME}" --resource-group "${RESOURCE_GROUP}" >/dev/null 2>&1; then
+  secretsync_ready=true
+else
+  secretsync_ready=false
+fi
+if [ "${secretsync_ready}" != "true" ]; then
+  echo "!!! NOTE: AIO secret sync is not enabled, so the OPC UA trust list cannot be updated."
+  echo "    After enabling it, add each UA Cloud Publisher CA (from /mnt/c/K3s/PublisherConfig/<line>/PKI) with:"
+  echo "      az iot ops connector opcua trust add --instance ${AIO_INSTANCE_NAME} \\"
+  echo "        --resource-group ${RESOURCE_GROUP} --certificate-file <ca>.der"
+else
+  publisher_ca_found=false
+  for line in "${LINES[@]}"; do
+    # The OPC UA .NET stack keeps the publisher's own CA under <PKI>/issuer/certs. Skip the AIO
+    # connector cert we distributed earlier (aio-opcuabroker.*) - only the publisher CA belongs here.
+    ca_dir="/mnt/c/K3s/PublisherConfig/${line}/PKI/issuer/certs"
     [ -d "${ca_dir}" ] || continue
-    for ca_file in "${ca_dir}"/*.der "${ca_dir}"/*.crt; do
+    for ca_file in "${ca_dir}"/*.der; do
       [ -f "${ca_file}" ] || continue
+      case "${ca_file}" in
+        *aio-opcuabroker*) continue ;;
+      esac
       publisher_ca_found=true
       echo ">>> Trusting ${ca_file}"
       run az iot ops connector opcua trust add \
@@ -675,12 +751,12 @@ for line in "${LINES[@]}"; do
         --certificate-file "${ca_file}"
     done
   done
-done
-if [ "${publisher_ca_found}" != "true" ]; then
-  echo "!!! NOTE: no UA Cloud Publisher CA certificate was found on disk yet. If AIO fails to"
-  echo "    connect to a station after provisioning, export the station/GDS CA certificate and run:"
-  echo "      az iot ops connector opcua trust add --instance ${AIO_INSTANCE_NAME} \\"
-  echo "        --resource-group ${RESOURCE_GROUP} --certificate-file <ca>.der"
+  if [ "${publisher_ca_found}" != "true" ]; then
+    echo "!!! NOTE: no UA Cloud Publisher CA certificate was found on disk yet. If AIO fails to"
+    echo "    connect to a station after provisioning, export the station/GDS CA certificate and run:"
+    echo "      az iot ops connector opcua trust add --instance ${AIO_INSTANCE_NAME} \\"
+    echo "        --resource-group ${RESOURCE_GROUP} --certificate-file <ca>.der"
+  fi
 fi
 
 # Clean up the generated config files (they contain no secrets).

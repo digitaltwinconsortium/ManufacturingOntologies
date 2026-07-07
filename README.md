@@ -99,7 +99,7 @@ The deployment script establishes the required two-way (mutual) trust automatica
 
 ## Access the Arc-enabled Kubernetes cluster from the Azure portal
 
-When you browse the Kubernetes resources of the Arc-enabled cluster (or the Azure IoT Operations instance) in the Azure portal, you are prompted for a **service account bearer token**. Generate one by logging on to the VM deployed via SSH and then running the following commands:
+When you browse the Kubernetes resources of the Arc-enabled cluster (or the Azure IoT Operations instance) in the Azure portal, you are prompted for a **service account bearer token**. Generate one by logging on to the deployed VM via SSH and then running the following commands:
 
 ```bash
 # Create a service account (in the default namespace).
@@ -122,9 +122,6 @@ EOF
 # Print the token, then paste it into the portal's "Service account bearer token" prompt.
 sudo kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml get secret arc-portal-user-secret -o jsonpath='{$.data.token}' | base64 -d
 ```
-
-> [!NOTE]
-> The `cluster-admin` binding grants full access; scope it down with a more restrictive role if you only need read access. For details and alternatives (including Microsoft Entra authentication), see [Access Kubernetes resources from the Azure portal](https://learn.microsoft.com/azure/azure-arc/kubernetes/kubernetes-resource-view) and [cluster connect](https://learn.microsoft.com/azure/azure-arc/kubernetes/cluster-connect#service-account-token-authentication-option).
 
 ## Manufacturing Ontologies
 

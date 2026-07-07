@@ -952,7 +952,7 @@
       "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies','EventHubDataConnection')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'OPCUA-parsing-script')]"
+        "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'OEE-calculation-script')]"
       ],
       "kind": "EventHub",
       "properties": {
@@ -1258,7 +1258,7 @@
       "apiVersion": "2021-01-01",
       "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies', guid(resourceId('Microsoft.Kusto/clusters/databases', split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[1]), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), 'Admin'))]",
       "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), 'ontologies')]"
+        "[resourceId('Microsoft.Kusto/Clusters/Databases/DataConnections', variables('adxClusterName'), 'ontologies', 'EventHubMetadataConnection')]"
       ],
       "properties": {
         "principalId": "[reference(concat(parameters('resourcesName'), '-Identity')).principalId]",

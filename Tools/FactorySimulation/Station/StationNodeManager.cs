@@ -289,9 +289,23 @@ namespace Station.Simulation
             return ServiceResult.Good;
         }
 
+        public static bool IsInProvisioningMode()
+        {
+            int issuerCount = CountCerts(Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs"));
+            int trustedCount = CountCerts(Path.Combine(Directory.GetCurrentDirectory(), "pki", "trusted", "certs"));
+
+            // trustedCount > 1 is a workaround when GDS is not in operation
+            return !(issuerCount >= 1 || trustedCount > 1);
+        }
+
+        private static int CountCerts(string directory)
+        {
+            return Directory.Exists(directory) ? Directory.EnumerateFiles(directory).Count() : 0;
+        }
+
         private ServiceResult OnReadValue(ISystemContext context, NodeState node, NumericRange indexRange, QualifiedName dataEncoding, ref object value, ref StatusCode statusCode, ref DateTime timestamp)
         {
-            bool provisioningMode = (Directory.EnumerateFiles(Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs")).Count() == 0);
+            bool provisioningMode = IsInProvisioningMode();
             if (provisioningMode)
             {
                 return new ServiceResult(StatusCodes.BadNotReadable, "Access to Station is limited while in provisioning mode!");

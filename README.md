@@ -94,6 +94,23 @@ The station OPC UA server uses the following OPC UA node IDs for telemetry to th
 
 The solution uses a digital feedback loop to manage the pressure in a simulated station. To implement the feedback loop, the solution triggers a command from the cloud on one of the OPC UA servers in the simulation. The trigger activates when simulated time-series pressure data reaches a certain threshold. You can see the pressure of the assembly machine in the Azure Data Explorer dashboard. The pressure is released at regular intervals for the Seattle production line. In a real-world deployment, something as critical as opening a pressure relief valve would be done on-premises. This example simply demonstrates how to achieve the digital feedback loop.
 
+## OPC UA certificate trust
+
+The simulation stations accept anonymous/untrusted OPC UA sessions **only while they are in provisioning mode**, that is, until trust material is placed in their PKI stores (either through an OPC UA GDS push or through manual copying). After that, each station accepts a peer certificate only if it is present in the station's `pki/trusted/certs` store or is signed by an issuer in its `pki/issuer/certs` store. Azure IoT Operations' connector for OPC UA uses a self-signed application instance certificate, and each station in turn presents its own self-signed server certificate, so without extra configuration the two sides would **reject** each other once provisioned.
+
+The deployment script establishes the required two-way (mutual) trust automatically, after Azure IoT Operations is installed:
+
+1. **Stations trust AIO.** AIO's connector certificate is a self-signed, cert-manager-managed application instance certificate stored in the Kubernetes secret `aio-opc-opcuabroker-default-application-cert`.
+
+   The script copies this certificate into each station's `pki/trusted/certs` store. The stations mount this store from the host (`/mnt/c/K3s/<Station>/<Line>/PKI`), and the certificate validator re-reads it on each validation, so no station restart is required.
+
+2. **AIO trusts the stations.** The script enables Azure IoT Operations secret sync (reusing the solution's Key Vault and shared managed identity) and then adds each station's own OPC UA server certificate — for the Assembly, Test and Packaging stations of every production line.
+
+   AIO stores this as the `aio-opc-ua-broker-trust-list` secret, synced from Key Vault.
+
+> [!NOTE]
+> This is the automated equivalent of the mutual-trust procedure in [Configure OPC UA certificates infrastructure for the connector for OPC UA](https://learn.microsoft.com/azure/iot-operations/discover-manage-assets/howto-configure-opc-ua-certificates-infrastructure).
+
 ## Access the Arc-enabled Kubernetes cluster from the Azure portal
 
 When you browse the Kubernetes resources of the Arc-enabled cluster (or the Azure IoT Operations instance) in the Azure portal, you are prompted for a **service account bearer token**. Generate one by logging on to the deployed VM via SSH and then running the following commands:

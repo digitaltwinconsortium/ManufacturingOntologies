@@ -938,30 +938,6 @@
                 e.Accept = true;
                 return;
             }
-
-            // Post-provisioning: accept only if the cert was signed by a CA
-            // that the GDS explicitly pushed into our issuer store.
-            if (e.Certificate != null)
-            {
-                foreach (string certFile in Directory.EnumerateFiles(issuerCertsDir))
-                {
-                    try
-                    {
-                        using var issuerCert = X509CertificateLoader.LoadCertificateFromFile(certFile);
-                        if (e.Certificate.Issuer == issuerCert.Subject)
-                        {
-                            Log.Information("Accepting certificate signed by provisioned CA: [{Subject}], Issuer: [{Issuer}]",
-                                e.Certificate.Subject, issuerCert.Subject);
-                            e.Accept = true;
-                            return;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warning(ex, "Could not read issuer cert file: {File}", certFile);
-                    }
-                }
-            }
         }
     }
 }

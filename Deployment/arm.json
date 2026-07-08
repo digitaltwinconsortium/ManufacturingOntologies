@@ -50,11 +50,13 @@
     "subnetPrefix": "10.0.0.0/24",
     "subnetPrefix2": "10.0.0.0/23",
     "keyVaultSecretsUserId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacAzurekeyVaultSecretsUser'))]",
+    "keyVaultSecretsOfficerId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacKeyVaultSecretsOfficer'))]",
     "keyVaultReaderId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacKeyVaultReader'))]",
     "authRuleResourceId": "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', concat(parameters('resourcesName'), '-EventHubs'), 'RootManageSharedAccessKey')]",
     "azureRbacContributor": "b24988ac-6180-42a0-ab88-20f7382dd24c",
     "azureRbacAzureEventHubsDataOwner": "f526a384-b230-433a-b45c-95f59c4a2dec",
     "azureRbacAzurekeyVaultSecretsUser": "4633458b-17de-408a-b874-0445c86b69e6",
+    "azureRbacKeyVaultSecretsOfficer": "b86a8fe4-44ce-4948-aee5-eccb2c155cd7",
     "azureRbacKeyVaultReader": "21090545-7ca7-4776-b22c-e363652d74d2",
     "adxClusterName": "[concat(parameters('resourcesName'), 'ADX')]",
     "adxDBName": "[concat(parameters('resourcesName'), '-DB')]",
@@ -1248,6 +1250,19 @@
       ],
       "properties": {
         "roleDefinitionId": "[variables('keyVaultSecretsUserId')]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-10-01-preview",
+      "name": "[guid(variables('keyVaultSecretsOfficerId'), resourceGroup().id)]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[variables('keyVaultSecretsOfficerId')]",
         "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId]",
         "principalType": "ServicePrincipal"
       }

@@ -37,7 +37,7 @@
     </RejectedCertificateStore>
     <AutoAcceptUntrustedCertificates>false</AutoAcceptUntrustedCertificates>
     <RejectSHA1SignedCertificates>true</RejectSHA1SignedCertificates>
-    <MinimumCertificateKeySize>1024</MinimumCertificateKeySize>
+    <MinimumCertificateKeySize>2048</MinimumCertificateKeySize>
   </SecurityConfiguration>
 
   <TransportConfigurations/>

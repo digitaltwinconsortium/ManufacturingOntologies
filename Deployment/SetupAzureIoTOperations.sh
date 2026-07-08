@@ -778,10 +778,15 @@ else
       esac
       publisher_ca_found=true
       echo ">>> Trusting ${ca_file}"
+      # Key Vault secret names must match ^[0-9a-zA-Z-]+$. The certificate file name contains
+      # dots, spaces and '[thumbprint]', which the CLI's auto-derived name rejects, so pass an
+      # explicit sanitized --secret-name (non-alphanumeric -> '-', collapsed, trimmed).
+      secret_name="$(basename "${ca_file}" | sed 's/[^0-9A-Za-z]/-/g; s/--*/-/g; s/^-//; s/-$//')"
       run az iot ops connector opcua trust add \
         --instance "${AIO_INSTANCE_NAME}" \
         --resource-group "${RESOURCE_GROUP}" \
-        --certificate-file "${ca_file}"
+        --certificate-file "${ca_file}" \
+        --secret-name "${secret_name}"
     done
   done
   if [ "${publisher_ca_found}" != "true" ]; then

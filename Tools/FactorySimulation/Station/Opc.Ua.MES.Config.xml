@@ -45,7 +45,7 @@
       <StorePath>./pki/rejected</StorePath>
     </RejectedCertificateStore>
     <RejectSHA1SignedCertificates>false</RejectSHA1SignedCertificates>
-    <MinimumCertificateKeySize>1024</MinimumCertificateKeySize>
+    <MinimumCertificateKeySize>2048</MinimumCertificateKeySize>
     <SendCertificateChain>false</SendCertificateChain>
     <!-- Where the User issers list is stored-->
     <UserIssuerCertificates>

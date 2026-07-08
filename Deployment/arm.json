@@ -41,7 +41,7 @@
       "type": "string",
       "minLength": 36,
       "metadata": {
-        "description": "Object ID of the 'custom-locations' Microsoft Entra application. Obtain it by running az ad sp show --id bc313c14-388c-4e7d-a58e-70017303ee3b --query id -o tsv from the Azure CLI."
+        "description": "Object ID of the custom-locations Microsoft Entra application. Obtain it by running az ad sp show --id bc313c14-388c-4e7d-a58e-70017303ee3b --query id -o tsv from the Azure CLI."
       }
     }
   },

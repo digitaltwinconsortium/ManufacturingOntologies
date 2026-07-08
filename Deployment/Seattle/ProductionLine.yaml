@@ -168,10 +168,15 @@ spec:
         volumeMounts:
         - name: "logs"
           mountPath: "/app/logs"
+        - name: "pki"
+          mountPath: "/app/pki"
       volumes:
         - name: "logs"
           hostPath:
             path: "/mnt/c/K3s/Assembly/Seattle/Logs"
+        - name: "pki"
+          hostPath:
+            path: "/mnt/c/K3s/Assembly/Seattle/PKI"
 ---
 apiVersion: v1
 kind: Service
@@ -225,10 +230,15 @@ spec:
         volumeMounts:
         - name: "logs"
           mountPath: "/app/logs"
+        - name: "pki"
+          mountPath: "/app/pki"
       volumes:
         - name: "logs"
           hostPath:
             path: "/mnt/c/K3s/Test/Seattle/Logs"
+        - name: "pki"
+          hostPath:
+            path: "/mnt/c/K3s/Test/Seattle/PKI"
 ---
 apiVersion: v1
 kind: Service
@@ -282,10 +292,15 @@ spec:
         volumeMounts:
         - name: "logs"
           mountPath: "/app/logs"
+        - name: "pki"
+          mountPath: "/app/pki"
       volumes:
         - name: "logs"
           hostPath:
             path: "/mnt/c/K3s/Packaging/Seattle/Logs"
+        - name: "pki"
+          hostPath:
+            path: "/mnt/c/K3s/Packaging/Seattle/PKI"
 ---
 apiVersion: v1
 kind: Service

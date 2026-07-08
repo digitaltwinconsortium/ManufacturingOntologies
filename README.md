@@ -36,10 +36,16 @@ az provider register --namespace Microsoft.SecretSyncController
 
 ## Postrequisites
 
-The reference solution also deploys the Azure IoT Schema Registry, which requires the **IoT Operations Arc extension** service principal to be granted the **Azure Device Registry Administrator** role. A subscription Owner or User Access Administrator must create this role assignment by running the following **after** the deployment completes. Replace `<subscription_id>` and `<resource_group>` with your values and `<resources_name>` with the `resourcesName` deployment parameter in lowercase:
+The reference solution also deploys the Azure IoT Schema Registry, which requires the **IoT Operations Arc extension** service principal to be granted the **Azure Device Registry Administrator** role. The deployment script logs a warning containing the extension service principal's object id. Retrieve it from the deployment (bootstrap) log on the simulation VM:
+
+```bash
+sudo grep -oP "IoT Operations arc extension' service principal '\K[0-9a-fA-F-]{36}" /var/log/bootstrap/Bootstrap.log
+```
+
+A subscription Owner or User Access Administrator must then create the role assignment **after** the deployment completes, replacing `<extension_principal_id>` with the id printed above and `<subscription_id>`, `<resource_group>` and `<resources_name>` (the `resourcesName` deployment parameter in lowercase) with your values:
 
 ```azurecli
-az role assignment create --assignee a2127957-50f2-44e9-8434-4fed4109fc30 --role "Azure Device Registry Administrator" --scope /subscriptions/<subscription_id>/resourceGroups/<resource_group>/providers/Microsoft.DeviceRegistry/schemaRegistries/<resources_name>-schemaregistry
+az role assignment create --assignee-object-id <extension_principal_id> --assignee-principal-type ServicePrincipal --role "Azure Device Registry Administrator" --scope /subscriptions/<subscription_id>/resourceGroups/<resource_group>/providers/Microsoft.DeviceRegistry/schemaRegistries/<resources_name>-schemaregistry
 ```
 
 ## Articles in this reference solution
@@ -87,23 +93,6 @@ The station OPC UA server uses the following OPC UA node IDs for telemetry to th
 - `i=434` - pressure
 
 The solution uses a digital feedback loop to manage the pressure in a simulated station. To implement the feedback loop, the solution triggers a command from the cloud on one of the OPC UA servers in the simulation. The trigger activates when simulated time-series pressure data reaches a certain threshold. You can see the pressure of the assembly machine in the Azure Data Explorer dashboard. The pressure is released at regular intervals for the Seattle production line. In a real-world deployment, something as critical as opening a pressure relief valve would be done on-premises. This example simply demonstrates how to achieve the digital feedback loop.
-
-## OPC UA certificate trust
-
-The simulation stations accept anonymous/untrusted OPC UA sessions **only until a CA certificate is pushed to them via OPC UA Part 12 Server Push**. After that, each station accepts a client certificate only if its **issuer matches a certificate in the station's `pki/issuer/certs` store**. Azure IoT Operation's connector for OPC UA uses a self-signed application instance certificate, so without extra configuration the stations would **reject** it once provisioned.
-
-The deployment script establishes the required two-way (mutual) trust automatically, after Azure IoT Operations is installed:
-
-1. **Stations trust AIO.** AIO's connector certificate is a self-signed, cert-manager-managed application instance certificate stored in the Kubernetes secret `aio-opc-opcuabroker-default-application-cert` (namespace `azure-iot-operations`) — you **retrieve** it, you don't generate it.
-
-   The script copies this certificate into each station's issuer certs and trusted certs store.
-
-2. **AIO trusts the stations.** The script adds all CA certificates found in the GDS Certificate Authority (CA) store to AIO's connector trust list.
-
-   AIO stores this in the `aio-opc-ua-broker-trust-list` secret.
-
-> [!NOTE]
-> This is the automated equivalent of the mutual-trust procedure in [Configure OPC UA certificates infrastructure for the connector for OPC UA](https://learn.microsoft.com/azure/iot-operations/discover-manage-assets/howto-configure-opc-ua-certificates-infrastructure).
 
 ## Access the Arc-enabled Kubernetes cluster from the Azure portal
 

@@ -81,7 +81,7 @@ api() {
     DATABRICKS_API_METHOD="${method}" \
     DATABRICKS_API_BODY_FILE="${body_file}" \
     python3 - <<'PY'
-import os, sys, urllib.error, urllib.request
+import os, sys, time, urllib.error, urllib.request
 
 url = os.environ["DATABRICKS_API_URL"]
 method = os.environ["DATABRICKS_API_METHOD"]
@@ -98,18 +98,42 @@ if body_file:
         data = body.read()
     headers["Content-Type"] = "application/json"
 
-request = urllib.request.Request(url, data=data, headers=headers, method=method)
-try:
-    with urllib.request.urlopen(request) as response:
-        sys.stdout.buffer.write(response.read())
-except urllib.error.HTTPError as error:
-    # Match `curl -sS` (without -f): emit the response body and exit 0 so callers
-    # that parse the payload keep working unchanged.
-    sys.stdout.buffer.write(error.read())
-except urllib.error.URLError:
-    # Connection-level failure: exit non-zero like curl so the reachability retry
-    # loop keeps polling until the workspace control plane is ready.
-    sys.exit(1)
+# The Databricks control plane can briefly return transient failures right after the
+# workspace is provisioned: connection resets, HTTP 408/429/5xx, or even a 2xx with an
+# empty body. Callers pipe this output straight into json.load, which crashes on empty or
+# partial input (JSONDecodeError: Expecting value: line 1 column 1) and, under
+# `set -euo pipefail`, fails the entire deployment script. Retry those transient cases with
+# a short bounded backoff so callers reliably receive a real JSON payload.
+attempts = 5
+for attempt in range(1, attempts + 1):
+    last = attempt == attempts
+    backoff = min(2 ** (attempt - 1), 10)
+    try:
+        request = urllib.request.Request(url, data=data, headers=headers, method=method)
+        with urllib.request.urlopen(request) as response:
+            payload = response.read()
+        if not payload and not last:
+            # Unexpected empty success body: treat as transient and retry.
+            time.sleep(backoff)
+            continue
+        sys.stdout.buffer.write(payload)
+        sys.exit(0)
+    except urllib.error.HTTPError as error:
+        payload = error.read()
+        # Retry throttling/server errors; return definitive client errors (4xx) unchanged
+        # so callers can inspect the error body, matching `curl -sS` (without -f).
+        if (error.code in (408, 429) or error.code >= 500) and not last:
+            time.sleep(backoff)
+            continue
+        sys.stdout.buffer.write(payload)
+        sys.exit(0)
+    except urllib.error.URLError:
+        # Connection-level failure: retry, then exit non-zero like curl so the reachability
+        # loop keeps polling until the workspace control plane is ready.
+        if not last:
+            time.sleep(backoff)
+            continue
+        sys.exit(1)
 PY
 }
 

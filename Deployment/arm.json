@@ -952,7 +952,7 @@
       "name": "[format('{0}/{1}', variables('adxClusterName'), 'ontologies')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters', variables('adxClusterName'))]"
+        "[resourceId('Microsoft.Resources/deploymentScripts', concat(parameters('resourcesName'), '-WaitForAdxCluster'))]"
       ],
       "properties": {
         "softDeletePeriodInDays": 365,
@@ -1023,6 +1023,45 @@
       "dependsOn": [
         "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'OPCUA-parsing-script')]"
       ]
+    },
+    {
+      "comment": "Waits for the ADX cluster to reach a terminal provisioning state before the Event Hub data connections are created. ARM dependsOn only waits for each child resource's own call to return, not for the cluster itself to settle, which intermittently caused 'RequestConflict: provisioning state is not terminal' when a data connection started while the cluster was still transitioning.",
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2020-10-01",
+      "name": "[concat(parameters('resourcesName'), '-WaitForAdxCluster')]",
+      "location": "[resourceGroup().location]",
+      "kind": "AzureCLI",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]": {}
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Kusto/clusters', variables('adxClusterName'))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+      ],
+      "properties": {
+        "azCliVersion": "2.61.0",
+        "timeout": "PT30M",
+        "retentionInterval": "P1D",
+        "cleanupPreference": "OnSuccess",
+        "environmentVariables": [
+          {
+            "name": "ADX_CLUSTER_NAME",
+            "value": "[variables('adxClusterName')]"
+          },
+          {
+            "name": "RESOURCE_GROUP",
+            "value": "[resourceGroup().name]"
+          },
+          {
+            "name": "SUBSCRIPTION_ID",
+            "value": "[subscription().subscriptionId]"
+          }
+        ],
+        "scriptContent": "set -e; echo \"Waiting for ADX cluster ${ADX_CLUSTER_NAME} to reach a terminal provisioning state...\"; az kusto cluster wait --created --name \"${ADX_CLUSTER_NAME}\" --resource-group \"${RESOURCE_GROUP}\" --subscription \"${SUBSCRIPTION_ID}\" --interval 15 --timeout 1500; echo \"ADX cluster ${ADX_CLUSTER_NAME} provisioning state: $(az kusto cluster show --name \"${ADX_CLUSTER_NAME}\" --resource-group \"${RESOURCE_GROUP}\" --subscription \"${SUBSCRIPTION_ID}\" --query provisioningState -o tsv)\""
+      }
     },
     {
       "type": "Microsoft.EventHub/namespaces",

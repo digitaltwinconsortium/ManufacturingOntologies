@@ -36,7 +36,9 @@ az provider register --namespace Microsoft.SecretSyncController
 
 ## Postrequisites
 
-The reference solution also deploys the Azure IoT Schema Registry, which requires the **IoT Operations Arc extension** service principal to be granted the **Azure Device Registry Administrator** role. The deployment script logs a warning containing the extension service principal's object id. Retrieve it from the deployment (bootstrap) log on the simulation VM via SSH:
+The reference solution also deploys the Azure IoT Schema Registry, which requires the **IoT Operations Arc extension** service principal to be granted the **Azure Device Registry Administrator** role. This role assignment is **optional for this reference solution**, as the schema registry is only used by Azure IoT Operations data flows for schema-based serialization (Parquet/Delta) to storage destinations such as Azure Data Lake Storage or direct connections to Microsoft Fabric OneLake.
+
+The deployment script logs a warning containing the extension service principal's object id. Retrieve it from the deployment (bootstrap) log on the simulation VM via SSH:
 
 ```bash
 sudo grep -oP "IoT Operations arc extension' service principal '\K[0-9a-fA-F-]{36}" /var/log/bootstrap/Bootstrap.log

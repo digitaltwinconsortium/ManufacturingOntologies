@@ -321,6 +321,8 @@ from pyspark.sql.functions import (
     coalesce,
     array,
     regexp_extract,
+    when,
+    lit,
 )
 
 # 3a. Telemetry expansion: normalize the array/single DataSet shapes, then pivot the key-value
@@ -343,7 +345,10 @@ normalized_df = raw_df.withColumn(
 telemetry_df = (
     normalized_df.select(explode(col("messages")).alias("msg"))
     .select(
-        col("msg.DataSetWriterId").alias("Subject"),
+        # Azure IoT Operations appends a topic suffix (e.g. '/telemetry') to the DataSetWriterId it
+        # carries in the CloudEvent subject; strip anything after the first '/' so Subject matches
+        # the bare writer id used by the metadata table for the join.
+        regexp_extract(col("msg.DataSetWriterId"), r"^([^/]+)", 1).alias("Subject"),
         to_timestamp(col("msg.Timestamp")).alias("Timestamp"),
         explode(col("msg.Payload")).alias("Name", "val_struct"),
     )
@@ -381,7 +386,8 @@ metadata_parsed = metadata_raw_stream.withColumn(
 
 metadata_df = (
     metadata_parsed.select(
-        col("p.DataSetWriterId").alias("Subject"),
+        # Normalize Subject the same way as the telemetry table (strip any suffix after the first '/').
+        regexp_extract(col("p.DataSetWriterId"), r"^([^/]+)", 1).alias("Subject"),
         to_timestamp(col("p.Timestamp")).alias("Timestamp"),
         col("p.MetaData.Name").alias("DataSetName"),
         col("p.MetaData.ConfigurationVersion.MajorVersion").alias("MajorVersion"),
@@ -400,19 +406,39 @@ metadata_df = (
         col("Field.ValueRank").alias("ValueRank"),
         col("Field.Description").alias("Type"),
         col("Field.Name").alias("DisplayName"),
-        regexp_extract(col("DataSetName"), r":([^.]+)\.", 1).alias("Workcell"),
-        regexp_extract(col("DataSetName"), r":(?:[^.]+)\.([^.]+)\.", 1).alias("Line"),
-        regexp_extract(col("DataSetName"), r":(?:[^.]+)\.(?:[^.]+)\.([^.]+)\.", 1).alias("Area"),
-        regexp_extract(
-            col("DataSetName"), r":(?:[^.]+)\.(?:[^.]+)\.(?:[^.]+)\.([^.]+)\.", 1
-        ).alias("Site"),
-        regexp_extract(
-            col("DataSetName"),
-            r":(?:[^.]+)\.(?:[^.]+)\.(?:[^.]+)\.(?:[^.]+)\.([^;]+);",
-            1,
-        ).alias("Enterprise"),
-        regexp_extract(col("DataSetName"), r";nsu=([^;]+);", 1).alias("NamespaceUri"),
-        regexp_extract(col("DataSetName"), r";nsu=[^;]+;(.+)$", 1).alias("NodeId"),
+        # Parse the ISA-95 hierarchy from DataSetName, supporting BOTH producers. UA Cloud Publisher
+        # emits the OPC UA ApplicationUri form 'Workcell.Line.Area.Site.Enterprise;nsu=<uri>;<NodeId>'
+        # (detected by ';nsu='); Azure IoT Operations emits the asset name
+        # '<station>-<location>-asset_telemetry'. For AIO only Workcell (station) and Site (location)
+        # have an equivalent; the remaining levels are left empty.
+        when(
+            col("DataSetName").contains(";nsu="),
+            regexp_extract(col("DataSetName"), r"([^:.]+)\.[^.]+\.[^.]+\.[^.]+\.[^;]+;nsu=", 1),
+        ).otherwise(regexp_extract(col("DataSetName"), r"^([^-]+)-", 1)).alias("Workcell"),
+        when(
+            col("DataSetName").contains(";nsu="),
+            regexp_extract(col("DataSetName"), r"[^:.]+\.([^.]+)\.[^.]+\.[^.]+\.[^;]+;nsu=", 1),
+        ).otherwise(lit("")).alias("Line"),
+        when(
+            col("DataSetName").contains(";nsu="),
+            regexp_extract(col("DataSetName"), r"[^:.]+\.[^.]+\.([^.]+)\.[^.]+\.[^;]+;nsu=", 1),
+        ).otherwise(lit("")).alias("Area"),
+        when(
+            col("DataSetName").contains(";nsu="),
+            regexp_extract(col("DataSetName"), r"[^:.]+\.[^.]+\.[^.]+\.([^.]+)\.[^;]+;nsu=", 1),
+        ).otherwise(regexp_extract(col("DataSetName"), r"^[^-]+-([^-]+)-", 1)).alias("Site"),
+        when(
+            col("DataSetName").contains(";nsu="),
+            regexp_extract(col("DataSetName"), r"[^:.]+\.[^.]+\.[^.]+\.[^.]+\.([^;]+);nsu=", 1),
+        ).otherwise(lit("")).alias("Enterprise"),
+        when(
+            col("DataSetName").contains(";nsu="),
+            regexp_extract(col("DataSetName"), r";nsu=([^;]+);", 1),
+        ).otherwise(lit("")).alias("NamespaceUri"),
+        when(
+            col("DataSetName").contains(";nsu="),
+            regexp_extract(col("DataSetName"), r";nsu=[^;]+;(.+)$", 1),
+        ).otherwise(lit("")).alias("NodeId"),
     )
 )
 

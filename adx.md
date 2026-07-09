@@ -34,16 +34,15 @@ Add a new connection to your Azure Data Explorer instance and then run the follo
 
 ```kql
 let edges = opcua_metadata_lkv
-| project source = DisplayName, target = Workcell
-| join kind=fullouter (opcua_metadata_lkv
-    | project source = Workcell, target = Line) on source
-    | join kind=fullouter (opcua_metadata_lkv
-        | project source = Line, target = Area) on source
-        | join kind=fullouter (opcua_metadata_lkv
-            | project source = Area, target = Site) on source
-            | join kind=fullouter (opcua_metadata_lkv
-                | project source = Site, target = Enterprise) on source
-                | project source = coalesce(source, source1, source2, source3, source4), target = coalesce(target, target1, target2, target3, target4);
+| project DisplayName, levels = pack_array(DisplayName, Workcell, Line, Area, Site, Enterprise)
+| mv-apply with_itemindex = i level = levels to typeof(string) on (
+    where isnotempty(level)
+    | sort by i asc
+    | extend source = level, target = next(level)
+    | where isnotempty(target)
+    | project source, target
+)
+| distinct source, target;
 let nodes = opcua_metadata_lkv;
 edges | make-graph source --> target with nodes on DisplayName
 ```

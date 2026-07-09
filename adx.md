@@ -14,7 +14,7 @@ The deployment process prompts you to provide a password for the virtual machine
 To reduce cost, the deployment creates a single Linux VM for both the production line simulation and the edge infrastructure. In a production scenario, the production line simulation isn't required.
 
 > [!NOTE]
-> Please be patient! The deployment can take up to 90 minutes to complete. After the deployment is complete, you can access the VM via SSH using the credentials you provided during deployment.
+> Please be patient! The deployment takes about 95 minutes to complete. After the deployment is complete, you can access the VM via SSH using the credentials you provided during deployment.
 
 ## Use cases for condition monitoring, OEE calculation, anomaly detection, and predictions in Azure Data Explorer
 

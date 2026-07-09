@@ -426,6 +426,25 @@ run az iot ops dataflow endpoint apply \
 # OpcSamplingInterval). This is the AIO equivalent of persistency.json's OpcNodes.
 echo
 echo "=== Registering OPC UA devices/assets from persistency.json (both production lines) ==="
+
+# Build a NodeId-identifier -> OPC UA browse name map from the station information model
+# (Station.NodeSet2.xml) so telemetry data points can be named by their real browse name
+# (e.g. EnergyConsumption) instead of a generic node-<index>. The browse name becomes the
+# telemetry Payload key and therefore opcua_telemetry.Name in ADX/Fabric/Databricks, which the
+# dashboards and OEE functions filter on. Each UAVariable line looks like:
+#   <UAVariable NodeId="ns=1;i=406" BrowseName="1:EnergyConsumption" ...>
+# Extract "<identifier> <BrowseName>" pairs (dropping the "<namespaceIndex>:" browse-name prefix)
+# and fold them into a JSON object with jq. If the NodeSet is missing, the map stays empty and the
+# import falls back to node-<index>.
+STATION_NODESET="${REPO_DIR}/Tools/FactorySimulation/Station/Station.NodeSet2.xml"
+NODE_NAME_MAP="{}"
+if [ -f "${STATION_NODESET}" ]; then
+  NODE_NAME_MAP="$(grep -oE '<UAVariable [^>]*>' "${STATION_NODESET}" \
+    | sed -nE 's/.*NodeId="[^"]*;i=([0-9]+)"[^>]*BrowseName="([^"]*:)?([^"]+)".*/\1 \3/p' \
+    | jq -Rn 'reduce (inputs | split(" ")) as $p ({}; .[$p[0]] = $p[1])')"
+  [ -n "${NODE_NAME_MAP}" ] || NODE_NAME_MAP="{}"
+fi
+
 for line in "${LINES[@]}"; do
   persistency="${PUBLISHER_CONFIG_DIR}/${line}/persistency.json"
   if [ ! -f "${persistency}" ]; then
@@ -516,11 +535,16 @@ for line in "${LINES[@]}"; do
 	# (per-node 'datapoint add' made the run exceed the CustomScript extension timeout). The
 	# import file is a JSON array of { name, dataSource=NodeId, dataPointConfiguration }.
 	datapoints_file="${AIO_CONFIG_DIR}/datapoints-${line}-${safe_name}.json"
-	jq --argjson idx "${idx}" '
+	# Name each data point by its real OPC UA browse name (e.g. EnergyConsumption) rather than a
+	# generic 'node-<index>', using the NodeId-identifier -> browse name map derived from
+	# Station.NodeSet2.xml above. The name becomes the telemetry Payload key and therefore
+	# opcua_telemetry.Name in ADX/Fabric/Databricks, which the dashboards and OEE functions filter on
+	# (e.g. Name == "EnergyConsumption"). Fall back to node-<index> for any id not in the map.
+	jq --argjson idx "${idx}" --argjson names "${NODE_NAME_MAP}" '
 	  ( .[$idx].OpcNodes // [] )
 	  | to_entries
 	  | map({
-		  name: ("node-" + (.key|tostring)),
+		  name: ( ($names[ (.value.Id | capture(";i=(?<n>[0-9]+)$").n) ]) // ("node-" + (.key|tostring)) ),
 		  dataSource: .value.Id,
 		  dataPointConfiguration: ( { samplingInterval: (.value.OpcSamplingInterval // 1000) } | tojson )
 		})

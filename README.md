@@ -23,7 +23,7 @@ az account set --subscription <subscription_id>
 az ad sp show --id bc313c14-388c-4e7d-a58e-70017303ee3b --query id -o tsv
 ```
 
-The reference solution also deploys Azure IoT Operations, which requires the following resource providers to be registered in the subscription. Registering a resource provider is a subscription-scope action, so it must be done once by a subscription Owner or Contributor before deployment:
+The reference solution also deploys Azure IoT Operations, which requires the following resource providers to be registered in the subscription. Registering a resource provider is a subscription-scope action, so it must be done once by a subscription Owner or Contributor before deployment. You can do so via the following Azure CLI commands:
 
 ```azurecli
 az provider register --namespace Microsoft.ExtendedLocation
@@ -36,13 +36,13 @@ az provider register --namespace Microsoft.SecretSyncController
 
 ## Postrequisites
 
-The reference solution also deploys the Azure IoT Schema Registry, which requires the **IoT Operations Arc extension** service principal to be granted the **Azure Device Registry Administrator** role. The deployment script logs a warning containing the extension service principal's object id. Retrieve it from the deployment (bootstrap) log on the simulation VM:
+The reference solution also deploys the Azure IoT Schema Registry, which requires the **IoT Operations Arc extension** service principal to be granted the **Azure Device Registry Administrator** role. The deployment script logs a warning containing the extension service principal's object id. Retrieve it from the deployment (bootstrap) log on the simulation VM via SSH:
 
 ```bash
 sudo grep -oP "IoT Operations arc extension' service principal '\K[0-9a-fA-F-]{36}" /var/log/bootstrap/Bootstrap.log
 ```
 
-A subscription Owner or User Access Administrator must then create the role assignment **after** the deployment completes, replacing `<extension_principal_id>` with the id printed above and `<subscription_id>`, `<resource_group>` and `<resources_name>` (the `resourcesName` deployment parameter in lowercase) with your values:
+A subscription Owner or User Access Administrator must then create the role assignment **after** the deployment completes, replacing `<extension_principal_id>` with the id printed above and `<subscription_id>`, `<resource_group>` and `<resources_name>` (the `resourcesName` deployment parameter in lowercase) with your values. Do so via the following Azure CLI command:
 
 ```azurecli
 az role assignment create --assignee-object-id <extension_principal_id> --assignee-principal-type ServicePrincipal --role "Azure Device Registry Administrator" --scope /subscriptions/<subscription_id>/resourceGroups/<resource_group>/providers/Microsoft.DeviceRegistry/schemaRegistries/<resources_name>-schemaregistry

@@ -575,12 +575,12 @@ cat > "${TELEMETRY_DATAFLOW_CONFIG}" <<EOF
 			"description": "Wrap all dataset value fields under Payload"
 		  },
 		  {
-			"inputs": ["\$metadata.user_properties.subject"],
+			"inputs": ["\$metadata.user_property.subject"],
 			"output": "DataSetWriterId",
 			"description": "CloudEvent subject -> dataset identity"
 		  },
 		  {
-			"inputs": ["\$metadata.user_properties.time"],
+			"inputs": ["\$metadata.user_property.time"],
 			"output": "Timestamp",
 			"description": "CloudEvent time -> Timestamp"
 		  }
@@ -627,12 +627,12 @@ cat > "${METADATA_DATAFLOW_CONFIG}" <<EOF
 			"description": "Wrap all metadata fields under MetaData"
 		  },
 		  {
-			"inputs": ["\$metadata.user_properties.subject"],
+			"inputs": ["\$metadata.user_property.subject"],
 			"output": "DataSetWriterId",
 			"description": "CloudEvent subject -> dataset identity"
 		  },
 		  {
-			"inputs": ["\$metadata.user_properties.time"],
+			"inputs": ["\$metadata.user_property.time"],
 			"output": "Timestamp",
 			"description": "CloudEvent time -> Timestamp"
 		  }

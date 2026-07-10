@@ -28,7 +28,12 @@ An [**I3X API**](https://i3x.dev) container app named `<resourcesName>-i3x4kusto
 
 ## Use the sample dashboard
 
-The reference solution ships a sample **Fabric RTI dashboard** that mirrors the use cases of the Azure Data Explorer dashboard: condition monitoring, OEE calculation, energy consumption, production and diagnostics for the Munich and Seattle production lines. The dashboard is already imported and published against the deployed EventHouse - just open it from **Dashboards** in your workspace. 
+The reference solution ships a sample **Fabric RTI dashboard** that mirrors the use cases of the Azure Data Explorer dashboard: condition monitoring, OEE calculation, energy consumption, production and diagnostics for the Munich and Seattle production lines. The dashboard is already imported and published against the deployed EventHouse - just open it from **Dashboards** in your workspace.
+
+The dashboard also includes a **Unified NameSpace (UNS) / ISA-95 Graph** tile that renders the Unified Namespace / ISA-95 asset hierarchy as an interactive node-link graph. 
+
+> [!IMPORTANT]
+> This tile renders only after you enable the Python plugin on the Eventhouse via **Eventhouse > Plugins > Python language extension = On**. Enabling it can take up to ~1 hour to take effect.
 
 ## Run a Query
 

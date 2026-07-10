@@ -22,29 +22,8 @@ You can deploy a [sample dashboard](https://github.com/digitaltwinconsortium/Man
 
 To display the OEE for a specific shift, select **Custom Time Range** in the **Time Range** drop-down in the top-left corner of the Azure Data Explorer Dashboard and enter the date and time from start to end of the shift you're interested in.
 
+The sample dashboard also includes a **Unified NameSpace (UNS) / ISA-95 Graph** tile that renders the Unified Namespace / ISA-95 asset hierarchy as an interactive node-link graph.
+
 ## I3X API
 
 An [**I3X API**](https://i3x.dev) container app named `<resourcesName>-i3x4kusto` is deployed, exposing ADX over the I3X REST API. Its URL can be retrieved from the Azure portal and the Swagger endpoint is accessible by adding /swagger to its URL.
-
-## Render the built-in Unified NameSpace (UNS) and ISA-95 model graph in Kusto Explorer
-
-This solution implements a Unified Namespace (UNS), based on the OPC UA metadata sent to the Azure Data Explorer time-series database in the cloud. This OPC UA metadata includes the ISA-95 asset hierarchy. You can visualize the resulting graph in the [Kusto Explorer tool](/en-us/azure/data-explorer/kusto/tools/kusto-explorer).
-
-Add a new connection to your Azure Data Explorer instance and then run the following query in Kusto Explorer:
-
-```kql
-let edges = opcua_metadata_lkv
-| project DisplayName, levels = pack_array(DisplayName, Workcell, Line, Area, Site, Enterprise)
-| mv-apply with_itemindex = i level = levels to typeof(string) on (
-    where isnotempty(level)
-    | sort by i asc
-    | extend source = level, target = next(level)
-    | where isnotempty(target)
-    | project source, target
-)
-| distinct source, target;
-let nodes = opcua_metadata_lkv;
-edges | make-graph source --> target with nodes on DisplayName
-```
-
-For best results, change the `Layout` option to `Grouped`.

@@ -347,16 +347,16 @@
     },
     {
       "id": "1bccbda7-4250-4e72-9bb0-5ea48fba7a7c",
-      "title": "Publisher Munich Diagnostics",
-      "visualType": "table",
+      "title": "UNS / ISA-95 Graph",
+      "visualType": "plotly",
       "pageId": "1604d4fc-a7b5-4e47-82c6-640286103fde",
       "layout": {
         "x": 0,
         "y": 122,
-        "width": 12,
+        "width": 24,
         "height": 10
       },
-      "description": "",
+      "description": "Unified Namespace (UNS) / ISA-95 asset hierarchy rendered as an interactive Plotly node-link graph. Requires the Python plugin on the database.",
       "query": {
         "kind": "inline",
         "dataSource": {
@@ -364,13 +364,10 @@
           "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
         },
         "usedVariables": [
-          "_endTime",
-          "_startTime"
         ],
-        "text": "opcua_metadata_lkv\n| where DataSetName contains \"publisher\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp, Name1, NodeValue\n| summarize arg_max(Timestamp, *) by Name1"
+        "text": "let edges =\n    opcua_metadata_lkv\n    | project DisplayName, levels = pack_array(DisplayName, Workcell, Line, Area, Site, Enterprise)\n    | mv-apply with_itemindex = i level = levels to typeof(string) on (\n        where isnotempty(level)\n        | sort by i asc\n        | extend source = level, target = next(level)\n        | where isnotempty(target)\n        | project source, target\n    )\n    | distinct source, target;\nlet nodes =\n    edges\n    | project id = source\n    | union (edges | project id = target)\n    | distinct id;\nplotly_graph_fl(edges, nodes, node_id_column=\"id\", source_id_column=\"source\", target_id_column=\"target\", colorscale_id=\"Viridis\", diagram_title=\"UNS / ISA-95 asset hierarchy\")\n| render plotly"
       },
       "visualOptions": {
-        "table__enableRenderLinks": true,
         "colorRules": [
         ],
         "colorRulesDisabled": true,
@@ -380,48 +377,6 @@
         "crossFilter": [
         ],
         "drillthrough": [
-        ],
-        "table__renderLinks": [
-        ]
-      }
-    },
-    {
-      "id": "c2fa5519-6184-4dcd-bfc1-251a12347927",
-      "title": "Publisher Seattle Diagnostics",
-      "visualType": "table",
-      "pageId": "1604d4fc-a7b5-4e47-82c6-640286103fde",
-      "layout": {
-        "x": 12,
-        "y": 122,
-        "width": 12,
-        "height": 10
-      },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "opcua_metadata_lkv\n| where DataSetName contains \"publisher\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp, Name1, NodeValue\n| summarize arg_max(Timestamp, *) by Name1\n"
-      },
-      "visualOptions": {
-        "table__enableRenderLinks": true,
-        "colorRules": [
-        ],
-        "colorRulesDisabled": true,
-        "colorStyle": "light",
-        "crossFilterDisabled": false,
-        "drillthroughDisabled": false,
-        "crossFilter": [
-        ],
-        "drillthrough": [
-        ],
-        "table__renderLinks": [
         ]
       }
     },

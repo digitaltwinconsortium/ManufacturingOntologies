@@ -120,3 +120,123 @@ toscalar(oeeForStations)
 }
 
 .create-or-alter function ShiftBreak(startTime:datetime,endTime:datetime,bandValue:real,tzOffset:timespan) { print Steps = range(startTime, endTime, 1m) | mv-expand Timestamp1 = Steps to typeof(datetime) | extend localHourOfDay = hourofday(Timestamp1 + tzOffset) | where localHourOfDay == 14 or localHourOfDay == 6 | extend Break = bandValue | project Timestamp1, Break }
+
+// Render interactive graph visualizations using a Plotly template. Turns separate 'edges' and
+// 'nodes' tables into an interactive node-link graph (Plotly JSON) that can be shown on a Fabric
+// Real-Time Dashboard tile via '| render plotly'. Used to visualize the UNS / ISA-95 asset
+// hierarchy (see adx.md). Requires the Python language extension to be enabled on this Eventhouse
+// (Eventhouse > Plugins > Python language extension = On); that is a portal-only action in Fabric.
+.create-or-alter function with (folder = "Packages\\Plotly", docstring = "Render interactive graph visualizations using plotly template")
+plotly_graph_fl (
+    edges:(*), nodes:(*),
+    node_id_column:string="nodeId",
+    source_id_column:string="sourceId", target_id_column:string="targetId",
+    colorscale_id:string="Cividis", diagram_title:string="Simple Graph for educational purposes") {
+let pythonCodeBlueprint = ```
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+import networkx as nx
+
+NODE_OR_EDGE_COLUMN = kargs.get("node_or_edge_column", "tableName")
+NODE_ROW = kargs.get("node_row", "V")
+NODE_ID_COLUMN = kargs.get("node_id_column", "nodeId")
+EDGE_ROW = kargs.get("edge_row", "E")
+SOURCE_ID_COLUMN = kargs.get("source_id_column", "sourceId")
+TARGET_ID_COLUMN = kargs.get("target_id_column", "targetId")
+COLORSCALE_ID = kargs.get("colorscale_id", "YlGnBu")
+DIAGRAM_TITLE = kargs.get("diagram_title", "Network Graph Visualization")
+
+def is_valid_value(value):
+    if value is None or (isinstance(value, str) and value == ''):
+        return False
+    if hasattr(value, '__len__') and not isinstance(value, str):
+        try:
+            na_result = pd.isna(value)
+            return not (hasattr(na_result, 'all') and na_result.all()) and not na_result
+        except (TypeError, ValueError):
+            return True
+    return not pd.isna(value)
+
+def create_properties_dict(row):
+    return {k: v for k, v in row.items() if is_valid_value(v)}
+
+def build_graph(dataframe):
+    graph = nx.Graph()
+    nodes_df = dataframe[dataframe[NODE_OR_EDGE_COLUMN] == NODE_ROW]
+    edges_df = dataframe[dataframe[NODE_OR_EDGE_COLUMN] == EDGE_ROW]
+    if not nodes_df.empty:
+        for _, row in nodes_df.iterrows():
+            graph.add_node(row[NODE_ID_COLUMN], size=1, properties=create_properties_dict(row))
+    if not edges_df.empty:
+        for _, row in edges_df.iterrows():
+            graph.add_edge(row[SOURCE_ID_COLUMN], row[TARGET_ID_COLUMN], weight=1, properties=create_properties_dict(row))
+    return graph
+
+def create_edge_traces(graph, positions):
+    edge_x, edge_y = [], []
+    mnode_x, mnode_y, mnode_txt = [], [], []
+    for source, target, edge_data in graph.edges(data=True):
+        x0, y0 = positions[source]
+        x1, y1 = positions[target]
+        edge_x.extend([x0, x1, None])
+        edge_y.extend([y0, y1, None])
+        properties = edge_data.get('properties', {})
+        valid_props = {k: v for k, v in properties.items() if is_valid_value(v)}
+        prop_text = '<br>'.join(f'{key}: {value}' for key, value in valid_props.items())
+        text = f'source: {source} destination: {target}<br>Properties: {prop_text}'
+        mnode_x.append((x0 + x1) * 0.5)
+        mnode_y.append((y0 + y1) * 0.5)
+        mnode_txt.append(text)
+    edge_trace = go.Scatter(x=edge_x, y=edge_y, line=dict(width=0.5, color='#888'), hoverinfo='none', mode='lines')
+    mnode_trace = go.Scatter(x=mnode_x, y=mnode_y, text=mnode_txt, mode="markers", hoverinfo='text', opacity=0.5, marker=dict(color='LightSkyBlue', size=2, line_width=1))
+    return edge_trace, mnode_trace
+
+def create_node_trace(graph, positions):
+    nodes_list = list(graph.nodes())
+    num_nodes = len(nodes_list)
+    inv_num_nodes = 1.0 / num_nodes if num_nodes > 0 else 0
+    node_x = [positions[node][0] for node in nodes_list]
+    node_y = [positions[node][1] for node in nodes_list]
+    node_adjacencies = []
+    node_text = []
+    node_sizes = []
+    for node in nodes_list:
+        num_connections = len(graph[node])
+        node_adjacencies.append(num_connections)
+        node_sizes.append(10 + num_connections * inv_num_nodes)
+        node_properties = graph.nodes[node].get('properties', {})
+        valid_props = {k: v for k, v in node_properties.items() if is_valid_value(v)}
+        prop_text = '<br>'.join(f'{key}: {value}' for key, value in valid_props.items())
+        text = f'# of connections: {num_connections}<br>Properties: {prop_text}'
+        node_text.append(text)
+    return go.Scatter(x=node_x, y=node_y, text=node_text, mode='markers', hoverinfo='text', marker=dict(colorscale=COLORSCALE_ID, color=node_adjacencies, size=node_sizes, line=dict(width=2, color='#888')))
+
+def create_plotly_figure(graph):
+    positions = nx.layout.spring_layout(graph)
+    edge_trace, mnode_trace = create_edge_traces(graph, positions)
+    node_trace = create_node_trace(graph, positions)
+    return go.Figure(data=[edge_trace, node_trace, mnode_trace], layout=go.Layout(title=f'<br>{DIAGRAM_TITLE}<br>', showlegend=False, hovermode='closest', margin=dict(b=20, l=5, r=5, t=40), annotations=[dict(text="Created using plotly, networkx and the python plugin of Kusto", showarrow=False, xref="paper", yref="paper", x=0.005, y=-0.002)], xaxis=dict(showgrid=False, zeroline=False, showticklabels=False), yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)))
+
+graph = build_graph(df)
+figure = create_plotly_figure(graph)
+plotly_obj = figure.to_json()
+result = pd.DataFrame(data=[plotly_obj], columns=['plotly'])
+```;
+let E = view() { edges };
+let V = view() { nodes };
+union withsource=tableName E, V
+| evaluate python(
+typeof(plotly:string),
+pythonCodeBlueprint,
+bag_pack(
+    'node_or_edge_column', 'tableName',
+    'node_row', 'V',
+    'node_id_column', node_id_column,
+    'edge_row', 'E',
+    'source_id_column', source_id_column,
+    'target_id_column', target_id_column,
+    'colorscale_id', colorscale_id,
+    'diagram_title', diagram_title
+))
+}

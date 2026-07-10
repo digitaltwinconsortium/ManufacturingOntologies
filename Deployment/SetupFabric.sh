@@ -25,6 +25,8 @@
 #   EVENTHUBS_CONNECTION_STRING  - namespace-level RootManageSharedAccessKey connection string
 #   KQL_SCRIPT_URL               - raw URL of Tools/FabricQueries/opcua_setup.kql
 #   DASHBOARD_URL                - raw URL of Tools/ADXQueries/dashboard-ontologies.json (imported as a Real-Time Dashboard)
+#   RESOURCE_GROUP               - resource group holding the AIO assets (used to re-trigger OPC UA metadata)
+#   SUBSCRIPTION_ID              - subscription id (used to re-trigger OPC UA metadata)
 #
 # Optional environment variables (defaults shown):
 #   EVENTHOUSE_NAME=opcua
@@ -785,6 +787,62 @@ print(json.dumps({
 }))
 PY
 	fabric POST "/workspaces/${WORKSPACE_ID}/items" "${TMP_DIR}/dashboard_item.json" >/dev/null || echo "  warning: could not import the Real-Time Dashboard; import Tools/ADXQueries/dashboard-ontologies.json manually and point its data source at the eventhouse (see fabric.md)."
+fi
+
+# ---------------------------------------------------------------------------
+# Step 7: Re-trigger the OPC UA metadata from Azure IoT Operations
+#
+# AIO's connector for OPC UA emits the OPC UA PubSub *MetaData* message only when an asset/dataset
+# definition CHANGES (or the connector restarts) - it is not sent on a schedule. Because Fabric is
+# deployed AFTER AIO, the metadata eventstream created above starts reading from 'latest' and never
+# sees the one-time metadata AIO already published. Without it 'opcua_metadata' stays empty and every
+# query/dashboard that joins telemetry to metadata (station/line names, OEE, the UNS graph) returns
+# nothing. So we "touch" each AIO OPC UA asset (a no-op control-plane update) to make the connector
+# re-emit its metadata, which the freshly created eventstream now captures.
+#
+# The AIO assets are Microsoft.DeviceRegistry ARM resources named '<host>-asset' (see
+# SetupAzureIoTOperations.sh), so this works from this script's managed identity via the Azure
+# control plane - no cluster/kubectl access is required. This is best-effort: on any failure the
+# script logs guidance (touch the datasets manually) and still completes.
+# ---------------------------------------------------------------------------
+
+if [ -n "${RESOURCE_GROUP:-}" ]; then
+	echo "Re-triggering OPC UA metadata: touching the Azure IoT Operations OPC UA assets so AIO resends it..."
+	TOUCHED=0
+	# List all DeviceRegistry assets in the resource group; touch the OPC UA telemetry assets only.
+	ASSET_IDS="$(az resource list \
+		--resource-group "${RESOURCE_GROUP}" \
+		${SUBSCRIPTION_ID:+--subscription "${SUBSCRIPTION_ID}"} \
+		--resource-type "Microsoft.DeviceRegistry/assets" \
+		--query "[?ends_with(name, '-asset')].id" -o tsv 2>/dev/null || true)"
+	if [ -z "${ASSET_IDS}" ]; then
+		echo "  note: no Microsoft.DeviceRegistry/assets found in '${RESOURCE_GROUP}'. If AIO was deployed to a"
+		echo "        different resource group, touch the datasets manually (see fabric.md) so metadata is resent."
+	else
+		TOUCH_STAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+		while IFS= read -r ASSET_ID; do
+			[ -z "${ASSET_ID}" ] && continue
+			# A tag update is a no-op change on the asset resource that still bumps its version, which is
+			# enough to make the connector for OPC UA re-publish the asset's metadata message.
+			if az resource tag \
+				--ids "${ASSET_ID}" \
+				--operation merge \
+				--tags "fabricMetadataRefresh=${TOUCH_STAMP}" \
+				--output none 2>/dev/null; then
+				echo "  touched: ${ASSET_ID##*/}"
+				TOUCHED=$((TOUCHED + 1))
+			else
+				echo "  warning: could not touch ${ASSET_ID##*/}; touch it manually (see fabric.md)."
+			fi
+		done <<-EOF
+		${ASSET_IDS}
+		EOF
+		echo "  re-triggered metadata for ${TOUCHED} OPC UA asset(s)."
+		echo "  it can take a minute or two for 'opcua_metadata' to populate in the eventhouse."
+	fi
+else
+	echo "note: RESOURCE_GROUP not set; skipping the OPC UA metadata re-trigger. After deployment, touch the"
+	echo "      Azure IoT Operations datasets manually so AIO resends OPC UA metadata (see fabric.md)."
 fi
 
 echo "Fabric setup complete. Workspace '${FABRIC_WORKSPACE_NAME}' contains the '${EVENTHOUSE_NAME}' eventhouse"

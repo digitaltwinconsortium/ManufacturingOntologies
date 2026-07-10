@@ -74,6 +74,14 @@
             "value": "[variables('resourcesName')]"
           },
           {
+            "name": "RESOURCE_GROUP",
+            "value": "[resourceGroup().name]"
+          },
+          {
+            "name": "SUBSCRIPTION_ID",
+            "value": "[subscription().subscriptionId]"
+          },
+          {
             "name": "FABRIC_CAPACITY_NAME",
             "value": "[variables('fabricCapacityName')]"
           },

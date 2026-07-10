@@ -9,10 +9,6 @@ Select the **Deploy** button to deploy all required resources to your Azure subs
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdigitaltwinconsortium%2FManufacturingOntologies%2Fmain%2FDeployment%2Farm.json)
 
-The deployment process prompts you to provide a password for the virtual machine (VM) that hosts the production line simulation and the Edge infrastructure.
-
-To reduce cost, the deployment creates a single Linux VM for both the production line simulation and the edge infrastructure. In a production scenario, the production line simulation isn't required.
-
 > [!NOTE]
 > Please be patient! The deployment takes about 95 minutes to complete. After the deployment is complete, you can access the VM via SSH using the credentials you provided during deployment.
 
@@ -27,3 +23,22 @@ The sample dashboard also includes a **Unified NameSpace (UNS) / ISA-95 Graph** 
 ## I3X API
 
 An [**I3X API**](https://i3x.dev) container app named `<resourcesName>-i3x4kusto` is deployed, exposing ADX over the I3X REST API. Its URL can be retrieved from the Azure portal and the Swagger endpoint is accessible by adding /swagger to its URL.
+
+## Run a Query
+
+Open your KQL database and select its `opcua_queryset`. Because the telemetry `Subject` is the numeric `DataSetWriterId`, the station and production line are matched on the metadata `DataSetName` (built from the OPC UA server's ApplicationUri and NodeId) and then joined to the telemetry on `Subject`. (With Azure IoT Operations, the station and line usually aren't encoded in `DataSetName`, so point these filters at whatever your asset or dataset naming carries instead.) Delete the sample queries, enter the following query in the text box, and select `Run`:
+
+        let _startTime = ago(1h);
+        let _endTime = now();
+        opcua_metadata_lkv
+        | where DataSetName contains "assembly"
+        | where DataSetName contains "munich"
+        | join kind=inner (
+            opcua_telemetry
+            | where Name == "Status"
+            | where Timestamp > _startTime and Timestamp < _endTime
+        ) on Subject
+        | extend energy = todouble(Value)
+        | project Timestamp1, energy
+        | sort by Timestamp1 desc
+        | render linechart

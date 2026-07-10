@@ -35,6 +35,8 @@ az account set --subscription <subscription_id>
 az ad sp show --id bc313c14-388c-4e7d-a58e-70017303ee3b --query id -o tsv
 ```
 
+In addition, the deployment process prompts you to provide a password for the virtual machine (VM) that hosts the production line simulation and the Edge infrastructure.
+
 The reference solution also deploys Azure IoT Operations, which requires the following resource providers to be registered in the subscription. Registering a resource provider is a subscription-scope action, so it must be done once by a subscription Owner or Contributor before deployment. You can do so via the following Azure CLI commands:
 
 ```azurecli
@@ -107,6 +109,8 @@ The station OPC UA server uses the following OPC UA node IDs for telemetry to th
 - `i=434` - pressure
 
 The solution uses a digital feedback loop to manage the pressure in a simulated station. To implement the feedback loop, the solution triggers a command from the cloud on one of the OPC UA servers in the simulation. The trigger activates when simulated time-series pressure data reaches a certain threshold. You can see the pressure of the assembly machine in the Azure Data Explorer dashboard. The pressure is released at regular intervals for the Seattle production line. In a real-world deployment, something as critical as opening a pressure relief valve would be done on-premises. This example simply demonstrates how to achieve the digital feedback loop.
+
+To reduce cost, the deployment creates a single Linux VM for both the production line simulation and the edge infrastructure. In a production scenario, the production line simulation isn't required.
 
 ## OPC UA certificate trust
 

@@ -20,7 +20,7 @@ Select the **Deploy to Azure** button and choose the **same resource group you u
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdigitaltwinconsortium%2FManufacturingOntologies%2Fmain%2FDeployment%2Ffabric.json)
 
 > [!IMPORTANT]
-> **Getting access to the workspace.**: A Fabric administrator can open the Fabric portal -> **Admin portal -> Workspaces**, find `<resourcesName>-Fabric`, and use **Access -> Add admins, members or contributors** to add you as an **Admin**.
+> **Getting access to the workspace.**: A Fabric administrator can open the Fabric portal -> **Admin portal -> Workspaces**, find `<resourcesName>-Fabric`, and use **Access -> Add admins, members or contributors** to add users as **Admin**.
 
 ## I3X API
 
@@ -35,9 +35,9 @@ The dashboard also includes a **Unified NameSpace (UNS) / ISA-95 Graph** tile th
 > [!IMPORTANT]
 > This tile renders only after you enable the Python plugin on the Eventhouse via **Eventhouse > Plugins > Python language extension = On**. Enabling it can take up to ~1 hour to take effect.
 
-## OPC UA metadata (required for the queries to work)
+### OPC UA metadata (required for the dashboard to work)
 
-All queries and dashboard tiles join the telemetry (`opcua_telemetry`) to the OPC UA metadata (`opcua_metadata` / `opcua_metadata_lkv`) to resolve station and production-line names, OEE and the UNS/ISA-95 hierarchy. If `opcua_metadata` is empty, **none** of the queries return data.
+All dashboard tiles queries join the telemetry (`opcua_telemetry`) to the OPC UA metadata (`opcua_metadata` / `opcua_metadata_lkv`) to resolve station and production-line names, OEE and the UNS/ISA-95 hierarchy. If `opcua_metadata` is empty, **none** of the queries return data.
 
 Azure IoT Operations (AIO) sends the OPC UA PubSub *MetaData* message only when an asset/dataset definition **changes** (or the connector restarts) - it is not sent on a schedule. Because Fabric is deployed *after* AIO, its metadata eventstream starts reading from the latest offset and never sees the one-time metadata AIO already published. To fix this, the Fabric setup script automatically "touches" every AIO OPC UA asset at the end of the run so AIO resends its metadata, which the freshly created eventstream then captures. Allow a minute or two after deployment for `opcua_metadata` to populate.
 

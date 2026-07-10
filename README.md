@@ -25,6 +25,8 @@ The deployment provisions Azure resources, onboards the simulation VM's Kubernet
 
 > Note: after the deployment completes, one additional **optional** role assignment can be created by a subscription **Owner** or **User Access Administrator** — see [Postrequisites](#postrequisites) below.
 
+### Required Azure CLI commands
+
 This reference solution deploys Azure Arc, which requires the `custom-locations` application object ID that needs to be passed to the deployment script. You can retrieve it with the following Azure CLI commands:
 
 ```azurecli

@@ -116,10 +116,15 @@ spec:
         volumeMounts:
         - name: "logs"
           mountPath: "/app/logs"
+        - name: "pki"
+          mountPath: "/app/pki"
       volumes:
         - name: "logs"
           hostPath:
             path: "/mnt/c/K3s/MES/Seattle/Logs"
+        - name: "pki"
+          hostPath:
+            path: "/mnt/c/K3s/MES/Seattle/PKI"
 ---
 apiVersion: v1
 kind: Service

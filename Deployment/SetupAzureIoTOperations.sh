@@ -695,10 +695,11 @@ run az iot ops dataflow apply \
 #  - AIO trusts the stations (12c): add each station's own OPC UA server certificate to AIO's
 #    connector trust list via Key Vault secret sync, so AIO validates (does not auto-accept) the
 #    server certificate each station presents.
-#  - Stations trust the UA Cloud Commander (12d): the commander is an OPC UA client that connects to
-#    the stations to issue commands. With GDS Server Push disabled the commander's certificate is no
-#    longer distributed automatically, so copy the commander's own OPC UA client certificate (exposed
-#    on the host at /mnt/c/K3s/Commander/<Line>/PKI/own/certs) into each station's trusted/certs.
+#  - Stations trust the UA Cloud Commander and the MES (12d): both are OPC UA clients that connect to
+#    the stations (the commander to issue commands, the MES to drive the assembly line). With GDS
+#    Server Push disabled their certificates are no longer distributed automatically, so copy each
+#    client's own OPC UA client certificate (exposed on the host at
+#    /mnt/c/K3s/<Component>/<Line>/PKI/own/certs) into each station's trusted/certs.
 echo
 echo "=== Establishing OPC UA mutual trust between AIO and the stations ==="
 
@@ -822,41 +823,50 @@ else
   fi
 fi
 
-# 12d. Make the stations trust the UA Cloud Commander. The commander is an OPC UA client that
-# connects to the stations to issue commands. With GDS Server Push disabled, its certificate is no
-# longer distributed automatically, so each station now rejects the commander unless its certificate
-# is present in trusted/certs. The commander's /app/pki is host-mounted at
-# /mnt/c/K3s/Commander/<Line>/PKI (see Deployment/<Line>/ProductionLine.yaml), so its public cert
-# lives under .../PKI/own/certs. pki/own/certs holds the RSA application instance cert plus alternate
-# ECC curve variants; the stations negotiate Basic256Sha256 (RSA), so copy only the RSA cert and skip
-# the curve-tagged variants. The OPC UA .NET validator re-reads trusted/certs on each validation, so
-# no station restart is required.
+# 12d. Make the stations trust the OPC UA clients that connect to them. Two simulation components act
+# as OPC UA clients against the stations: the UA Cloud Commander (issues commands) and the MES
+# (drives the assembly line and reads station status). With GDS Server Push disabled, their
+# certificates are no longer distributed automatically, so each station rejects these clients once it
+# leaves provisioning mode unless the client certificate is present in trusted/certs. Each client's
+# /app/pki is host-mounted at /mnt/c/K3s/<Component>/<Line>/PKI (see Deployment/<Line>/
+# ProductionLine.yaml), so its public cert lives under .../PKI/own/certs. pki/own/certs holds the RSA
+# application instance cert plus alternate ECC curve variants; the stations negotiate Basic256Sha256
+# (RSA), so copy only the RSA cert and skip the curve-tagged variants. Both client certs are
+# distributed in the same pass so no station is left in provisioning mode with an incomplete trust
+# list. The OPC UA .NET validator re-reads trusted/certs on each validation, so no station restart is
+# required.
 echo
-echo "=== Establishing trust for the UA Cloud Commander at the stations ==="
-commander_cert_found=false
-for line in "${LINES[@]}"; do
-  commander_cert_dir="/mnt/c/K3s/Commander/${line}/PKI/own/certs"
-  [ -d "${commander_cert_dir}" ] || continue
-  for cert_file in "${commander_cert_dir}"/*.der; do
-    [ -f "${cert_file}" ] || continue
-    case "${cert_file}" in
-      *NistP256*|*NistP384*|*BrainpoolP256r1*|*BrainpoolP384r1*) continue ;;
-    esac
-    commander_cert_found=true
-    cert_basename="commander.$(basename "${cert_file}")"
-    for station in Assembly Test Packaging; do
-      dest_dir="/mnt/c/K3s/${station}/${line}/PKI/trusted/certs"
-      run mkdir -p "${dest_dir}"
-      run cp "${cert_file}" "${dest_dir}/${cert_basename}"
-      echo ">>> ${station}/${line}: UA Cloud Commander certificate installed into ${dest_dir}"
+echo "=== Establishing trust for the OPC UA clients (Commander, MES) at the stations ==="
+# Each entry maps a host PKI component directory to the filename prefix used in trusted/certs.
+CLIENT_COMPONENTS="Commander:commander MES:mes"
+for client in ${CLIENT_COMPONENTS}; do
+  component="${client%%:*}"
+  prefix="${client##*:}"
+  client_cert_found=false
+  for line in "${LINES[@]}"; do
+    client_cert_dir="/mnt/c/K3s/${component}/${line}/PKI/own/certs"
+    [ -d "${client_cert_dir}" ] || continue
+    for cert_file in "${client_cert_dir}"/*.der; do
+      [ -f "${cert_file}" ] || continue
+      case "${cert_file}" in
+        *NistP256*|*NistP384*|*BrainpoolP256r1*|*BrainpoolP384r1*) continue ;;
+      esac
+      client_cert_found=true
+      cert_basename="${prefix}.$(basename "${cert_file}")"
+      for station in Assembly Test Packaging; do
+        dest_dir="/mnt/c/K3s/${station}/${line}/PKI/trusted/certs"
+        run mkdir -p "${dest_dir}"
+        run cp "${cert_file}" "${dest_dir}/${cert_basename}"
+        echo ">>> ${station}/${line}: ${component} certificate installed into ${dest_dir}"
+      done
     done
   done
+  if [ "${client_cert_found}" != "true" ]; then
+    echo "!!! NOTE: no ${component} OPC UA certificate was found under"
+    echo "    /mnt/c/K3s/${component}/<Line>/PKI/own/certs yet. If the stations reject ${component},"
+    echo "    copy its own cert into each station's PKI/trusted/certs and retry."
+  fi
 done
-if [ "${commander_cert_found}" != "true" ]; then
-  echo "!!! NOTE: no UA Cloud Commander OPC UA certificate was found under"
-  echo "    /mnt/c/K3s/Commander/<Line>/PKI/own/certs yet. If the stations reject the commander,"
-  echo "    copy the commander's own cert into each station's PKI/trusted/certs and retry."
-fi
 
 # Clean up the generated config files (they contain no secrets).
 rm -rf "${AIO_CONFIG_DIR}"

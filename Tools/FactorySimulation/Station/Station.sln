@@ -24,6 +24,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\..\..\grafana.md = ..\..\..\grafana.md
 		..\..\..\Deployment\iot-stack.yaml = ..\..\..\Deployment\iot-stack.yaml
 		..\..\..\LICENSE = ..\..\..\LICENSE
+		..\..\..\ontologies.md = ..\..\..\ontologies.md
 		..\..\DatabricksQueries\opcua_setup.py = ..\..\DatabricksQueries\opcua_setup.py
 		..\..\..\powerbi.md = ..\..\..\powerbi.md
 		..\..\..\README.md = ..\..\..\README.md

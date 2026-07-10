@@ -35,22 +35,13 @@ The dashboard also includes a **Unified NameSpace (UNS) / ISA-95 Graph** tile th
 > [!IMPORTANT]
 > This tile renders only after you enable the Python plugin on the Eventhouse via **Eventhouse > Plugins > Python language extension = On**. Enabling it can take up to ~1 hour to take effect.
 
-### OPC UA metadata (required for the dashboard to work)
-
-All dashboard tiles queries join the telemetry (`opcua_telemetry`) to the OPC UA metadata (`opcua_metadata` / `opcua_metadata_lkv`) to resolve station and production-line names, OEE and the UNS/ISA-95 hierarchy. If `opcua_metadata` is empty, **none** of the queries return data.
-
-Azure IoT Operations (AIO) sends the OPC UA PubSub *MetaData* message only when an asset/dataset definition **changes** (or the connector restarts) - it is not sent on a schedule. Because Fabric is deployed *after* AIO, its metadata eventstream starts reading from the latest offset and never sees the one-time metadata AIO already published. To fix this, the Fabric setup script automatically "touches" every AIO OPC UA asset at the end of the run so AIO resends its metadata, which the freshly created eventstream then captures. Allow a minute or two after deployment for `opcua_metadata` to populate.
-
-> [!TIP]
-> If `opcua_metadata` is still empty (for example the AIO assets live in a different resource group than the one the script scanned), re-trigger the metadata manually by making any change to each AIO OPC UA dataset, e.g.:
+> [!IMPORTANT]
+> Resending OPC UA metadata (required for the dashboard to work)
 >
-> ```bash
-> # List the AIO OPC UA assets, then touch each one so AIO resends its metadata.
-> az resource list -g <resourceGroup> --resource-type "Microsoft.DeviceRegistry/assets" --query "[].id" -o tsv \
->   | while read -r id; do az resource tag --ids "$id" --operation merge --tags "metadataRefresh=$(date -u +%s)"; done
-> ```
+> All dashboard tiles queries join the telemetry (`opcua_telemetry`) to the OPC UA metadata (`opcua_metadata_lkv`) to resolve station and production-line names, OEE and the UNS/ISA-95 hierarchy. If `opcua_metadata_lkv` is empty, **none** of the queries return data.
+> Azure IoT Operations sends OPC UA PubSub *MetaData* messages only when an asset/dataset definition **changes** - it is not sent on a schedule. Because Fabric is deployed *after* Azure IoT Operations, its metadata eventstream starts reading from the latest offset and never sees the one-time metadata AIO already published.
 >
-> Alternatively, edit the asset in the Azure IoT Operations experience (or run an `az iot ops ns asset opcua ... update`) to force a change that makes the connector re-publish metadata.
+> Edit each asset in the Azure IoT Operations Experience (for example, add a description to each asset) to force a change that makes the connector re-publish metadata.
 
 ## Run a Query
 

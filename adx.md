@@ -26,7 +26,7 @@ An [**I3X API**](https://i3x.dev) container app named `<resourcesName>-i3x4kusto
 
 ## Run a Query
 
-Open your KQL database and select its `opcua_queryset`. Because the telemetry `Subject` is the numeric `DataSetWriterId`, the station and production line are matched on the metadata `DataSetName` (built from the OPC UA server's ApplicationUri and NodeId) and then joined to the telemetry on `Subject`. (With Azure IoT Operations, the station and line usually aren't encoded in `DataSetName`, so point these filters at whatever your asset or dataset naming carries instead.) Delete the sample queries, enter the following query in the text box, and select `Run`:
+Open your ADX database and select `Queries`. Because the telemetry `Subject` is the numeric `DataSetWriterId`, the station and production line are matched on the metadata `DataSetName` (built from the OPC UA server's ApplicationUri and NodeId) and then joined to the telemetry on `Subject`. Enter the following query in the text box, and select `Run`:
 
         let _startTime = ago(1h);
         let _endTime = now();

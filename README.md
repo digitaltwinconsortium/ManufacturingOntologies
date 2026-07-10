@@ -66,7 +66,7 @@ The following articles describe how to deploy this reference solution as well as
 
 ## Production line simulation
 
-The production line simulation is made up of several stations, using the station OPC UA information model, and a simple manufacturing execution system (MES). Both the stations and the MES are containerized for easy deployment. Their configuration is:
+The production line simulation is made up of several stations (3 per production line, named "Assembly", "Test" and "Packaging"), using the [station OPC UA information model](Tools/FactorySimulation/Station/Station.NodeSet2.xml), and a simple manufacturing execution system (MES). Both the stations and the MES are containerized for easy deployment. Their configuration is:
 
 | Production Line | Ideal Cycle Time (in seconds) |
 | --- | --- |

@@ -928,12 +928,9 @@
                 return;
             }
 
-            string issuerCertsDir = Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs");
-            bool provisioningMode = !Directory.EnumerateFiles(issuerCertsDir).Any();
-
-            if (provisioningMode)
+            if (StationNodeManager.IsInProvisioningMode())
             {
-                // No issuer cert on disk yet — accept everything during initial setup
+                // No issuer/trusted cert on disk yet — accept everything during initial setup
                 Log.Warning("Auto-accepting certificate in provisioning mode: [{Subject}]", e.Certificate?.Subject);
                 e.Accept = true;
                 return;

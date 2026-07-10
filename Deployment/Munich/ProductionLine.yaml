@@ -54,10 +54,15 @@ spec:
         volumeMounts:
         - name: "logs"
           mountPath: "/app/logs"
+        - name: "pki"
+          mountPath: "/app/pki"
       volumes:
         - name: "logs"
           hostPath:
             path: "/mnt/c/K3s/Commander/Munich/Logs"
+        - name: "pki"
+          hostPath:
+            path: "/mnt/c/K3s/Commander/Munich/PKI"
 ---
 apiVersion: v1
 kind: Service

@@ -36,9 +36,8 @@ The dashboard also includes a **Unified NameSpace (UNS) / ISA-95 Graph** tile th
 > This tile renders only after you enable the Python plugin on the Eventhouse via **Eventhouse > Plugins > Python language extension = On**. Enabling it can take up to ~1 hour to take effect.
 
 > [!IMPORTANT]
-> Resending OPC UA metadata (required for the dashboard to work)
->
 > All dashboard tiles queries join the telemetry (`opcua_telemetry`) to the OPC UA metadata (`opcua_metadata_lkv`) to resolve station and production-line names, OEE and the UNS/ISA-95 hierarchy. If `opcua_metadata_lkv` is empty, **none** of the queries return data.
+>
 > Azure IoT Operations sends OPC UA PubSub *MetaData* messages only when an asset/dataset definition **changes** - it is not sent on a schedule. Because Fabric is deployed *after* Azure IoT Operations, its metadata eventstream starts reading from the latest offset and never sees the one-time metadata AIO already published.
 >
 > Edit each asset in the Azure IoT Operations Experience (for example, add a description to each asset) to force a change that makes the connector re-publish metadata.

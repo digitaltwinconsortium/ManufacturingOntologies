@@ -33,7 +33,7 @@ The reference solution ships a sample **Fabric RTI dashboard** that mirrors the 
 The dashboard also includes a **Unified NameSpace (UNS) / ISA-95 Graph** tile that renders the Unified Namespace / ISA-95 asset hierarchy as an interactive node-link graph. 
 
 > [!IMPORTANT]
-> This tile renders only after you enable the Python plugin on the Eventhouse via **Eventhouse > Plugins > Python language extension = On**. Enabling it can take up to ~1 hour to take effect.
+> This tile renders only after you enable the Python plugin on the Eventhouse via **Eventhouse > Plugins > Python language extension = On**.
 
 > [!IMPORTANT]
 > All dashboard tiles queries join the telemetry (`opcua_telemetry`) to the OPC UA metadata (`opcua_metadata_lkv`) to resolve station and production-line names, OEE and the UNS/ISA-95 hierarchy. If `opcua_metadata_lkv` is empty, **none** of the queries return data.

@@ -15,6 +15,16 @@ Interoperability is the key enabler for these requirements. The use of open stan
 
 ## Prerequisites
 
+### Required Azure permissions
+
+The deployment provisions Azure resources, onboards the simulation VM's Kubernetes cluster to Azure Arc, installs Azure IoT Operations, and creates several Azure role assignments. Ensure the user that runs the deployment script has the following:
+
+- **Owner** on the target subscription or resource group (recommended), **or** the combination of **Contributor** and **User Access Administrator** (or **Role Based Access Control Administrator**) so it can both create resources and create the role assignments the template defines.
+- **Contributor** (or Owner) at the **subscription** scope for the one-time resource-provider registration below, since `az provider register` is a subscription-scope action.
+- Permission to sign in to the target **Microsoft Entra** tenant and read the `custom-locations` application service principal (`az ad sp show`), used when onboarding Azure Arc.
+
+> Note: after the deployment completes, one additional **optional** role assignment can be created by a subscription **Owner** or **User Access Administrator** — see [Postrequisites](#postrequisites) below.
+
 This reference solution deploys Azure Arc, which requires the `custom-locations` application object ID that needs to be passed to the deployment script. You can retrieve it with the following Azure CLI commands:
 
 ```azurecli

@@ -1175,7 +1175,6 @@
         "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubsNamespaceName'))]",
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
       ],
-      "scope": "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubsNamespaceName'))]",
       "properties": {
         "roleDefinitionId": "[variables('eventHubsDataSenderRoleId')]",
         "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId]",
@@ -1186,7 +1185,6 @@
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-10-01-preview",
       "name": "[guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), variables('eventHubsDataReceiverRoleId'))]",
-      "scope": "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubsNamespaceName'))]",
       "dependsOn": [
         "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubsNamespaceName'))]",
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"

@@ -868,6 +868,51 @@ for client in ${CLIENT_COMPONENTS}; do
   fi
 done
 
+# 12e. Register an OPC UA command (management-group action) so the AIO OPC UA connector's built-in
+# commander can execute a command on the station directly - the AIO-native alternative to UA Cloud
+# Commander. The reference command is "open the pressure relief valve" on the Seattle assembly
+# station (the same command UA-CloudAction triggers). It is modeled as a management-group action of
+# type "Call" on the station's telemetry asset: dataSource maps to the OPC UA objectId and targetUri
+# to the methodId (see Station.NodeSet2.xml). UA-CloudAction (MESSAGING_PLATFORM=AIO-Commander) then
+# invokes it by publishing to azure-iot-operations/asset-operations/<asset>/<managementGroup>/<action>.
+#
+# This is additive: UA Cloud Commander stays deployed as a backup. The exact CLI verb for actions can
+# vary by az iot ops extension version, so this step is best-effort and only warns on failure.
+echo
+echo "=== Registering the AIO OPC UA commander action (Seattle assembly pressure relief valve) ==="
+COMMAND_ASSET="assembly-seattle-asset"
+COMMAND_MGMT_GROUP="managementGroup"
+COMMAND_ACTION_NAME="OpenPressureReliefValve"
+COMMAND_OBJECT_ID="ns=2;i=424"
+COMMAND_METHOD_ID="ns=2;i=435"
+if az iot ops ns asset opcua management-group --help >/dev/null 2>&1; then
+  # Create the management group (carries the OPC UA objectId via --data-source) if the verb exists.
+  run az iot ops ns asset opcua management-group add \
+    --resource-group "${RESOURCE_GROUP}" \
+    --instance "${AIO_INSTANCE_NAME}" \
+    --asset "${COMMAND_ASSET}" \
+    --name "${COMMAND_MGMT_GROUP}" \
+    --data-source "${COMMAND_OBJECT_ID}" || \
+    echo "!!! NOTE: could not create management group '${COMMAND_MGMT_GROUP}' on '${COMMAND_ASSET}'; it may already exist or the CLI verb differs in this az iot ops version."
+  # Add the Call action (targetUri = methodId) to the management group.
+  run az iot ops ns asset opcua management-group action add \
+    --resource-group "${RESOURCE_GROUP}" \
+    --instance "${AIO_INSTANCE_NAME}" \
+    --asset "${COMMAND_ASSET}" \
+    --management-group "${COMMAND_MGMT_GROUP}" \
+    --name "${COMMAND_ACTION_NAME}" \
+    --action-type "Call" \
+    --target-uri "${COMMAND_METHOD_ID}" || \
+    echo "!!! NOTE: could not add action '${COMMAND_ACTION_NAME}'; verify the management-group action verb for your az iot ops version."
+  echo ">>> If successful, UA-CloudAction (MESSAGING_PLATFORM=AIO-Commander) can call:"
+  echo "    azure-iot-operations/asset-operations/${COMMAND_ASSET}/${COMMAND_MGMT_GROUP}/${COMMAND_ACTION_NAME}"
+else
+  echo "!!! NOTE: this az iot ops version does not expose 'ns asset opcua management-group'; skipping the"
+  echo "    AIO commander action registration. Add the management group + Call action (objectId"
+  echo "    ${COMMAND_OBJECT_ID}, methodId ${COMMAND_METHOD_ID}) on asset '${COMMAND_ASSET}' via the"
+  echo "    operations experience portal, or keep using UA Cloud Commander."
+fi
+
 # Clean up the generated config files (they contain no secrets).
 rm -rf "${AIO_CONFIG_DIR}"
 

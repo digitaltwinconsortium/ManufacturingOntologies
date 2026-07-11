@@ -12,7 +12,10 @@ metadata:
   name: commander
   namespace: munich
 spec:
-  replicas: 1
+  # Scaled to zero: UA Cloud Commander is kept in the config as a dormant backup but not run. The AIO
+  # command dataflow forwards commander.command to the built-in OPC UA connector commander instead.
+  # Set replicas back to 1 (and disable the AIO command dataflow) to re-enable UA Cloud Commander.
+  replicas: 0
   selector:
     matchLabels:
       app: commander

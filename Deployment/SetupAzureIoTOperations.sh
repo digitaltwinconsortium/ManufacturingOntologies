@@ -53,6 +53,23 @@ METADATA_EVENTHUB_NAME="metadata"
 DATAFLOW_ENDPOINT_NAME="eventhubs"
 TELEMETRY_DATAFLOW_NAME="opcua-telemetry-to-eventhubs"
 METADATA_DATAFLOW_NAME="opcua-metadata-to-eventhubs"
+# Cloud-to-edge command path (Event Hubs 'commander.command' -> local MQTT broker -> AIO OPC UA commander).
+# A Kafka/Event Hubs endpoint used as a dataflow source needs its own consumer group, hence a dedicated
+# source endpoint. COMMAND_MQTT_TOPIC must match the asset/management-group/action registered in 12e.
+COMMAND_EVENTHUB_NAME="commander.command"
+COMMAND_SOURCE_ENDPOINT_NAME="eventhubs-commands"
+COMMAND_CONSUMER_GROUP="aio-commander-ingest"
+COMMAND_DATAFLOW_NAME="commander-command-to-opcua"
+COMMAND_MQTT_TOPIC="azure-iot-operations/asset-operations/assembly-seattle-asset/managementGroup/OpenPressureReliefValve"
+# The dataflow transformation reshapes the incoming UA Cloud Commander ActionRequest into the payload
+# the AIO OPC UA commander expects: the method's input arguments as the message body. The pressure-
+# relief method takes no parameters, so the body is an empty object. The map below copies an optional
+# "Arguments" object out of the ActionRequest's first message payload (Messages[0].Payload.Arguments)
+# and defaults it to an empty object when absent, dropping the ActionRequest envelope. If your action
+# needs arguments, have UA-CloudAction place them under that Arguments object (or adjust the input path
+# / add per-argument rules here).
+COMMAND_METHOD_ARGS_INPUT="Messages[0].Payload.Arguments ?? {}"
+COMMAND_METHOD_ARGS_OUTPUT="*"
 # Working directory for the generated data flow / asset configuration files.
 AIO_CONFIG_DIR="$(mktemp -d)"
 
@@ -679,6 +696,98 @@ run az iot ops dataflow apply \
   --profile default \
   --name "${METADATA_DATAFLOW_NAME}" \
   --config-file "${METADATA_DATAFLOW_CONFIG}"
+
+# --------------------------
+# 11b. Cloud-to-edge command path: Event Hubs 'commander.command' -> local MQTT broker -> AIO OPC UA commander
+# --------------------------
+# This is the AIO-native alternative to routing commands through UA Cloud Commander. UA-CloudAction (the
+# cloud app) keeps publishing its command to the Event Hubs 'commander.command' topic exactly as before -
+# it does not need to reach the in-cluster broker. A dataflow subscribes to that Event Hubs topic and
+# republishes each message onto the local MQTT broker topic the built-in OPC UA connector commander
+# listens on, so the connector executes the OPC UA method (registered in section 12e) on the station.
+#
+# A Kafka/Event Hubs endpoint used as a dataflow SOURCE requires its own consumerGroupId, so we create a
+# dedicated source endpoint 'eventhubs-commands' (same host and managed-identity auth as the egress
+# endpoint) rather than reusing the telemetry/metadata egress endpoint.
+#
+# NOTE (payload schema): UA-CloudAction publishes an OPC UA PubSub ActionRequest to 'commander.command',
+# whereas the AIO commander expects the method's input arguments as the message body (an empty object
+# for the parameter-less pressure-relief method). The command dataflow below therefore includes a
+# BuiltInTransformation that reshapes the ActionRequest into the commander's argument payload, so
+# UA-CloudAction can keep publishing exactly as it does today. UA Cloud Commander remains deployed as a
+# working backup.
+echo
+echo "=== Creating the Event Hubs command source data flow endpoint (${COMMAND_SOURCE_ENDPOINT_NAME}) ==="
+COMMAND_ENDPOINT_CONFIG="${AIO_CONFIG_DIR}/endpoint-eventhubs-commands.json"
+cat > "${COMMAND_ENDPOINT_CONFIG}" <<EOF
+{
+  "endpointType": "Kafka",
+  "kafkaSettings": {
+    "host": "${EVENTHUBS_HOST}:9093",
+    "consumerGroupId": "${COMMAND_CONSUMER_GROUP}",
+    "tls": {
+      "mode": "Enabled"
+    },
+    "authentication": {
+      "method": "UserAssignedManagedIdentity",
+      "userAssignedManagedIdentitySettings": {
+        "clientId": "${MANAGED_IDENTITY_CLIENT_ID}",
+        "tenantId": "${TENANT_ID}",
+        "scope": "https://${EVENTHUBS_HOST}/.default"
+      }
+    },
+    "cloudEventAttributes": "Propagate"
+  }
+}
+EOF
+run az iot ops dataflow endpoint apply \
+  --resource-group "${RESOURCE_GROUP}" \
+  --instance "${AIO_INSTANCE_NAME}" \
+  --name "${COMMAND_SOURCE_ENDPOINT_NAME}" \
+  --config-file "${COMMAND_ENDPOINT_CONFIG}"
+
+echo
+echo "=== Creating the command data flow (Event Hubs '${COMMAND_EVENTHUB_NAME}' -> MQTT '${COMMAND_MQTT_TOPIC}') ==="
+COMMAND_DATAFLOW_CONFIG="${AIO_CONFIG_DIR}/dataflow-command.json"
+cat > "${COMMAND_DATAFLOW_CONFIG}" <<EOF
+{
+  "mode": "Enabled",
+  "operations": [
+    {
+      "operationType": "Source",
+      "sourceSettings": {
+        "endpointRef": "${COMMAND_SOURCE_ENDPOINT_NAME}",
+        "dataSources": ["${COMMAND_EVENTHUB_NAME}"]
+      }
+    },
+    {
+      "operationType": "BuiltInTransformation",
+      "builtInTransformationSettings": {
+        "map": [
+          {
+            "inputs": ["${COMMAND_METHOD_ARGS_INPUT}"],
+            "output": "${COMMAND_METHOD_ARGS_OUTPUT}",
+            "description": "Reshape the incoming UA Cloud Commander ActionRequest into the AIO OPC UA commander payload (the method's input arguments). Copies Messages[0].Payload.Arguments to the message root, defaulting to an empty object for a parameter-less method such as the pressure-relief valve, and drops the ActionRequest envelope."
+          }
+        ]
+      }
+    },
+    {
+      "operationType": "Destination",
+      "destinationSettings": {
+        "endpointRef": "default",
+        "dataDestination": "${COMMAND_MQTT_TOPIC}"
+      }
+    }
+  ]
+}
+EOF
+run az iot ops dataflow apply \
+  --resource-group "${RESOURCE_GROUP}" \
+  --instance "${AIO_INSTANCE_NAME}" \
+  --profile default \
+  --name "${COMMAND_DATAFLOW_NAME}" \
+  --config-file "${COMMAND_DATAFLOW_CONFIG}"
 
 # --------------------------
 # 12. Establish OPC UA application-authentication mutual trust with the stations

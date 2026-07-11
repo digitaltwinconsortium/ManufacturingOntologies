@@ -12,7 +12,10 @@ metadata:
   name: ua-cloudpublisher
   namespace: seattle
 spec:
-  replicas: 1
+  # Scaled to zero: UA Cloud Publisher is kept in the config as a dormant backup but not run. The AIO
+  # connector for OPC UA publishes station telemetry/metadata to the cloud instead. Set replicas back
+  # to 1 to re-enable UA Cloud Publisher (and stop the AIO connector to avoid duplicate ingestion).
+  replicas: 0
   selector:
     matchLabels:
       app: ua-cloudpublisher

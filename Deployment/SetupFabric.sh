@@ -797,17 +797,30 @@ fi
 # deployed AFTER AIO, the metadata eventstream created above starts reading from 'latest' and never
 # sees the one-time metadata AIO already published. Without it 'opcua_metadata' stays empty and every
 # query/dashboard that joins telemetry to metadata (station/line names, OEE, the UNS graph) returns
-# nothing. So we "touch" each AIO OPC UA asset (a no-op control-plane update) to make the connector
-# re-emit its metadata, which the freshly created eventstream now captures.
+# nothing. So we "touch" each AIO OPC UA asset to make the connector re-emit its metadata, which the
+# freshly created eventstream now captures.
+#
+# The touch must be a real change to the asset SPEC (properties), not just an ARM tag: a resource tag
+# update does not bump the asset definition the connector watches, so it does NOT resend metadata.
+# Updating properties.description does (confirmed: manually adding a description in the operations
+# experience portal made metadata flow). We therefore set properties.description on each asset via the
+# Azure control plane (no cluster/kubectl access required), from this script's managed identity.
+#
+# Timing also matters: the metadata eventstream must already be operational when the asset is touched,
+# otherwise the re-emitted metadata message is published before the eventstream subscribes and is
+# missed. We sleep 30 seconds first to let the eventstream created above become active.
 #
 # The AIO assets are Microsoft.DeviceRegistry ARM resources named '<host>-asset' (see
-# SetupAzureIoTOperations.sh), so this works from this script's managed identity via the Azure
-# control plane - no cluster/kubectl access is required. This is best-effort: on any failure the
-# script logs guidance (touch the datasets manually) and still completes.
+# SetupAzureIoTOperations.sh). This is best-effort: on any failure the script logs guidance (touch the
+# datasets manually) and still completes.
 # ---------------------------------------------------------------------------
 
 if [ -n "${RESOURCE_GROUP:-}" ]; then
 	echo "Re-triggering OPC UA metadata: touching the Azure IoT Operations OPC UA assets so AIO resends it..."
+	# Give the metadata eventstream time to become operational before we touch the assets, so it is
+	# subscribed and captures the re-emitted metadata rather than missing it.
+	echo "  waiting 30s for the metadata eventstream to become operational before touching assets..."
+	sleep 30
 	TOUCHED=0
 	# List all DeviceRegistry assets in the resource group; touch the OPC UA telemetry assets only.
 	ASSET_IDS="$(az resource list \
@@ -822,14 +835,13 @@ if [ -n "${RESOURCE_GROUP:-}" ]; then
 		TOUCH_STAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 		while IFS= read -r ASSET_ID; do
 			[ -z "${ASSET_ID}" ] && continue
-			# A tag update is a no-op change on the asset resource that still bumps its version, which is
-			# enough to make the connector for OPC UA re-publish the asset's metadata message.
-			if az resource tag \
+			# Setting properties.description is a real change to the asset spec that makes the connector
+			# for OPC UA re-publish the asset's metadata message (a tag update does not).
+			if az resource update \
 				--ids "${ASSET_ID}" \
-				--operation merge \
-				--tags "fabricMetadataRefresh=${TOUCH_STAMP}" \
+				--set "properties.description=Metadata refresh for Fabric ingestion at ${TOUCH_STAMP}" \
 				--output none 2>/dev/null; then
-				echo "  touched: ${ASSET_ID##*/}"
+				echo "  touched (description updated): ${ASSET_ID##*/}"
 				TOUCHED=$((TOUCHED + 1))
 			else
 				echo "  warning: could not touch ${ASSET_ID##*/}; touch it manually (see fabric.md)."

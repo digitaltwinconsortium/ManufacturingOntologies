@@ -260,23 +260,36 @@
             catch (Exception ex)
             {
                 Log.Fatal(ex, "Critical exception, MES restarting");
-
-                try
-                {
-                    await application.StopAsync().ConfigureAwait(false);
-                }
-                catch (Exception)
-                {
-                    // do nothing
-                }
             }
             finally
             {
+                // Stop the MES logic timer first so it cannot fire another cycle
+                // against sessions/server we are about to tear down.
+                if (m_timer != null)
+                {
+                    await m_timer.DisposeAsync().ConfigureAwait(false);
+                    m_timer = null;
+                }
+
                 // Dispose sessions to close transport channels cleanly
                 await (m_sessionAssembly?.DisposeAsync() ?? default).ConfigureAwait(false);
                 await (m_sessionTest?.DisposeAsync() ?? default).ConfigureAwait(false);
                 await (m_sessionPackaging?.DisposeAsync() ?? default).ConfigureAwait(false);
 
+                // Always stop the hosted OPC UA server, even on the normal (m_quitEvent)
+                // restart path. Skipping this leaks the entire server stack (listeners,
+                // RequestQueue worker tasks, timers) on every restart and floods the log
+                // with "ObjectDisposedException: The CancellationTokenSource has been
+                // disposed" from orphaned RequestQueue tasks — the root of the multi-week
+                // memory growth.
+                try
+                {
+                    await application.StopAsync().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex, "Error stopping MES server during restart");
+                }
             }
         }
 
@@ -394,15 +407,15 @@
                         {
                             if (!m_sessionAssembly.SessionConnected)
                             {
-                                await m_sessionAssembly.RecreateSessionAsync().ConfigureAwait(false);
+                                await RecoverSessionAsync(m_sessionAssembly, MonitoredItem_AssemblyStationAsync).ConfigureAwait(false);
                             }
                             if (!m_sessionTest.SessionConnected)
                             {
-                                await m_sessionTest.RecreateSessionAsync().ConfigureAwait(false);
+                                await RecoverSessionAsync(m_sessionTest, MonitoredItem_TestStationAsync).ConfigureAwait(false);
                             }
                             if (!m_sessionPackaging.SessionConnected)
                             {
-                                await m_sessionPackaging.RecreateSessionAsync().ConfigureAwait(false);
+                                await RecoverSessionAsync(m_sessionPackaging, MonitoredItem_PackagingStationAsync).ConfigureAwait(false);
                             }
 
                             m_lastActivity = DateTime.UtcNow;
@@ -465,15 +478,15 @@
                 {
                     if (!m_sessionAssembly.SessionConnected)
                     {
-                        await m_sessionAssembly.RecreateSessionAsync().ConfigureAwait(false);
+                        await RecoverSessionAsync(m_sessionAssembly, MonitoredItem_AssemblyStationAsync).ConfigureAwait(false);
                     }
                     if (!m_sessionTest.SessionConnected)
                     {
-                        await m_sessionTest.RecreateSessionAsync().ConfigureAwait(false);
+                        await RecoverSessionAsync(m_sessionTest, MonitoredItem_TestStationAsync).ConfigureAwait(false);
                     }
                     if (!m_sessionPackaging.SessionConnected)
                     {
-                        await m_sessionPackaging.RecreateSessionAsync().ConfigureAwait(false);
+                        await RecoverSessionAsync(m_sessionPackaging, MonitoredItem_PackagingStationAsync).ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)
@@ -488,6 +501,30 @@
             finally
             {
                 RestartTimer(c_updateRate);
+            }
+        }
+
+        /// <summary>
+        /// Recreates a broken session AND re-establishes its status monitored item.
+        /// Recreating the session alone leaves it without a subscription, so publishing
+        /// never resumes, activity stays stale, and the MES tears the session down again
+        /// on the next tick — producing an endless connect/close storm against the station
+        /// servers (and unbounded session/channel/subscription churn on their side).
+        /// </summary>
+        private static async Task RecoverSessionAsync(SessionHandler sessionHandler, MonitoredItemNotificationEventHandler handler)
+        {
+            if (await sessionHandler.RecreateSessionAsync().ConfigureAwait(false))
+            {
+                if (!await CreateMonitoredItemAsync(m_station.StatusNode, sessionHandler, handler).ConfigureAwait(false))
+                {
+                    Log.Warning("Recovered session but failed to re-create its monitored item; will retry next cycle");
+                }
+                else
+                {
+                    // Publishing has resumed on a healthy session — treat this as activity
+                    // so the activity-timeout watchdog does not immediately restart the MES.
+                    m_lastActivity = DateTime.UtcNow;
+                }
             }
         }
 

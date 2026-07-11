@@ -70,11 +70,13 @@
     "contributorRoleId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacContributor'))]",
     "i3xContainerAppName": "[concat(parameters('resourcesName'), '-i3x4kusto')]",
     "azureRbacAzureEventHubsDataSender": "2b629674-e913-4c01-ae53-ef4638d8f975",
+    "azureRbacAzureEventHubsDataReceiver": "a638d3c7-ab3a-418d-83e6-5f17a39d4fde",
     "aioStorageAccountName": "[toLower(take(concat(replace(parameters('resourcesName'), '-', ''), 'aiostorage'), 24))]",
     "aioSchemaRegistryName": "[toLower(concat(parameters('resourcesName'), '-schemaregistry'))]",
     "aioSchemaRegistryNamespace": "[toLower(concat(replace(parameters('resourcesName'), '-', ''), 'aiosr'))]",
     "aioSetupScriptUri": "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'SetupAzureIoTOperations.sh')]",
-    "eventHubsDataSenderRoleId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacAzureEventHubsDataSender'))]"
+    "eventHubsDataSenderRoleId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacAzureEventHubsDataSender'))]",
+    "eventHubsDataReceiverRoleId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacAzureEventHubsDataReceiver'))]"
   },
   "resources": [
     {
@@ -1173,8 +1175,24 @@
         "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubsNamespaceName'))]",
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
       ],
+      "scope": "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubsNamespaceName'))]",
       "properties": {
         "roleDefinitionId": "[variables('eventHubsDataSenderRoleId')]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-10-01-preview",
+      "name": "[guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), variables('eventHubsDataReceiverRoleId'))]",
+      "scope": "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubsNamespaceName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubsNamespaceName'))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[variables('eventHubsDataReceiverRoleId')]",
         "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId]",
         "principalType": "ServicePrincipal"
       }

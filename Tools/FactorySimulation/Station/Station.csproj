@@ -12,6 +12,16 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>.</DockerfileContext>
     <DockerfileRunArguments>-p 4840:4840</DockerfileRunArguments>
+    <!--
+      These are lightweight simulation OPC UA servers and many run on one host. The .NET default
+      Server GC allocates one heap per CPU and reserves/retains large amounts of memory per process
+      (~10 GB RES / ~70 GB VIRT observed with several instances), starving the machine. Workstation
+      GC uses a single, memory-conservative heap and returns memory to the OS, which is the right
+      profile for these small servers.
+    -->
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+    <RetainVMGarbageCollection>false</RetainVMGarbageCollection>
   </PropertyGroup>
 
   <ItemGroup>

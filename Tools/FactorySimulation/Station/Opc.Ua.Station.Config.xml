@@ -84,7 +84,7 @@
       </ua:UserTokenPolicy>
     </UserTokenPolicies>
 
-    <DiagnosticsEnabled>true</DiagnosticsEnabled>
+    <DiagnosticsEnabled>false</DiagnosticsEnabled>
     <MaxSessionCount>100</MaxSessionCount>
     <MinSessionTimeout>10000</MinSessionTimeout>
     <MaxSessionTimeout>3600000</MaxSessionTimeout>

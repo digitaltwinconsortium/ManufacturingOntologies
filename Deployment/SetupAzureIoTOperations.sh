@@ -68,8 +68,12 @@ COMMAND_MQTT_TOPIC="azure-iot-operations/asset-operations/assembly-seattle-asset
 # and defaults it to an empty object when absent, dropping the ActionRequest envelope. If your action
 # needs arguments, have UA-CloudAction place them under that Arguments object (or adjust the input path
 # / add per-argument rules here).
-COMMAND_METHOD_ARGS_INPUT="Messages[0].Payload.Arguments ?? {}"
-COMMAND_METHOD_ARGS_OUTPUT="*"
+# The AIO built-in transformation evaluates against a SINGLE message, so OPC UA PubSub network-message
+# syntax such as 'Messages[0]...' is invalid here and crashes the dataflow runtime on load. The target
+# method (OpenPressureReliefValve) is parameter-less, so we emit a constant empty object to the message
+# root. If a future method needs arguments, replace the expression with an explicit per-argument map
+# (e.g. inputs=["Payload.Arguments.<name>"], output="<name>").
+COMMAND_METHOD_ARGS_EXPRESSION="{}"
 # Working directory for the generated data flow / asset configuration files.
 AIO_CONFIG_DIR="$(mktemp -d)"
 
@@ -765,9 +769,10 @@ cat > "${COMMAND_DATAFLOW_CONFIG}" <<EOF
       "builtInTransformationSettings": {
         "map": [
           {
-            "inputs": ["${COMMAND_METHOD_ARGS_INPUT}"],
-            "output": "${COMMAND_METHOD_ARGS_OUTPUT}",
-            "description": "Reshape the UA Cloud Action request into the AIO commander payload: copy Messages[0].Payload.Arguments to the root and drop the envelope."
+            "inputs": [],
+            "output": "$",
+            "expression": "${COMMAND_METHOD_ARGS_EXPRESSION}",
+            "description": "Emit the parameter-less commander payload (an empty object) to the message root, dropping the UA Cloud Action envelope."
           }
         ]
       }

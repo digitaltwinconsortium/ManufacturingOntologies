@@ -253,6 +253,7 @@ namespace Station.Simulation
                 cycleTime = c_failureCycleTime + Convert.ToInt32(Math.Abs((double)c_failureCycleTime * NormalDistribution(m_random, 0.0, 1.0)));
             }
 
+            m_simulationTimer?.Dispose();
             m_simulationTimer = new Timer(SimulationFinished, stationFailure, cycleTime, Timeout.Infinite);
 
             UpdateNodeValues();
@@ -265,8 +266,6 @@ namespace Station.Simulation
             CalculateSimulationResult((bool)state);
 
             UpdateNodeValues();
-
-            m_simulationTimer.Dispose();
         }
 
 

@@ -188,6 +188,11 @@
                             Log.Error(ex, "Session recreation failed for {EndpointUrl}", session.Endpoint?.EndpointUrl);
                         }
                     });
+
+                    // A full recreation is already scheduled; do NOT also start a
+                    // SessionReconnectHandler on the same (dead) session, otherwise two
+                    // recovery mechanisms race and orphan session/channel objects.
+                    return;
                 }
 
                 m_reconnectHandler = new SessionReconnectHandler(_telemetry);

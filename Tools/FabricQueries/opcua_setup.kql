@@ -212,8 +212,46 @@ def create_node_trace(graph, positions):
         node_text.append(text)
     return go.Scatter(x=node_x, y=node_y, text=node_text, mode='markers', hoverinfo='text', marker=dict(colorscale=COLORSCALE_ID, color=node_adjacencies, size=node_sizes, line=dict(width=2, color='#888')))
 
+def hierarchical_layout(graph):
+    # Lay the graph out as a top-down hierarchy with EQUAL spacing so ISA-95 levels
+    # (Enterprise > Site > Area > Line > Workcell) form evenly spaced rows and the nodes
+    # within each row are spread evenly across the width. Avoids the spring layout's uneven
+    # gaps where top nodes float far from the rest and lower levels get squashed.
+    positions = {}
+    if graph.number_of_nodes() == 0:
+        return positions
+
+    # Assign a level (row) to every node via BFS. Each connected component is rooted at its
+    # most-connected node (the ISA-95 hierarchy's upper tiers are hubs), so BFS depth maps to level.
+    import networkx as _nx
+    level = {}
+    for component in _nx.connected_components(graph):
+        sub = graph.subgraph(component)
+        root = max(sub.nodes(), key=lambda n: sub.degree(n))
+        for node, depth in _nx.single_source_shortest_path_length(sub, root).items():
+            level[node] = depth
+
+    max_level = max(level.values()) if level else 0
+
+    # Group nodes by level, then place each level as a full row of evenly spaced points.
+    nodes_by_level = {}
+    for node, lvl in level.items():
+        nodes_by_level.setdefault(lvl, []).append(node)
+
+    for lvl, nodes_in_level in nodes_by_level.items():
+        nodes_in_level = sorted(nodes_in_level, key=lambda n: str(n))
+        count = len(nodes_in_level)
+        # Even horizontal spacing across [0, 1]; single node sits centered.
+        for i, node in enumerate(nodes_in_level):
+            x = 0.5 if count == 1 else i / (count - 1)
+            # Even vertical spacing; level 0 (top tier) at the top of the plot.
+            y = 1.0 if max_level == 0 else 1.0 - (lvl / max_level)
+            positions[node] = (x, y)
+
+    return positions
+
 def create_plotly_figure(graph):
-    positions = nx.layout.spring_layout(graph)
+    positions = hierarchical_layout(graph)
     edge_trace, mnode_trace = create_edge_traces(graph, positions)
     node_trace = create_node_trace(graph, positions)
     return go.Figure(data=[edge_trace, node_trace, mnode_trace], layout=go.Layout(title=f'<br>{DIAGRAM_TITLE}<br>', showlegend=False, hovermode='closest', margin=dict(b=20, l=5, r=5, t=40), annotations=[dict(text="Created using plotly, networkx and the python plugin of Kusto", showarrow=False, xref="paper", yref="paper", x=0.005, y=-0.002)], xaxis=dict(showgrid=False, zeroline=False, showticklabels=False), yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)))

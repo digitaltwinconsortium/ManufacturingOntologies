@@ -767,7 +767,7 @@ cat > "${COMMAND_DATAFLOW_CONFIG}" <<EOF
           {
             "inputs": ["${COMMAND_METHOD_ARGS_INPUT}"],
             "output": "${COMMAND_METHOD_ARGS_OUTPUT}",
-            "description": "Reshape the incoming UA Cloud Commander ActionRequest into the AIO OPC UA commander payload (the method's input arguments). Copies Messages[0].Payload.Arguments to the message root, defaulting to an empty object for a parameter-less method such as the pressure-relief valve, and drops the ActionRequest envelope."
+            "description": "Reshape the UA Cloud Action request into the AIO commander payload: copy Messages[0].Payload.Arguments to the root and drop the envelope."
           }
         ]
       }

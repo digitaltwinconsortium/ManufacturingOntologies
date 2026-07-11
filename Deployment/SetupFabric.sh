@@ -800,19 +800,22 @@ fi
 # nothing. So we "touch" each AIO OPC UA asset to make the connector re-emit its metadata, which the
 # freshly created eventstream now captures.
 #
-# The touch must be a real change to the asset SPEC (properties), not just an ARM tag: a resource tag
-# update does not bump the asset definition the connector watches, so it does NOT resend metadata.
-# Updating properties.description does (confirmed: manually adding a description in the operations
-# experience portal made metadata flow). We therefore set properties.description on each asset via the
-# Azure control plane (no cluster/kubectl access required), from this script's managed identity.
+# The touch must go through the SAME control-plane path the operations experience portal uses, which
+# is what actually makes the connector re-publish metadata: 'az iot ops ns asset opcua update
+# --description'. A generic ARM 'az resource update --set properties.description' does NOT reliably
+# reach the connector's watched spec for a namespaced DeviceRegistry asset (and silently no-ops), so
+# it must NOT be used here. Updating the description via the AIO CLI is confirmed to work (it mirrors
+# manually adding a description in the portal, which made metadata flow).
 #
 # Timing also matters: the metadata eventstream must already be operational when the asset is touched,
 # otherwise the re-emitted metadata message is published before the eventstream subscribes and is
 # missed. We sleep 30 seconds first to let the eventstream created above become active.
 #
-# The AIO assets are Microsoft.DeviceRegistry ARM resources named '<host>-asset' (see
-# SetupAzureIoTOperations.sh). This is best-effort: on any failure the script logs guidance (touch the
-# datasets manually) and still completes.
+# The AIO assets are namespaced Microsoft.DeviceRegistry assets
+# (Microsoft.DeviceRegistry/namespaces/assets) named '<host>-asset', discovered via
+# 'az iot ops ns asset query' (a generic 'az resource list' for the non-namespaced type finds none).
+# This is best-effort: on any failure the script logs guidance (touch the datasets manually) and
+# still completes.
 # ---------------------------------------------------------------------------
 
 if [ -n "${RESOURCE_GROUP:-}" ]; then
@@ -821,33 +824,43 @@ if [ -n "${RESOURCE_GROUP:-}" ]; then
 	# subscribed and captures the re-emitted metadata rather than missing it.
 	echo "  waiting 30s for the metadata eventstream to become operational before touching assets..."
 	sleep 30
+	# The AIO instance is named '<resourcesName>-aio' (lowercase), matching SetupAzureIoTOperations.sh.
+	AIO_INSTANCE_NAME="$(printf '%s-aio' "${RESOURCES_NAME}" | tr '[:upper:]' '[:lower:]')"
 	TOUCHED=0
-	# List all DeviceRegistry assets in the resource group; touch the OPC UA telemetry assets only.
-	ASSET_IDS="$(az resource list \
+	# Discover the OPC UA telemetry asset NAMES. These are namespaced Device Registry assets
+	# (Microsoft.DeviceRegistry/namespaces/assets), so a generic 'az resource list' for
+	# 'Microsoft.DeviceRegistry/assets' returns nothing - use the AIO CLI to query them by instance.
+	ASSET_NAMES="$(az iot ops ns asset query \
+		--instance "${AIO_INSTANCE_NAME}" \
 		--resource-group "${RESOURCE_GROUP}" \
 		${SUBSCRIPTION_ID:+--subscription "${SUBSCRIPTION_ID}"} \
-		--resource-type "Microsoft.DeviceRegistry/assets" \
-		--query "[?ends_with(name, '-asset')].id" -o tsv 2>/dev/null || true)"
-	if [ -z "${ASSET_IDS}" ]; then
-		echo "  note: no Microsoft.DeviceRegistry/assets found in '${RESOURCE_GROUP}'. If AIO was deployed to a"
-		echo "        different resource group, touch the datasets manually (see fabric.md) so metadata is resent."
+		--query "[?ends_with(name, '-asset')].name" -o tsv 2>/dev/null || true)"
+	if [ -z "${ASSET_NAMES}" ]; then
+		echo "  note: no OPC UA assets found on instance '${AIO_INSTANCE_NAME}' in '${RESOURCE_GROUP}'. If AIO"
+		echo "        was deployed to a different resource group/instance, update an asset's description in the"
+		echo "        operations experience portal manually (see fabric.md) so metadata is resent."
 	else
 		TOUCH_STAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-		while IFS= read -r ASSET_ID; do
-			[ -z "${ASSET_ID}" ] && continue
-			# Setting properties.description is a real change to the asset spec that makes the connector
-			# for OPC UA re-publish the asset's metadata message (a tag update does not).
-			if az resource update \
-				--ids "${ASSET_ID}" \
-				--set "properties.description=Metadata refresh for Fabric ingestion at ${TOUCH_STAMP}" \
-				--output none 2>/dev/null; then
-				echo "  touched (description updated): ${ASSET_ID##*/}"
+		while IFS= read -r ASSET_NAME; do
+			[ -z "${ASSET_NAME}" ] && continue
+			# Update the asset description via the AIO CLI (the portal's path). This is a real change to
+			# the asset spec the connector for OPC UA watches, so it re-publishes the metadata message.
+			# Errors are shown (no 2>/dev/null) so a genuine failure is visible in the deployment log.
+			if az iot ops ns asset opcua update \
+				--name "${ASSET_NAME}" \
+				--instance "${AIO_INSTANCE_NAME}" \
+				--resource-group "${RESOURCE_GROUP}" \
+				${SUBSCRIPTION_ID:+--subscription "${SUBSCRIPTION_ID}"} \
+				--description "Metadata refresh for Fabric ingestion at ${TOUCH_STAMP}" \
+				--output none; then
+				echo "  touched (description updated): ${ASSET_NAME}"
 				TOUCHED=$((TOUCHED + 1))
 			else
-				echo "  warning: could not touch ${ASSET_ID##*/}; touch it manually (see fabric.md)."
+				echo "  warning: could not touch ${ASSET_NAME}; update its description in the operations"
+				echo "           experience portal manually (see fabric.md) so metadata is resent."
 			fi
 		done <<-EOF
-		${ASSET_IDS}
+		${ASSET_NAMES}
 		EOF
 		echo "  re-triggered metadata for ${TOUCHED} OPC UA asset(s)."
 		echo "  it can take a minute or two for 'opcua_metadata' to populate in the eventhouse."

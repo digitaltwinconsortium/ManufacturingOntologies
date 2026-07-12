@@ -35,13 +35,6 @@ The dashboard also includes a **Unified NameSpace (UNS) / ISA-95 Graph** tile th
 > [!IMPORTANT]
 > This tile renders only after you enable the Python plugin on the Eventhouse via **Eventhouse > Plugins > Python language extension = On**.
 
-> [!IMPORTANT]
-> All dashboard tiles queries join the telemetry (`opcua_telemetry`) to the OPC UA metadata (`opcua_metadata_lkv`) to resolve station and production-line names, OEE and the UNS/ISA-95 hierarchy. If `opcua_metadata_lkv` is empty, **none** of the queries return data.
->
-> Azure IoT Operations sends OPC UA PubSub *MetaData* messages only when an asset/dataset definition **changes** - it is not sent on a schedule. Because Fabric is deployed *after* Azure IoT Operations, its metadata eventstream starts reading from the latest offset and never sees the one-time metadata AIO already published.
->
-> Edit each asset in the Azure IoT Operations Experience (for example, add a description to each asset) to force a change that makes the connector re-publish metadata.
-
 ## Run a Query
 
 Open your KQL database and select its `opcua_queryset`. Because the telemetry `Subject` is the numeric `DataSetWriterId`, the station and production line are matched on the metadata `DataSetName` (built from the OPC UA server's ApplicationUri and NodeId) and then joined to the telemetry on `Subject`. Delete the sample queries, enter the following query in the text box, and select `Run`:

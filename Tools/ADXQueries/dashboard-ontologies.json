@@ -1,16 +1,14 @@
 {
-  "$schema": "https://dataexplorer.azure.com/static/d/schema/48/dashboard.json",
-  "id": "ee653da6-2830-4e03-bac2-19d08e70a7e0",
-  "eTag": "bb89180d-1374-4c70-bf59-ff254b4c6b55",
-  "schema_version": "48",
-  "title": "ontologies4",
+  "$schema": "https://dataexplorer.azure.com/static/d/schema/76/dashboard.json",
+  "id": "7ae2e1a4-d53c-4fbd-bd5a-e837c76c0dc1",
+  "eTag": "40801326-a97c-405d-b0bb-c215044a4f40",
+  "title": "ontologies",
+  "schema_version": 76,
   "autoRefresh": {
-    "defaultInterval": "30s",
     "enabled": true,
+    "defaultInterval": "30s",
     "minInterval": "30s"
   },
-  "baseQueries": [
-  ],
   "tiles": [
     {
       "id": "fa7b9b0d-a5d7-48b6-9626-4387d08d9fa1",
@@ -23,18 +21,9 @@
         "width": 24,
         "height": 7
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'Europe/Berlin') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, tzOffset))\n"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "e4c0d60b-9071-4880-8acf-7bcdbb672627"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -65,7 +54,15 @@
         "crossFilter": [
         ],
         "drillthrough": [
-        ]
+        ],
+        "selectedDataOnLoad": {
+          "all": true,
+          "limit": 10
+        },
+        "dataPointsTooltip": {
+          "all": false,
+          "limit": 1
+        }
       }
     },
     {
@@ -79,18 +76,9 @@
         "width": 24,
         "height": 8
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"EnergyConsumption\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| order by Timestamp1 desc\n| make-series num=avg(todouble(Value)) on Timestamp1 from _startTime to _endTime step 1s \n| extend (anomalies, score, baseline) = series_decompose_anomalies(num, 0.5, -1, 'linefit')"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "3822fb44-6fa9-418c-93b2-78bd12d63601"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -121,7 +109,15 @@
         "crossFilter": [
         ],
         "drillthrough": [
-        ]
+        ],
+        "selectedDataOnLoad": {
+          "all": true,
+          "limit": 10
+        },
+        "dataPointsTooltip": {
+          "all": false,
+          "limit": 1
+        }
       }
     },
     {
@@ -135,18 +131,9 @@
         "width": 24,
         "height": 8
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let horizon = (_endTime - _startTime) / 2;\nlet dt = 1m;\nopcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"NumberOfManufacturedProducts\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| order by Timestamp1 desc\n| make-series actual=avg(toint(Value)) on Timestamp1 from _startTime to _endTime + horizon step dt\n| extend forecast = series_decompose_forecast(actual, toint(horizon/dt))"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "ee53e7c8-94aa-4ef8-83fd-d1fe8cadd5ee"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -177,7 +164,15 @@
         "crossFilter": [
         ],
         "drillthrough": [
-        ]
+        ],
+        "selectedDataOnLoad": {
+          "all": true,
+          "limit": 10
+        },
+        "dataPointsTooltip": {
+          "all": false,
+          "limit": 1
+        }
       }
     },
     {
@@ -191,24 +186,14 @@
         "width": 6,
         "height": 3
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "\nlet oee = CalculateOEEForStation(\"assembly\", \"munich\", 6000, _startTime, _endTime);\nprint round(oee * 100, 2)\n"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "e07bd3f2-1e81-4746-ad1e-1c249e541d70"
       },
       "visualOptions": {
         "multiStat__textSize": "auto",
         "multiStat__valueColumn": null,
         "colorRulesDisabled": false,
-        "colorStyle": "light",
         "colorRules": [
         ]
       }
@@ -224,24 +209,14 @@
         "width": 6,
         "height": 3
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let oee = CalculateOEEForStation(\"test\", \"munich\", 6000, _startTime, _endTime);\nprint round(oee * 100, 2)"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "de504220-d771-462d-8d5b-d3fa1d1d1af5"
       },
       "visualOptions": {
         "multiStat__textSize": "auto",
         "multiStat__valueColumn": null,
         "colorRulesDisabled": false,
-        "colorStyle": "light",
         "colorRules": [
         ]
       }
@@ -257,24 +232,14 @@
         "width": 6,
         "height": 3
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let oee = CalculateOEEForStation(\"packaging\", \"munich\", 6000, _startTime, _endTime);\nprint round(oee * 100, 2)"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "b5abf75b-bfd3-4f36-9932-0a77f15946ec"
       },
       "visualOptions": {
         "multiStat__textSize": "auto",
         "multiStat__valueColumn": null,
         "colorRulesDisabled": false,
-        "colorStyle": "light",
         "colorRules": [
         ]
       }
@@ -290,24 +255,14 @@
         "width": 8,
         "height": 3
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let averageEnergyConsumption = toscalar(\nopcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"EnergyConsumption\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend energy = todouble(Value)\n| summarize avg(energy));\nprint round(toscalar(averageEnergyConsumption) * 1000, 2)\n\n"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "e8d0a10a-120b-4114-84f8-cb0795d6d0cd"
       },
       "visualOptions": {
         "multiStat__textSize": "auto",
         "multiStat__valueColumn": null,
         "colorRulesDisabled": false,
-        "colorStyle": "light",
         "colorRules": [
         ]
       }
@@ -323,60 +278,15 @@
         "width": 6,
         "height": 3
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "print round(CalculateOEEForLine(\"munich\", 6000, _startTime, _endTime) * 100, 2)\n"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "ca9f602e-0648-45da-a86d-c13b3430d28d"
       },
       "visualOptions": {
         "multiStat__textSize": "auto",
         "multiStat__valueColumn": null,
         "colorRulesDisabled": false,
-        "colorStyle": "light",
         "colorRules": [
-        ]
-      }
-    },
-    {
-      "id": "1bccbda7-4250-4e72-9bb0-5ea48fba7a7c",
-      "title": "UNS / ISA-95 Graph",
-      "visualType": "plotly",
-      "pageId": "1604d4fc-a7b5-4e47-82c6-640286103fde",
-      "layout": {
-        "x": 0,
-        "y": 122,
-        "width": 24,
-        "height": 10
-      },
-      "description": "Unified Namespace (UNS) / ISA-95 asset hierarchy rendered as an interactive Plotly node-link graph. Requires the Python plugin on the database.",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-        ],
-        "text": "let edges =\n    opcua_metadata_lkv\n    | project DisplayName, levels = pack_array(DisplayName, Workcell, Line, Area, Site, Enterprise)\n    | mv-apply with_itemindex = i level = levels to typeof(string) on (\n        where isnotempty(level)\n        | sort by i asc\n        | extend source = level, target = next(level)\n        | where isnotempty(target)\n        | project source, target\n    )\n    | distinct source, target;\nlet depths =\n    opcua_metadata_lkv\n    | project levels = pack_array(Enterprise, Site, Area, Line, Workcell, DisplayName)\n    | mv-apply with_itemindex = d level = levels to typeof(string) on (\n        where isnotempty(level)\n        | project id = level, depth = d\n    )\n    | summarize depth = min(depth) by id;\nlet nodes =\n    edges\n    | project id = source\n    | union (edges | project id = target)\n    | distinct id\n    | join kind=leftouter depths on id\n    | project id, depth = coalesce(depth, 0);\nlet graphData =\n    (edges | extend rowType = \"E\", id = \"\", depth = 0)\n    | union (nodes | extend rowType = \"V\", source = \"\", target = \"\");\nlet pythonCode = ```\nimport pandas as pd\nimport plotly.graph_objects as go\nimport networkx as nx\n\nedges_df = df[df['rowType'] == 'E']\nnodes_df = df[df['rowType'] == 'V']\n\nG = nx.DiGraph()\nfor _, r in nodes_df.iterrows():\n    G.add_node(str(r['id']), subset=int(r['depth']))\nfor _, r in edges_df.iterrows():\n    s = str(r['source']); t = str(r['target'])\n    if s not in G: G.add_node(s, subset=0)\n    if t not in G: G.add_node(t, subset=0)\n    G.add_edge(s, t)\n\ndepths = nx.get_node_attributes(G, 'subset')\n# ISA-95 depths come from pack_array(Enterprise, Site, Area, Line, Workcell, DisplayName) so unused\n# tiers (e.g. Enterprise/Line/Workcell) leave gaps like {1,2,5}; rank the distinct depths into\n# consecutive integers so the tiers are evenly spaced rows.\n_ranks = {d: i for i, d in enumerate(sorted(set(depths.values())))}\ndepths = {n: _ranks[d] for n, d in depths.items()}\nfor n in G.nodes():\n    G.nodes[n]['subset'] = depths.get(n, 0)\nmaxd = max(depths.values()) if depths else 0\npos = nx.multipartite_layout(G, subset_key='subset', align='horizontal')\npos = {n: (xy[0], float(maxd - depths.get(n, 0))) for n, xy in pos.items()}\n\nedge_x = []; edge_y = []\nfor s, t in G.edges():\n    x0, y0 = pos[s]; x1, y1 = pos[t]\n    edge_x += [x0, x1, None]; edge_y += [y0, y1, None]\nedge_trace = go.Scatter(x=edge_x, y=edge_y, mode='lines', line=dict(width=1, color='#888'), hoverinfo='none')\n\nnode_x = []; node_y = []; node_text = []; node_color = []\nfor n in G.nodes():\n    x, y = pos[n]; node_x.append(x); node_y.append(y)\n    node_text.append(n); node_color.append(depths.get(n, 0))\nnode_trace = go.Scatter(x=node_x, y=node_y, mode='markers+text', text=node_text, textposition='top center', hoverinfo='text', marker=dict(size=16, color=node_color, colorscale='Viridis', line=dict(width=1, color='#333')))\n\nfig = go.Figure(data=[edge_trace, node_trace], layout=go.Layout(title='UNS / ISA-95 asset hierarchy', showlegend=False, hovermode='closest', margin=dict(b=20, l=5, r=5, t=40), xaxis=dict(showgrid=False, zeroline=False, showticklabels=False), yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)))\nresult = pd.DataFrame(data=[fig.to_json()], columns=['plotly'])\n```;\ngraphData\n| evaluate python(typeof(plotly:string), pythonCode)\n| render plotly"
-      },
-      "visualOptions": {
-        "colorRules": [
-        ],
-        "colorRulesDisabled": true,
-        "colorStyle": "light",
-        "crossFilterDisabled": false,
-        "drillthroughDisabled": false,
-        "crossFilter": [
-        ],
-        "drillthrough": [
         ]
       }
     },
@@ -391,18 +301,9 @@
         "width": 24,
         "height": 7
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Pressure\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue\n\n"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "04c79159-c1c9-43cd-9c77-e9041be8689c"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -441,7 +342,15 @@
         "crossFilter": [
         ],
         "drillthrough": [
-        ]
+        ],
+        "selectedDataOnLoad": {
+          "all": true,
+          "limit": 10
+        },
+        "dataPointsTooltip": {
+          "all": false,
+          "limit": 1
+        }
       }
     },
     {
@@ -455,18 +364,9 @@
         "width": 24,
         "height": 6
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'Europe/Berlin') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 6000, tzOffset))"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "7d35f168-e843-4da8-885f-d24346689b4a"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -505,7 +405,15 @@
         "crossFilter": [
         ],
         "drillthrough": [
-        ]
+        ],
+        "selectedDataOnLoad": {
+          "all": true,
+          "limit": 10
+        },
+        "dataPointsTooltip": {
+          "all": false,
+          "limit": 1
+        }
       }
     },
     {
@@ -519,26 +427,16 @@
         "width": 6,
         "height": 3
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let oee = CalculateOEEForStation(\"assembly\", \"seattle\", 10000, _startTime, _endTime);\nprint round(oee * 100, 2)"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "2a9b2d9c-befd-4a68-acf6-0cd23848b7fc"
       },
       "visualOptions": {
         "multiStat__textSize": "auto",
         "multiStat__valueColumn": null,
         "colorRulesDisabled": true,
         "colorRules": [
-        ],
-        "colorStyle": "light"
+        ]
       }
     },
     {
@@ -552,26 +450,16 @@
         "width": 6,
         "height": 3
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let oee = CalculateOEEForStation(\"test\", \"seattle\", 10000, _startTime, _endTime);\nprint round(oee * 100, 2)\n"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "2913064f-aeef-485a-a31b-e1c229542956"
       },
       "visualOptions": {
         "multiStat__textSize": "auto",
         "multiStat__valueColumn": null,
         "colorRulesDisabled": false,
         "colorRules": [
-        ],
-        "colorStyle": "light"
+        ]
       }
     },
     {
@@ -585,26 +473,16 @@
         "width": 6,
         "height": 3
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let oee = CalculateOEEForStation(\"packaging\", \"seattle\", 10000, _startTime, _endTime);\nprint round(oee * 100, 2)\n"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "34caabeb-e112-41bf-b9e5-3e56c3f39f0e"
       },
       "visualOptions": {
         "multiStat__textSize": "auto",
         "multiStat__valueColumn": null,
         "colorRulesDisabled": true,
         "colorRules": [
-        ],
-        "colorStyle": "light"
+        ]
       }
     },
     {
@@ -618,26 +496,16 @@
         "width": 6,
         "height": 3
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "print round(CalculateOEEForLine(\"seattle\", 10000, _startTime, _endTime) * 100, 2)"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "f1ae73e5-aef4-47c9-91f8-668a749f88f3"
       },
       "visualOptions": {
         "multiStat__textSize": "auto",
         "multiStat__valueColumn": null,
         "colorRulesDisabled": false,
         "colorRules": [
-        ],
-        "colorStyle": "light"
+        ]
       }
     },
     {
@@ -651,26 +519,16 @@
         "width": 8,
         "height": 3
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let averageEnergyConsumption = toscalar(\nopcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"EnergyConsumption\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend energy = todouble(Value)\n| summarize avg(energy));\nprint round(toscalar(averageEnergyConsumption) * 1000, 2)"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "3d7f9997-30d7-4826-91c8-35a55bc4b87a"
       },
       "visualOptions": {
         "multiStat__textSize": "auto",
         "multiStat__valueColumn": null,
         "colorRulesDisabled": false,
         "colorRules": [
-        ],
-        "colorStyle": "light"
+        ]
       }
     },
     {
@@ -684,26 +542,16 @@
         "width": 8,
         "height": 3
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let averageEnergyConsumption = toscalar(\nopcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"EnergyConsumption\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend energy = todouble(Value)\n| summarize avg(energy));\nprint round(toscalar(averageEnergyConsumption) * 1000, 2)\n"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "810b3cda-e65c-4f4d-b16e-1453f1ec1dc9"
       },
       "visualOptions": {
         "multiStat__textSize": "auto",
         "multiStat__valueColumn": null,
         "colorRulesDisabled": false,
         "colorRules": [
-        ],
-        "colorStyle": "light"
+        ]
       }
     },
     {
@@ -717,26 +565,16 @@
         "width": 8,
         "height": 3
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let averageEnergyConsumption = toscalar(\nopcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"EnergyConsumption\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend energy = todouble(Value)\n| summarize avg(energy));\nprint round(toscalar(averageEnergyConsumption) * 1000, 2)"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "088e27d9-5f52-4f7f-a6ae-6f3527db7b47"
       },
       "visualOptions": {
         "multiStat__textSize": "auto",
         "multiStat__valueColumn": null,
         "colorRulesDisabled": false,
         "colorRules": [
-        ],
-        "colorStyle": "light"
+        ]
       }
     },
     {
@@ -750,26 +588,16 @@
         "width": 8,
         "height": 3
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let averageEnergyConsumption = toscalar(\nopcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"EnergyConsumption\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend energy = todouble(Value)\n| summarize avg(energy));\nprint round(toscalar(averageEnergyConsumption) * 1000, 2)"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "976bd9f2-db35-4dc1-8d8a-83a6668dc01a"
       },
       "visualOptions": {
         "multiStat__textSize": "auto",
         "multiStat__valueColumn": null,
         "colorRulesDisabled": false,
         "colorRules": [
-        ],
-        "colorStyle": "light"
+        ]
       }
     },
     {
@@ -783,26 +611,16 @@
         "width": 8,
         "height": 3
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let averageEnergyConsumption = toscalar(\nopcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"EnergyConsumption\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend energy = todouble(Value)\n| summarize avg(energy));\nprint round(toscalar(averageEnergyConsumption) * 1000, 2)"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "a59a85a5-30d3-4670-b54d-1a7d9efae61b"
       },
       "visualOptions": {
         "multiStat__textSize": "auto",
         "multiStat__valueColumn": null,
         "colorRulesDisabled": false,
         "colorRules": [
-        ],
-        "colorStyle": "light"
+        ]
       }
     },
     {
@@ -816,18 +634,9 @@
         "width": 24,
         "height": 6
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'Europe/Berlin') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 6000, tzOffset))\n"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "1eccf2f8-949a-4114-a540-da63a5fe242c"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -862,7 +671,15 @@
         "crossFilter": [
         ],
         "drillthrough": [
-        ]
+        ],
+        "selectedDataOnLoad": {
+          "all": true,
+          "limit": 10
+        },
+        "dataPointsTooltip": {
+          "all": false,
+          "limit": 1
+        }
       }
     },
     {
@@ -876,18 +693,9 @@
         "width": 24,
         "height": 6
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'Europe/Berlin') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 6000, tzOffset))\n"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "659fa91d-c5d9-4816-ba1e-ac76248360e3"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -922,7 +730,15 @@
         "crossFilter": [
         ],
         "drillthrough": [
-        ]
+        ],
+        "selectedDataOnLoad": {
+          "all": true,
+          "limit": 10
+        },
+        "dataPointsTooltip": {
+          "all": false,
+          "limit": 1
+        }
       }
     },
     {
@@ -936,18 +752,9 @@
         "width": 24,
         "height": 6
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'America/Los_Angeles') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 10000, tzOffset))"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "226337b7-b052-43ff-bb07-17c23735757f"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -982,7 +789,15 @@
         "crossFilter": [
         ],
         "drillthrough": [
-        ]
+        ],
+        "selectedDataOnLoad": {
+          "all": true,
+          "limit": 10
+        },
+        "dataPointsTooltip": {
+          "all": false,
+          "limit": 1
+        }
       }
     },
     {
@@ -996,18 +811,9 @@
         "width": 24,
         "height": 6
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'America/Los_Angeles') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 10000, tzOffset))"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "d121ac1c-a802-4fd0-8bc9-bb92ab1a6975"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1042,7 +848,15 @@
         "crossFilter": [
         ],
         "drillthrough": [
-        ]
+        ],
+        "selectedDataOnLoad": {
+          "all": true,
+          "limit": 10
+        },
+        "dataPointsTooltip": {
+          "all": false,
+          "limit": 1
+        }
       }
     },
     {
@@ -1056,18 +870,9 @@
         "width": 24,
         "height": 6
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'America/Los_Angeles') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 10000, tzOffset))\n"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "928d373b-bace-4326-b9d5-ed6953ea0816"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1102,7 +907,15 @@
         "crossFilter": [
         ],
         "drillthrough": [
-        ]
+        ],
+        "selectedDataOnLoad": {
+          "all": true,
+          "limit": 10
+        },
+        "dataPointsTooltip": {
+          "all": false,
+          "limit": 1
+        }
       }
     },
     {
@@ -1116,18 +929,9 @@
         "width": 24,
         "height": 7
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'Europe/Berlin') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, tzOffset))"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "e8f842c4-3a0e-4046-a349-9d9092d70cb6"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1158,7 +962,15 @@
         "crossFilter": [
         ],
         "drillthrough": [
-        ]
+        ],
+        "selectedDataOnLoad": {
+          "all": true,
+          "limit": 10
+        },
+        "dataPointsTooltip": {
+          "all": false,
+          "limit": 1
+        }
       }
     },
     {
@@ -1172,18 +984,9 @@
         "width": 24,
         "height": 7
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'Europe/Berlin') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, tzOffset))\n"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "fac01a7e-1de4-4c69-b966-5fee0368753a"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1214,7 +1017,15 @@
         "crossFilter": [
         ],
         "drillthrough": [
-        ]
+        ],
+        "selectedDataOnLoad": {
+          "all": true,
+          "limit": 10
+        },
+        "dataPointsTooltip": {
+          "all": false,
+          "limit": 1
+        }
       }
     },
     {
@@ -1228,18 +1039,9 @@
         "width": 24,
         "height": 7
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'America/Los_Angeles') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, tzOffset))\n"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "8816b344-e7fd-40fe-8d39-2f138a1cf87c"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1270,7 +1072,15 @@
         "crossFilter": [
         ],
         "drillthrough": [
-        ]
+        ],
+        "selectedDataOnLoad": {
+          "all": true,
+          "limit": 10
+        },
+        "dataPointsTooltip": {
+          "all": false,
+          "limit": 1
+        }
       }
     },
     {
@@ -1284,18 +1094,9 @@
         "width": 24,
         "height": 8
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'America/Los_Angeles') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, tzOffset))"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "573f3b22-3a83-47b1-b190-37bcd9399a10"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1326,7 +1127,15 @@
         "crossFilter": [
         ],
         "drillthrough": [
-        ]
+        ],
+        "selectedDataOnLoad": {
+          "all": true,
+          "limit": 10
+        },
+        "dataPointsTooltip": {
+          "all": false,
+          "limit": 1
+        }
       }
     },
     {
@@ -1340,18 +1149,9 @@
         "width": 24,
         "height": 7
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'America/Los_Angeles') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, tzOffset))\n"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "a870fd53-5c52-45a8-9d55-414d135a9d56"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1382,7 +1182,15 @@
         "crossFilter": [
         ],
         "drillthrough": [
-        ]
+        ],
+        "selectedDataOnLoad": {
+          "all": true,
+          "limit": 10
+        },
+        "dataPointsTooltip": {
+          "all": false,
+          "limit": 1
+        }
       }
     },
     {
@@ -1396,18 +1204,9 @@
         "width": 24,
         "height": 8
       },
-      "description": "",
-      "query": {
-        "kind": "inline",
-        "dataSource": {
-          "kind": "inline",
-          "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
-        },
-        "usedVariables": [
-          "_endTime",
-          "_startTime"
-        ],
-        "text": "let horizon = (_endTime - _startTime) / 2;\nlet dt = 1m;\nopcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"NumberOfManufacturedProducts\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| order by Timestamp1 desc\n| make-series actual=avg(toint(Value)) on Timestamp1 from _startTime to _endTime + horizon step dt\n| extend forecast = series_decompose_forecast(actual, toint(horizon/dt))\n"
+      "queryRef": {
+        "kind": "query",
+        "queryId": "eafb41e8-a05b-4b13-bfc2-fecbc18887ee"
       },
       "visualOptions": {
         "multipleYAxes": {
@@ -1438,9 +1237,50 @@
         "crossFilter": [
         ],
         "drillthrough": [
+        ],
+        "selectedDataOnLoad": {
+          "all": true,
+          "limit": 10
+        },
+        "dataPointsTooltip": {
+          "all": false,
+          "limit": 1
+        }
+      }
+    },
+    {
+      "id": "1bccbda7-4250-4e72-9bb0-5ea48fba7a7c",
+      "title": "UNS / ISA-95 Graph",
+      "visualType": "plotly",
+      "pageId": "1604d4fc-a7b5-4e47-82c6-640286103fde",
+      "layout": {
+        "x": 0,
+        "y": 122,
+        "width": 24,
+        "height": 10
+      },
+      "description": "Unified Namespace (UNS) / ISA-95 asset hierarchy rendered as an interactive Plotly node-link graph. Requires the Python plugin on the database.",
+      "queryRef": {
+        "kind": "query",
+        "queryId": "c41c70fc-a56c-4272-bd32-f521aaf91258"
+      },
+      "visualOptions": {
+        "colorRulesDisabled": true,
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "crossFilter": [
+        ],
+        "xColumn": null,
+        "plotly__version": "2",
+        "imageAllowlist": "",
+        "drillthrough": [
+        ],
+        "colorRules": [
         ]
       }
     }
+  ],
+  "baseQueries": [
   ],
   "parameters": [
     {
@@ -1463,11 +1303,10 @@
   "dataSources": [
     {
       "id": "09ab8651-b041-4b8e-ba7b-347796f7911c",
-      "name": "ontologies",
-      "clusterUri": "https://testadx.westeurope.kusto.windows.net/",
-      "database": "ontologies",
       "kind": "manual-kusto",
-      "scopeId": "kusto"
+      "name": "ontologies",
+      "clusterUri": "https://sandbox48adx.northeurope.kusto.windows.net/",
+      "database": "ontologies"
     }
   ],
   "pages": [
@@ -1475,5 +1314,379 @@
       "name": "Page 1",
       "id": "1604d4fc-a7b5-4e47-82c6-640286103fde"
     }
+  ],
+  "queries": [
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'Europe/Berlin') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, tzOffset))\n",
+      "id": "e4c0d60b-9071-4880-8acf-7bcdbb672627",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"EnergyConsumption\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| order by Timestamp1 desc\n| make-series num=avg(todouble(Value)) on Timestamp1 from _startTime to _endTime step 1s \n| extend (anomalies, score, baseline) = series_decompose_anomalies(num, 0.5, -1, 'linefit')",
+      "id": "3822fb44-6fa9-418c-93b2-78bd12d63601",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let horizon = (_endTime - _startTime) / 2;\nlet dt = 1m;\nopcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"NumberOfManufacturedProducts\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| order by Timestamp1 desc\n| make-series actual=avg(toint(Value)) on Timestamp1 from _startTime to _endTime + horizon step dt\n| extend forecast = series_decompose_forecast(actual, toint(horizon/dt))",
+      "id": "ee53e7c8-94aa-4ef8-83fd-d1fe8cadd5ee",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "\nlet oee = CalculateOEEForStation(\"assembly\", \"munich\", 6000, _startTime, _endTime);\nprint round(oee * 100, 2)\n",
+      "id": "e07bd3f2-1e81-4746-ad1e-1c249e541d70",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let oee = CalculateOEEForStation(\"test\", \"munich\", 6000, _startTime, _endTime);\nprint round(oee * 100, 2)",
+      "id": "de504220-d771-462d-8d5b-d3fa1d1d1af5",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let oee = CalculateOEEForStation(\"packaging\", \"munich\", 6000, _startTime, _endTime);\nprint round(oee * 100, 2)",
+      "id": "b5abf75b-bfd3-4f36-9932-0a77f15946ec",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let averageEnergyConsumption = toscalar(\nopcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"EnergyConsumption\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend energy = todouble(Value)\n| summarize avg(energy));\nprint round(toscalar(averageEnergyConsumption) * 1000, 2)\n\n",
+      "id": "e8d0a10a-120b-4114-84f8-cb0795d6d0cd",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "print round(CalculateOEEForLine(\"munich\", 6000, _startTime, _endTime) * 100, 2)\n",
+      "id": "ca9f602e-0648-45da-a86d-c13b3430d28d",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Pressure\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue\n\n",
+      "id": "04c79159-c1c9-43cd-9c77-e9041be8689c",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'Europe/Berlin') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 6000, tzOffset))",
+      "id": "7d35f168-e843-4da8-885f-d24346689b4a",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let oee = CalculateOEEForStation(\"assembly\", \"seattle\", 10000, _startTime, _endTime);\nprint round(oee * 100, 2)",
+      "id": "2a9b2d9c-befd-4a68-acf6-0cd23848b7fc",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let oee = CalculateOEEForStation(\"test\", \"seattle\", 10000, _startTime, _endTime);\nprint round(oee * 100, 2)\n",
+      "id": "2913064f-aeef-485a-a31b-e1c229542956",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let oee = CalculateOEEForStation(\"packaging\", \"seattle\", 10000, _startTime, _endTime);\nprint round(oee * 100, 2)\n",
+      "id": "34caabeb-e112-41bf-b9e5-3e56c3f39f0e",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "print round(CalculateOEEForLine(\"seattle\", 10000, _startTime, _endTime) * 100, 2)",
+      "id": "f1ae73e5-aef4-47c9-91f8-668a749f88f3",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let averageEnergyConsumption = toscalar(\nopcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"EnergyConsumption\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend energy = todouble(Value)\n| summarize avg(energy));\nprint round(toscalar(averageEnergyConsumption) * 1000, 2)",
+      "id": "3d7f9997-30d7-4826-91c8-35a55bc4b87a",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let averageEnergyConsumption = toscalar(\nopcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"EnergyConsumption\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend energy = todouble(Value)\n| summarize avg(energy));\nprint round(toscalar(averageEnergyConsumption) * 1000, 2)\n",
+      "id": "810b3cda-e65c-4f4d-b16e-1453f1ec1dc9",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let averageEnergyConsumption = toscalar(\nopcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"EnergyConsumption\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend energy = todouble(Value)\n| summarize avg(energy));\nprint round(toscalar(averageEnergyConsumption) * 1000, 2)",
+      "id": "088e27d9-5f52-4f7f-a6ae-6f3527db7b47",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let averageEnergyConsumption = toscalar(\nopcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"EnergyConsumption\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend energy = todouble(Value)\n| summarize avg(energy));\nprint round(toscalar(averageEnergyConsumption) * 1000, 2)",
+      "id": "976bd9f2-db35-4dc1-8d8a-83a6668dc01a",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let averageEnergyConsumption = toscalar(\nopcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"EnergyConsumption\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend energy = todouble(Value)\n| summarize avg(energy));\nprint round(toscalar(averageEnergyConsumption) * 1000, 2)",
+      "id": "a59a85a5-30d3-4670-b54d-1a7d9efae61b",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'Europe/Berlin') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 6000, tzOffset))\n",
+      "id": "1eccf2f8-949a-4114-a540-da63a5fe242c",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'Europe/Berlin') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 6000, tzOffset))\n",
+      "id": "659fa91d-c5d9-4816-ba1e-ac76248360e3",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'America/Los_Angeles') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 10000, tzOffset))",
+      "id": "226337b7-b052-43ff-bb07-17c23735757f",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'America/Los_Angeles') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 10000, tzOffset))",
+      "id": "d121ac1c-a802-4fd0-8bc9-bb92ab1a6975",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'America/Los_Angeles') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"ActualCycleTime\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = todouble(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 10000, tzOffset))\n",
+      "id": "928d373b-bace-4326-b9d5-ed6953ea0816",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'Europe/Berlin') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, tzOffset))",
+      "id": "e8f842c4-3a0e-4046-a349-9d9092d70cb6",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'Europe/Berlin') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"munich\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, tzOffset))\n",
+      "id": "fac01a7e-1de4-4c69-b966-5fee0368753a",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'America/Los_Angeles') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"assembly\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, tzOffset))\n",
+      "id": "8816b344-e7fd-40fe-8d39-2f138a1cf87c",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'America/Los_Angeles') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"test\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, tzOffset))",
+      "id": "573f3b22-3a83-47b1-b190-37bcd9399a10",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let tzOffset = toscalar(datetime_utc_to_local(now(), 'America/Los_Angeles') - now());\n(opcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"Status\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| extend NodeValue = toint(Value)\n| project Timestamp1, NodeValue)\n| union (ShiftBreak(_startTime, _endTime, 4, tzOffset))\n",
+      "id": "a870fd53-5c52-45a8-9d55-414d135a9d56",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let horizon = (_endTime - _startTime) / 2;\nlet dt = 1m;\nopcua_metadata_lkv\n| where DataSetName contains \"packaging\"\n| where DataSetName contains \"seattle\"\n| join kind=inner (opcua_telemetry\n    | where Name == \"NumberOfManufacturedProducts\"\n    | where Timestamp > _startTime and Timestamp < _endTime\n) on Subject\n| order by Timestamp1 desc\n| make-series actual=avg(toint(Value)) on Timestamp1 from _startTime to _endTime + horizon step dt\n| extend forecast = series_decompose_forecast(actual, toint(horizon/dt))\n",
+      "id": "eafb41e8-a05b-4b13-bfc2-fecbc18887ee",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
+      },
+      "text": "let edges =\n    opcua_metadata_lkv\n    | project DisplayName, levels = pack_array(DisplayName, Workcell, Line, Area, Site, Enterprise)\n    | mv-apply with_itemindex = i level = levels to typeof(string) on (\n        where isnotempty(level)\n        | sort by i asc\n        | extend source = level, target = next(level)\n        | where isnotempty(target)\n        | project source, target\n    )\n    | distinct source, target;\nlet depths =\n    opcua_metadata_lkv\n    | project levels = pack_array(Enterprise, Site, Area, Line, Workcell, DisplayName)\n    | mv-apply with_itemindex = d level = levels to typeof(string) on (\n        where isnotempty(level)\n        | project id = level, depth = d\n    )\n    | summarize depth = min(depth) by id;\nlet nodes =\n    edges\n    | project id = source\n    | union (edges | project id = target)\n    | distinct id\n    | join kind=leftouter depths on id\n    | project id, depth = coalesce(depth, 0);\nlet graphData =\n    (edges | extend rowType = \"E\", id = \"\", depth = 0)\n    | union (nodes | extend rowType = \"V\", source = \"\", target = \"\");\nlet pythonCode = ```\nimport pandas as pd\nimport plotly.graph_objects as go\nimport networkx as nx\n\nedges_df = df[df['rowType'] == 'E']\nnodes_df = df[df['rowType'] == 'V']\n\nG = nx.DiGraph()\nfor _, r in nodes_df.iterrows():\n    G.add_node(str(r['id']), subset=int(r['depth']))\nfor _, r in edges_df.iterrows():\n    s = str(r['source']); t = str(r['target'])\n    if s not in G: G.add_node(s, subset=0)\n    if t not in G: G.add_node(t, subset=0)\n    G.add_edge(s, t)\n\ndepths = nx.get_node_attributes(G, 'subset')\n# ISA-95 depths come from pack_array(Enterprise, Site, Area, Line, Workcell, DisplayName) so unused\n# tiers (e.g. Enterprise/Line/Workcell) leave gaps like {1,2,5}; rank the distinct depths into\n# consecutive integers so the tiers are evenly spaced rows.\n_ranks = {d: i for i, d in enumerate(sorted(set(depths.values())))}\ndepths = {n: _ranks[d] for n, d in depths.items()}\nfor n in G.nodes():\n    G.nodes[n]['subset'] = depths.get(n, 0)\nmaxd = max(depths.values()) if depths else 0\npos = nx.multipartite_layout(G, subset_key='subset', align='horizontal')\npos = {n: (xy[0], float(maxd - depths.get(n, 0))) for n, xy in pos.items()}\n\nedge_x = []; edge_y = []\nfor s, t in G.edges():\n    x0, y0 = pos[s]; x1, y1 = pos[t]\n    edge_x += [x0, x1, None]; edge_y += [y0, y1, None]\nedge_trace = go.Scatter(x=edge_x, y=edge_y, mode='lines', line=dict(width=1, color='#888'), hoverinfo='none')\n\nnode_x = []; node_y = []; node_text = []; node_color = []\nfor n in G.nodes():\n    x, y = pos[n]; node_x.append(x); node_y.append(y)\n    node_text.append(n); node_color.append(depths.get(n, 0))\nnode_trace = go.Scatter(x=node_x, y=node_y, mode='markers+text', text=node_text, textposition='top center', hoverinfo='text', marker=dict(size=16, color=node_color, colorscale='Viridis', line=dict(width=1, color='#333')))\n\nfig = go.Figure(data=[edge_trace, node_trace], layout=go.Layout(title='UNS / ISA-95 asset hierarchy', showlegend=False, hovermode='closest', margin=dict(b=20, l=5, r=5, t=40), xaxis=dict(showgrid=False, zeroline=False, showticklabels=False), yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)))\nresult = pd.DataFrame(data=[fig.to_json()], columns=['plotly'])\n```;\ngraphData\n| evaluate python(typeof(plotly:string), pythonCode)\n| render plotly",
+      "id": "c41c70fc-a56c-4272-bd32-f521aaf91258",
+      "usedVariables": [
+      ]
+    }
+  ],
+  "embeddedApps": [
   ]
 }

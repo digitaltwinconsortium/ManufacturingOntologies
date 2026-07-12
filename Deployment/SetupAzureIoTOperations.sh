@@ -61,6 +61,13 @@ COMMAND_SOURCE_ENDPOINT_NAME="eventhubs-commands"
 COMMAND_CONSUMER_GROUP="aio-commander-ingest"
 COMMAND_DATAFLOW_NAME="commander-command-to-opcua"
 COMMAND_MQTT_TOPIC="azure-iot-operations/asset-operations/assembly-seattle-asset/managementGroup/OpenPressureReliefValve"
+# RPC response path: the AIO commander answers the method Call on the MQTT v5 Response Topic that
+# arrived with the request. UA-CloudAction must set that Response Topic (as an Event Hubs/Kafka user
+# header 'Response Topic') to COMMAND_RESPONSE_MQTT_TOPIC below. A reverse dataflow forwards that MQTT
+# response back to the existing 'commander.response' Event Hub that UA-CloudAction already listens to.
+COMMAND_RESPONSE_EVENTHUB_NAME="commander.response"
+COMMAND_RESPONSE_MQTT_TOPIC="azure-iot-operations/asset-operations/assembly-seattle-asset/managementGroup/OpenPressureReliefValve/response"
+COMMAND_RESPONSE_DATAFLOW_NAME="commander-response-to-eventhubs"
 # The command dataflow forwards the Event Hubs 'commander.command' record straight to the AIO OPC UA
 # commander's MQTT topic with NO transformation. The target method (OpenPressureReliefValve) is
 # parameter-less, so the commander does not need a reshaped argument payload. A builtInTransformation
@@ -393,7 +400,8 @@ cat > "${ENDPOINT_CONFIG}" <<EOF
 		"scope": "https://${EVENTHUBS_HOST}/.default"
 	  }
 	},
-	"cloudEventAttributes": "Propagate"
+	"cloudEventAttributes": "Propagate",
+	"copyMqttProperties": "Enabled"
   }
 }
 EOF
@@ -710,11 +718,19 @@ run az iot ops dataflow apply \
 # dedicated source endpoint 'eventhubs-commands' (same host and managed-identity auth as the egress
 # endpoint) rather than reusing the telemetry/metadata egress endpoint.
 #
-# NOTE (payload schema): UA-CloudAction publishes an OPC UA PubSub ActionRequest to 'commander.command'.
-# For the parameter-less pressure-relief method the AIO commander needs no argument payload, so the
-# command dataflow below forwards the record with NO transformation (a builtInTransformation cannot
-# synthesize a literal empty object; see the COMMAND dataflow notes above). UA Cloud Commander remains
-# deployed as a working backup.
+# NOTE (RPC contract): the AIO OPC UA commander's action topic is an MQTT v5 RPC endpoint, not a
+# fire-and-forget topic. A request is only executed when it carries the MQTT v5 'Correlation Data' and
+# 'Response Topic' properties (and the commander replies on that Response Topic). Data flows translate
+# Event Hubs/Kafka user headers to MQTT v5 properties when copyMqttProperties is Enabled (set on both the
+# command source endpoint and the egress endpoint above), so UA-CloudAction must publish to
+# 'commander.command' with:
+#   - body: the JSON method-arguments object; for the parameter-less pressure-relief method use '{}'.
+#   - Event Hubs/Kafka user header 'Correlation Data': a unique per-request id (bytes) - echoed back on
+#     the response so UA-CloudAction can match reply to request.
+#   - Event Hubs/Kafka user header 'Response Topic': ${COMMAND_RESPONSE_MQTT_TOPIC} (the MQTT topic the
+#     commander must reply on; the reverse response dataflow below forwards it to '${COMMAND_RESPONSE_EVENTHUB_NAME}').
+#   - Event Hubs/Kafka user header 'Content Type': application/json.
+# The command dataflow forwards the record body with NO transformation.
 echo
 echo "=== Creating the Event Hubs command source data flow endpoint (${COMMAND_SOURCE_ENDPOINT_NAME}) ==="
 COMMAND_ENDPOINT_CONFIG="${AIO_CONFIG_DIR}/endpoint-eventhubs-commands.json"
@@ -735,7 +751,8 @@ cat > "${COMMAND_ENDPOINT_CONFIG}" <<EOF
         "scope": "https://${EVENTHUBS_HOST}/.default"
       }
     },
-    "cloudEventAttributes": "Propagate"
+    "cloudEventAttributes": "Propagate",
+    "copyMqttProperties": "Enabled"
   }
 }
 EOF
@@ -775,6 +792,50 @@ run az iot ops dataflow apply \
   --profile default \
   --name "${COMMAND_DATAFLOW_NAME}" \
   --config-file "${COMMAND_DATAFLOW_CONFIG}"
+
+# The AIO OPC UA commander answers each method Call as an MQTT RPC response, published to the MQTT v5
+# Response Topic that arrived on the request (UA-CloudAction sets that Response Topic, via the Event
+# Hubs/Kafka 'Response Topic' user header, to ${COMMAND_RESPONSE_MQTT_TOPIC}; copyMqttProperties on the
+# command source endpoint turns that header into the MQTT v5 property). This reverse data flow forwards
+# that MQTT response back to the Event Hubs '${COMMAND_RESPONSE_EVENTHUB_NAME}' hub that UA-CloudAction
+# already listens to for command results. The egress 'eventhubs' endpoint has copyMqttProperties enabled
+# so the response's Correlation Data / Content Type MQTT v5 properties are carried back as Kafka headers,
+# letting UA-CloudAction correlate the reply to its original request.
+# NOTE (known AIO caveat): an Event Hubs/Kafka endpoint used as a data flow SOURCE can corrupt binary
+# Kafka user headers when translating them to MQTT v5 properties (AMQP round-trip). If the RPC does not
+# complete, verify the Correlation Data / Response Topic properties arrive intact at the commander; if
+# they are mangled, move the command leg to the local MQTT broker or fall back to Option C (re-enable the
+# UA Cloud Commander deployment; see Deployment/<Line>/ProductionLine.yaml).
+echo
+echo "=== Creating the command response data flow (MQTT '${COMMAND_RESPONSE_MQTT_TOPIC}' -> Event Hubs '${COMMAND_RESPONSE_EVENTHUB_NAME}') ==="
+COMMAND_RESPONSE_DATAFLOW_CONFIG="${AIO_CONFIG_DIR}/dataflow-command-response.json"
+cat > "${COMMAND_RESPONSE_DATAFLOW_CONFIG}" <<EOF
+{
+  "mode": "Enabled",
+  "operations": [
+    {
+      "operationType": "Source",
+      "sourceSettings": {
+        "endpointRef": "default",
+        "dataSources": ["${COMMAND_RESPONSE_MQTT_TOPIC}"]
+      }
+    },
+    {
+      "operationType": "Destination",
+      "destinationSettings": {
+        "endpointRef": "${DATAFLOW_ENDPOINT_NAME}",
+        "dataDestination": "${COMMAND_RESPONSE_EVENTHUB_NAME}"
+      }
+    }
+  ]
+}
+EOF
+run az iot ops dataflow apply \
+  --resource-group "${RESOURCE_GROUP}" \
+  --instance "${AIO_INSTANCE_NAME}" \
+  --profile default \
+  --name "${COMMAND_RESPONSE_DATAFLOW_NAME}" \
+  --config-file "${COMMAND_RESPONSE_DATAFLOW_CONFIG}"
 
 # --------------------------
 # 12. Establish OPC UA application-authentication mutual trust with the stations
@@ -999,12 +1060,18 @@ done
 # commander can execute a command on the station directly - the AIO-native alternative to UA Cloud
 # Commander. The reference command is "open the pressure relief valve" on the Seattle assembly
 # station (the same command UA-CloudAction triggers). It is modeled as a management-group action of
-# type "Call" on the station's telemetry asset: dataSource maps to the OPC UA objectId and targetUri
-# to the methodId (see Station.NodeSet2.xml). UA-CloudAction (MESSAGING_PLATFORM=AIO-Commander) then
-# invokes it by publishing to azure-iot-operations/asset-operations/<asset>/<managementGroup>/<action>.
+# type "Call" on the station's telemetry asset: the management group's dataSource is the OPC UA
+# objectId and the action's targetUri is the methodId (see Station.NodeSet2.xml), and the action's
+# MQTT topic matches COMMAND_MQTT_TOPIC so the commander subscribes to it. UA-CloudAction
+# (MESSAGING_PLATFORM=AIO-Commander) invokes it by publishing to that topic.
 #
-# This is additive: UA Cloud Commander stays deployed as a backup. The exact CLI verb for actions can
-# vary by az iot ops extension version, so this step is best-effort and only warns on failure.
+# This is registered via the GENERIC ARM resource API ('az resource update' / 'az rest' PATCH) rather
+# than the preview 'az iot ops ns asset opcua management-group' verb. That verb is not available in
+# every environment (and the whole 'ns' group is missing on older azure-iot-ops builds), so a
+# preview-CLI-only approach silently skips the registration and the command path never works. The
+# asset is an ARM resource of type 'Microsoft.DeviceRegistry/namespaces/assets', so PATCHing
+# 'properties.managementGroups' works with plain 'az' and no extension dependency, fully automated.
+# This is additive: UA Cloud Commander stays deployed as a backup.
 echo
 echo "=== Registering the AIO OPC UA commander action (Seattle assembly pressure relief valve) ==="
 COMMAND_ASSET="assembly-seattle-asset"
@@ -1012,32 +1079,69 @@ COMMAND_MGMT_GROUP="managementGroup"
 COMMAND_ACTION_NAME="OpenPressureReliefValve"
 COMMAND_OBJECT_ID="ns=2;i=424"
 COMMAND_METHOD_ID="ns=2;i=435"
-if az iot ops ns asset opcua management-group --help >/dev/null 2>&1; then
-  # Create the management group (carries the OPC UA objectId via --data-source) if the verb exists.
-  run az iot ops ns asset opcua management-group add \
+# Resolve the asset's full ARM resource id (name is namespace-prefixed in 'az resource list', so match
+# on the id rather than reconstructing a path).
+COMMAND_ASSET_ID="$(az resource list \
     --resource-group "${RESOURCE_GROUP}" \
-    --instance "${AIO_INSTANCE_NAME}" \
-    --asset "${COMMAND_ASSET}" \
-    --name "${COMMAND_MGMT_GROUP}" \
-    --data-source "${COMMAND_OBJECT_ID}" || \
-    echo "!!! NOTE: could not create management group '${COMMAND_MGMT_GROUP}' on '${COMMAND_ASSET}'; it may already exist or the CLI verb differs in this az iot ops version."
-  # Add the Call action (targetUri = methodId) to the management group.
-  run az iot ops ns asset opcua management-group action add \
-    --resource-group "${RESOURCE_GROUP}" \
-    --instance "${AIO_INSTANCE_NAME}" \
-    --asset "${COMMAND_ASSET}" \
-    --management-group "${COMMAND_MGMT_GROUP}" \
-    --name "${COMMAND_ACTION_NAME}" \
-    --action-type "Call" \
-    --target-uri "${COMMAND_METHOD_ID}" || \
-    echo "!!! NOTE: could not add action '${COMMAND_ACTION_NAME}'; verify the management-group action verb for your az iot ops version."
-  echo ">>> If successful, UA-CloudAction (MESSAGING_PLATFORM=AIO-Commander) can call:"
-  echo "    azure-iot-operations/asset-operations/${COMMAND_ASSET}/${COMMAND_MGMT_GROUP}/${COMMAND_ACTION_NAME}"
+    --resource-type "Microsoft.DeviceRegistry/namespaces/assets" \
+    ${SUBSCRIPTION_ID:+--subscription "${SUBSCRIPTION_ID}"} \
+    --query "[?ends_with(name, '/${COMMAND_ASSET}') || name=='${COMMAND_ASSET}'].id | [0]" -o tsv 2>/dev/null || true)"
+if [ -z "${COMMAND_ASSET_ID}" ]; then
+    echo "!!! NOTE: could not resolve asset '${COMMAND_ASSET}' in '${RESOURCE_GROUP}'; skipping the AIO"
+    echo "    commander action registration. Ensure the asset exists, then re-run this section."
 else
-  echo "!!! NOTE: this az iot ops version does not expose 'ns asset opcua management-group'; skipping the"
-  echo "    AIO commander action registration. Add the management group + Call action (objectId"
-  echo "    ${COMMAND_OBJECT_ID}, methodId ${COMMAND_METHOD_ID}) on asset '${COMMAND_ASSET}' via the"
-  echo "    operations experience portal, or keep using UA Cloud Commander."
+    # Build the managementGroups payload (one management group with one Call action). The action topic
+    # MUST equal COMMAND_MQTT_TOPIC so the commander subscribes to the same topic the command dataflow
+    # publishes to. Write to a file to avoid shell/JMESPath quoting pitfalls.
+    COMMAND_MG_FILE="${AIO_CONFIG_DIR}/management-groups.json"
+    cat > "${COMMAND_MG_FILE}" <<EOF
+[
+  {
+    "name": "${COMMAND_MGMT_GROUP}",
+    "dataSource": "${COMMAND_OBJECT_ID}",
+    "defaultTopic": "${COMMAND_MQTT_TOPIC}",
+    "actions": [
+      {
+        "name": "${COMMAND_ACTION_NAME}",
+        "actionType": "Call",
+        "targetUri": "${COMMAND_METHOD_ID}",
+        "topic": "${COMMAND_MQTT_TOPIC}"
+      }
+    ]
+  }
+]
+EOF
+    # Primary path: generic ARM PATCH via 'az resource update' (errors shown, best-effort).
+    if az resource update --ids "${COMMAND_ASSET_ID}" \
+        --set properties.managementGroups=@"${COMMAND_MG_FILE}" \
+        --output none; then
+        echo ">>> Registered management group '${COMMAND_MGMT_GROUP}' with Call action '${COMMAND_ACTION_NAME}' on '${COMMAND_ASSET}'."
+    else
+        # Fallback: REST PATCH to the asset id (still extension-independent). Try a couple of API versions.
+        echo "  'az resource update' did not apply; trying a REST PATCH fallback..."
+        COMMAND_PATCH_FILE="${AIO_CONFIG_DIR}/asset-patch.json"
+        printf '{"properties":{"managementGroups":%s}}' "$(cat "${COMMAND_MG_FILE}")" > "${COMMAND_PATCH_FILE}"
+        _patched=""
+        for _apiver in 2025-10-01 2024-11-01 2026-04-01; do
+            if az rest --method patch \
+                --url "https://management.azure.com${COMMAND_ASSET_ID}?api-version=${_apiver}" \
+                --headers "Content-Type=application/json" \
+                --body @"${COMMAND_PATCH_FILE}" \
+                --output none 2>/dev/null; then
+                _patched="${_apiver}"; break
+            fi
+        done
+        if [ -n "${_patched}" ]; then
+            echo ">>> Registered management group '${COMMAND_MGMT_GROUP}' with Call action '${COMMAND_ACTION_NAME}' on '${COMMAND_ASSET}' (REST api-version ${_patched})."
+        else
+            echo "!!! NOTE: could not register the commander action automatically. The command path will not"
+            echo "    execute until the management group '${COMMAND_MGMT_GROUP}' (dataSource ${COMMAND_OBJECT_ID}) and"
+            echo "    Call action '${COMMAND_ACTION_NAME}' (targetUri ${COMMAND_METHOD_ID}, topic ${COMMAND_MQTT_TOPIC})"
+            echo "    are added to asset '${COMMAND_ASSET}', or keep using UA Cloud Commander."
+        fi
+    fi
+    echo ">>> UA-CloudAction (MESSAGING_PLATFORM=AIO-Commander) can invoke the command by publishing to:"
+    echo "    ${COMMAND_MQTT_TOPIC}"
 fi
 
 # Clean up the generated config files (they contain no secrets).

@@ -645,6 +645,14 @@
                   "value": "commander.response"
                 },
                 {
+                  "name": "KAFKA_TARGET",
+                  "value": "AIOCommander"
+                },
+                {
+                  "name": "RESPONSE_MQTT_TOPIC",
+                  "value": "azure-iot-operations/asset-operations/assembly-seattle-asset/managementGroup/OpenPressureReliefValve/response"
+                },
+                {
                   "name": "UA_SERVER_ENDPOINT",
                   "value": "opc.tcp://assembly.seattle/"
                 },

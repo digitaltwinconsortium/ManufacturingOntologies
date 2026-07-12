@@ -826,29 +826,29 @@ if [ -n "${RESOURCE_GROUP:-}" ]; then
 	sleep 30
 	# The AIO instance is named '<resourcesName>-aio' (lowercase), matching SetupAzureIoTOperations.sh.
 	AIO_INSTANCE_NAME="$(printf '%s-aio' "${RESOURCES_NAME}" | tr '[:upper:]' '[:lower:]')"
+	# The Device Registry namespace holding the assets is '<resourcesName>-aions' (lowercase).
+	AIO_NAMESPACE_NAME="$(printf '%s-aions' "${RESOURCES_NAME}" | tr '[:upper:]' '[:lower:]')"
 	TOUCHED=0
-	# The 'az iot ops ns asset ...' commands require a RECENT 'azure-iot-ops' CLI extension (the 'ns'
-	# namespaced-asset command group only exists in newer versions). This script may run in an environment
-	# (e.g. a Fabric/managed-identity context) where the extension is missing OR stale. A presence-only
-	# check is not enough: an OLD cached extension would pass it but still fail with "'ns' is misspelled
-	# or not recognized". Always add-with-upgrade so we get a version that has the 'ns' group.
-	echo "  ensuring the latest 'azure-iot-ops' CLI extension (required for asset discovery/touch)..."
-	az extension add --upgrade --name azure-iot-ops --only-show-errors --yes >/dev/null 2>&1 \
-		|| az extension add --name azure-iot-ops --only-show-errors --yes >/dev/null 2>&1 \
-		|| echo "  warning: failed to install/upgrade the 'azure-iot-ops' extension; asset discovery may fail."
-	# Discover the OPC UA telemetry asset NAMES. These are namespaced Device Registry assets
-	# (Microsoft.DeviceRegistry/namespaces/assets), so a generic 'az resource list' for
-	# 'Microsoft.DeviceRegistry/assets' returns nothing - use the AIO CLI to query them by instance.
-	# Capture stderr (no 2>/dev/null) so a genuine failure is VISIBLE in the deployment log rather than
-	# being silently reported as "no assets found" (the previous, hard-to-diagnose behaviour).
+	# Discover and touch the OPC UA assets using GENERIC 'az resource' commands rather than the
+	# 'az iot ops ns asset ...' subgroup. Rationale: this script may run in a constrained environment
+	# (e.g. the Fabric deployment-script container) whose Azure CLI core is too old to load an
+	# 'azure-iot-ops' extension version that includes the (preview) 'ns' command group - which fails with
+	# "'ns' is misspelled or not recognized". The assets are ARM resources of type
+	# 'Microsoft.DeviceRegistry/namespaces/assets' under the namespace, so 'az resource list/update'
+	# reaches them with NO extension dependency. Updating properties.description is a real spec change the
+	# connector for OPC UA watches, so it re-publishes the asset metadata.
 	ASSET_QUERY_ERR="$(mktemp)"
-	ASSET_NAMES="$(az iot ops ns asset query \
-		--instance "${AIO_INSTANCE_NAME}" \
+	# List the full ARM resource IDs of the telemetry assets ('<host>-asset'). Using the id directly is
+	# robust: 'az resource list' returns the asset 'name' namespace-prefixed (e.g.
+	# 'sandbox47-aions/assembly-munich-asset'), so reconstructing an id from the name would double the
+	# namespace segment. The id is always correct, so we update by --ids and never rebuild a path.
+	ASSET_IDS="$(az resource list \
 		--resource-group "${RESOURCE_GROUP}" \
+		--resource-type "Microsoft.DeviceRegistry/namespaces/assets" \
 		${SUBSCRIPTION_ID:+--subscription "${SUBSCRIPTION_ID}"} \
-		--query "[?ends_with(name, '-asset')].name" -o tsv 2>"${ASSET_QUERY_ERR}" || true)"
-	if [ -z "${ASSET_NAMES}" ]; then
-		echo "  note: no OPC UA assets found on instance '${AIO_INSTANCE_NAME}' in '${RESOURCE_GROUP}'. If AIO"
+		--query "[?ends_with(name, '-asset')].id" -o tsv 2>"${ASSET_QUERY_ERR}" || true)"
+	if [ -z "${ASSET_IDS}" ]; then
+		echo "  note: no OPC UA assets found in namespace '${AIO_NAMESPACE_NAME}' in '${RESOURCE_GROUP}'. If AIO"
 		echo "        was deployed to a different resource group/instance, update an asset's description in the"
 		echo "        operations experience portal manually (see fabric.md) so metadata is resent."
 		if [ -s "${ASSET_QUERY_ERR}" ]; then
@@ -859,26 +859,22 @@ if [ -n "${RESOURCE_GROUP:-}" ]; then
 	else
 		rm -f "${ASSET_QUERY_ERR}"
 		TOUCH_STAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-		while IFS= read -r ASSET_NAME; do
-			[ -z "${ASSET_NAME}" ] && continue
-			# Update the asset description via the AIO CLI (the portal's path). This is a real change to
-			# the asset spec the connector for OPC UA watches, so it re-publishes the metadata message.
-			# Errors are shown (no 2>/dev/null) so a genuine failure is visible in the deployment log.
-			if az iot ops ns asset opcua update \
-				--name "${ASSET_NAME}" \
-				--instance "${AIO_INSTANCE_NAME}" \
-				--resource-group "${RESOURCE_GROUP}" \
-				${SUBSCRIPTION_ID:+--subscription "${SUBSCRIPTION_ID}"} \
-				--description "Metadata refresh for Fabric ingestion at ${TOUCH_STAMP}" \
+		while IFS= read -r ASSET_ID; do
+			[ -z "${ASSET_ID}" ] && continue
+			ASSET_LABEL="${ASSET_ID##*/}"
+			# Updating properties.description is a real spec change the connector for OPC UA watches, so it
+			# re-publishes the metadata message. Errors are shown so a genuine failure is visible.
+			if az resource update --ids "${ASSET_ID}" \
+				--set "properties.description=Metadata refresh for Fabric ingestion at ${TOUCH_STAMP}" \
 				--output none; then
-				echo "  touched (description updated): ${ASSET_NAME}"
+				echo "  touched (description updated): ${ASSET_LABEL}"
 				TOUCHED=$((TOUCHED + 1))
 			else
-				echo "  warning: could not touch ${ASSET_NAME}; update its description in the operations"
+				echo "  warning: could not touch ${ASSET_LABEL}; update its description in the operations"
 				echo "           experience portal manually (see fabric.md) so metadata is resent."
 			fi
 		done <<-EOF
-		${ASSET_NAMES}
+		${ASSET_IDS}
 		EOF
 		echo "  re-triggered metadata for ${TOUCHED} OPC UA asset(s)."
 		echo "  it can take a minute or two for 'opcua_metadata' to populate in the eventhouse."

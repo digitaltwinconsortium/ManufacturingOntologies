@@ -61,19 +61,15 @@ COMMAND_SOURCE_ENDPOINT_NAME="eventhubs-commands"
 COMMAND_CONSUMER_GROUP="aio-commander-ingest"
 COMMAND_DATAFLOW_NAME="commander-command-to-opcua"
 COMMAND_MQTT_TOPIC="azure-iot-operations/asset-operations/assembly-seattle-asset/managementGroup/OpenPressureReliefValve"
-# The dataflow transformation reshapes the incoming UA Cloud Commander ActionRequest into the payload
-# the AIO OPC UA commander expects: the method's input arguments as the message body. The pressure-
-# relief method takes no parameters, so the body is an empty object. The map below copies an optional
-# "Arguments" object out of the ActionRequest's first message payload (Messages[0].Payload.Arguments)
-# and defaults it to an empty object when absent, dropping the ActionRequest envelope. If your action
-# needs arguments, have UA-CloudAction place them under that Arguments object (or adjust the input path
-# / add per-argument rules here).
-# The AIO built-in transformation evaluates against a SINGLE message, so OPC UA PubSub network-message
-# syntax such as 'Messages[0]...' is invalid here and crashes the dataflow runtime on load. The target
-# method (OpenPressureReliefValve) is parameter-less, so we emit a constant empty object to the message
-# root. If a future method needs arguments, replace the expression with an explicit per-argument map
-# (e.g. inputs=["Payload.Arguments.<name>"], output="<name>").
-COMMAND_METHOD_ARGS_EXPRESSION="{}"
+# The command dataflow forwards the Event Hubs 'commander.command' record straight to the AIO OPC UA
+# commander's MQTT topic with NO transformation. The target method (OpenPressureReliefValve) is
+# parameter-less, so the commander does not need a reshaped argument payload. A builtInTransformation
+# was tried but the AIO mapper's expression grammar cannot synthesize a literal empty object: '{}' is
+# parsed as a variable identifier ("not bound to anything by context"), and both object literals and
+# the '?? <default>' operator are data-flow-graph-only features, NOT supported in a builtInTransformation
+# (see https://learn.microsoft.com/azure/iot-operations/connect-to-cloud/concept-dataflow-graphs-expressions).
+# If a future method needs arguments, add a data flow GRAPH with a map transform, or have UA-CloudAction
+# publish the arguments in the exact shape the commander expects so a plain passthrough still works.
 # Working directory for the generated data flow / asset configuration files.
 AIO_CONFIG_DIR="$(mktemp -d)"
 
@@ -714,12 +710,11 @@ run az iot ops dataflow apply \
 # dedicated source endpoint 'eventhubs-commands' (same host and managed-identity auth as the egress
 # endpoint) rather than reusing the telemetry/metadata egress endpoint.
 #
-# NOTE (payload schema): UA-CloudAction publishes an OPC UA PubSub ActionRequest to 'commander.command',
-# whereas the AIO commander expects the method's input arguments as the message body (an empty object
-# for the parameter-less pressure-relief method). The command dataflow below therefore includes a
-# BuiltInTransformation that reshapes the ActionRequest into the commander's argument payload, so
-# UA-CloudAction can keep publishing exactly as it does today. UA Cloud Commander remains deployed as a
-# working backup.
+# NOTE (payload schema): UA-CloudAction publishes an OPC UA PubSub ActionRequest to 'commander.command'.
+# For the parameter-less pressure-relief method the AIO commander needs no argument payload, so the
+# command dataflow below forwards the record with NO transformation (a builtInTransformation cannot
+# synthesize a literal empty object; see the COMMAND dataflow notes above). UA Cloud Commander remains
+# deployed as a working backup.
 echo
 echo "=== Creating the Event Hubs command source data flow endpoint (${COMMAND_SOURCE_ENDPOINT_NAME}) ==="
 COMMAND_ENDPOINT_CONFIG="${AIO_CONFIG_DIR}/endpoint-eventhubs-commands.json"
@@ -762,19 +757,6 @@ cat > "${COMMAND_DATAFLOW_CONFIG}" <<EOF
       "sourceSettings": {
         "endpointRef": "${COMMAND_SOURCE_ENDPOINT_NAME}",
         "dataSources": ["${COMMAND_EVENTHUB_NAME}"]
-      }
-    },
-    {
-      "operationType": "BuiltInTransformation",
-      "builtInTransformationSettings": {
-        "map": [
-          {
-            "inputs": [],
-            "output": "$",
-            "expression": "${COMMAND_METHOD_ARGS_EXPRESSION}",
-            "description": "Emit the parameter-less commander payload (an empty object) to the message root, dropping the UA Cloud Action envelope."
-          }
-        ]
       }
     },
     {

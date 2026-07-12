@@ -2,13 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "resourcesName": {
-      "type": "string",
-      "minLength": 2,
-      "metadata": {
-        "description": "Name of resources to be deployed."
-      }
-    },
     "adminUsername": {
       "type": "string",
       "minLength": 2,
@@ -46,34 +39,35 @@
     }
   },
   "variables": {
+    "resourcesName": "[resourceGroup().name]",
     "addressPrefix": "10.0.0.0/16",
     "subnetPrefix": "10.0.0.0/24",
     "subnetPrefix2": "10.0.0.0/23",
     "keyVaultSecretsUserId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacAzurekeyVaultSecretsUser'))]",
     "keyVaultSecretsOfficerId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacKeyVaultSecretsOfficer'))]",
     "keyVaultReaderId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacKeyVaultReader'))]",
-    "authRuleResourceId": "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', concat(parameters('resourcesName'), '-EventHubs'), 'RootManageSharedAccessKey')]",
+    "authRuleResourceId": "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', concat(variables('resourcesName'), '-EventHubs'), 'RootManageSharedAccessKey')]",
     "azureRbacContributor": "b24988ac-6180-42a0-ab88-20f7382dd24c",
     "azureRbacAzureEventHubsDataOwner": "f526a384-b230-433a-b45c-95f59c4a2dec",
     "azureRbacAzurekeyVaultSecretsUser": "4633458b-17de-408a-b874-0445c86b69e6",
     "azureRbacKeyVaultSecretsOfficer": "b86a8fe4-44ce-4948-aee5-eccb2c155cd7",
     "azureRbacKeyVaultReader": "21090545-7ca7-4776-b22c-e363652d74d2",
-    "adxClusterName": "[concat(parameters('resourcesName'), 'ADX')]",
-    "adxDBName": "[concat(parameters('resourcesName'), '-DB')]",
-    "fabricCapacityName": "[toLower(concat(parameters('resourcesName'), 'fabric'))]",
-    "eventHubsNamespaceName": "[concat(parameters('resourcesName'), '-EventHubs')]",
-    "databricksWorkspaceName": "[concat(parameters('resourcesName'), '-Databricks')]",
-    "databricksManagedResourceGroupId": "[concat(subscription().id, '/resourceGroups/', parameters('resourcesName'), '-Databricks-managed')]",
+    "adxClusterName": "[concat(variables('resourcesName'), 'ADX')]",
+    "adxDBName": "[concat(variables('resourcesName'), '-DB')]",
+    "fabricCapacityName": "[toLower(concat(variables('resourcesName'), 'fabric'))]",
+    "eventHubsNamespaceName": "[concat(variables('resourcesName'), '-EventHubs')]",
+    "databricksWorkspaceName": "[concat(variables('resourcesName'), '-Databricks')]",
+    "databricksManagedResourceGroupId": "[concat(subscription().id, '/resourceGroups/', variables('resourcesName'), '-Databricks-managed')]",
     "databricksSetupScriptUri": "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'SetupDatabricks.sh')]",
     "databricksNotebookUri": "https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Tools/DatabricksQueries/opcua_setup.py",
     "databricksDashboardUri": "https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Tools/DatabricksQueries/dashboard-ontologies.lvdash.json",
     "contributorRoleId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacContributor'))]",
-    "i3xContainerAppName": "[concat(parameters('resourcesName'), '-i3x4kusto')]",
+    "i3xContainerAppName": "[concat(variables('resourcesName'), '-i3x4kusto')]",
     "azureRbacAzureEventHubsDataSender": "2b629674-e913-4c01-ae53-ef4638d8f975",
     "azureRbacAzureEventHubsDataReceiver": "a638d3c7-ab3a-418d-83e6-5f17a39d4fde",
-    "aioStorageAccountName": "[toLower(take(concat(replace(parameters('resourcesName'), '-', ''), 'aiostorage'), 24))]",
-    "aioSchemaRegistryName": "[toLower(concat(parameters('resourcesName'), '-schemaregistry'))]",
-    "aioSchemaRegistryNamespace": "[toLower(concat(replace(parameters('resourcesName'), '-', ''), 'aiosr'))]",
+    "aioStorageAccountName": "[toLower(take(concat(replace(variables('resourcesName'), '-', ''), 'aiostorage'), 24))]",
+    "aioSchemaRegistryName": "[toLower(concat(variables('resourcesName'), '-schemaregistry'))]",
+    "aioSchemaRegistryNamespace": "[toLower(concat(replace(variables('resourcesName'), '-', ''), 'aiosr'))]",
     "aioSetupScriptUri": "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'SetupAzureIoTOperations.sh')]",
     "eventHubsDataSenderRoleId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacAzureEventHubsDataSender'))]",
     "eventHubsDataReceiverRoleId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacAzureEventHubsDataReceiver'))]"
@@ -82,7 +76,7 @@
     {
       "type": "Microsoft.App/managedEnvironments",
       "apiVersion": "2024-03-01",
-      "name": "[concat(parameters('resourcesName'), '-AppEnvironment')]",
+      "name": "[concat(variables('resourcesName'), '-AppEnvironment')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "appLogsConfiguration": {},
@@ -93,21 +87,21 @@
          }
         ],
         "vnetConfiguration": {
-          "infrastructureSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(parameters('resourcesName'), '-Network-CA'), concat(parameters('resourcesName'), '-Subnet-CA'))]"
+          "infrastructureSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(variables('resourcesName'), '-Network-CA'), concat(variables('resourcesName'), '-Subnet-CA'))]"
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/virtualNetworks', concat(parameters('resourcesName'), '-Network-CA'))]"
+        "[resourceId('Microsoft.Network/virtualNetworks', concat(variables('resourcesName'), '-Network-CA'))]"
       ]
     },
     {
       "type": "Microsoft.App/containerApps",
       "apiVersion": "2024-03-01",
-      "name": "[concat(parameters('resourcesName'), '-edc-provider')]",
+      "name": "[concat(variables('resourcesName'), '-edc-provider')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "workloadProfileName": "Consumption",
-        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
         "configuration": {
           "ingress": {
             "external": true,
@@ -193,7 +187,7 @@
                 },
                 {
                   "name": "edc_dsp_callback_address",
-                  "value": "[concat('http://', reference(concat(parameters('resourcesName'), '-AppEnvironment')).staticIp, ':8282/dsp')]"
+                  "value": "[concat('http://', reference(concat(variables('resourcesName'), '-AppEnvironment')).staticIp, ':8282/dsp')]"
                 },
                 {
                   "name": "edc_api_auth_key",
@@ -225,7 +219,7 @@
                 },
                 {
                   "name": "edc_hostname",
-                  "value": "[reference(concat(parameters('resourcesName'), '-AppEnvironment')).staticIp]"
+                  "value": "[reference(concat(variables('resourcesName'), '-AppEnvironment')).staticIp]"
                 },
                 {
                   "name": "edc_participant_id",
@@ -245,18 +239,18 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
-        "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV'))]"
+        "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
+        "[resourceId('Microsoft.KeyVault/vaults', concat(variables('resourcesName'), '-KV'))]"
       ]
     },
     {
       "type": "Microsoft.App/containerApps",
       "apiVersion": "2024-03-01",
-      "name": "[concat(parameters('resourcesName'), '-edc-consumer')]",
+      "name": "[concat(variables('resourcesName'), '-edc-consumer')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "workloadProfileName": "Consumption",
-        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
         "configuration": {
           "ingress": {
             "external": true,
@@ -334,7 +328,7 @@
                 },
                 {
                   "name": "edc_dsp_callback_address",
-                  "value": "[concat('http://', reference(concat(parameters('resourcesName'), '-AppEnvironment')).staticIp, ':9292/dsp')]"
+                  "value": "[concat('http://', reference(concat(variables('resourcesName'), '-AppEnvironment')).staticIp, ':9292/dsp')]"
                 },
                 {
                   "name": "edc_api_auth_key",
@@ -366,7 +360,7 @@
                 },
                 {
                   "name": "edc_hostname",
-                  "value": "[reference(concat(parameters('resourcesName'), '-AppEnvironment')).staticIp]"
+                  "value": "[reference(concat(variables('resourcesName'), '-AppEnvironment')).staticIp]"
                 },
                 {
                   "name": "edc_participant_id",
@@ -386,14 +380,14 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
-        "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV'))]"
+        "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
+        "[resourceId('Microsoft.KeyVault/vaults', concat(variables('resourcesName'), '-KV'))]"
       ]
     },
     {
       "type": "Microsoft.KeyVault/vaults",
       "apiVersion": "2024-12-01-preview",
-      "name": "[concat(parameters('resourcesName'), '-KV')]",
+      "name": "[concat(variables('resourcesName'), '-KV')]",
       "location": "[resourceGroup().location]",
       "tags": {},
       "properties": {
@@ -404,10 +398,10 @@
           "ipRules": [],
           "virtualNetworkRules": [
             {
-              "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(parameters('resourcesName'), '-Network-CA'), concat(parameters('resourcesName'), '-Subnet-CA'))]"
+              "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(variables('resourcesName'), '-Network-CA'), concat(variables('resourcesName'), '-Subnet-CA'))]"
             },
             {
-              "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(parameters('resourcesName'), '-Network'), concat(parameters('resourcesName'), '-Subnet'))]"
+              "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(variables('resourcesName'), '-Network'), concat(variables('resourcesName'), '-Subnet'))]"
             }
           ]
         },
@@ -426,63 +420,63 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/virtualNetworks', concat(parameters('resourcesName'), '-Network-CA'))]",
-        "[resourceId('Microsoft.Network/virtualNetworks', concat(parameters('resourcesName'), '-Network'))]"
+        "[resourceId('Microsoft.Network/virtualNetworks', concat(variables('resourcesName'), '-Network-CA'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', concat(variables('resourcesName'), '-Network'))]"
       ]
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2021-04-01-preview",
-      "name": "[format('{0}/{1}', concat(parameters('resourcesName'), '-KV'), 'adminpassword')]",
+      "name": "[format('{0}/{1}', concat(variables('resourcesName'), '-KV'), 'adminpassword')]",
       "properties": {
         "value": "[parameters('adminPassword')]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV'))]"
+        "[resourceId('Microsoft.KeyVault/vaults', concat(variables('resourcesName'), '-KV'))]"
       ]
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2021-04-01-preview",
-      "name": "[format('{0}/{1}', concat(parameters('resourcesName'), '-KV'), 'brokerpassword')]",
+      "name": "[format('{0}/{1}', concat(variables('resourcesName'), '-KV'), 'brokerpassword')]",
       "properties": {
         "value": "[listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV'))]"
+        "[resourceId('Microsoft.KeyVault/vaults', concat(variables('resourcesName'), '-KV'))]"
       ]
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2021-04-01-preview",
-      "name": "[format('{0}/{1}', concat(parameters('resourcesName'), '-KV'), 'servicepassword')]",
+      "name": "[format('{0}/{1}', concat(variables('resourcesName'), '-KV'), 'servicepassword')]",
       "properties": {
         "value": "[parameters('adminPassword')]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV'))]"
+        "[resourceId('Microsoft.KeyVault/vaults', concat(variables('resourcesName'), '-KV'))]"
       ]
     },
     {
       "type": "Microsoft.App/containerApps",
       "apiVersion": "2024-03-01",
-      "name": "[concat(parameters('resourcesName'), '-aas-repository')]",
+      "name": "[concat(variables('resourcesName'), '-aas-repository')]",
       "location": "[resourceGroup().location]",
       "identity": {
         "type": "UserAssigned",
         "userAssignedIdentities": {
-          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]": {}
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]": {}
         }
       },
       "properties": {
         "workloadProfileName": "Consumption",
-        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
         "configuration": {
           "secrets": [
             {
               "name": "servicepassword",
-              "keyVaultUrl": "[concat('https://', parameters('resourcesName'), '-KV.vault.azure.net/secrets/servicepassword')]",
-              "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+              "keyVaultUrl": "[concat('https://', variables('resourcesName'), '-KV.vault.azure.net/secrets/servicepassword')]",
+              "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]"
             }
           ],
           "ingress": {
@@ -515,7 +509,7 @@
                 },
                 {
                   "name": "AAD_APPLICATION_ID",
-                  "value": "[reference(concat(parameters('resourcesName'), '-Identity')).clientId]"
+                  "value": "[reference(concat(variables('resourcesName'), '-Identity')).clientId]"
                 },
                 {
                   "name": "CALCULATE_PCF",
@@ -547,35 +541,35 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
+        "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
         "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'OPCUA-parsing-script')]"
       ]
     },
     {
       "type": "Microsoft.App/containerApps",
       "apiVersion": "2024-03-01",
-      "name": "[concat(parameters('resourcesName'), '-ua-cloud-action')]",
+      "name": "[concat(variables('resourcesName'), '-ua-cloud-action')]",
       "location": "[resourceGroup().location]",
       "identity": {
         "type": "UserAssigned",
         "userAssignedIdentities": {
-          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]": {}
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]": {}
         }
       },
       "properties": {
         "workloadProfileName": "Consumption",
-        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
         "configuration": {
           "secrets": [
             {
               "name": "adminpassword",
-              "keyVaultUrl": "[concat('https://', parameters('resourcesName'), '-KV.vault.azure.net/secrets/adminpassword')]",
-              "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+              "keyVaultUrl": "[concat('https://', variables('resourcesName'), '-KV.vault.azure.net/secrets/adminpassword')]",
+              "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]"
             },
             {
               "name": "brokerpassword",
-              "keyVaultUrl": "[concat('https://', parameters('resourcesName'), '-KV.vault.azure.net/secrets/brokerpassword')]",
-              "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+              "keyVaultUrl": "[concat('https://', variables('resourcesName'), '-KV.vault.azure.net/secrets/brokerpassword')]",
+              "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]"
             }
           ],
           "ingress": {
@@ -624,7 +618,7 @@
                 },
                 {
                   "name": "APPLICATION_ID",
-                  "value": "[reference(concat(parameters('resourcesName'), '-Identity')).clientId]"
+                  "value": "[reference(concat(variables('resourcesName'), '-Identity')).clientId]"
                 },
                 {
                   "name": "APPLICATION_KEY",
@@ -632,7 +626,7 @@
                 },
                 {
                   "name": "BROKER_NAME",
-                  "value": "[concat(parameters('resourcesName'), '-EventHubs.servicebus.windows.net')]"
+                  "value": "[concat(variables('resourcesName'), '-EventHubs.servicebus.windows.net')]"
                 },
                 {
                   "name": "BROKER_USERNAME",
@@ -684,15 +678,15 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
+        "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
         "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'OPCUA-parsing-script')]",
-        "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('resourcesName'), '-KV'))]"
+        "[resourceId('Microsoft.KeyVault/vaults', concat(variables('resourcesName'), '-KV'))]"
       ]
     },
     {
       "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2020-11-01",
-      "name": "[concat(parameters('resourcesName'), '-IPAddress')]",
+      "name": "[concat(variables('resourcesName'), '-IPAddress')]",
       "location": "[resourceGroup().location]",
       "sku": {
         "name": "Standard"
@@ -700,14 +694,14 @@
       "properties": {
         "publicIPAllocationMethod": "Static",
         "dnsSettings": {
-          "domainNameLabel": "[concat(parameters('resourcesName'), 'domain')]"
+          "domainNameLabel": "[concat(variables('resourcesName'), 'domain')]"
         }
       }
     },
     {
       "type": "Microsoft.Network/networkSecurityGroups",
       "apiVersion": "2020-11-01",
-      "name": "[concat(parameters('resourcesName'), '-NSG')]",
+      "name": "[concat(variables('resourcesName'), '-NSG')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "securityRules": [
@@ -730,7 +724,7 @@
     {
       "type": "Microsoft.Network/virtualNetworks",
       "apiVersion": "2020-11-01",
-      "name": "[concat(parameters('resourcesName'), '-Network')]",
+      "name": "[concat(variables('resourcesName'), '-Network')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "addressSpace": {
@@ -740,7 +734,7 @@
         },
         "subnets": [
           {
-            "name": "[concat(parameters('resourcesName'), '-Subnet')]",
+            "name": "[concat(variables('resourcesName'), '-Subnet')]",
             "properties": {
               "addressPrefix": "[variables('subnetPrefix')]",
               "serviceEndpoints": [
@@ -752,20 +746,20 @@
                 }
               ],
               "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(parameters('resourcesName'), '-NSG'))]"
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('resourcesName'), '-NSG'))]"
               }
             }
           }
         ]
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/networkSecurityGroups', concat(parameters('resourcesName'), '-NSG'))]"
+        "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('resourcesName'), '-NSG'))]"
       ]
     },
     {
       "type": "Microsoft.Network/virtualNetworks",
       "apiVersion": "2020-11-01",
-      "name": "[concat(parameters('resourcesName'), '-Network-CA')]",
+      "name": "[concat(variables('resourcesName'), '-Network-CA')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "addressSpace": {
@@ -775,7 +769,7 @@
         },
         "subnets": [
           {
-            "name": "[concat(parameters('resourcesName'), '-Subnet-CA')]",
+            "name": "[concat(variables('resourcesName'), '-Subnet-CA')]",
             "properties": {
               "addressPrefix": "[variables('subnetPrefix2')]",
               "serviceEndpoints": [
@@ -802,7 +796,7 @@
     {
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2020-11-01",
-      "name": "[concat(parameters('resourcesName'), '-IF')]",
+      "name": "[concat(variables('resourcesName'), '-IF')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "ipConfigurations": [
@@ -811,29 +805,29 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('resourcesName'), '-IPAddress'))]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('resourcesName'), '-IPAddress'))]"
               },
               "subnet": {
-                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(parameters('resourcesName'), '-Network'), concat(parameters('resourcesName'), '-Subnet'))]"
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(variables('resourcesName'), '-Network'), concat(variables('resourcesName'), '-Subnet'))]"
               }
             }
           }
         ]
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('resourcesName'), '-IPAddress'))]",
-        "[resourceId('Microsoft.Network/virtualNetworks', concat(parameters('resourcesName'), '-Network'))]"
+        "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('resourcesName'), '-IPAddress'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', concat(variables('resourcesName'), '-Network'))]"
       ]
     },
     {
       "apiVersion": "2025-04-01",
       "type": "microsoft.compute/virtualmachines",
-      "name": "[concat(parameters('resourcesName'), '-VM')]",
+      "name": "[concat(variables('resourcesName'), '-VM')]",
       "location": "[resourceGroup().location]",
       "identity": {
         "type": "UserAssigned",
         "userAssignedIdentities": {
-          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]": {}
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]": {}
         }
       },
       "properties": {
@@ -860,7 +854,7 @@
           "dataDisks": []
         },
         "osProfile": {
-          "computerName": "[parameters('resourcesName')]",
+          "computerName": "[variables('resourcesName')]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]",
           "linuxConfiguration": {
@@ -877,30 +871,30 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('resourcesName'), '-IF'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('resourcesName'), '-IF'))]"
             }
           ]
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('resourcesName'), '-IF'))]",
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+        "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('resourcesName'), '-IF'))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]"
       ]
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(parameters('resourcesName'), '-VM','/Bootstrap')]",
+      "name": "[concat(variables('resourcesName'), '-VM','/Bootstrap')]",
       "apiVersion": "2022-11-01",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('resourcesName'), '-VM')]",
+        "[concat('Microsoft.Compute/virtualMachines/', variables('resourcesName'), '-VM')]",
         "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubsNamespaceName'))]",
         "[resourceId('Microsoft.Kusto/Clusters/Databases/DataConnections', variables('adxClusterName'), 'ontologies', 'EventHubDataConnection')]",
         "[resourceId('Microsoft.Kusto/Clusters/Databases/DataConnections', variables('adxClusterName'), 'ontologies', 'EventHubMetadataConnection')]",
         "[resourceId('Microsoft.EventHub/namespaces/eventhubs', variables('eventHubsNamespaceName'), 'data')]",
         "[resourceId('Microsoft.EventHub/namespaces/eventhubs', variables('eventHubsNamespaceName'), 'metadata')]",
-        "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), variables('eventHubsDataSenderRoleId')))]",
-        "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), variables('contributorRoleId')))]",
+        "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), variables('eventHubsDataSenderRoleId')))]",
+        "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), variables('contributorRoleId')))]",
         "[resourceId('Microsoft.DeviceRegistry/schemaRegistries', variables('aioSchemaRegistryName'))]"
       ],
       "tags": {
@@ -918,7 +912,7 @@
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[concat('bash Bootstrap.sh ''', listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString, ''' ''', resourceGroup().name, ''' ''', resourceGroup().location, ''' ''', parameters('resourcesName'), ''' ''', reference(concat(parameters('resourcesName'), '-Identity')).clientId, ''' ''', subscription().subscriptionId, ''' ''', parameters('customLocationsOid'), ''' ''', concat(variables('eventHubsNamespaceName'), '.servicebus.windows.net'), '''')]"
+          "commandToExecute": "[concat('bash Bootstrap.sh ''', listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString, ''' ''', resourceGroup().name, ''' ''', resourceGroup().location, ''' ''', variables('resourcesName'), ''' ''', reference(concat(variables('resourcesName'), '-Identity')).clientId, ''' ''', subscription().subscriptionId, ''' ''', parameters('customLocationsOid'), ''' ''', concat(variables('eventHubsNamespaceName'), '.servicebus.windows.net'), '''')]"
         }
       }
     },
@@ -962,7 +956,7 @@
       "name": "[format('{0}/{1}', variables('adxClusterName'), 'ontologies')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[resourceId('Microsoft.Resources/deploymentScripts', concat(parameters('resourcesName'), '-WaitForAdxCluster'))]"
+        "[resourceId('Microsoft.Resources/deploymentScripts', concat(variables('resourcesName'), '-WaitForAdxCluster'))]"
       ],
       "properties": {
         "softDeletePeriodInDays": 365,
@@ -976,11 +970,11 @@
       "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies','EventHubDataConnection')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[resourceId('Microsoft.Kusto/clusters/databases/principalAssignments', variables('adxClusterName'), 'ontologies', guid(resourceId('Microsoft.Kusto/clusters/databases', split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[1]), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), 'Admin'))]"
+        "[resourceId('Microsoft.Kusto/clusters/databases/principalAssignments', variables('adxClusterName'), 'ontologies', guid(resourceId('Microsoft.Kusto/clusters/databases', split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[1]), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), 'Admin'))]"
       ],
       "kind": "EventHub",
       "properties": {
-        "eventHubResourceId": "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'data')]",
+        "eventHubResourceId": "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(variables('resourcesName'), '-EventHubs'), 'data')]",
         "consumerGroup": "adx",
         "tableName": "opcua_raw",
         "mappingRuleName": "opcua_mapping",
@@ -1000,7 +994,7 @@
       ],
       "kind": "EventHub",
       "properties": {
-        "eventHubResourceId": "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'metadata')]",
+        "eventHubResourceId": "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(variables('resourcesName'), '-EventHubs'), 'metadata')]",
         "consumerGroup": "adx",
         "tableName": "opcua_metadata_raw",
         "mappingRuleName": "opcua_metadata_mapping",
@@ -1027,7 +1021,7 @@
       "apiVersion": "2022-12-29",
       "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies', 'Plotly-graph-function')]",
       "properties": {
-        "scriptContent": ".create-or-alter function with (folder = \"Packages\\\\Plotly\", docstring = \"Render interactive graph visualizations using plotly template\")\r\nplotly_graph_fl (\r\n\tedges:(*), nodes:(*),\r\n\tnode_id_column:string=\"nodeId\",\r\n\tsource_id_column:string=\"sourceId\", target_id_column:string=\"targetId\",\r\n\tcolorscale_id:string=\"Cividis\", diagram_title:string=\"Simple Graph for educational purposes\") {\r\nlet pythonCodeBlueprint = ```\r\nimport numpy as np\r\nimport pandas as pd\r\nimport plotly.graph_objects as go\r\nimport networkx as nx\r\n\r\nNODE_OR_EDGE_COLUMN = kargs.get(\"node_or_edge_column\", \"tableName\")\r\nNODE_ROW = kargs.get(\"node_row\", \"V\")\r\nNODE_ID_COLUMN = kargs.get(\"node_id_column\", \"nodeId\")\r\nEDGE_ROW = kargs.get(\"edge_row\", \"E\")\r\nSOURCE_ID_COLUMN = kargs.get(\"source_id_column\", \"sourceId\")\r\nTARGET_ID_COLUMN = kargs.get(\"target_id_column\", \"targetId\")\r\nCOLORSCALE_ID = kargs.get(\"colorscale_id\", \"YlGnBu\")\r\nDIAGRAM_TITLE = kargs.get(\"diagram_title\", \"Network Graph Visualization\")\r\n\r\ndef is_valid_value(value):\r\n\tif value is None or (isinstance(value, str) and value == \u0027\u0027):\r\n\t\treturn False\r\n\tif hasattr(value, \u0027__len__\u0027) and not isinstance(value, str):\r\n\t\ttry:\r\n\t\t\tna_result = pd.isna(value)\r\n\t\t\treturn not (hasattr(na_result, \u0027all\u0027) and na_result.all()) and not na_result\r\n\t\texcept (TypeError, ValueError):\r\n\t\t\treturn True\r\n\treturn not pd.isna(value)\r\n\r\ndef create_properties_dict(row):\r\n\treturn {k: v for k, v in row.items() if is_valid_value(v)}\r\n\r\ndef build_graph(dataframe):\r\n\tgraph = nx.Graph()\r\n\tnodes_df = dataframe[dataframe[NODE_OR_EDGE_COLUMN] == NODE_ROW]\r\n\tedges_df = dataframe[dataframe[NODE_OR_EDGE_COLUMN] == EDGE_ROW]\r\n\tif not nodes_df.empty:\r\n\t\tfor _, row in nodes_df.iterrows():\r\n\t\t\tgraph.add_node(row[NODE_ID_COLUMN], size=1, properties=create_properties_dict(row))\r\n\tif not edges_df.empty:\r\n\t\tfor _, row in edges_df.iterrows():\r\n\t\t\tgraph.add_edge(row[SOURCE_ID_COLUMN], row[TARGET_ID_COLUMN], weight=1, properties=create_properties_dict(row))\r\n\treturn graph\r\n\r\ndef create_edge_traces(graph, positions):\r\n\tedge_x, edge_y = [], []\r\n\tmnode_x, mnode_y, mnode_txt = [], [], []\r\n\tfor source, target, edge_data in graph.edges(data=True):\r\n\t\tx0, y0 = positions[source]\r\n\t\tx1, y1 = positions[target]\r\n\t\tedge_x.extend([x0, x1, None])\r\n\t\tedge_y.extend([y0, y1, None])\r\n\t\tproperties = edge_data.get(\u0027properties\u0027, {})\r\n\t\tvalid_props = {k: v for k, v in properties.items() if is_valid_value(v)}\r\n\t\tprop_text = \u0027\u003cbr\u003e\u0027.join(f\u0027{key}: {value}\u0027 for key, value in valid_props.items())\r\n\t\ttext = f\u0027source: {source} destination: {target}\u003cbr\u003eProperties: {prop_text}\u0027\r\n\t\tmnode_x.append((x0 + x1) * 0.5)\r\n\t\tmnode_y.append((y0 + y1) * 0.5)\r\n\t\tmnode_txt.append(text)\r\n\tedge_trace = go.Scatter(x=edge_x, y=edge_y, line=dict(width=0.5, color=\u0027#888\u0027), hoverinfo=\u0027none\u0027, mode=\u0027lines\u0027)\r\n\tmnode_trace = go.Scatter(x=mnode_x, y=mnode_y, text=mnode_txt, mode=\"markers\", hoverinfo=\u0027text\u0027, opacity=0.5, marker=dict(color=\u0027LightSkyBlue\u0027, size=2, line_width=1))\r\n\treturn edge_trace, mnode_trace\r\n\r\ndef create_node_trace(graph, positions):\r\n\tnodes_list = list(graph.nodes())\r\n\tnum_nodes = len(nodes_list)\r\n\tinv_num_nodes = 1.0 / num_nodes if num_nodes \u003e 0 else 0\r\n\tnode_x = [positions[node][0] for node in nodes_list]\r\n\tnode_y = [positions[node][1] for node in nodes_list]\r\n\tnode_adjacencies = []\r\n\tnode_text = []\r\n\tnode_sizes = []\r\n\tfor node in nodes_list:\r\n\t\tnum_connections = len(graph[node])\r\n\t\tnode_adjacencies.append(num_connections)\r\n\t\tnode_sizes.append(10 + num_connections * inv_num_nodes)\r\n\t\tnode_properties = graph.nodes[node].get(\u0027properties\u0027, {})\r\n\t\tvalid_props = {k: v for k, v in node_properties.items() if is_valid_value(v)}\r\n\t\tprop_text = \u0027\u003cbr\u003e\u0027.join(f\u0027{key}: {value}\u0027 for key, value in valid_props.items())\r\n\t\ttext = f\u0027# of connections: {num_connections}\u003cbr\u003eProperties: {prop_text}\u0027\r\n\t\tnode_text.append(text)\r\n\treturn go.Scatter(x=node_x, y=node_y, text=node_text, mode=\u0027markers\u0027, hoverinfo=\u0027text\u0027, marker=dict(colorscale=COLORSCALE_ID, color=node_adjacencies, size=node_sizes, line=dict(width=2, color=\u0027#888\u0027)))\r\n\r\ndef hierarchical_layout(graph):\r\n\t# Top-down hierarchy with EQUAL spacing so ISA-95 levels form evenly spaced rows\r\n\t# and nodes within each row spread evenly. Replaces the uneven spring layout.\r\n\tpositions = {}\r\n\tif graph.number_of_nodes() == 0:\r\n\t\treturn positions\r\n\timport networkx as _nx\r\n\tlevel = {}\r\n\tfor component in _nx.connected_components(graph):\r\n\t\tsub = graph.subgraph(component)\r\n\t\troot = max(sub.nodes(), key=lambda n: sub.degree(n))\r\n\t\tfor node, depth in _nx.single_source_shortest_path_length(sub, root).items():\r\n\t\t\tlevel[node] = depth\r\n\tmax_level = max(level.values()) if level else 0\r\n\tnodes_by_level = {}\r\n\tfor node, lvl in level.items():\r\n\t\tnodes_by_level.setdefault(lvl, []).append(node)\r\n\tfor lvl, nodes_in_level in nodes_by_level.items():\r\n\t\tnodes_in_level = sorted(nodes_in_level, key=lambda n: str(n))\r\n\t\tcount = len(nodes_in_level)\r\n\t\tfor i, node in enumerate(nodes_in_level):\r\n\t\t\tx = 0.5 if count == 1 else i / (count - 1)\r\n\t\t\ty = 1.0 if max_level == 0 else 1.0 - (lvl / max_level)\r\n\t\t\tpositions[node] = (x, y)\r\n\treturn positions\r\n\r\ndef create_plotly_figure(graph):\r\n\tpositions = hierarchical_layout(graph)\r\n\tedge_trace, mnode_trace = create_edge_traces(graph, positions)\r\n\tnode_trace = create_node_trace(graph, positions)\r\n\treturn go.Figure(data=[edge_trace, node_trace, mnode_trace], layout=go.Layout(title=f\u0027\u003cbr\u003e{DIAGRAM_TITLE}\u003cbr\u003e\u0027, showlegend=False, hovermode=\u0027closest\u0027, margin=dict(b=20, l=5, r=5, t=40), annotations=[dict(text=\"Created using plotly, networkx and the python plugin of Kusto\", showarrow=False, xref=\"paper\", yref=\"paper\", x=0.005, y=-0.002)], xaxis=dict(showgrid=False, zeroline=False, showticklabels=False), yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)))\r\n\r\ngraph = build_graph(df)\r\nfigure = create_plotly_figure(graph)\r\nplotly_obj = figure.to_json()\r\nresult = pd.DataFrame(data=[plotly_obj], columns=[\u0027plotly\u0027])\r\n```;\r\nlet E = view() { edges };\r\nlet V = view() { nodes };\r\nunion withsource=tableName E, V\r\n| evaluate python(\r\ntypeof(plotly:string),\r\npythonCodeBlueprint,\r\nbag_pack(\r\n\t\u0027node_or_edge_column\u0027, \u0027tableName\u0027,\r\n\t\u0027node_row\u0027, \u0027V\u0027,\r\n\t\u0027node_id_column\u0027, node_id_column,\r\n\t\u0027edge_row\u0027, \u0027E\u0027,\r\n\t\u0027source_id_column\u0027, source_id_column,\r\n\t\u0027target_id_column\u0027, target_id_column,\r\n\t\u0027colorscale_id\u0027, colorscale_id,\r\n\t\u0027diagram_title\u0027, diagram_title\r\n))\r\n}",
+        "scriptContent": ".create-or-alter function with (folder = \"Packages\\\\Plotly\", docstring = \"Render interactive graph visualizations using plotly template\")\r\nplotly_graph_fl (\r\n\tedges:(*), nodes:(*),\r\n\tnode_id_column:string=\"nodeId\",\r\n\tsource_id_column:string=\"sourceId\", target_id_column:string=\"targetId\",\r\n\tcolorscale_id:string=\"Cividis\", diagram_title:string=\"Simple Graph for educational purposes\") {\r\nlet pythonCodeBlueprint = ```\r\nimport numpy as np\r\nimport pandas as pd\r\nimport plotly.graph_objects as go\r\nimport networkx as nx\r\n\r\nNODE_OR_EDGE_COLUMN = kargs.get(\"node_or_edge_column\", \"tableName\")\r\nNODE_ROW = kargs.get(\"node_row\", \"V\")\r\nNODE_ID_COLUMN = kargs.get(\"node_id_column\", \"nodeId\")\r\nEDGE_ROW = kargs.get(\"edge_row\", \"E\")\r\nSOURCE_ID_COLUMN = kargs.get(\"source_id_column\", \"sourceId\")\r\nTARGET_ID_COLUMN = kargs.get(\"target_id_column\", \"targetId\")\r\nCOLORSCALE_ID = kargs.get(\"colorscale_id\", \"YlGnBu\")\r\nDIAGRAM_TITLE = kargs.get(\"diagram_title\", \"Network Graph Visualization\")\r\n\r\ndef is_valid_value(value):\r\n\tif value is None or (isinstance(value, str) and value == \u0027\u0027):\r\n\t\treturn False\r\n\tif hasattr(value, \u0027__len__\u0027) and not isinstance(value, str):\r\n\t\ttry:\r\n\t\t\tna_result = pd.isna(value)\r\n\t\t\treturn not (hasattr(na_result, \u0027all\u0027) and na_result.all()) and not na_result\r\n\t\texcept (TypeError, ValueError):\r\n\t\t\treturn True\r\n\treturn not pd.isna(value)\r\n\r\ndef create_properties_dict(row):\r\n\treturn {k: v for k, v in row.items() if is_valid_value(v)}\r\n\r\ndef build_graph(dataframe):\r\n\tgraph = nx.Graph()\r\n\tnodes_df = dataframe[dataframe[NODE_OR_EDGE_COLUMN] == NODE_ROW]\r\n\tedges_df = dataframe[dataframe[NODE_OR_EDGE_COLUMN] == EDGE_ROW]\r\n\tif not nodes_df.empty:\r\n\t\tfor _, row in nodes_df.iterrows():\r\n\t\t\tgraph.add_node(row[NODE_ID_COLUMN], size=1, properties=create_properties_dict(row))\r\n\tif not edges_df.empty:\r\n\t\tfor _, row in edges_df.iterrows():\r\n\t\t\tgraph.add_edge(row[SOURCE_ID_COLUMN], row[TARGET_ID_COLUMN], weight=1, properties=create_properties_dict(row))\r\n\treturn graph\r\n\r\ndef create_edge_traces(graph, positions):\r\n\tedge_x, edge_y = [], []\r\n\tmnode_x, mnode_y, mnode_txt = [], [], []\r\n\tfor source, target, edge_data in graph.edges(data=True):\r\n\t\tx0, y0 = positions[source]\r\n\t\tx1, y1 = positions[target]\r\n\t\tedge_x.extend([x0, x1, None])\r\n\t\tedge_y.extend([y0, y1, None])\r\n\t\tproperties = edge_data.get(\u0027properties\u0027, {})\r\n\t\tvalid_props = {k: v for k, v in properties.items() if is_valid_value(v)}\r\n\t\tprop_text = \u0027\u003cbr\u003e\u0027.join(f\u0027{key}: {value}\u0027 for key, value in valid_props.items())\r\n\t\ttext = f\u0027source: {source} destination: {target}\u003cbr\u003eProperties: {prop_text}\u0027\r\n\t\tmnode_x.append((x0 + x1) * 0.5)\r\n\t\tmnode_y.append((y0 + y1) * 0.5)\r\n\t\tmnode_txt.append(text)\r\n\tedge_trace = go.Scatter(x=edge_x, y=edge_y, line=dict(width=0.5, color=\u0027#888\u0027), hoverinfo=\u0027none\u0027, mode=\u0027lines\u0027)\r\n\tmnode_trace = go.Scatter(x=mnode_x, y=mnode_y, text=mnode_txt, mode=\"markers\", hoverinfo=\u0027text\u0027, opacity=0.5, marker=dict(color=\u0027LightSkyBlue\u0027, size=2, line_width=1))\r\n\treturn edge_trace, mnode_trace\r\n\r\ndef create_node_trace(graph, positions):\r\n\tnodes_list = list(graph.nodes())\r\n\tnum_nodes = len(nodes_list)\r\n\tinv_num_nodes = 1.0 / num_nodes if num_nodes \u003e 0 else 0\r\n\tnode_x = [positions[node][0] for node in nodes_list]\r\n\tnode_y = [positions[node][1] for node in nodes_list]\r\n\tnode_adjacencies = []\r\n\tnode_text = []\r\n\tnode_sizes = []\r\n\tfor node in nodes_list:\r\n\t\tnum_connections = len(graph[node])\r\n\t\tnode_adjacencies.append(num_connections)\r\n\t\tnode_sizes.append(10 + num_connections * inv_num_nodes)\r\n\t\tnode_properties = graph.nodes[node].get(\u0027properties\u0027, {})\r\n\t\tvalid_props = {k: v for k, v in node_properties.items() if is_valid_value(v)}\r\n\t\tprop_text = \u0027\u003cbr\u003e\u0027.join(f\u0027{key}: {value}\u0027 for key, value in valid_props.items())\r\n\t\ttext = f\u0027# of connections: {num_connections}\u003cbr\u003eProperties: {prop_text}\u0027\r\n\t\tnode_text.append(text)\r\n\treturn go.Scatter(x=node_x, y=node_y, text=node_text, mode=\u0027markers\u0027, hoverinfo=\u0027text\u0027, marker=dict(colorscale=COLORSCALE_ID, color=node_adjacencies, size=node_sizes, line=dict(width=2, color=\u0027#888\u0027)))\r\n\r\ndef hierarchical_layout(graph):\r\n\t# Top-down hierarchy with EQUAL, evenly spaced ISA-95 tiers; nodes spread evenly per row.\r\n\tpositions = {}\r\n\tif graph.number_of_nodes() == 0:\r\n\t\treturn positions, 0\r\n\timport networkx as _nx\r\n\tlevel = {}\r\n\tfor component in _nx.connected_components(graph):\r\n\t\tsub = graph.subgraph(component)\r\n\t\tecc = _nx.eccentricity(sub)\r\n\t\troot = max(ecc, key=ecc.get)\r\n\t\tdepth = _nx.single_source_shortest_path_length(sub, root)\r\n\t\tfor node, d in depth.items():\r\n\t\t\tlevel[node] = d\r\n\tmax_level = max(level.values()) if level else 0\r\n\tif max_level > 0:\r\n\t\ttop_count = sum(1 for v in level.values() if v == 0)\r\n\t\tbottom_count = sum(1 for v in level.values() if v == max_level)\r\n\t\tif top_count > bottom_count:\r\n\t\t\tlevel = {n: max_level - v for n, v in level.items()}\r\n\tnodes_by_level = {}\r\n\tfor node, lvl in level.items():\r\n\t\tnodes_by_level.setdefault(lvl, []).append(node)\r\n\tfor lvl, nodes_in_level in nodes_by_level.items():\r\n\t\tnodes_in_level = sorted(nodes_in_level, key=lambda n: str(n))\r\n\t\tcount = len(nodes_in_level)\r\n\t\tfor i, node in enumerate(nodes_in_level):\r\n\t\t\tx = 0.5 if count == 1 else i / (count - 1)\r\n\t\t\ty = max_level - lvl\r\n\t\t\tpositions[node] = (x, y)\r\n\treturn positions, max_level\r\n\r\ndef create_plotly_figure(graph):\r\n\tpositions, max_level = hierarchical_layout(graph)\r\n\tedge_trace, mnode_trace = create_edge_traces(graph, positions)\r\n\tnode_trace = create_node_trace(graph, positions)\r\n\ty_axis = dict(showgrid=False, zeroline=False, showticklabels=False, range=[-0.5, max_level + 0.5])\r\n\treturn go.Figure(data=[edge_trace, node_trace, mnode_trace], layout=go.Layout(title=f'<br>{DIAGRAM_TITLE}<br>', showlegend=False, hovermode='closest', margin=dict(b=20, l=5, r=5, t=40), annotations=[dict(text="Created using plotly, networkx and the python plugin of Kusto", showarrow=False, xref="paper", yref="paper", x=0.005, y=-0.002)], xaxis=dict(showgrid=False, zeroline=False, showticklabels=False), yaxis=y_axis))\r\n\r\ngraph = build_graph(df)\r\nfigure = create_plotly_figure(graph)\r\nplotly_obj = figure.to_json()\r\nresult = pd.DataFrame(data=[plotly_obj], columns=[\u0027plotly\u0027])\r\n```;\r\nlet E = view() { edges };\r\nlet V = view() { nodes };\r\nunion withsource=tableName E, V\r\n| evaluate python(\r\ntypeof(plotly:string),\r\npythonCodeBlueprint,\r\nbag_pack(\r\n\t\u0027node_or_edge_column\u0027, \u0027tableName\u0027,\r\n\t\u0027node_row\u0027, \u0027V\u0027,\r\n\t\u0027node_id_column\u0027, node_id_column,\r\n\t\u0027edge_row\u0027, \u0027E\u0027,\r\n\t\u0027source_id_column\u0027, source_id_column,\r\n\t\u0027target_id_column\u0027, target_id_column,\r\n\t\u0027colorscale_id\u0027, colorscale_id,\r\n\t\u0027diagram_title\u0027, diagram_title\r\n))\r\n}",
         "continueOnErrors": false
       },
       "dependsOn": [
@@ -1050,18 +1044,18 @@
       "comment": "Waits for the ADX cluster to reach a terminal provisioning state before the Event Hub data connections are created. ARM dependsOn only waits for each child resource's own call to return, not for the cluster itself to settle, which intermittently caused 'RequestConflict: provisioning state is not terminal' when a data connection started while the cluster was still transitioning.",
       "type": "Microsoft.Resources/deploymentScripts",
       "apiVersion": "2020-10-01",
-      "name": "[concat(parameters('resourcesName'), '-WaitForAdxCluster')]",
+      "name": "[concat(variables('resourcesName'), '-WaitForAdxCluster')]",
       "location": "[resourceGroup().location]",
       "kind": "AzureCLI",
       "identity": {
         "type": "UserAssigned",
         "userAssignedIdentities": {
-          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]": {}
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]": {}
         }
       },
       "dependsOn": [
         "[resourceId('Microsoft.Kusto/clusters', variables('adxClusterName'))]",
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]"
       ],
       "properties": {
         "azCliVersion": "2.61.0",
@@ -1104,94 +1098,94 @@
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
       "apiVersion": "2021-11-01",
-      "name": "[concat(parameters('resourcesName'), '-EventHubs', '/commander.command')]",
+      "name": "[concat(variables('resourcesName'), '-EventHubs', '/commander.command')]",
       "properties": {
         "messageRetentionInDays": 1,
         "partitionCount": 1
       },
       "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]"
+        "[resourceId('Microsoft.EventHub/namespaces', concat(variables('resourcesName'), '-EventHubs'))]"
       ]
     },
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
       "apiVersion": "2021-11-01",
-      "name": "[concat(parameters('resourcesName'), '-EventHubs', '/commander.response')]",
+      "name": "[concat(variables('resourcesName'), '-EventHubs', '/commander.response')]",
       "properties": {
         "messageRetentionInDays": 1,
         "partitionCount": 1
       },
       "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]"
+        "[resourceId('Microsoft.EventHub/namespaces', concat(variables('resourcesName'), '-EventHubs'))]"
       ]
     },
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
       "apiVersion": "2021-11-01",
-      "name": "[concat(parameters('resourcesName'), '-EventHubs', '/data')]",
+      "name": "[concat(variables('resourcesName'), '-EventHubs', '/data')]",
       "properties": {
         "messageRetentionInDays": 1,
         "partitionCount": 1
       },
       "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]"
+        "[resourceId('Microsoft.EventHub/namespaces', concat(variables('resourcesName'), '-EventHubs'))]"
       ]
     },
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs",
       "apiVersion": "2021-11-01",
-      "name": "[concat(parameters('resourcesName'), '-EventHubs', '/metadata')]",
+      "name": "[concat(variables('resourcesName'), '-EventHubs', '/metadata')]",
       "properties": {
         "messageRetentionInDays": 1,
         "partitionCount": 1
       },
       "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]"
+        "[resourceId('Microsoft.EventHub/namespaces', concat(variables('resourcesName'), '-EventHubs'))]"
       ]
     },
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
       "apiVersion": "2021-11-01",
-      "name": "[format('{0}/{1}/{2}', concat(parameters('resourcesName'), '-EventHubs'), 'data', 'adx')]",
+      "name": "[format('{0}/{1}/{2}', concat(variables('resourcesName'), '-EventHubs'), 'data', 'adx')]",
       "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'data')]"
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(variables('resourcesName'), '-EventHubs'), 'data')]"
       ],
       "properties": {}
     },
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
       "apiVersion": "2021-11-01",
-      "name": "[format('{0}/{1}/{2}', concat(parameters('resourcesName'), '-EventHubs'), 'metadata', 'adx')]",
+      "name": "[format('{0}/{1}/{2}', concat(variables('resourcesName'), '-EventHubs'), 'metadata', 'adx')]",
       "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'metadata')]"
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(variables('resourcesName'), '-EventHubs'), 'metadata')]"
       ],
       "properties": {}
     },
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-10-01-preview",
-      "name": "[guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), variables('eventHubsDataSenderRoleId'))]",
+      "name": "[guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), variables('eventHubsDataSenderRoleId'))]",
       "dependsOn": [
         "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubsNamespaceName'))]",
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]"
       ],
       "properties": {
         "roleDefinitionId": "[variables('eventHubsDataSenderRoleId')]",
-        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), '2018-11-30').principalId]",
         "principalType": "ServicePrincipal"
       }
     },
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-10-01-preview",
-      "name": "[guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), variables('eventHubsDataReceiverRoleId'))]",
+      "name": "[guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), variables('eventHubsDataReceiverRoleId'))]",
       "dependsOn": [
         "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubsNamespaceName'))]",
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]"
       ],
       "properties": {
         "roleDefinitionId": "[variables('eventHubsDataReceiverRoleId')]",
-        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), '2018-11-30').principalId]",
         "principalType": "ServicePrincipal"
       }
     },
@@ -1250,12 +1244,12 @@
         "tier": "Fabric"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]",
-        "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), variables('contributorRoleId')))]"
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]",
+        "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), variables('contributorRoleId')))]"
       ],
       "properties": {
         "administration": {
-          "members": "[createArray(reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId)]"
+          "members": "[createArray(reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), '2018-11-30').principalId)]"
         }
       }
     },
@@ -1263,9 +1257,9 @@
       "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
       "apiVersion": "2021-11-01",
       "condition": "[parameters('deployDatabricks')]",
-      "name": "[format('{0}/{1}/{2}', concat(parameters('resourcesName'), '-EventHubs'), 'data', 'databricks')]",
+      "name": "[format('{0}/{1}/{2}', concat(variables('resourcesName'), '-EventHubs'), 'data', 'databricks')]",
       "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'data')]"
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(variables('resourcesName'), '-EventHubs'), 'data')]"
       ],
       "properties": {}
     },
@@ -1273,46 +1267,46 @@
       "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
       "apiVersion": "2021-11-01",
       "condition": "[parameters('deployDatabricks')]",
-      "name": "[format('{0}/{1}/{2}', concat(parameters('resourcesName'), '-EventHubs'), 'metadata', 'databricks')]",
+      "name": "[format('{0}/{1}/{2}', concat(variables('resourcesName'), '-EventHubs'), 'metadata', 'databricks')]",
       "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'metadata')]"
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(variables('resourcesName'), '-EventHubs'), 'metadata')]"
       ],
       "properties": {}
     },
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
       "apiVersion": "2021-11-01",
-      "name": "[format('{0}/{1}/{2}', concat(parameters('resourcesName'), '-EventHubs'), 'data', 'fabric')]",
+      "name": "[format('{0}/{1}/{2}', concat(variables('resourcesName'), '-EventHubs'), 'data', 'fabric')]",
       "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'data')]"
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(variables('resourcesName'), '-EventHubs'), 'data')]"
       ],
       "properties": {}
     },
     {
       "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
       "apiVersion": "2021-11-01",
-      "name": "[format('{0}/{1}/{2}', concat(parameters('resourcesName'), '-EventHubs'), 'metadata', 'fabric')]",
+      "name": "[format('{0}/{1}/{2}', concat(variables('resourcesName'), '-EventHubs'), 'metadata', 'fabric')]",
       "dependsOn": [
-        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('resourcesName'), '-EventHubs'), 'metadata')]"
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(variables('resourcesName'), '-EventHubs'), 'metadata')]"
       ],
       "properties": {}
     },
     {
       "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-      "name": "[concat(parameters('resourcesName'), '-Identity')]",
+      "name": "[concat(variables('resourcesName'), '-Identity')]",
       "apiVersion": "2018-11-30",
       "location": "[resourceGroup().location]"
     },
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-10-01-preview",
-      "name": "[guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), variables('contributorRoleId'))]",
+      "name": "[guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), variables('contributorRoleId'))]",
       "dependsOn": [
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]"
       ],
       "properties": {
         "roleDefinitionId": "[variables('contributorRoleId')]",
-        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), '2018-11-30').principalId]",
         "principalType": "ServicePrincipal"
       }
     },
@@ -1321,11 +1315,11 @@
       "apiVersion": "2020-10-01-preview",
       "name": "[guid(variables('keyVaultSecretsUserId'), resourceGroup().id)]",
       "dependsOn": [
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]"
       ],
       "properties": {
         "roleDefinitionId": "[variables('keyVaultSecretsUserId')]",
-        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), '2018-11-30').principalId]",
         "principalType": "ServicePrincipal"
       }
     },
@@ -1334,38 +1328,38 @@
       "apiVersion": "2020-10-01-preview",
       "name": "[guid(variables('keyVaultSecretsOfficerId'), resourceGroup().id)]",
       "dependsOn": [
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]"
       ],
       "properties": {
         "roleDefinitionId": "[variables('keyVaultSecretsOfficerId')]",
-        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), '2018-11-30').principalId]",
         "principalType": "ServicePrincipal"
       }
     },
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-10-01-preview",
-      "name": "[guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), variables('keyVaultReaderId'))]",
+      "name": "[guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), variables('keyVaultReaderId'))]",
       "dependsOn": [
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]"
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]"
       ],
       "properties": {
         "roleDefinitionId": "[variables('keyVaultReaderId')]",
-        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), '2018-11-30').principalId]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), '2018-11-30').principalId]",
         "principalType": "ServicePrincipal"
       }
     },
     {
       "type": "Microsoft.Kusto/clusters/databases/principalAssignments",
       "apiVersion": "2021-01-01",
-      "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies', guid(resourceId('Microsoft.Kusto/clusters/databases', split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[1]), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), 'Admin'))]",
+      "name": "[format('{0}/{1}/{2}', variables('adxClusterName'), 'ontologies', guid(resourceId('Microsoft.Kusto/clusters/databases', split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[0], split(format('{0}/{1}', variables('adxClusterName'), 'ontologies'), '/')[1]), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), 'Admin'))]",
       "dependsOn": [
         "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'OEE-calculation-script')]"
       ],
       "properties": {
-        "principalId": "[reference(concat(parameters('resourcesName'), '-Identity')).principalId]",
+        "principalId": "[reference(concat(variables('resourcesName'), '-Identity')).principalId]",
         "role": "Admin",
-        "tenantId": "[reference(concat(parameters('resourcesName'), '-Identity')).tenantId]",
+        "tenantId": "[reference(concat(variables('resourcesName'), '-Identity')).tenantId]",
         "principalType": "App"
       }
     },
@@ -1387,22 +1381,22 @@
       "type": "Microsoft.Resources/deploymentScripts",
       "apiVersion": "2020-10-01",
       "condition": "[parameters('deployDatabricks')]",
-      "name": "[concat(parameters('resourcesName'), '-DatabricksSetup')]",
+      "name": "[concat(variables('resourcesName'), '-DatabricksSetup')]",
       "location": "[resourceGroup().location]",
       "kind": "AzureCLI",
       "identity": {
         "type": "UserAssigned",
         "userAssignedIdentities": {
-          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]": {}
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]": {}
         }
       },
       "dependsOn": [
         "[resourceId('Microsoft.Databricks/workspaces', variables('databricksWorkspaceName'))]",
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]",
-        "[resourceId('Microsoft.EventHub/namespaces', concat(parameters('resourcesName'), '-EventHubs'))]",
-        "[resourceId('Microsoft.EventHub/namespaces/eventhubs/consumergroups', concat(parameters('resourcesName'), '-EventHubs'), 'data', 'databricks')]",
-        "[resourceId('Microsoft.EventHub/namespaces/eventhubs/consumergroups', concat(parameters('resourcesName'), '-EventHubs'), 'metadata', 'databricks')]",
-        "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), variables('contributorRoleId')))]"
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]",
+        "[resourceId('Microsoft.EventHub/namespaces', concat(variables('resourcesName'), '-EventHubs'))]",
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs/consumergroups', concat(variables('resourcesName'), '-EventHubs'), 'data', 'databricks')]",
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs/consumergroups', concat(variables('resourcesName'), '-EventHubs'), 'metadata', 'databricks')]",
+        "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), variables('contributorRoleId')))]"
       ],
       "properties": {
         "azCliVersion": "2.61.0",
@@ -1421,7 +1415,7 @@
           },
           {
             "name": "MANAGED_IDENTITY_CLIENT_ID",
-            "value": "[reference(concat(parameters('resourcesName'), '-Identity')).clientId]"
+            "value": "[reference(concat(variables('resourcesName'), '-Identity')).clientId]"
           },
           {
             "name": "NOTEBOOK_URL",
@@ -1446,12 +1440,12 @@
       "identity": {
         "type": "UserAssigned",
         "userAssignedIdentities": {
-          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]": {}
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]": {}
         }
       },
       "properties": {
         "workloadProfileName": "Consumption",
-        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
         "configuration": {
           "activeRevisionsMode": "Single",
           "ingress": {
@@ -1483,7 +1477,7 @@
                 },
                 {
                   "name": "ADX_APPLICATION_ID",
-                  "value": "[reference(concat(parameters('resourcesName'), '-Identity')).clientId]"
+                  "value": "[reference(concat(variables('resourcesName'), '-Identity')).clientId]"
                 },
                 {
                   "name": "AZURE_TENANT_ID",
@@ -1503,10 +1497,10 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourcesName'), '-AppEnvironment'))]",
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity'))]",
+        "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]",
         "[resourceId('Microsoft.Kusto/clusters', variables('adxClusterName'))]",
-        "[resourceId('Microsoft.Kusto/clusters/databases/principalAssignments', variables('adxClusterName'), 'ontologies', guid(resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), 'ontologies'), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(parameters('resourcesName'), '-Identity')), 'Admin'))]"
+        "[resourceId('Microsoft.Kusto/clusters/databases/principalAssignments', variables('adxClusterName'), 'ontologies', guid(resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), 'ontologies'), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), 'Admin'))]"
       ]
     }
   ],

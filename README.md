@@ -58,7 +58,7 @@ The deployment script logs a warning containing the extension service principal'
 sudo grep -oP "IoT Operations arc extension' service principal '\K[0-9a-fA-F-]{36}" /var/log/bootstrap/Bootstrap.log
 ```
 
-A subscription Owner or User Access Administrator must then create the role assignment **after** the deployment completes, replacing `<extension_principal_id>` with the id printed above and `<subscription_id>`, `<resource_group>` and `<resources_name>` (the `resourcesName` deployment parameter in lowercase) with your values. Do so via the following Azure CLI command:
+A subscription Owner or User Access Administrator must then create the role assignment **after** the deployment completes, replacing `<extension_principal_id>` with the id printed above and `<subscription_id>`, `<resource_group>` and `<resources_name>` (the resources are named after the resource group, so this is the resource group name in lowercase) with your values. Do so via the following Azure CLI command:
 
 ```azurecli
 az role assignment create --assignee-object-id <extension_principal_id> --assignee-principal-type ServicePrincipal --role "Azure Device Registry Administrator" --scope /subscriptions/<subscription_id>/resourceGroups/<resource_group>/providers/Microsoft.DeviceRegistry/schemaRegistries/<resources_name>-schemaregistry

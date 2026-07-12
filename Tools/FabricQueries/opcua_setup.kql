@@ -219,21 +219,34 @@ def hierarchical_layout(graph):
     # gaps where top nodes float far from the rest and lower levels get squashed.
     positions = {}
     if graph.number_of_nodes() == 0:
-        return positions
+        return positions, 0
 
-    # Assign a level (row) to every node via BFS. Each connected component is rooted at its
-    # most-connected node (the ISA-95 hierarchy's upper tiers are hubs), so BFS depth maps to level.
+    # Assign a level (row) to every node via BFS depth. The root must be a TOP-of-hierarchy
+    # node (e.g. Enterprise/Site), not the most-connected hub: the middle tier (Area) has the
+    # highest degree because it links up to sites and down to many datapoints, so rooting there
+    # would collapse the real tiers. Instead root each component at a PERIPHERAL node (one end of
+    # the graph's longest shortest-path), which corresponds to the top (or bottom) of the chain;
+    # we then normalise so level 0 is the tier with the fewest members (the top of the hierarchy).
     import networkx as _nx
     level = {}
     for component in _nx.connected_components(graph):
         sub = graph.subgraph(component)
-        root = max(sub.nodes(), key=lambda n: sub.degree(n))
-        for node, depth in _nx.single_source_shortest_path_length(sub, root).items():
-            level[node] = depth
+        # Peripheral root: endpoint of an approximate graph diameter (max eccentricity node).
+        ecc = _nx.eccentricity(sub)
+        root = max(ecc, key=ecc.get)
+        depth = _nx.single_source_shortest_path_length(sub, root)
+        for node, d in depth.items():
+            level[node] = d
 
+    # Orient so level 0 is the smaller tier (top of the ISA-95 hierarchy). If the peripheral root
+    # happened to be a leaf (bottom), the deepest level would hold the fewest nodes; flip if so.
     max_level = max(level.values()) if level else 0
+    if max_level > 0:
+        top_count = sum(1 for v in level.values() if v == 0)
+        bottom_count = sum(1 for v in level.values() if v == max_level)
+        if top_count > bottom_count:
+            level = {n: max_level - v for n, v in level.items()}
 
-    # Group nodes by level, then place each level as a full row of evenly spaced points.
     nodes_by_level = {}
     for node, lvl in level.items():
         nodes_by_level.setdefault(lvl, []).append(node)
@@ -241,20 +254,24 @@ def hierarchical_layout(graph):
     for lvl, nodes_in_level in nodes_by_level.items():
         nodes_in_level = sorted(nodes_in_level, key=lambda n: str(n))
         count = len(nodes_in_level)
-        # Even horizontal spacing across [0, 1]; single node sits centered.
         for i, node in enumerate(nodes_in_level):
+            # Even horizontal spacing across [0, 1]; single node sits centered.
             x = 0.5 if count == 1 else i / (count - 1)
-            # Even vertical spacing; level 0 (top tier) at the top of the plot.
-            y = 1.0 if max_level == 0 else 1.0 - (lvl / max_level)
+            # Fixed integer tier spacing => consecutive rows are exactly 1 unit apart (guaranteed
+            # even), with level 0 (top tier) at the highest y.
+            y = max_level - lvl
             positions[node] = (x, y)
 
-    return positions
+    return positions, max_level
 
 def create_plotly_figure(graph):
-    positions = hierarchical_layout(graph)
+    positions, max_level = hierarchical_layout(graph)
     edge_trace, mnode_trace = create_edge_traces(graph, positions)
     node_trace = create_node_trace(graph, positions)
-    return go.Figure(data=[edge_trace, node_trace, mnode_trace], layout=go.Layout(title=f'<br>{DIAGRAM_TITLE}<br>', showlegend=False, hovermode='closest', margin=dict(b=20, l=5, r=5, t=40), annotations=[dict(text="Created using plotly, networkx and the python plugin of Kusto", showarrow=False, xref="paper", yref="paper", x=0.005, y=-0.002)], xaxis=dict(showgrid=False, zeroline=False, showticklabels=False), yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)))
+    # Explicit y-axis range with equal top/bottom margin so the even integer tier spacing is
+    # preserved regardless of Plotly's auto-scaling.
+    y_axis = dict(showgrid=False, zeroline=False, showticklabels=False, range=[-0.5, max_level + 0.5])
+    return go.Figure(data=[edge_trace, node_trace, mnode_trace], layout=go.Layout(title=f'<br>{DIAGRAM_TITLE}<br>', showlegend=False, hovermode='closest', margin=dict(b=20, l=5, r=5, t=40), annotations=[dict(text="Created using plotly, networkx and the python plugin of Kusto", showarrow=False, xref="paper", yref="paper", x=0.005, y=-0.002)], xaxis=dict(showgrid=False, zeroline=False, showticklabels=False), yaxis=y_axis))
 
 graph = build_graph(df)
 figure = create_plotly_figure(graph)

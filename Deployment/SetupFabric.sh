@@ -827,16 +827,15 @@ if [ -n "${RESOURCE_GROUP:-}" ]; then
 	# The AIO instance is named '<resourcesName>-aio' (lowercase), matching SetupAzureIoTOperations.sh.
 	AIO_INSTANCE_NAME="$(printf '%s-aio' "${RESOURCES_NAME}" | tr '[:upper:]' '[:lower:]')"
 	TOUCHED=0
-	# The 'az iot ops ns asset ...' commands require the 'azure-iot-ops' CLI extension. This script may
-	# run in an environment (e.g. a Fabric/managed-identity context) where it is NOT installed, in which
-	# case the query below would fail. Ensure it is present so the failure mode is not a silent
-	# "command not found" that gets swallowed and misreported as "no assets found".
-	if ! az extension show --name azure-iot-ops >/dev/null 2>&1; then
-		echo "  installing the 'azure-iot-ops' CLI extension (required for asset discovery/touch)..."
-		az extension add --name azure-iot-ops --only-show-errors --yes >/dev/null 2>&1 \
-			|| az extension add --upgrade --name azure-iot-ops --only-show-errors --yes >/dev/null 2>&1 \
-			|| echo "  warning: failed to install the 'azure-iot-ops' extension; asset discovery may fail."
-	fi
+	# The 'az iot ops ns asset ...' commands require a RECENT 'azure-iot-ops' CLI extension (the 'ns'
+	# namespaced-asset command group only exists in newer versions). This script may run in an environment
+	# (e.g. a Fabric/managed-identity context) where the extension is missing OR stale. A presence-only
+	# check is not enough: an OLD cached extension would pass it but still fail with "'ns' is misspelled
+	# or not recognized". Always add-with-upgrade so we get a version that has the 'ns' group.
+	echo "  ensuring the latest 'azure-iot-ops' CLI extension (required for asset discovery/touch)..."
+	az extension add --upgrade --name azure-iot-ops --only-show-errors --yes >/dev/null 2>&1 \
+		|| az extension add --name azure-iot-ops --only-show-errors --yes >/dev/null 2>&1 \
+		|| echo "  warning: failed to install/upgrade the 'azure-iot-ops' extension; asset discovery may fail."
 	# Discover the OPC UA telemetry asset NAMES. These are namespaced Device Registry assets
 	# (Microsoft.DeviceRegistry/namespaces/assets), so a generic 'az resource list' for
 	# 'Microsoft.DeviceRegistry/assets' returns nothing - use the AIO CLI to query them by instance.

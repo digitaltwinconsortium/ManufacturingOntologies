@@ -925,13 +925,27 @@ else
   # trust list. Best-effort: never fail the whole setup if a restart is unavailable.
   if [ "${station_cert_found}" = "true" ]; then
     echo ">>> Restarting the AIO OPC UA connector and commander so they reload the updated trust list..."
-    for _sel in \
-      "app.kubernetes.io/component=opcua-connector" \
-      "app=aio-opc-opcua-commander"; do
-      sudo kubectl rollout restart deployment -n azure-iot-operations -l "${_sel}" 2>/dev/null || true
-    done
-    # Fallback in case the label selectors differ across AIO builds: restart any opc.tcp/commander pods.
-    sudo kubectl delete pod -n azure-iot-operations -l 'app.kubernetes.io/name in (aio-opc-opcuabroker, aio-opc-opcua-commander)' 2>/dev/null || true
+    # Discover the OPC UA workloads by NAME (label schemes differ across AIO builds, so name matching is
+    # more robust). This catches the connector (aio-opc-opc.tcp-*) and the commander (aio-opc-opcua-
+    # commander-*) deployments. Best-effort: never fail the whole setup if a restart is unavailable.
+    OPCUA_DEPLOYMENTS="$(sudo kubectl get deployment -n azure-iot-operations -o name 2>/dev/null \
+      | grep -Ei 'aio-opc' || true)"
+    if [ -n "${OPCUA_DEPLOYMENTS}" ]; then
+      echo "${OPCUA_DEPLOYMENTS}" | while IFS= read -r _dep; do
+        [ -z "${_dep}" ] && continue
+        echo "    restarting ${_dep}"
+        sudo kubectl rollout restart "${_dep}" -n azure-iot-operations 2>/dev/null || true
+      done
+    else
+      # Fallback: delete OPC UA pods by name match so they are recreated and reload the trust list.
+      echo "    no matching deployments found by name; deleting OPC UA pods so they are recreated..."
+      sudo kubectl get pods -n azure-iot-operations -o name 2>/dev/null \
+        | grep -Ei 'aio-opc' \
+        | while IFS= read -r _pod; do
+            [ -z "${_pod}" ] && continue
+            sudo kubectl delete "${_pod}" -n azure-iot-operations 2>/dev/null || true
+          done
+    fi
     echo ">>> OPC UA connector/commander restart requested (trust list will be reloaded on pod start)."
   fi
 fi

@@ -917,6 +917,23 @@ else
     echo "      az iot ops connector opcua trust add --instance ${AIO_INSTANCE_NAME} \\"
     echo "        --resource-group ${RESOURCE_GROUP} --certificate-file <station>.der"
   fi
+  # The station certs were just synced into the 'aio-opc-ua-broker-trust-list' secret, but the OPC UA
+  # connector AND commander pods load their trusted-certificate store at startup and do NOT hot-reload
+  # the updated synced secret. Without a restart the commander keeps its stale (empty) trust list and
+  # rejects the stations with 'BadCertificateUntrusted' (e.g. CN=packaging.seattle), which blocks method
+  # calls and process-control schema generation. Restart the OPC UA workloads so they pick up the new
+  # trust list. Best-effort: never fail the whole setup if a restart is unavailable.
+  if [ "${station_cert_found}" = "true" ]; then
+    echo ">>> Restarting the AIO OPC UA connector and commander so they reload the updated trust list..."
+    for _sel in \
+      "app.kubernetes.io/component=opcua-connector" \
+      "app=aio-opc-opcua-commander"; do
+      sudo kubectl rollout restart deployment -n azure-iot-operations -l "${_sel}" 2>/dev/null || true
+    done
+    # Fallback in case the label selectors differ across AIO builds: restart any opc.tcp/commander pods.
+    sudo kubectl delete pod -n azure-iot-operations -l 'app.kubernetes.io/name in (aio-opc-opcuabroker, aio-opc-opcua-commander)' 2>/dev/null || true
+    echo ">>> OPC UA connector/commander restart requested (trust list will be reloaded on pod start)."
+  fi
 fi
 
 # 12d. Make the stations trust the OPC UA clients that connect to them. Two simulation components act

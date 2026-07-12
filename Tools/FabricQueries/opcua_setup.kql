@@ -192,7 +192,7 @@ def create_edge_traces(graph, positions):
     mnode_trace = go.Scatter(x=mnode_x, y=mnode_y, text=mnode_txt, mode="markers", hoverinfo='text', opacity=0.5, marker=dict(color='LightSkyBlue', size=2, line_width=1))
     return edge_trace, mnode_trace
 
-def create_node_trace(graph, positions):
+def create_node_trace(graph, positions, level):
     nodes_list = list(graph.nodes())
     num_nodes = len(nodes_list)
     inv_num_nodes = 1.0 / num_nodes if num_nodes > 0 else 0
@@ -201,6 +201,9 @@ def create_node_trace(graph, positions):
     node_adjacencies = []
     node_text = []
     node_sizes = []
+    # DIAGNOSTIC: label each marker with its computed level (L#) so the rendered graph reveals the
+    # actual tier assignment. Temporary - remove once the tiering is verified.
+    node_labels = [f"L{level.get(node, '?')}" for node in nodes_list]
     for node in nodes_list:
         num_connections = len(graph[node])
         node_adjacencies.append(num_connections)
@@ -210,7 +213,7 @@ def create_node_trace(graph, positions):
         prop_text = '<br>'.join(f'{key}: {value}' for key, value in valid_props.items())
         text = f'# of connections: {num_connections}<br>Properties: {prop_text}'
         node_text.append(text)
-    return go.Scatter(x=node_x, y=node_y, text=node_text, mode='markers', hoverinfo='text', marker=dict(colorscale=COLORSCALE_ID, color=node_adjacencies, size=node_sizes, line=dict(width=2, color='#888')))
+    return go.Scatter(x=node_x, y=node_y, text=node_labels, hovertext=node_text, mode='markers+text', textposition='top center', hoverinfo='text', marker=dict(colorscale=COLORSCALE_ID, color=node_adjacencies, size=node_sizes, line=dict(width=2, color='#888')))
 
 def hierarchical_layout(graph):
     # Lay the graph out as a top-down hierarchy with EQUAL spacing so ISA-95 levels
@@ -262,12 +265,12 @@ def hierarchical_layout(graph):
             y = max_level - lvl
             positions[node] = (x, y)
 
-    return positions, max_level
+    return positions, max_level, level
 
 def create_plotly_figure(graph):
-    positions, max_level = hierarchical_layout(graph)
+    positions, max_level, level = hierarchical_layout(graph)
     edge_trace, mnode_trace = create_edge_traces(graph, positions)
-    node_trace = create_node_trace(graph, positions)
+    node_trace = create_node_trace(graph, positions, level)
     # Explicit y-axis range with equal top/bottom margin so the even integer tier spacing is
     # preserved regardless of Plotly's auto-scaling.
     y_axis = dict(showgrid=False, zeroline=False, showticklabels=False, range=[-0.5, max_level + 0.5])

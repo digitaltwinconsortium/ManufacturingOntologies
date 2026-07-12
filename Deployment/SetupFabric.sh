@@ -809,7 +809,7 @@ fi
 #
 # Timing also matters: the metadata eventstream must already be operational when the asset is touched,
 # otherwise the re-emitted metadata message is published before the eventstream subscribes and is
-# missed. We sleep 30 seconds first to let the eventstream created above become active.
+# missed. We sleep 2 minutes first to let the eventstream created above become active.
 #
 # The AIO assets are namespaced Microsoft.DeviceRegistry assets
 # (Microsoft.DeviceRegistry/namespaces/assets) named '<host>-asset', discovered via
@@ -822,8 +822,8 @@ if [ -n "${RESOURCE_GROUP:-}" ]; then
 	echo "Re-triggering OPC UA metadata: touching the Azure IoT Operations OPC UA assets so AIO resends it..."
 	# Give the metadata eventstream time to become operational before we touch the assets, so it is
 	# subscribed and captures the re-emitted metadata rather than missing it.
-	echo "  waiting 30s for the metadata eventstream to become operational before touching assets..."
-	sleep 30
+	echo "  waiting 2 minutes for the metadata eventstream to become operational before touching assets..."
+	sleep 120
 	# The AIO instance is named '<resourcesName>-aio' (lowercase), matching SetupAzureIoTOperations.sh.
 	AIO_INSTANCE_NAME="$(printf '%s-aio' "${RESOURCES_NAME}" | tr '[:upper:]' '[:lower:]')"
 	# The Device Registry namespace holding the assets is '<resourcesName>-aions' (lowercase).

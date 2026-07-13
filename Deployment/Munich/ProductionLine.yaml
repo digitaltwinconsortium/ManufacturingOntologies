@@ -84,6 +84,12 @@ kind: ServiceAccount
 metadata:
   name: ua-cloud-action
   namespace: munich
+  annotations:
+    # Microsoft Entra Workload Identity: federates this service account with the shared user-assigned
+    # managed identity (which has ADX access) so UA-CloudAction queries ADX with a federated token and no
+    # secret. StartSimulation.sh substitutes the managed identity's client id; SetupAzureIoTOperations.sh
+    # creates the federated credential and enables the OIDC issuer/workload identity on the Arc cluster.
+    azure.workload.identity/client-id: "myManagedIdentityClientId"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -95,7 +101,9 @@ spec:
   # MQTT broker directly. It queries ADX for high pressure, then publishes an MQTT v5 RPC request to the
   # built-in OPC UA connector commander's action topic (MESSAGING_PLATFORM=MQTT). Client auth to the broker
   # uses the in-cluster Kubernetes Service Account Token (K8S-SAT); the CA bundle is only for TLS server
-  # validation. Fill in the ADX Entra app registration (APPLICATION_ID/APPLICATION_KEY/AAD_TENANT_ID) before use.
+  # validation. ADX access uses Microsoft Entra Workload Identity (see the service account annotation and the
+  # 'azure.workload.identity/use' pod label); the APPLICATION_ID/KEY/AAD_TENANT_ID env vars below are only a
+  # fallback when workload identity is not enabled.
   replicas: 1
   selector:
     matchLabels:
@@ -104,6 +112,8 @@ spec:
     metadata:
       labels:
         app: ua-cloud-action
+        # Required so the Arc workload-identity webhook projects the federated token into the pod.
+        azure.workload.identity/use: "true"
     spec:
       # Dedicated ServiceAccount so the AIO broker's BrokerAuthentication SAT rule can admit this client
       # (and so the projected 'aio-internal'-audience token identifies UA-CloudAction, not the default SA).
@@ -137,19 +147,21 @@ spec:
           value: "azure-iot-operations/asset-operations/assembly-munich-asset/managementGroup/OpenPressureReliefValve"
         - name: RESPONSE_TOPIC
           value: "azure-iot-operations/asset-operations/assembly-munich-asset/managementGroup/OpenPressureReliefValve/response"
-        # --- ADX access (Entra app registration) for the high-pressure query ---
+        # --- ADX access for the high-pressure query (authenticated via workload identity above) ---
         - name: ADX_INSTANCE_URL
           value: "https://myadxcluster.myregion.kusto.windows.net"
         - name: ADX_DB_NAME
           value: "ontologies"
         - name: ADX_TABLE_NAME
           value: "opcua_telemetry"
+        # Service-principal fallback (used only if workload identity is not enabled). Leave empty to rely on
+        # workload identity; to use a service principal instead, set all three to real values.
         - name: AAD_TENANT_ID
-          value: "myTenantId"
+          value: ""
         - name: APPLICATION_ID
-          value: "myAppRegistrationClientId"
+          value: ""
         - name: APPLICATION_KEY
-          value: "myAppRegistrationClientSecret"
+          value: ""
         # --- OPC UA target (assembly.munich pressure-relief method) ---
         - name: UA_SERVER_ENDPOINT
           value: "opc.tcp://assembly.munich/"
@@ -170,9 +182,16 @@ spec:
           readOnly: true
       volumes:
         # AIO broker trust bundle so UA-CloudAction can validate the MQTT broker's TLS certificate.
+        # NOTE: this configMap is created by AIO in the 'azure-iot-operations' namespace and is namespace-
+        # scoped, so it must be COPIED into this namespace, e.g.:
+        #   kubectl get configmap azure-iot-operations-aio-ca-trust-bundle -n azure-iot-operations -o yaml \
+        #     | sed 's/namespace: azure-iot-operations/namespace: munich/' | kubectl apply -f -
+        # 'optional: true' prevents a missing configMap from wedging the pod in ContainerCreating; if the CA
+        # is absent, set MQTT_TLS_INSECURE=true above (test only) so TLS validation is skipped.
         - name: "aio-ca"
           configMap:
             name: azure-iot-operations-aio-ca-trust-bundle
+            optional: true
             items:
             - key: ca.crt
               path: ca.crt

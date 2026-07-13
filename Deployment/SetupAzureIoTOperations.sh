@@ -1004,6 +1004,75 @@ EOF
     echo "    ${COMMAND_MQTT_TOPIC}"
 fi
 
+# --------------------------
+# 12f. Copy the AIO broker CA trust bundle into the production-line namespaces
+# --------------------------
+# UA-CloudAction runs on the edge in the per-line namespaces (seattle/munich) and mounts the AIO MQTT
+# broker's CA trust bundle to validate the broker's TLS server certificate. That configMap
+# ('azure-iot-operations-aio-ca-trust-bundle') is created by AIO in the '${AIO_NAMESPACE}' namespace and is
+# namespace-scoped, so it must be copied into each line namespace or the UA-CloudAction pod stays stuck in
+# ContainerCreating (MountVolume.SetUp failed ... configmap not found). The volume is marked optional in the
+# manifest, but copying the bundle here is what makes TLS trust actually work.
+echo
+echo "=== Copying the AIO broker CA trust bundle into the production-line namespaces ==="
+CA_TRUST_BUNDLE="azure-iot-operations-aio-ca-trust-bundle"
+for line in "${LINES[@]}"; do
+    line_ns="$(echo "${line}" | tr '[:upper:]' '[:lower:]')"
+    # Ensure the namespace exists (StartSimulation.sh normally creates it via ProductionLine.yaml).
+    sudo kubectl create namespace "${line_ns}" 2>/dev/null || true
+    if sudo kubectl get configmap "${CA_TRUST_BUNDLE}" -n "${AIO_NAMESPACE}" >/dev/null 2>&1; then
+        # Rebuild the configMap with only apiVersion/kind/name/data so server-managed metadata
+        # (namespace, uid, resourceVersion, creationTimestamp AND ownerReferences) is dropped - an empty
+        # ownerReferences.uid otherwise makes 'kubectl apply' reject it in the target namespace.
+        sudo kubectl get configmap "${CA_TRUST_BUNDLE}" -n "${AIO_NAMESPACE}" -o json \
+            | jq '{apiVersion, kind, metadata: {name: .metadata.name}, data}' \
+            | sudo kubectl apply -n "${line_ns}" -f - \
+            && echo "  copied ${CA_TRUST_BUNDLE} into namespace '${line_ns}'." \
+            || echo "  warning: could not copy CA trust bundle into '${line_ns}' (copy it manually or set MQTT_TLS_INSECURE=true)."
+    else
+        echo "  warning: configmap ${CA_TRUST_BUNDLE} not found in ${AIO_NAMESPACE}; skipping copy for '${line_ns}'."
+    fi
+done
+
+# --------------------------
+# 12g. Federate the production-line UA-CloudAction service accounts with the shared managed identity
+# --------------------------
+# UA-CloudAction (edge) queries Azure Data Explorer using Microsoft Entra Workload Identity: its Kubernetes
+# service account token is exchanged for an Entra token for the shared '${RESOURCES_NAME}-Identity' managed
+# identity (which already has ADX access), so no service principal or secret is needed. The cluster's OIDC
+# issuer and workload identity were enabled during Arc connect (section 5). Here we create one federated
+# identity credential per line namespace, trusting the 'ua-cloud-action' service account.
+echo
+echo "=== Federating UA-CloudAction service accounts with '${RESOURCES_NAME}-Identity' (workload identity) ==="
+if [ -n "${ISSUER_URL}" ]; then
+    for line in "${LINES[@]}"; do
+        line_ns="$(echo "${line}" | tr '[:upper:]' '[:lower:]')"
+        run az identity federated-credential create \
+            --name "ua-cloud-action-${line_ns}" \
+            --identity-name "${RESOURCES_NAME}-Identity" \
+            --resource-group "${RESOURCE_GROUP}" \
+            --issuer "${ISSUER_URL}" \
+            --subject "system:serviceaccount:${line_ns}:ua-cloud-action" \
+            --audience "api://AzureADTokenExchange" \
+            && echo "  federated ua-cloud-action in '${line_ns}' with ${RESOURCES_NAME}-Identity." \
+            || echo "  warning: could not create the federated credential for '${line_ns}' (create it manually)."
+    done
+else
+    echo "  warning: OIDC issuer URL is unknown; skipping workload identity federation."
+    echo "           UA-CloudAction will fall back to APPLICATION_ID/KEY/AAD_TENANT_ID if those are set."
+fi
+
+# Restart the UA-CloudAction pods in each line namespace so they pick up the changes made after they were
+# first deployed by StartSimulation.sh: the CA trust bundle copied in 12f, and (via the workload-identity
+# admission webhook) the projected federated token now that the federated credential exists. Without this
+# the pods keep running with the missing configMap / no federated token until the next manual restart.
+for line in "${LINES[@]}"; do
+    line_ns="$(echo "${line}" | tr '[:upper:]' '[:lower:]')"
+    sudo kubectl rollout restart deployment/ua-cloud-action -n "${line_ns}" 2>/dev/null \
+        && echo "  restarted ua-cloud-action in '${line_ns}'." \
+        || echo "  note: ua-cloud-action deployment not found in '${line_ns}' yet (it will pick up the changes on next start)."
+done
+
 # Clean up the generated config files (they contain no secrets).
 rm -rf "${AIO_CONFIG_DIR}"
 

@@ -10,7 +10,7 @@ Select the **Deploy** button to deploy all required resources to your Azure subs
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdigitaltwinconsortium%2FManufacturingOntologies%2Fmain%2FDeployment%2Farm.json)
 
 > [!NOTE]
-> Please be patient! The deployment takes about 95 minutes to complete. After the deployment is complete, you can access the VM via SSH using the credentials you provided during deployment.
+> Please be patient! The deployment takes about 100 minutes to complete. After the deployment is complete, you can access the VM via SSH using the credentials you provided during deployment.
 
 ## Use cases for condition monitoring, OEE calculation, anomaly detection, and predictions in Azure Data Explorer
 

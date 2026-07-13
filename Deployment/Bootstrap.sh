@@ -156,9 +156,10 @@ if [ -n "${EVENTHUBS_CONNECTION_STRING}" ]; then
     try sudo sed -i 's/\r$//' "${START_SIM}"
     try sudo chmod +x "${START_SIM}"
     # Invoke StartSimulation.sh directly (not via the try helper) so the connection string, passed as
-    # an argument, is never echoed to the bootstrap log.
+    # an argument, is never echoed to the bootstrap log. The managed identity client id ($2) lets
+    # StartSimulation.sh authenticate the az CLI (it runs before SetupAzureIoTOperations.sh logs in).
     echo ">>> Starting simulation (connection string redacted)"
-    if sudo env KUBECONFIG=/etc/rancher/k3s/k3s.yaml bash "${START_SIM}" "${EVENTHUBS_CONNECTION_STRING}"; then
+    if sudo env KUBECONFIG=/etc/rancher/k3s/k3s.yaml bash "${START_SIM}" "${EVENTHUBS_CONNECTION_STRING}" "${AIO_MANAGED_IDENTITY_CLIENT_ID}"; then
       echo "Simulation started."
     else
       echo "!!! WARNING: StartSimulation.sh failed (rc=$?)."

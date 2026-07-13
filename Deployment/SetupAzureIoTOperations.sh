@@ -53,30 +53,12 @@ METADATA_EVENTHUB_NAME="metadata"
 DATAFLOW_ENDPOINT_NAME="eventhubs"
 TELEMETRY_DATAFLOW_NAME="opcua-telemetry-to-eventhubs"
 METADATA_DATAFLOW_NAME="opcua-metadata-to-eventhubs"
-# Cloud-to-edge command path (Event Hubs 'commander.command' -> local MQTT broker -> AIO OPC UA commander).
-# A Kafka/Event Hubs endpoint used as a dataflow source needs its own consumer group, hence a dedicated
-# source endpoint. COMMAND_MQTT_TOPIC must match the asset/management-group/action registered in 12e.
-COMMAND_EVENTHUB_NAME="commander.command"
-COMMAND_SOURCE_ENDPOINT_NAME="eventhubs-commands"
-COMMAND_CONSUMER_GROUP="aio-commander-ingest"
-COMMAND_DATAFLOW_NAME="commander-command-to-opcua"
+# Cloud-to-edge command path: UA-CloudAction runs ON THE EDGE (inside the K3s cluster; see
+# Deployment/<Line>/ProductionLine.yaml) and publishes the OPC UA method call directly to the local AIO
+# MQTT broker as an MQTT v5 RPC request. No Event Hubs command endpoint or command/response dataflow is
+# created here. COMMAND_MQTT_TOPIC is the commander's action topic and MUST match the asset/management-
+# group/action registered in section 12e (it is the topic UA-CloudAction publishes to).
 COMMAND_MQTT_TOPIC="azure-iot-operations/asset-operations/assembly-seattle-asset/managementGroup/OpenPressureReliefValve"
-# RPC response path: the AIO commander answers the method Call on the MQTT v5 Response Topic that
-# arrived with the request. UA-CloudAction must set that Response Topic (as an Event Hubs/Kafka user
-# header 'Response Topic') to COMMAND_RESPONSE_MQTT_TOPIC below. A reverse dataflow forwards that MQTT
-# response back to the existing 'commander.response' Event Hub that UA-CloudAction already listens to.
-COMMAND_RESPONSE_EVENTHUB_NAME="commander.response"
-COMMAND_RESPONSE_MQTT_TOPIC="azure-iot-operations/asset-operations/assembly-seattle-asset/managementGroup/OpenPressureReliefValve/response"
-COMMAND_RESPONSE_DATAFLOW_NAME="commander-response-to-eventhubs"
-# The command dataflow forwards the Event Hubs 'commander.command' record straight to the AIO OPC UA
-# commander's MQTT topic with NO transformation. The target method (OpenPressureReliefValve) is
-# parameter-less, so the commander does not need a reshaped argument payload. A builtInTransformation
-# was tried but the AIO mapper's expression grammar cannot synthesize a literal empty object: '{}' is
-# parsed as a variable identifier ("not bound to anything by context"), and both object literals and
-# the '?? <default>' operator are data-flow-graph-only features, NOT supported in a builtInTransformation
-# (see https://learn.microsoft.com/azure/iot-operations/connect-to-cloud/concept-dataflow-graphs-expressions).
-# If a future method needs arguments, add a data flow GRAPH with a map transform, or have UA-CloudAction
-# publish the arguments in the exact shape the commander expects so a plain passthrough still works.
 # Working directory for the generated data flow / asset configuration files.
 AIO_CONFIG_DIR="$(mktemp -d)"
 
@@ -706,136 +688,14 @@ run az iot ops dataflow apply \
   --config-file "${METADATA_DATAFLOW_CONFIG}"
 
 # --------------------------
-# 11b. Cloud-to-edge command path: Event Hubs 'commander.command' -> local MQTT broker -> AIO OPC UA commander
+# 11b. Cloud-to-edge command path (runs on the edge, not via a dataflow)
 # --------------------------
-# This is the AIO-native alternative to routing commands through UA Cloud Commander. UA-CloudAction (the
-# cloud app) keeps publishing its command to the Event Hubs 'commander.command' topic exactly as before -
-# it does not need to reach the in-cluster broker. A dataflow subscribes to that Event Hubs topic and
-# republishes each message onto the local MQTT broker topic the built-in OPC UA connector commander
-# listens on, so the connector executes the OPC UA method (registered in section 12e) on the station.
-#
-# A Kafka/Event Hubs endpoint used as a dataflow SOURCE requires its own consumerGroupId, so we create a
-# dedicated source endpoint 'eventhubs-commands' (same host and managed-identity auth as the egress
-# endpoint) rather than reusing the telemetry/metadata egress endpoint.
-#
-# NOTE (RPC contract): the AIO OPC UA commander's action topic is an MQTT v5 RPC endpoint, not a
-# fire-and-forget topic. A request is only executed when it carries the MQTT v5 'Correlation Data' and
-# 'Response Topic' properties (and the commander replies on that Response Topic). Data flows translate
-# Event Hubs/Kafka user headers to MQTT v5 properties when copyMqttProperties is Enabled (set on both the
-# command source endpoint and the egress endpoint above), so UA-CloudAction must publish to
-# 'commander.command' with:
-#   - body: the JSON method-arguments object; for the parameter-less pressure-relief method use '{}'.
-#   - Event Hubs/Kafka user header 'Correlation Data': a unique per-request id (bytes) - echoed back on
-#     the response so UA-CloudAction can match reply to request.
-#   - Event Hubs/Kafka user header 'Response Topic': ${COMMAND_RESPONSE_MQTT_TOPIC} (the MQTT topic the
-#     commander must reply on; the reverse response dataflow below forwards it to '${COMMAND_RESPONSE_EVENTHUB_NAME}').
-#   - Event Hubs/Kafka user header 'Content Type': application/json.
-# The command dataflow forwards the record body with NO transformation.
-echo
-echo "=== Creating the Event Hubs command source data flow endpoint (${COMMAND_SOURCE_ENDPOINT_NAME}) ==="
-COMMAND_ENDPOINT_CONFIG="${AIO_CONFIG_DIR}/endpoint-eventhubs-commands.json"
-cat > "${COMMAND_ENDPOINT_CONFIG}" <<EOF
-{
-  "endpointType": "Kafka",
-  "kafkaSettings": {
-    "host": "${EVENTHUBS_HOST}:9093",
-    "consumerGroupId": "${COMMAND_CONSUMER_GROUP}",
-    "tls": {
-      "mode": "Enabled"
-    },
-    "authentication": {
-      "method": "UserAssignedManagedIdentity",
-      "userAssignedManagedIdentitySettings": {
-        "clientId": "${MANAGED_IDENTITY_CLIENT_ID}",
-        "tenantId": "${TENANT_ID}",
-        "scope": "https://${EVENTHUBS_HOST}/.default"
-      }
-    },
-    "cloudEventAttributes": "Propagate",
-    "copyMqttProperties": "Enabled"
-  }
-}
-EOF
-run az iot ops dataflow endpoint apply \
-  --resource-group "${RESOURCE_GROUP}" \
-  --instance "${AIO_INSTANCE_NAME}" \
-  --name "${COMMAND_SOURCE_ENDPOINT_NAME}" \
-  --config-file "${COMMAND_ENDPOINT_CONFIG}"
-
-echo
-echo "=== Creating the command data flow (Event Hubs '${COMMAND_EVENTHUB_NAME}' -> MQTT '${COMMAND_MQTT_TOPIC}') ==="
-COMMAND_DATAFLOW_CONFIG="${AIO_CONFIG_DIR}/dataflow-command.json"
-cat > "${COMMAND_DATAFLOW_CONFIG}" <<EOF
-{
-  "mode": "Enabled",
-  "operations": [
-    {
-      "operationType": "Source",
-      "sourceSettings": {
-        "endpointRef": "${COMMAND_SOURCE_ENDPOINT_NAME}",
-        "dataSources": ["${COMMAND_EVENTHUB_NAME}"]
-      }
-    },
-    {
-      "operationType": "Destination",
-      "destinationSettings": {
-        "endpointRef": "default",
-        "dataDestination": "${COMMAND_MQTT_TOPIC}"
-      }
-    }
-  ]
-}
-EOF
-run az iot ops dataflow apply \
-  --resource-group "${RESOURCE_GROUP}" \
-  --instance "${AIO_INSTANCE_NAME}" \
-  --profile default \
-  --name "${COMMAND_DATAFLOW_NAME}" \
-  --config-file "${COMMAND_DATAFLOW_CONFIG}"
-
-# The AIO OPC UA commander answers each method Call as an MQTT RPC response, published to the MQTT v5
-# Response Topic that arrived on the request (UA-CloudAction sets that Response Topic, via the Event
-# Hubs/Kafka 'Response Topic' user header, to ${COMMAND_RESPONSE_MQTT_TOPIC}; copyMqttProperties on the
-# command source endpoint turns that header into the MQTT v5 property). This reverse data flow forwards
-# that MQTT response back to the Event Hubs '${COMMAND_RESPONSE_EVENTHUB_NAME}' hub that UA-CloudAction
-# already listens to for command results. The egress 'eventhubs' endpoint has copyMqttProperties enabled
-# so the response's Correlation Data / Content Type MQTT v5 properties are carried back as Kafka headers,
-# letting UA-CloudAction correlate the reply to its original request.
-# NOTE (known AIO caveat): an Event Hubs/Kafka endpoint used as a data flow SOURCE can corrupt binary
-# Kafka user headers when translating them to MQTT v5 properties (AMQP round-trip). If the RPC does not
-# complete, verify the Correlation Data / Response Topic properties arrive intact at the commander; if
-# they are mangled, move the command leg to the local MQTT broker or fall back to Option C (re-enable the
-# UA Cloud Commander deployment; see Deployment/<Line>/ProductionLine.yaml).
-echo
-echo "=== Creating the command response data flow (MQTT '${COMMAND_RESPONSE_MQTT_TOPIC}' -> Event Hubs '${COMMAND_RESPONSE_EVENTHUB_NAME}') ==="
-COMMAND_RESPONSE_DATAFLOW_CONFIG="${AIO_CONFIG_DIR}/dataflow-command-response.json"
-cat > "${COMMAND_RESPONSE_DATAFLOW_CONFIG}" <<EOF
-{
-  "mode": "Enabled",
-  "operations": [
-    {
-      "operationType": "Source",
-      "sourceSettings": {
-        "endpointRef": "default",
-        "dataSources": ["${COMMAND_RESPONSE_MQTT_TOPIC}"]
-      }
-    },
-    {
-      "operationType": "Destination",
-      "destinationSettings": {
-        "endpointRef": "${DATAFLOW_ENDPOINT_NAME}",
-        "dataDestination": "${COMMAND_RESPONSE_EVENTHUB_NAME}"
-      }
-    }
-  ]
-}
-EOF
-run az iot ops dataflow apply \
-  --resource-group "${RESOURCE_GROUP}" \
-  --instance "${AIO_INSTANCE_NAME}" \
-  --profile default \
-  --name "${COMMAND_RESPONSE_DATAFLOW_NAME}" \
-  --config-file "${COMMAND_RESPONSE_DATAFLOW_CONFIG}"
+# UA-CloudAction runs INSIDE the K3s cluster (see Deployment/<Line>/ProductionLine.yaml, the
+# 'ua-cloud-action' Deployment) with MESSAGING_PLATFORM=MQTT. It publishes the OPC UA method call
+# directly to the local AIO MQTT broker as a spec-valid MQTT v5 RPC request (Payload Format Indicator,
+# Message Expiry, Correlation Data and Response Topic), which the built-in OPC UA connector commander
+# executes (action registered in section 12e). Because the request is issued in-cluster, no Event Hubs
+# command source endpoint and no command/response dataflows are needed here.
 
 # --------------------------
 # 12. Establish OPC UA application-authentication mutual trust with the stations

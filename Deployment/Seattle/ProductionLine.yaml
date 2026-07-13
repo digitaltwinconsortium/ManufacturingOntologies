@@ -12,9 +12,9 @@ metadata:
   name: commander
   namespace: seattle
 spec:
-  # Scaled to zero: UA Cloud Commander is kept in the config as a dormant backup but not run. The AIO
-  # command dataflow forwards commander.command to the built-in OPC UA connector commander instead.
-  # Set replicas back to 1 (and disable the AIO command dataflow) to re-enable UA Cloud Commander.
+  # Scaled to zero: UA Cloud Commander is kept in the config as a dormant backup but not run. Commands now
+  # flow via the in-cluster 'ua-cloud-action' Deployment below, which publishes an MQTT-RPC request directly
+  # to the AIO OPC UA connector commander. Set replicas back to 1 to re-enable UA Cloud Commander instead.
   replicas: 0
   selector:
     matchLabels:
@@ -78,6 +78,113 @@ spec:
     port: 4840
   selector:
     app: commander
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ua-cloud-action
+  namespace: seattle
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ua-cloud-action
+  namespace: seattle
+spec:
+  # UA-CloudAction runs on the edge (inside the K3s cluster where AIO runs) so it can reach the local AIO
+  # MQTT broker directly. It queries ADX for high pressure, then publishes an MQTT v5 RPC request to the
+  # built-in OPC UA connector commander's action topic (MESSAGING_PLATFORM=MQTT). Client auth to the broker
+  # uses the in-cluster Kubernetes Service Account Token (K8S-SAT); the CA bundle is only for TLS server
+  # validation. Fill in the ADX Entra app registration (APPLICATION_ID/APPLICATION_KEY/AAD_TENANT_ID) before use.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ua-cloud-action
+  template:
+    metadata:
+      labels:
+        app: ua-cloud-action
+    spec:
+      # Dedicated ServiceAccount so the AIO broker's BrokerAuthentication SAT rule can admit this client
+      # (and so the projected 'aio-internal'-audience token identifies UA-CloudAction, not the default SA).
+      serviceAccountName: ua-cloud-action
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: ua-cloud-action
+        image: ghcr.io/opcfoundation/ua-cloudaction:main
+        imagePullPolicy: Always
+        env:
+        # --- transport: publish the OPC UA method call directly to the local AIO MQTT broker ---
+        - name: MESSAGING_PLATFORM
+          value: "MQTT"
+        - name: MQTT_TARGET
+          value: "AIOCommander"
+        - name: BROKER_NAME
+          value: "aio-broker.azure-iot-operations"
+        - name: MQTT_PORT
+          value: "18883"
+        - name: MQTT_USE_TLS
+          value: "true"
+        # CA bundle: validates the broker's TLS server certificate (encryption/identity of the broker).
+        - name: MQTT_CA_FILE
+          value: "/var/run/certs/ca.crt"
+        # Client authentication: the AIO broker's default listener accepts the Kubernetes Service Account
+        # Token (K8S-SAT). UA-CloudAction sends this projected token; no username/password is needed.
+        - name: MQTT_SAT_TOKEN_FILE
+          value: "/var/run/secrets/tokens/broker-sat"
+        - name: TOPIC
+          value: "azure-iot-operations/asset-operations/assembly-seattle-asset/managementGroup/OpenPressureReliefValve"
+        - name: RESPONSE_TOPIC
+          value: "azure-iot-operations/asset-operations/assembly-seattle-asset/managementGroup/OpenPressureReliefValve/response"
+        # --- ADX access (Entra app registration) for the high-pressure query ---
+        - name: ADX_INSTANCE_URL
+          value: "https://myadxcluster.myregion.kusto.windows.net"
+        - name: ADX_DB_NAME
+          value: "ontologies"
+        - name: ADX_TABLE_NAME
+          value: "opcua_telemetry"
+        - name: AAD_TENANT_ID
+          value: "myTenantId"
+        - name: APPLICATION_ID
+          value: "myAppRegistrationClientId"
+        - name: APPLICATION_KEY
+          value: "myAppRegistrationClientSecret"
+        # --- OPC UA target (assembly.seattle pressure-relief method) ---
+        - name: UA_SERVER_ENDPOINT
+          value: "opc.tcp://assembly.seattle/"
+        - name: UA_SERVER_METHOD_ID
+          value: "ns=2;i=435"
+        - name: UA_SERVER_OBJECT_ID
+          value: "ns=2;i=424"
+        - name: UA_SERVER_APPLICATION_NAME
+          value: "assembly"
+        - name: UA_SERVER_LOCATION_NAME
+          value: "seattle"
+        volumeMounts:
+        - name: "aio-ca"
+          mountPath: "/var/run/certs"
+          readOnly: true
+        - name: "broker-sat"
+          mountPath: "/var/run/secrets/tokens"
+          readOnly: true
+      volumes:
+        # AIO broker trust bundle so UA-CloudAction can validate the MQTT broker's TLS certificate.
+        - name: "aio-ca"
+          configMap:
+            name: azure-iot-operations-aio-ca-trust-bundle
+            items:
+            - key: ca.crt
+              path: ca.crt
+        # Projected Kubernetes Service Account Token used to authenticate to the AIO MQTT broker (K8S-SAT).
+        # 'audience' must match the AIO BrokerAuthentication SAT audience (AIO default: aio-internal).
+        - name: "broker-sat"
+          projected:
+            sources:
+            - serviceAccountToken:
+                path: broker-sat
+                audience: aio-internal
+                expirationSeconds: 3600
 ---
 apiVersion: apps/v1
 kind: Deployment

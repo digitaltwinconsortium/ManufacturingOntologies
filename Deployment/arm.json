@@ -54,6 +54,8 @@
     "azureRbacKeyVaultReader": "21090545-7ca7-4776-b22c-e363652d74d2",
     "adxClusterName": "[concat(variables('resourcesName'), 'ADX')]",
     "adxDBName": "[concat(variables('resourcesName'), '-DB')]",
+    "uaCloudLibPostgresName": "[toLower(concat(variables('resourcesName'), '-uacloudlib-pg'))]",
+    "uaCloudLibDatabaseName": "uacloudlib",
     "fabricCapacityName": "[toLower(concat(variables('resourcesName'), 'fabric'))]",
     "eventHubsNamespaceName": "[concat(variables('resourcesName'), '-EventHubs')]",
     "databricksWorkspaceName": "[concat(variables('resourcesName'), '-Databricks')]",
@@ -92,296 +94,6 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Network/virtualNetworks', concat(variables('resourcesName'), '-Network-CA'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.App/containerApps",
-      "apiVersion": "2024-03-01",
-      "name": "[concat(variables('resourcesName'), '-edc-provider')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "workloadProfileName": "Consumption",
-        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
-        "configuration": {
-          "ingress": {
-            "external": true,
-            "transport": "Tcp",
-            "targetPort": 8181,
-            "allowInsecure": false,
-            "additionalPortMappings": [
-              {
-                "external": true,
-                "targetPort": 8182
-              },
-              {
-                "external": true,
-                "targetPort": 8281
-              },
-              {
-                "external": true,
-                "targetPort": 8282
-              }
-            ],
-            "traffic": [
-              {
-                "latestRevision": true,
-                "weight": 100
-              }
-            ]
-          }
-        },
-        "template": {
-          "revisionSuffix": "firstrevision",
-          "containers": [
-            {
-              "name": "edc-producer",
-              "image": "fraunhoferiosb/edc-extension4aas:2.2.1",
-              "env": [
-                {
-                  "name": "JAVA_OPTS",
-                  "value": "-XX:MaxRAMPercentage=50.0"
-                },
-                {
-                  "name": "edc_aas_syncPeriod",
-                  "value": "60"
-                },
-                {
-                  "name": "edc_dataplane_aas_acceptOwnSelfSignedCertificates",
-                  "value": "true"
-                },
-                {
-                  "name": "edc_transfer_functions_enabled_protocols",
-                  "value": "http"
-                },
-                {
-                  "name": "web_http_port",
-                  "value": "8281"
-                },
-                {
-                  "name": "web_http_path",
-                  "value": "/api"
-                },
-                {
-                  "name": "web_http_control_port",
-                  "value": "8181"
-                },
-                {
-                  "name": "web_http_control_path",
-                  "value": "/control"
-                },
-                {
-                  "name": "web_http_management_port",
-                  "value": "8182"
-                },
-                {
-                  "name": "web_http_management_path",
-                  "value": "/management"
-                },
-                {
-                  "name": "web_http_protocol_port",
-                  "value": "8282"
-                },
-                {
-                  "name": "web_http_protocol_path",
-                  "value": "/dsp"
-                },
-                {
-                  "name": "edc_dsp_callback_address",
-                  "value": "[concat('http://', reference(concat(variables('resourcesName'), '-AppEnvironment')).staticIp, ':8282/dsp')]"
-                },
-                {
-                  "name": "edc_api_auth_key",
-                  "value": "password"
-                },
-                {
-                  "name": "edc_web_rest_cors_enabled",
-                  "value": "true"
-                },
-                {
-                  "name": "edc_web_rest_cors_origins",
-                  "value": "*"
-                },
-                {
-                  "name": "edc_web_rest_cors_headers",
-                  "value": "x-api-key, content-type"
-                },
-                {
-                  "name": "edc_web_rest_cors_methods",
-                  "value": "GET, POST, DELETE, PUT, OPTIONS"
-                },
-                {
-                  "name": "edc_transfer_proxy_token_verifier_publickey_alias",
-                  "value": "public-key"
-                },
-                {
-                  "name": "edc_transfer_proxy_token_signer_privatekey_alias",
-                  "value": "private-key"
-                },
-                {
-                  "name": "edc_hostname",
-                  "value": "[reference(concat(variables('resourcesName'), '-AppEnvironment')).staticIp]"
-                },
-                {
-                  "name": "edc_participant_id",
-                  "value": "provider"
-                }
-              ],
-              "resources": {
-                "cpu": "2",
-                "memory": "4Gi"
-              }
-            }
-          ],
-          "scale": {
-            "minReplicas": "1",
-            "maxReplicas": "1"
-          }
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
-        "[resourceId('Microsoft.KeyVault/vaults', concat(variables('resourcesName'), '-KV'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.App/containerApps",
-      "apiVersion": "2024-03-01",
-      "name": "[concat(variables('resourcesName'), '-edc-consumer')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "workloadProfileName": "Consumption",
-        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
-        "configuration": {
-          "ingress": {
-            "external": true,
-            "transport": "Tcp",
-            "targetPort": 9191,
-            "allowInsecure": false,
-            "additionalPortMappings": [
-              {
-                "external": true,
-                "targetPort": 9192
-              },
-              {
-                "external": true,
-                "targetPort": 9291
-              },
-              {
-                "external": true,
-                "targetPort": 9292
-              }
-            ],
-            "traffic": [
-              {
-                "latestRevision": true,
-                "weight": 100
-              }
-            ]
-          }
-        },
-        "template": {
-          "revisionSuffix": "firstrevision",
-          "containers": [
-            {
-              "name": "edc-consumer",
-              "image": "fraunhoferiosb/edc-extension4aas:2.2.1",
-              "env": [
-                {
-                  "name": "edc_aas_exposeSelfDescription",
-                  "value": "false"
-                },
-                {
-                  "name": "edc_client_acceptAllProviderOffers",
-                  "value": "true"
-                },
-                {
-                  "name": "web_http_port",
-                  "value": "9291"
-                },
-                {
-                  "name": "web_http_path",
-                  "value": "/api"
-                },
-                {
-                  "name": "web_http_control_port",
-                  "value": "9191"
-                },
-                {
-                  "name": "web_http_control_path",
-                  "value": "/control"
-                },
-                {
-                  "name": "web_http_management_port",
-                  "value": "9192"
-                },
-                {
-                  "name": "web_http_management_path",
-                  "value": "/management"
-                },
-                {
-                  "name": "web_http_protocol_port",
-                  "value": "9292"
-                },
-                {
-                  "name": "web_http_protocol_path",
-                  "value": "/dsp"
-                },
-                {
-                  "name": "edc_dsp_callback_address",
-                  "value": "[concat('http://', reference(concat(variables('resourcesName'), '-AppEnvironment')).staticIp, ':9292/dsp')]"
-                },
-                {
-                  "name": "edc_api_auth_key",
-                  "value": "password"
-                },
-                {
-                  "name": "edc_web_rest_cors_enabled",
-                  "value": "true"
-                },
-                {
-                  "name": "edc_web_rest_cors_origins",
-                  "value": "*"
-                },
-                {
-                  "name": "edc_web_rest_cors_headers",
-                  "value": "x-api-key, content-type"
-                },
-                {
-                  "name": "edc_web_rest_cors_methods",
-                  "value": "GET, POST, DELETE, PUT, OPTIONS"
-                },
-                {
-                  "name": "edc_transfer_proxy_token_verifier_publickey_alias",
-                  "value": "public-key"
-                },
-                {
-                  "name": "edc_transfer_proxy_token_signer_privatekey_alias",
-                  "value": "private-key"
-                },
-                {
-                  "name": "edc_hostname",
-                  "value": "[reference(concat(variables('resourcesName'), '-AppEnvironment')).staticIp]"
-                },
-                {
-                  "name": "edc_participant_id",
-                  "value": "consumer"
-                }
-              ],
-              "resources": {
-                "cpu": "0.5",
-                "memory": "1Gi"
-              }
-            }
-          ],
-          "scale": {
-            "minReplicas": "1",
-            "maxReplicas": "1"
-          }
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
-        "[resourceId('Microsoft.KeyVault/vaults', concat(variables('resourcesName'), '-KV'))]"
       ]
     },
     {
@@ -458,9 +170,62 @@
       ]
     },
     {
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers",
+      "apiVersion": "2024-08-01",
+      "name": "[variables('uaCloudLibPostgresName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard_B1ms",
+        "tier": "Burstable"
+      },
+      "properties": {
+        "administratorLogin": "[parameters('adminUsername')]",
+        "administratorLoginPassword": "[parameters('adminPassword')]",
+        "version": "16",
+        "storage": {
+          "storageSizeGB": 32,
+          "autoGrow": "Disabled"
+        },
+        "backup": {
+          "backupRetentionDays": 7,
+          "geoRedundantBackup": "Disabled"
+        },
+        "highAvailability": {
+          "mode": "Disabled"
+        },
+        "network": {
+          "publicNetworkAccess": "Enabled"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers/databases",
+      "apiVersion": "2024-08-01",
+      "name": "[format('{0}/{1}', variables('uaCloudLibPostgresName'), variables('uaCloudLibDatabaseName'))]",
+      "properties": {
+        "charset": "UTF8",
+        "collation": "en_US.utf8"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', variables('uaCloudLibPostgresName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules",
+      "apiVersion": "2024-08-01",
+      "name": "[format('{0}/{1}', variables('uaCloudLibPostgresName'), 'AllowAllAzureIps')]",
+      "properties": {
+        "startIpAddress": "0.0.0.0",
+        "endIpAddress": "0.0.0.0"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', variables('uaCloudLibPostgresName'))]"
+      ]
+    },
+    {
       "type": "Microsoft.App/containerApps",
       "apiVersion": "2024-03-01",
-      "name": "[concat(variables('resourcesName'), '-aas-repository')]",
+      "name": "[concat(variables('resourcesName'), '-ua-cloudlibrary')]",
       "location": "[resourceGroup().location]",
       "identity": {
         "type": "UserAssigned",
@@ -474,13 +239,16 @@
         "configuration": {
           "secrets": [
             {
-              "name": "servicepassword",
-              "keyVaultUrl": "[concat('https://', variables('resourcesName'), '-KV.vault.azure.net/secrets/servicepassword')]",
-              "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]"
+              "name": "postgrespassword",
+              "value": "[parameters('adminPassword')]"
+            },
+            {
+              "name": "cloudlibservicepassword",
+              "value": "[parameters('adminPassword')]"
             }
           ],
           "ingress": {
-            "external": true,
+            "external": false,
             "transport": "Auto",
             "targetPort": 8080,
             "allowInsecure": false,
@@ -496,9 +264,89 @@
           "revisionSuffix": "firstrevision",
           "containers": [
             {
-              "name": "aas-repository",
-              "image": "ghcr.io/digitaltwinconsortium/aas-repository:masterv3",
+              "name": "ua-cloudlibrary",
+              "image": "ghcr.io/opcfoundation/ua-cloudlibrary:latest",
               "env": [
+                {
+                  "name": "ASPNETCORE_URLS",
+                  "value": "http://+:8080"
+                },
+                {
+                  "name": "PostgreSQLEndpoint",
+                  "value": "[reference(resourceId('Microsoft.DBforPostgreSQL/flexibleServers', variables('uaCloudLibPostgresName')), '2024-08-01').fullyQualifiedDomainName]"
+                },
+                {
+                  "name": "PostgreSQLUsername",
+                  "value": "[parameters('adminUsername')]"
+                },
+                {
+                  "name": "PostgreSQLPassword",
+                  "secretRef": "postgrespassword"
+                },
+                {
+                  "name": "ServicePassword",
+                  "secretRef": "cloudlibservicepassword"
+                }
+              ],
+              "resources": {
+                "cpu": "1",
+                "memory": "2Gi"
+              }
+            }
+          ],
+          "scale": {
+            "minReplicas": "1",
+            "maxReplicas": "1"
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
+        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers/databases', variables('uaCloudLibPostgresName'), variables('uaCloudLibDatabaseName'))]",
+        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers/firewallRules', variables('uaCloudLibPostgresName'), 'AllowAllAzureIps')]"
+      ]
+    },
+    {
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2024-03-01",
+      "name": "[concat(variables('resourcesName'), '-ua-dataprocessor')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]": {}
+        }
+      },
+      "properties": {
+        "workloadProfileName": "Consumption",
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
+        "configuration": {
+          "secrets": [
+            {
+              "name": "cloudlibpassword",
+              "value": "[parameters('adminPassword')]"
+            }
+          ]
+        },
+        "template": {
+          "revisionSuffix": "firstrevision",
+          "containers": [
+            {
+              "name": "ua-dataprocessor",
+              "image": "ghcr.io/opcfoundation/ua-dataprocessor:main",
+              "env": [
+                {
+                  "name": "UA_CLOUD_LIBRARY_URL",
+                  "value": "[concat('https://', reference(resourceId('Microsoft.App/containerApps', concat(variables('resourcesName'), '-ua-cloudlibrary')), '2024-03-01').configuration.ingress.fqdn)]"
+                },
+                {
+                  "name": "UA_CLOUD_LIBRARY_USERNAME",
+                  "value": "[parameters('adminUsername')]"
+                },
+                {
+                  "name": "UA_CLOUD_LIBRARY_PASSWORD",
+                  "secretRef": "cloudlibpassword"
+                },
                 {
                   "name": "ADX_HOST",
                   "value": "[reference(resourceId('Microsoft.Kusto/clusters', variables('adxClusterName')), '2022-02-01').uri]"
@@ -508,12 +356,12 @@
                   "value": "ontologies"
                 },
                 {
-                  "name": "AAD_APPLICATION_ID",
+                  "name": "ADX_APPLICATION_ID",
                   "value": "[reference(concat(variables('resourcesName'), '-Identity')).clientId]"
                 },
                 {
-                  "name": "CALCULATE_PCF",
-                  "value": "1"
+                  "name": "ADX_TENANT_ID",
+                  "value": "[subscription().tenantId]"
                 },
                 {
                   "name": "WATTTIME_USER",
@@ -522,10 +370,6 @@
                 {
                   "name": "WATTTIME_PASSWORD",
                   "value": ""
-                },
-                {
-                  "name": "ServicePassword",
-                  "secretRef": "servicepassword"
                 }
               ],
               "resources": {
@@ -542,6 +386,7 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
+        "[resourceId('Microsoft.App/containerApps', concat(variables('resourcesName'), '-ua-cloudlibrary'))]",
         "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'OPCUA-parsing-script')]"
       ]
     },

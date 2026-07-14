@@ -56,9 +56,17 @@ METADATA_DATAFLOW_NAME="opcua-metadata-to-eventhubs"
 # Cloud-to-edge command path: UA-CloudAction runs ON THE EDGE (inside the K3s cluster; see
 # Deployment/<Line>/ProductionLine.yaml) and publishes the OPC UA method call directly to the local AIO
 # MQTT broker as an MQTT v5 RPC request. No Event Hubs command endpoint or command/response dataflow is
-# created here. COMMAND_MQTT_TOPIC is the commander's action topic and MUST match the asset/management-
-# group/action registered in section 12e (it is the topic UA-CloudAction publishes to).
-COMMAND_MQTT_TOPIC="azure-iot-operations/asset-operations/assembly-seattle-asset/managementGroup/OpenPressureReliefValve"
+# created here. The commander's action topic is per-asset and MUST match the asset/management-group/action
+# registered in section 12e (it is the topic UA-CloudAction publishes to). The pressure-relief command is
+# enabled on the 'assembly' station of BOTH production lines; the object/method IDs are identical because
+# both lines run the same Station.NodeSet2.xml.
+COMMAND_ASSETS=("assembly-seattle-asset" "assembly-munich-asset")
+COMMAND_MGMT_GROUP="managementGroup"
+COMMAND_ACTION_NAME="OpenPressureReliefValve"
+COMMAND_OBJECT_ID="ns=2;i=424"
+COMMAND_METHOD_ID="ns=2;i=435"
+# Build the per-asset commander action topic: azure-iot-operations/asset-operations/<asset>/<mg>/<action>
+command_topic_for() { echo "azure-iot-operations/asset-operations/$1/${COMMAND_MGMT_GROUP}/${COMMAND_ACTION_NAME}"; }
 # Working directory for the generated data flow / asset configuration files.
 AIO_CONFIG_DIR="$(mktemp -d)"
 
@@ -918,12 +926,12 @@ done
 
 # 12e. Register an OPC UA command (management-group action) so the AIO OPC UA connector's built-in
 # commander can execute a command on the station directly - the AIO-native alternative to UA Cloud
-# Commander. The reference command is "open the pressure relief valve" on the Seattle assembly
-# station (the same command UA-CloudAction triggers). It is modeled as a management-group action of
-# type "Call" on the station's telemetry asset: the management group's dataSource is the OPC UA
+# Commander. The reference command is "open the pressure relief valve" on the assembly station of BOTH
+# production lines (the same command UA-CloudAction triggers). It is modeled as a management-group action
+# of type "Call" on each station's telemetry asset: the management group's dataSource is the OPC UA
 # objectId and the action's targetUri is the methodId (see Station.NodeSet2.xml), and the action's
-# MQTT topic matches COMMAND_MQTT_TOPIC so the commander subscribes to it. UA-CloudAction
-# (MESSAGING_PLATFORM=AIO-Commander) invokes it by publishing to that topic.
+# MQTT topic is the per-asset command topic so the commander subscribes to it. UA-CloudAction
+# (MESSAGING_PLATFORM=MQTT) invokes it by publishing to that topic.
 #
 # This is registered via the GENERIC ARM resource API ('az resource update' / 'az rest' PATCH) rather
 # than the preview 'az iot ops ns asset opcua management-group' verb. That verb is not available in
@@ -933,39 +941,38 @@ done
 # 'properties.managementGroups' works with plain 'az' and no extension dependency, fully automated.
 # This is additive: UA Cloud Commander stays deployed as a backup.
 echo
-echo "=== Registering the AIO OPC UA commander action (Seattle assembly pressure relief valve) ==="
-COMMAND_ASSET="assembly-seattle-asset"
-COMMAND_MGMT_GROUP="managementGroup"
-COMMAND_ACTION_NAME="OpenPressureReliefValve"
-COMMAND_OBJECT_ID="ns=2;i=424"
-COMMAND_METHOD_ID="ns=2;i=435"
-# Resolve the asset's full ARM resource id (name is namespace-prefixed in 'az resource list', so match
-# on the id rather than reconstructing a path).
-COMMAND_ASSET_ID="$(az resource list \
-    --resource-group "${RESOURCE_GROUP}" \
-    --resource-type "Microsoft.DeviceRegistry/namespaces/assets" \
-    ${SUBSCRIPTION_ID:+--subscription "${SUBSCRIPTION_ID}"} \
-    --query "[?ends_with(name, '/${COMMAND_ASSET}') || name=='${COMMAND_ASSET}'].id | [0]" -o tsv 2>/dev/null || true)"
-if [ -z "${COMMAND_ASSET_ID}" ]; then
-    echo "!!! NOTE: could not resolve asset '${COMMAND_ASSET}' in '${RESOURCE_GROUP}'; skipping the AIO"
-    echo "    commander action registration. Ensure the asset exists, then re-run this section."
-else
+echo "=== Registering the AIO OPC UA commander action (assembly pressure relief valve, both lines) ==="
+for COMMAND_ASSET in "${COMMAND_ASSETS[@]}"; do
+    command_topic="$(command_topic_for "${COMMAND_ASSET}")"
+    echo ">>> Asset '${COMMAND_ASSET}' -> topic '${command_topic}'"
+    # Resolve the asset's full ARM resource id (name is namespace-prefixed in 'az resource list', so match
+    # on the id rather than reconstructing a path).
+    COMMAND_ASSET_ID="$(az resource list \
+        --resource-group "${RESOURCE_GROUP}" \
+        --resource-type "Microsoft.DeviceRegistry/namespaces/assets" \
+        ${SUBSCRIPTION_ID:+--subscription "${SUBSCRIPTION_ID}"} \
+        --query "[?ends_with(name, '/${COMMAND_ASSET}') || name=='${COMMAND_ASSET}'].id | [0]" -o tsv 2>/dev/null || true)"
+    if [ -z "${COMMAND_ASSET_ID}" ]; then
+        echo "!!! NOTE: could not resolve asset '${COMMAND_ASSET}' in '${RESOURCE_GROUP}'; skipping the AIO"
+        echo "    commander action registration for it. Ensure the asset exists, then re-run this section."
+        continue
+    fi
     # Build the managementGroups payload (one management group with one Call action). The action topic
-    # MUST equal COMMAND_MQTT_TOPIC so the commander subscribes to the same topic the command dataflow
+    # MUST equal the per-asset command topic so the commander subscribes to the same topic UA-CloudAction
     # publishes to. Write to a file to avoid shell/JMESPath quoting pitfalls.
-    COMMAND_MG_FILE="${AIO_CONFIG_DIR}/management-groups.json"
+    COMMAND_MG_FILE="${AIO_CONFIG_DIR}/management-groups-${COMMAND_ASSET}.json"
     cat > "${COMMAND_MG_FILE}" <<EOF
 [
   {
     "name": "${COMMAND_MGMT_GROUP}",
     "dataSource": "${COMMAND_OBJECT_ID}",
-    "defaultTopic": "${COMMAND_MQTT_TOPIC}",
+    "defaultTopic": "${command_topic}",
     "actions": [
       {
         "name": "${COMMAND_ACTION_NAME}",
         "actionType": "Call",
         "targetUri": "${COMMAND_METHOD_ID}",
-        "topic": "${COMMAND_MQTT_TOPIC}"
+        "topic": "${command_topic}"
       }
     ]
   }
@@ -979,7 +986,7 @@ EOF
     else
         # Fallback: REST PATCH to the asset id (still extension-independent). Try a couple of API versions.
         echo "  'az resource update' did not apply; trying a REST PATCH fallback..."
-        COMMAND_PATCH_FILE="${AIO_CONFIG_DIR}/asset-patch.json"
+        COMMAND_PATCH_FILE="${AIO_CONFIG_DIR}/asset-patch-${COMMAND_ASSET}.json"
         printf '{"properties":{"managementGroups":%s}}' "$(cat "${COMMAND_MG_FILE}")" > "${COMMAND_PATCH_FILE}"
         _patched=""
         for _apiver in 2025-10-01 2024-11-01 2026-04-01; do
@@ -994,15 +1001,15 @@ EOF
         if [ -n "${_patched}" ]; then
             echo ">>> Registered management group '${COMMAND_MGMT_GROUP}' with Call action '${COMMAND_ACTION_NAME}' on '${COMMAND_ASSET}' (REST api-version ${_patched})."
         else
-            echo "!!! NOTE: could not register the commander action automatically. The command path will not"
-            echo "    execute until the management group '${COMMAND_MGMT_GROUP}' (dataSource ${COMMAND_OBJECT_ID}) and"
-            echo "    Call action '${COMMAND_ACTION_NAME}' (targetUri ${COMMAND_METHOD_ID}, topic ${COMMAND_MQTT_TOPIC})"
-            echo "    are added to asset '${COMMAND_ASSET}', or keep using UA Cloud Commander."
+            echo "!!! NOTE: could not register the commander action automatically on '${COMMAND_ASSET}'. The"
+            echo "    command path will not execute until the management group '${COMMAND_MGMT_GROUP}' (dataSource"
+            echo "    ${COMMAND_OBJECT_ID}) and Call action '${COMMAND_ACTION_NAME}' (targetUri ${COMMAND_METHOD_ID},"
+            echo "    topic ${command_topic}) are added to asset '${COMMAND_ASSET}', or keep using UA Cloud Commander."
         fi
     fi
-    echo ">>> UA-CloudAction (MESSAGING_PLATFORM=AIO-Commander) can invoke the command by publishing to:"
-    echo "    ${COMMAND_MQTT_TOPIC}"
-fi
+    echo ">>> UA-CloudAction (MESSAGING_PLATFORM=MQTT) can invoke the command by publishing to:"
+    echo "    ${command_topic}"
+done
 
 # --------------------------
 # 12f. Copy the AIO broker CA trust bundle into the production-line namespaces

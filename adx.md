@@ -24,6 +24,13 @@ The sample dashboard also includes a **Unified NameSpace (UNS) / ISA-95 Graph** 
 
 An [**I3X API**](https://i3x.dev) container app named `<resourcesName>-i3x4kusto` is deployed, exposing ADX over the I3X REST API. Its URL can be retrieved from the Azure portal and the Swagger endpoint is accessible by adding /swagger to its URL.
 
+The I3X API is protected with HTTP Basic authentication. Every request (including the Swagger "Authorize" dialog and any I3X client) must supply the credentials you provided during deployment:
+
+- **Username**: the `adminUsername` you specified at deployment.
+- **Password**: the `adminPassword` you specified at deployment.
+
+The health/capabilities endpoint (`GET /v1/info`) and the Swagger UI itself remain accessible without credentials; all data endpoints require the Basic auth header (for example `curl -u <adminUsername>:<adminPassword> https://<i3x-url>/v1/namespaces`).
+
 ## Run a Query
 
 Open your ADX database and select `Queries`. Because the telemetry `Subject` is the numeric `DataSetWriterId`, the station and production line are matched on the metadata `DataSetName` (built from the OPC UA server's ApplicationUri and NodeId) and then joined to the telemetry on `Subject`. Enter the following query in the text box, and select `Run`:

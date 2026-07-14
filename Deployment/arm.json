@@ -1143,6 +1143,12 @@
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
         "configuration": {
           "activeRevisionsMode": "Single",
+          "secrets": [
+            {
+              "name": "i3xbasicauthpassword",
+              "value": "[parameters('adminPassword')]"
+            }
+          ],
           "ingress": {
             "external": true,
             "transport": "Auto",
@@ -1177,6 +1183,14 @@
                 {
                   "name": "AZURE_TENANT_ID",
                   "value": "[subscription().tenantId]"
+                },
+                {
+                  "name": "I3X_BASIC_AUTH_USERNAME",
+                  "value": "[parameters('adminUsername')]"
+                },
+                {
+                  "name": "I3X_BASIC_AUTH_PASSWORD",
+                  "secretRef": "i3xbasicauthpassword"
                 }
               ],
               "resources": {

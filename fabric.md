@@ -26,6 +26,13 @@ Select the **Deploy to Azure** button and choose the **same resource group you u
 
 An [**I3X API**](https://i3x.dev) container app named `<resourcesName>-i3x4kusto-fabric` is deployed, exposing the Eventhouse over the I3X REST API. Its URL can be retrieved from the Azure portal and the Swagger endpoint is accessible by adding /swagger to its URL.
 
+The I3X API is protected with HTTP Basic authentication. Every request (including the Swagger "Authorize" dialog and any I3X client) must supply the credentials you provided during the Fabric deployment:
+
+- **Username**: the `adminUsername` you specified.
+- **Password**: the `adminPassword` you specified.
+
+The health/capabilities endpoint (`GET /v1/info`) and the Swagger UI itself remain accessible without credentials; all data endpoints require the Basic auth header (for example `curl -u <adminUsername>:<adminPassword> https://<i3x-url>/v1/namespaces`).
+
 ## Use the sample dashboard
 
 The reference solution ships a sample **Fabric RTI dashboard** that mirrors the use cases of the Azure Data Explorer dashboard: condition monitoring, OEE calculation, energy consumption, production and diagnostics for the Munich and Seattle production lines. The dashboard is already imported and published against the deployed EventHouse - just open it from **Dashboards** in your workspace.

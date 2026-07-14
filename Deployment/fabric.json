@@ -8,6 +8,20 @@
       "metadata": {
         "description": "Do not provide a value! This value is set automatically to the current UTC time and is used only to make the Fabric setup deployment script run on every deployment. (utcNow() can only be used in a parameter default, so it is surfaced to the template through the 'forceUpdateTime' variable.)"
       }
+    },
+    "adminUsername": {
+      "type": "string",
+      "minLength": 2,
+      "metadata": {
+        "description": "Username for HTTP Basic authentication of the i3X API. Specific to this Fabric deployment; can be any value."
+      }
+    },
+    "adminPassword": {
+      "type": "secureString",
+      "minLength": 12,
+      "metadata": {
+        "description": "Password for HTTP Basic authentication of the i3X API. Specific to this Fabric deployment; can be any value."
+      }
     }
   },
   "variables": {
@@ -124,6 +138,12 @@
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
         "configuration": {
           "activeRevisionsMode": "Single",
+          "secrets": [
+            {
+              "name": "i3xbasicauthpassword",
+              "value": "[parameters('adminPassword')]"
+            }
+          ],
           "ingress": {
             "external": true,
             "transport": "Auto",
@@ -158,6 +178,14 @@
                 {
                   "name": "AZURE_TENANT_ID",
                   "value": "[subscription().tenantId]"
+                },
+                {
+                  "name": "I3X_BASIC_AUTH_USERNAME",
+                  "value": "[parameters('adminUsername')]"
+                },
+                {
+                  "name": "I3X_BASIC_AUTH_PASSWORD",
+                  "secretRef": "i3xbasicauthpassword"
                 }
               ],
               "resources": {

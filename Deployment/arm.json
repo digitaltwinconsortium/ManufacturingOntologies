@@ -248,7 +248,7 @@
             }
           ],
           "ingress": {
-            "external": false,
+            "external": true,
             "transport": "Auto",
             "targetPort": 8080,
             "allowInsecure": false,

@@ -28,8 +28,29 @@ This reference solution supports Digital Product Passport (DPP) data modeling in
 
 This example automatically creates a Product Caron Footprint (PCF) for a sample of the simulated products produced and stores the DPPs in an UA Cloud Library. The UA Cloud Library is provided as an open-source reference solution by the [OPC Foundation](https://www.opcfoundation.org). The configuration of the deployed UA Cloud Library happens automatically during the deployment workflow and comes with its own dashboard. To access the dashboard, navigate to the **Overview** page of the UA Cloud Library container app from the Azure portal, and select the **Application URL** displayed. The UA Cloud Library comes with its own Explorer that can be used to inspect produced DPPs.
 
-> [!NOTE]
-> The UA Cloud Library has a REST interface that's [OpenAPI](https://swagger.io/specification) compatible and implements the official Digital Product Passport interface as specified in the EN 18222 standard.
+### Retrieve a Digital Product Passport (DPP) via the DPP Lifecycle API
+
+The UA Cloud Library exposes a Swagger (OpenAPI) UI that you can use to browse the DPPs produced by the simulation and retrieve a specific one through the EN 18222 DPP Lifecycle API. Follow these steps:
+
+1. **Open the Swagger UI.** In the [Azure portal](https://portal.azure.com), navigate to your resource group and open the UA Cloud Library container app (named `<resource-group-name>-ua-cloudlibrary`). On its **Overview** page, copy the **Application URL** (for example `https://<resource-group-name>-ua-cloudlibrary.<region>.azurecontainerapps.io`). Open that URL in a browser and append `/swagger` to reach the Swagger UI.
+   
+2. **Authorize as admin.** In the Swagger UI, select the **Authorize** button (top right).
+
+   - **Username**: `admin`
+   - **Password**: the value of the admin password you provided when you deployed the reference solution (the same password used for the deployment's Virtual Machine).
+
+   Enter these credentials and select **Authorize**, then **Close**. Subsequent requests from the Swagger UI are now sent with the admin credentials.
+
+3. **List the available DPPs.** Expand the **GET `/infomodel/namespaces`** operation and select **Try it out** > **Execute**. The response lists the information-model namespaces stored in the UA Cloud Library, including the DPPs produced by the simulation. Note the identifier (`dppId`) of the DPP you want to retrieve.
+
+4. **Retrieve a specific DPP.** Expand the **GET `/v1/dpps/{dppId}`** operation, select **Try it out**, paste the `dppId` from the previous step into the `dppId` field, and select **Execute**. The response body contains the full Digital Product Passport JSON document, including the calculated Product Carbon Footprint (PCF), for that product.
+
+> [!TIP]
+> The same calls work outside the Swagger UI with any HTTP client (for example `curl`) by sending the Basic authentication header, for example:
+> ```bash
+> curl -u admin:<ServicePassword> https://<application-url>/infomodel/namespaces
+> curl -u admin:<ServicePassword> https://<application-url>/v1/dpps/<dppId>
+> ```
 
 ### Configure the WattTime service
 

@@ -341,7 +341,7 @@
                 },
                 {
                   "name": "UA_CLOUD_LIBRARY_USERNAME",
-                  "value": "[parameters('adminUsername')]"
+                  "value": "admin"
                 },
                 {
                   "name": "UA_CLOUD_LIBRARY_PASSWORD",

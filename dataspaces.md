@@ -28,7 +28,7 @@ This reference solution supports Digital Product Passport (DPP) data modeling in
 
 This example automatically creates a Product Caron Footprint (PCF) for a sample of the simulated products produced and stores the DPPs in an UA Cloud Library. The UA Cloud Library is provided as an open-source reference solution by the [OPC Foundation](https://www.opcfoundation.org). The configuration of the deployed UA Cloud Library happens automatically during the deployment workflow and comes with its own dashboard. To access the dashboard, navigate to the **Overview** page of the UA Cloud Library container app from the Azure portal, and select the **Application URL** displayed. The UA Cloud Library comes with its own Explorer that can be used to inspect produced DPPs.
 
-### Retrieve a Digital Product Passport (DPP) via the DPP Lifecycle API
+## Retrieve a Digital Product Passport (DPP) via the DPP Lifecycle API
 
 The UA Cloud Library exposes a Swagger (OpenAPI) UI that you can use to browse the DPPs produced by the simulation and retrieve a specific one through the EN 18222 DPP Lifecycle API. Follow these steps:
 
@@ -52,7 +52,7 @@ The UA Cloud Library exposes a Swagger (OpenAPI) UI that you can use to browse t
 > curl -u admin:<ServicePassword> https://<application-url>/v1/dpps/<dppId>
 > ```
 
-### Configure the WattTime service
+## Configure the WattTime service (Optional)
 
 To optionally configure the WattTime service for a more accurate carbon footprint calculation:
 

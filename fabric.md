@@ -9,11 +9,11 @@
 The reference solution's deployment script can automatically deploy and configure Microsoft Fabric for you, as a **third analytics option** next to Azure Data Explorer and Azure Databricks.
 
 **Prerequisites (required)**
->
-> - **Deploy the main solution first:** Fabric reuses the managed identity (`<resourcesName>-Identity`), Event Hubs namespace, Container Apps environment and the `fabric` capacity created by the ADX/Databricks deployment. Deploy that first (see [adx.md](adx.md)).
-> - **Enable Fabric for the tenant:** Deploying the F2 capacity in Azure does **not** turn Fabric on for your tenant. If `fabric.microsoft.com` keeps switching back to Power BI, a Fabric admin still needs to enable Fabric: Fabric portal -> Settings (gear) -> Admin portal -> Tenant settings -> Microsoft Fabric -> **Users can create Fabric items** -> Enabled (requires the *Fabric administrator* role).
-> - **Enable the Fabric API setting:** The Fabric setup script calls the Fabric REST APIs as the solution's user-assigned managed identity (`<resourcesName>-Identity`), so a Fabric tenant admin must enable **Service principals can use Fabric APIs** (also shown as *Service principals can call Fabric public APIs*) under Fabric admin portal -> Tenant settings -> Developer settings.
-> - **Enable service-principal workspace creation setting:** The setup script creates a Fabric workspace, which is gated by a *different* developer setting that is **disabled by default**: **Service principals can create workspaces, connections, and deployment pipelines** (Fabric admin portal -> Tenant settings -> Developer settings).
+
+ - **Deploy the main solution first:** Fabric reuses the managed identity (`<resourcesName>-Identity`), Event Hubs namespace, Container Apps environment and the `fabric` capacity created by the ADX/Databricks deployment. Deploy that first (see [adx.md](adx.md)).
+ - **Enable Fabric for the tenant:** Deploying the F2 capacity in Azure does **not** turn Fabric on for your tenant. If `fabric.microsoft.com` keeps switching back to Power BI, a Fabric admin still needs to enable Fabric: Fabric portal -> Settings (gear) -> Admin portal -> Tenant settings -> Microsoft Fabric -> **Users can create Fabric items** -> Enabled (requires the *Fabric administrator* role).
+ - **Enable the Fabric API setting:** The Fabric setup script calls the Fabric REST APIs as the solution's user-assigned managed identity (`<resourcesName>-Identity`), so a Fabric tenant admin must enable **Service principals can use Fabric APIs** (also shown as *Service principals can call Fabric public APIs*) under Fabric admin portal -> Tenant settings -> Developer settings.
+ - **Enable service-principal workspace creation setting:** The setup script creates a Fabric workspace, which is gated by a *different* developer setting that is **disabled by default**: **Service principals can create workspaces, connections, and deployment pipelines** (Fabric admin portal -> Tenant settings -> Developer settings).
 
 Select the **Deploy to Azure** button and choose the **same resource group you used for the main deployment**:
 

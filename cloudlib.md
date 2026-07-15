@@ -70,6 +70,61 @@ evaluate http_request(uri, headers)
 | take 10000
 ```
 
+### Make the model's variables visible in the OPC UA tables
+
+Instead of keeping the imported model in a separate table, you can add its variables directly to the standard `opcua_metadata` and `opcua_telemetry` tables. Each variable is written with a placeholder telemetry value of `[Future]`, so users can see **all** the variables that *could* be retrieved from that OPC UA server's information model, alongside the ones that are actually being published live. Both tables are created automatically on the first run.
+
+First, add every variable of the Information Model to `opcua_metadata` so they show up as known nodes:
+
+```kql
+.set-or-append opcua_metadata <|
+let uri='https://uacloudlibrary.opcfoundation.org/infomodel/download/<INFORMATION_MODEL_IDENTIFIER_FROM_THE_UA_CLOUD_LIBRARY>';
+let headers=dynamic({'accept':'text/plain', 'Authorization':'Basic <HASHED_CLOUD_LIBRARY_CREDENTIALS>'});
+evaluate http_request(uri, headers)
+| project title = tostring(ResponseBody.['title']), nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
+| extend ModelNamespaceUri = tostring(nodeset.UANodeSet.NamespaceUris.Uri)
+| mv-expand UAVariable = nodeset.UANodeSet.UAVariable
+| extend NodeId = tostring(UAVariable.['@NodeId']), DisplayName = tostring(UAVariable.DisplayName.['#text']), DataType = tostring(UAVariable.['@DataType'])
+| where isnotempty(DisplayName)
+| project
+    Subject = NodeId,
+    Timestamp = now(),
+    DataSetName = title,
+    MajorVersion = tolong(0),
+    MinorVersion = tolong(0),
+    Name = DisplayName,
+    BuiltInType = toint(0),
+    DataType = DataType,
+    ValueRank = toint(-1),
+    Type = '',
+    DisplayName = DisplayName,
+    Workcell = title,
+    Line = '[Future]',
+    Area = '[Future]',
+    Site = '[Future]',
+    Enterprise = 'UA Cloud Library',
+    NamespaceUri = ModelNamespaceUri,
+    NodeId = NodeId
+```
+
+Then add a placeholder row per variable to `opcua_telemetry` with the value set to `[Future]`:
+
+```kql
+.set-or-append opcua_telemetry <|
+let uri='https://uacloudlibrary.opcfoundation.org/infomodel/download/<INFORMATION_MODEL_IDENTIFIER_FROM_THE_UA_CLOUD_LIBRARY>';
+let headers=dynamic({'accept':'text/plain', 'Authorization':'Basic <HASHED_CLOUD_LIBRARY_CREDENTIALS>'});
+evaluate http_request(uri, headers)
+| project nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
+| mv-expand UAVariable = nodeset.UANodeSet.UAVariable
+| extend NodeId = tostring(UAVariable.['@NodeId']), DisplayName = tostring(UAVariable.DisplayName.['#text'])
+| where isnotempty(DisplayName)
+| project
+    Subject = NodeId,
+    Timestamp = now(),
+    Name = DisplayName,
+    Value = dynamic("[Future]")
+```
+
 To view a graphical representation of an OPC UA Information Model, use the [Kusto Explorer tool](/azure/data-explorer/kusto/tools/kusto-explorer). To render station model, run the following query in Kusto Explorer. For best results, change the `Layout` option to `Grouped` and the `Labels` to `name`:
 
 ```kql
@@ -152,6 +207,61 @@ evaluate http_request(uri, headers)
 | extend NodeId = tostring(UAVariable.['@NodeId']), DisplayName = tostring(UAVariable.DisplayName.['#text']), BrowseName = tostring(UAVariable.['@BrowseName']), DataType = tostring(UAVariable.['@DataType'])
 | project title, contributor, NodeId, DisplayName, BrowseName, DataType
 | take 10000
+```
+
+### Make the model's variables visible in the OPC UA tables
+
+Just like in Azure Data Explorer, you can add the imported model's variables directly to the standard `opcua_metadata` and `opcua_telemetry` tables of your Eventhouse instead of keeping them in a separate table. Each variable is written with a placeholder telemetry value of `[Future]`, so users can see **all** the variables that *could* be retrieved from that OPC UA server's information model, alongside the ones that are actually being published live.
+
+First, add every variable of the Information Model to `opcua_metadata`:
+
+```kusto
+.set-or-append opcua_metadata <|
+let uri='https://uacloudlibrary.opcfoundation.org/infomodel/download/<INFORMATION_MODEL_IDENTIFIER_FROM_THE_UA_CLOUD_LIBRARY>';
+let headers=dynamic({'accept':'text/plain', 'Authorization':'Basic <HASHED_CLOUD_LIBRARY_CREDENTIALS>'});
+evaluate http_request(uri, headers)
+| project title = tostring(ResponseBody.['title']), nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
+| extend ModelNamespaceUri = tostring(nodeset.UANodeSet.NamespaceUris.Uri)
+| mv-expand UAVariable = nodeset.UANodeSet.UAVariable
+| extend NodeId = tostring(UAVariable.['@NodeId']), DisplayName = tostring(UAVariable.DisplayName.['#text']), DataType = tostring(UAVariable.['@DataType'])
+| where isnotempty(DisplayName)
+| project
+    Subject = NodeId,
+    Timestamp = now(),
+    DataSetName = title,
+    MajorVersion = tolong(0),
+    MinorVersion = tolong(0),
+    Name = DisplayName,
+    BuiltInType = toint(0),
+    DataType = DataType,
+    ValueRank = toint(-1),
+    Type = '',
+    DisplayName = DisplayName,
+    Workcell = title,
+    Line = '[Future]',
+    Area = '[Future]',
+    Site = '[Future]',
+    Enterprise = 'UA Cloud Library',
+    NamespaceUri = ModelNamespaceUri,
+    NodeId = NodeId
+```
+
+Then add a placeholder row per variable to `opcua_telemetry` with the value set to `[Future]`:
+
+```kusto
+.set-or-append opcua_telemetry <|
+let uri='https://uacloudlibrary.opcfoundation.org/infomodel/download/<INFORMATION_MODEL_IDENTIFIER_FROM_THE_UA_CLOUD_LIBRARY>';
+let headers=dynamic({'accept':'text/plain', 'Authorization':'Basic <HASHED_CLOUD_LIBRARY_CREDENTIALS>'});
+evaluate http_request(uri, headers)
+| project nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
+| mv-expand UAVariable = nodeset.UANodeSet.UAVariable
+| extend NodeId = tostring(UAVariable.['@NodeId']), DisplayName = tostring(UAVariable.DisplayName.['#text'])
+| where isnotempty(DisplayName)
+| project
+    Subject = NodeId,
+    Timestamp = now(),
+    Name = DisplayName,
+    Value = dynamic("[Future]")
 ```
 
 ### Visualize an Information Model as a graph
@@ -238,6 +348,10 @@ nodeset_xml = model_data.get("nodeset", {}).get("nodesetXml", "")
 root = ET.fromstring(nodeset_xml)
 ns = {"ua": "http://opcfoundation.org/UA/2011/03/UANodeSet.xsd"}
 
+# The model's own namespace URI is the first entry of <NamespaceUris>.
+namespace_uri_elem = root.find("ua:NamespaceUris/ua:Uri", ns)
+model_namespace_uri = namespace_uri_elem.text if namespace_uri_elem is not None and namespace_uri_elem.text else ""
+
 rows = []
 for var in root.findall(".//ua:UAVariable", ns):
     node_id = var.get("NodeId", "")
@@ -264,6 +378,91 @@ if rows:
     display(info_model_df.limit(20))
 else:
     print("No UAVariable nodes found in the Information Model.")
+```
+
+### Make the model's variables visible in the OPC UA tables
+
+Instead of (or in addition to) the separate `opcua_information_model` table, you can add the imported model's variables directly to the standard `opcua_metadata` and `opcua_telemetry` Delta tables. Each variable is written with a placeholder telemetry value of `[Future]`, so users can see **all** the variables that *could* be retrieved from that OPC UA server's information model, alongside the ones that are actually being published live.
+
+Append the following to the notebook (it reuses the `rows`, `title` and `nodeset` parsing from above):
+
+```python
+from pyspark.sql import functions as F
+from datetime import datetime, timezone
+
+if rows:
+    now = datetime.now(timezone.utc)
+
+    # --- opcua_metadata: one row per variable so they show up as known nodes ---
+    metadata_rows = [
+        Row(
+            Subject=r["NodeId"],
+            Timestamp=now,
+            DataSetName=title,
+            MajorVersion=0,
+            MinorVersion=0,
+            Name=r["DisplayName"],
+            BuiltInType=0,
+            DataType=r["DataType"],
+            ValueRank=-1,
+            Type="",
+            DisplayName=r["DisplayName"],
+            Workcell=title,
+            Line="[Future]",
+            Area="[Future]",
+            Site="[Future]",
+            Enterprise="UA Cloud Library",
+            NamespaceUri=model_namespace_uri,
+            NodeId=r["NodeId"],
+        )
+        for r in (row.asDict() for row in rows)
+        if r["DisplayName"]
+    ]
+
+    # --- opcua_telemetry: one placeholder row per variable, value set to [Future] ---
+    telemetry_rows = [
+        Row(
+            Subject=r["NodeId"],
+            Timestamp=now,
+            Name=r["DisplayName"],
+            Value="[Future]",
+        )
+        for r in (row.asDict() for row in rows)
+        if r["DisplayName"]
+    ]
+
+    if metadata_rows:
+        metadata_df = spark.createDataFrame(metadata_rows).select(
+            F.col("Subject").cast("string"),
+            F.col("Timestamp").cast("timestamp"),
+            F.col("DataSetName").cast("string"),
+            F.col("MajorVersion").cast("bigint"),
+            F.col("MinorVersion").cast("bigint"),
+            F.col("Name").cast("string"),
+            F.col("BuiltInType").cast("int"),
+            F.col("DataType").cast("string"),
+            F.col("ValueRank").cast("int"),
+            F.col("Type").cast("string"),
+            F.col("DisplayName").cast("string"),
+            F.col("Workcell").cast("string"),
+            F.col("Line").cast("string"),
+            F.col("Area").cast("string"),
+            F.col("Site").cast("string"),
+            F.col("Enterprise").cast("string"),
+            F.col("NamespaceUri").cast("string"),
+            F.col("NodeId").cast("string"),
+        )
+        metadata_df.write.format("delta").mode("append").saveAsTable("opcua_metadata")
+    if telemetry_rows:
+        telemetry_df = spark.createDataFrame(telemetry_rows).select(
+            F.col("Subject").cast("string"),
+            F.col("Timestamp").cast("timestamp"),
+            F.col("Name").cast("string"),
+            F.col("Value").cast("string"),
+        )
+        telemetry_df.write.format("delta").mode("append").saveAsTable("opcua_telemetry")
+
+    print(f"Added {len(metadata_rows)} variables to opcua_metadata and opcua_telemetry (Value = [Future]).")
 ```
 
 You have just imported an entire OPC UA Information Model into a Delta Lake table in Azure Databricks, ready to be joined with your telemetry and metadata for richer analytics.

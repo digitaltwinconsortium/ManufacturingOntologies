@@ -3,6 +3,30 @@
 > [!NOTE]
 > This article is the **Microsoft OPC UA reference solution**, which uses **IEC 62541 standard OPC UA PubSub** to send telemetry data from the edge to the cloud. It is **different** from other telemetry configurations of Azure IoT Operations, since Azure IoT Operations also caters for scenarions where no OPC UA-enabled telemetry sources are involved, i.e. OPC UA PubSub is **not required** between Azure IoT Operations and cloud endpoints. The Azure IoT Operations architecture is described in the [**Azure IoT Operations Overview**](https://learn.microsoft.com/en-us/azure/iot-operations/overview-iot-operations#architecture-overview).
 
+## Table of contents
+
+- [About this solution](#about-this-solution)
+- [Prerequisites](#prerequisites)
+  - [Required Azure permissions](#required-azure-permissions)
+  - [Required Azure CLI commands](#required-azure-cli-commands)
+- [Postrequisites](#postrequisites)
+- [Articles in this reference solution](#articles-in-this-reference-solution)
+- [Production line simulation](#production-line-simulation)
+- [OPC UA certificate trust](#opc-ua-certificate-trust)
+- [Access the Arc-enabled Kubernetes cluster from the Azure portal](#access-the-arc-enabled-kubernetes-cluster-from-the-azure-portal)
+- [Security review (STRIDE)](#security-review-stride)
+  - [Scope and architecture](#scope-and-architecture)
+  - [Trust boundaries](#trust-boundaries)
+  - [STRIDE analysis](#stride-analysis)
+    - [Spoofing](#spoofing)
+    - [Tampering](#tampering)
+    - [Repudiation](#repudiation)
+    - [Information disclosure](#information-disclosure)
+    - [Denial of service](#denial-of-service)
+    - [Elevation of privilege](#elevation-of-privilege)
+  - [Analytics-path-specific considerations (ADX, Databricks, Fabric)](#analytics-path-specific-considerations-adx-databricks-fabric)
+  - [Summary of recommendations for production](#summary-of-recommendations-for-production)
+
 ## About this solution
 
 Manufacturers want to use an industrial IoT solution that doesn't lock them in to walled-garden ecosystems. In addition, they want to deploy this solution on a global scale and connect all of their production sites to it to increase efficiencies for each individual site.
@@ -157,3 +181,103 @@ EOF
 # Print the token, then paste it into the portal's "Service account bearer token" prompt.
 sudo kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml get secret arc-portal-user-secret -o jsonpath='{$.data.token}' | base64 -d
 ```
+
+## Security review (STRIDE)
+
+This section is a threat model of the reference solution using Microsoft's **STRIDE** methodology (**S**poofing, **T**ampering, **R**epudiation, **I**nformation disclosure, **D**enial of service, **E**levation of privilege). It covers all three analytics paths — Azure Data Explorer (ADX), Azure Databricks and Microsoft Fabric — which share the same edge-to-cloud ingestion pipeline and differ only in the storage/analytics backend.
+
+> [!IMPORTANT]
+> This is a **reference solution**. Several defaults favor ease of deployment over hardening (public endpoints, a single shared VM, shared credentials, self-signed certificates). The findings and recommendations below are what you must address before using any part of this design in production. This review is provided for educational purposes and is not a substitute for a formal, environment-specific security assessment.
+
+### Scope and architecture
+
+Data flows edge → cloud through a common pipeline, then fans out to one of three analytics backends:
+
+1. **Edge**: a single Linux VM runs the production line simulation (OPC UA servers for the Assembly/Test/Packaging stations + MES) and the edge infrastructure (K3s, Azure Arc, Azure IoT Operations). OPC UA telemetry is published from the stations; Azure IoT Operations' connector for OPC UA bridges it to the cloud. A cloud-to-edge command (pressure-relief valve) closes a digital feedback loop.
+2. **Transport/ingestion**: telemetry is sent to **Azure Event Hubs** (Kafka-compatible) as the cloud ingestion point.
+3. **Storage/analytics** (one of):
+   - **ADX** — Event Hub data connections stream into the `opcua_telemetry`/`opcua_metadata` tables; an ADX dashboard and the I3X REST API expose the data.
+   - **Databricks** — Structured Streaming reads Event Hubs into Delta Lake tables in Unity Catalog.
+   - **Fabric** — an Eventhouse (KQL DB) ingests from Event Hubs; a Real-Time Dashboard and a Fabric-hosted I3X API expose it.
+4. **Supporting services**: Azure Key Vault (secrets), a user-assigned **managed identity** shared by the cloud services, PostgreSQL Flexible Server + a UA Cloud Library container app, and the I3X4Kusto container app (Basic-auth-protected).
+
+### Trust boundaries
+
+- **Physical/OT ↔ edge host** — the OPC UA servers and the AIO connector on the shared VM.
+- **Edge ↔ cloud** — the VM/K3s cluster (Arc-connected) to Azure (Event Hubs, ARM, Key Vault).
+- **Cloud service ↔ cloud service** — managed-identity-authenticated calls between the container apps, ADX/Eventhouse, Key Vault and PostgreSQL.
+- **Cloud ↔ external consumer** — the public dashboards and the I3X REST API reached over the Internet.
+- **Deployment plane** — the ARM template, bootstrap scripts (fetched from GitHub `main`), and the operator's Azure credentials.
+
+### STRIDE analysis
+
+#### Spoofing
+
+| Threat | Assessment in this solution | Recommendation for production |
+| --- | --- | --- |
+| Rogue OPC UA client/server impersonation | Mitigated: mutual (two-way) OPC UA certificate trust is established between each station and the AIO connector; stations reject peers not in their `pki/trusted`/`pki/issuer` stores once out of provisioning mode. However, all certificates are **self-signed** and stations accept **anonymous** sessions while in provisioning mode. | Use a proper PKI/CA (or OPC UA GDS) instead of self-signed certs; minimize the provisioning-mode window; require user authentication on the OPC UA servers. |
+| Impersonating a cloud consumer of the I3X API | Mitigated: HTTP **Basic authentication** is mandatory on the I3X API (fails closed if unconfigured). | Basic auth over TLS is acceptable for demos; for production prefer Entra ID/OAuth2 (bearer tokens) and per-consumer identities. |
+| Spoofing service-to-service calls | Mitigated: cloud services authenticate to ADX/Key Vault/Event Hubs with a **user-assigned managed identity** and Entra tokens (no shared keys for those hops); ADX read uses Entra Workload Identity federation. | Keep managed identity; scope each service to its own identity rather than one shared identity (see Elevation of privilege). |
+| Deployment/script source spoofing | Risk: the bootstrap and setup scripts are fetched at deploy time from the public GitHub `main` branch over HTTPS; a compromised branch or MITM on an unpinned ref would run attacker code on the VM. | Pin to an immutable commit/tag, verify checksums/signatures, or host the scripts in a trusted private location. |
+
+#### Tampering
+
+| Threat | Assessment | Recommendation |
+| --- | --- | --- |
+| Telemetry tampering in transit (edge→cloud) | Mitigated: transport to Event Hubs is TLS-encrypted; the AIO MQTT broker hop uses TLS + SAT auth. | Retain TLS everywhere; retain OPC UA message signing/encryption end-to-end, i.e., from other OPC UA servers to AIO, too. |
+| Command tampering (cloud→edge pressure-relief) | Mitigated: the command path uses spec-valid MQTT-RPC over TLS with SAT auth; but a control command to physical equipment is high-impact. The README already warns that in the real world such an action would be done on-premises. | Never actuate safety-critical equipment directly from the cloud; require local interlocks/authorization and command signing. |
+| Tampering with data at rest | Mitigated by platform: ADX/Eventhouse/Delta storage is Azure-managed with encryption at rest; Delta Lake retains history. | Enable immutability/retention policies where required; restrict write access (see EoP). |
+| Config/PKI store tampering on the shared VM | Risk: the station PKI stores are host-mounted (`/mnt/c/K3s/...`); anyone with VM access can alter trust material or the simulation. | Restrict VM access; separate the simulation from real edge infrastructure (they are co-located only to save cost). |
+| Dashboard/query definition tampering | Low: dashboards and KQL are imported from the repo. | Review imported artifacts; the embedded Python (ADX/Fabric graph tile) runs in the sandboxed `evaluate python` plugin. |
+
+#### Repudiation
+
+| Threat | Assessment | Recommendation |
+| --- | --- | --- |
+| Actions cannot be attributed | Partial: Azure platform logs (Activity Log, resource diagnostics) exist, but the I3X API Basic-auth user is a single shared `admin` account, and the VM/PostgreSQL/UA Cloud Library share one admin credential — actions are not attributable to individuals. | Enable diagnostic settings/audit logs on ADX, Eventhouse, Key Vault, Event Hubs and PostgreSQL; use per-user identities so actions are traceable; forward logs to a Security Information and Event Management (SIEM) system. |
+| Command loop actions unlogged | Partial: the connector/commander log RPC execution, but there is no signed audit trail of who/what triggered a physical command. | Add tamper-evident audit logging for control actions. |
+
+#### Information disclosure
+
+| Threat | Assessment | Recommendation |
+| --- | --- | --- |
+| Public network exposure | Risk: Key Vault, ADX and PostgreSQL are deployed with `publicNetworkAccess: Enabled`; PostgreSQL uses an **AllowAllAzureIps** firewall rule; the I3X API and dashboards are **externally** reachable. | Use Private Endpoints/VNet integration; replace AllowAllAzureIps with specific rules; put the API behind a gateway/WAF; restrict dashboard access. |
+| Secret exposure | Partial: secrets are stored in **Key Vault** (RBAC-authorized, soft-delete + purge protection) and referenced via managed identity / container-app secretRefs; but the **same `adminPassword`** is reused for the VM, PostgreSQL, UA Cloud Library and the I3X Basic-auth credential, and the Event Hubs connection string (SAS) is stored as a KV secret. | Use distinct, rotated secrets per service; prefer managed identity / Entra auth over connection strings and shared passwords; avoid credential reuse across trust boundaries. |
+| Credentials in deployment inputs | Partial: `adminPassword` is a `secureString`; ensured it isn't echoed into logs. | Pass secrets via secure parameters/Key Vault references only; scrub deployment logs. |
+| Data exposure via the analytics backends | Depends on config: ADX/Eventhouse/Databricks all enforce Entra RBAC, but overly broad grants (e.g. the shared identity is ADX **Admin**) widen exposure. | Grant least-privilege database roles (viewer/ingestor) instead of Admin; apply row/column security if telemetry is sensitive. |
+
+#### Denial of service
+
+| Threat | Assessment | Recommendation |
+| --- | --- | --- |
+| Public endpoints abused | Risk: internet-facing dashboards, the I3X API and public Key Vault/ADX/PostgreSQL endpoints can be targeted. | Front public services with rate limiting/WAF/DDoS protection; use private networking to remove the attack surface entirely. |
+| Single-VM single point of failure | Risk: one Linux VM hosts both the simulation and the edge infrastructure; and the I3X subscription state is in-memory, requiring a single replica. | Separate simulation from production edge; run redundant edge infrastructure; externalize API state to scale out. |
+| Ingestion overload | Partial: Event Hubs/ADX absorb bursts, but there are no explicit quotas/throttles in the sample. | Configure Event Hubs throughput units/auto-inflate, ADX capacity, and consumer backpressure. |
+| Unbounded queries / info-model import | Low: KQL queries and the UA Cloud Library `[Future]` import use `take` limits; the graph tile runs in the sandbox. | Keep query limits; cap import sizes. |
+
+#### Elevation of privilege
+
+| Threat | Assessment | Recommendation |
+| --- | --- | --- |
+| Over-privileged shared managed identity | Risk: a **single user-assigned managed identity** is shared by the container apps and is granted broad roles (Contributor at RG scope, ADX **Admin**). Compromise of any one workload yields all its rights. | Give each workload its own identity with least-privilege, resource-scoped roles; avoid RG-wide Contributor. |
+| Deployment identity over-permissioned | Expected: deployment needs Owner (or Contributor + User Access Administrator) to create role assignments. | Use just-in-time/PIM elevation for the deployment principal; remove standing Owner after deploy. |
+| Kubernetes cluster-admin token | Risk: the documented portal-access flow creates a **cluster-admin** service account and a long-lived token. | Scope the service account to least privilege; use short-lived tokens; rotate/revoke after use. |
+| Lateral movement from the shared VM | Risk: the VM holds edge credentials, PKI stores and Arc identity; compromise enables pivot to the cluster and (via managed identity) to cloud resources. | Harden and isolate the VM; restrict its managed-identity scope; monitor for anomalous identity use. |
+| OPC UA trust-list caching | Operational: the connector/commander cache the trust list at startup and require a pod restart to pick up changes — a stale trust list can silently block connections. The setup script now restarts them automatically and documents the manual step. | Automate trust-list reloads/restarts and alert on connection failures. |
+
+### Analytics-path-specific considerations (ADX, Databricks, Fabric)
+
+- **Common to all three**: the same edge/Event Hubs ingestion, shared managed identity, shared `adminPassword`, and public endpoints apply regardless of backend — so the Spoofing/Info-disclosure/EoP findings above are path-independent.
+- **ADX**: read auth uses Entra Workload Identity federation (no secret); the shared identity is ADX **Admin** (over-privileged — prefer a database viewer/ingestor role). The dashboard's graph tile executes Python in the sandboxed `evaluate python` plugin. The I3X API in front of ADX is Basic-auth-protected but publicly reachable.
+- **Databricks**: tables live in **Unity Catalog** (governed, Entra RBAC) with Structured Streaming checkpoints in a UC volume; ensure workspace access, cluster policies and secret scopes are locked down and the Event Hubs credential is least-privilege.
+- **Fabric**: the Eventhouse and Real-Time Dashboard use Fabric/Entra RBAC and a **separate** deployment with its own (independent) `adminUsername`/`adminPassword` for its I3X API; enabling `deployFabricCapacity` requires pre-existing Fabric capacity quota. Restrict Fabric workspace roles and the Eventhouse's callout/plugin policies (the `http_request` plugin used for UA Cloud Library import is powerful and should stay disabled unless needed).
+
+### Summary of recommendations for production
+
+1. **Remove public exposure** — Private Endpoints/VNet for Key Vault, ADX, PostgreSQL, Event Hubs; gateway/WAF for the API and dashboards; drop AllowAllAzureIps.
+2. **Least privilege** — per-workload managed identities; database viewer/ingestor roles instead of ADX Admin; no RG-wide Contributor; scoped, short-lived Kubernetes tokens.
+3. **Eliminate credential reuse** — distinct, rotated secrets per service; prefer Entra/managed-identity auth over connection strings and shared passwords; OAuth2 for the API.
+4. **Proper PKI** — CA-issued (or GDS-managed) OPC UA certificates; minimize provisioning-mode/anonymous windows.
+5. **Auditability** — enable diagnostic/audit logs on all services, per-user identities, and a signed audit trail for control commands; forward to a SIEM.
+6. **Harden the edge** — separate the simulation from real edge infrastructure; isolate and monitor the VM; never actuate safety-critical equipment directly from the cloud.
+7. **Secure the supply chain** — pin deployment scripts/templates to immutable, verified refs instead of GitHub `main`.

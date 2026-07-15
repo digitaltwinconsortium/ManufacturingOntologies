@@ -1,4 +1,4 @@
-{
+﻿{
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
@@ -27,7 +27,7 @@
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "Provision a Microsoft Fabric F2 capacity as part of the main deployment. Enable this if you plan to deploy Microsoft Fabric after the main deployment."
+        "description": "Provision a Microsoft Fabric F2 capacity as part of the main deployment. Enable this if you plan to deploy Microsoft Fabric after the main deployment. IMPORTANT: this requires pre-existing Microsoft Fabric capacity quota in the target region. This is a subscription-level quota you must request/enable in the Azure portal before setting this to true."
       }
     },
     "customLocationsOid": {
@@ -52,11 +52,13 @@
     "azureRbacAzurekeyVaultSecretsUser": "4633458b-17de-408a-b874-0445c86b69e6",
     "azureRbacKeyVaultSecretsOfficer": "b86a8fe4-44ce-4948-aee5-eccb2c155cd7",
     "azureRbacKeyVaultReader": "21090545-7ca7-4776-b22c-e363652d74d2",
-    "adxClusterName": "[concat(variables('resourcesName'), 'ADX')]",
+    "adxClusterName": "[toLower(take(concat(replace(variables('resourcesName'), '-', ''), 'adx'), 22))]",
     "adxDBName": "[concat(variables('resourcesName'), '-DB')]",
+    "keyVaultName": "[toLower(take(concat(replace(variables('resourcesName'), '-', ''), 'kv'), 24))]",
+    "uaCloudLibContainerAppName": "[take(concat(variables('resourcesName'), '-ua-cloudlib'), 32)]",
     "uaCloudLibPostgresName": "[toLower(concat(variables('resourcesName'), '-uacloudlib-pg'))]",
     "uaCloudLibDatabaseName": "uacloudlib",
-    "fabricCapacityName": "[toLower(concat(variables('resourcesName'), 'fabric'))]",
+    "fabricCapacityName": "[toLower(take(concat(replace(variables('resourcesName'), '-', ''), 'fabric'), 63))]",
     "eventHubsNamespaceName": "[concat(variables('resourcesName'), '-EventHubs')]",
     "databricksWorkspaceName": "[concat(variables('resourcesName'), '-Databricks')]",
     "databricksManagedResourceGroupId": "[concat(subscription().id, '/resourceGroups/', variables('resourcesName'), '-Databricks-managed')]",
@@ -99,7 +101,7 @@
     {
       "type": "Microsoft.KeyVault/vaults",
       "apiVersion": "2024-12-01-preview",
-      "name": "[concat(variables('resourcesName'), '-KV')]",
+      "name": "[variables('keyVaultName')]",
       "location": "[resourceGroup().location]",
       "tags": {},
       "properties": {
@@ -139,34 +141,34 @@
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2021-04-01-preview",
-      "name": "[format('{0}/{1}', concat(variables('resourcesName'), '-KV'), 'adminpassword')]",
+      "name": "[format('{0}/{1}', variables('keyVaultName'), 'adminpassword')]",
       "properties": {
         "value": "[parameters('adminPassword')]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', concat(variables('resourcesName'), '-KV'))]"
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
       ]
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2021-04-01-preview",
-      "name": "[format('{0}/{1}', concat(variables('resourcesName'), '-KV'), 'brokerpassword')]",
+      "name": "[format('{0}/{1}', variables('keyVaultName'), 'brokerpassword')]",
       "properties": {
         "value": "[listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', concat(variables('resourcesName'), '-KV'))]"
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
       ]
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2021-04-01-preview",
-      "name": "[format('{0}/{1}', concat(variables('resourcesName'), '-KV'), 'servicepassword')]",
+      "name": "[format('{0}/{1}', variables('keyVaultName'), 'servicepassword')]",
       "properties": {
         "value": "[parameters('adminPassword')]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', concat(variables('resourcesName'), '-KV'))]"
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
       ]
     },
     {
@@ -225,7 +227,7 @@
     {
       "type": "Microsoft.App/containerApps",
       "apiVersion": "2024-03-01",
-      "name": "[concat(variables('resourcesName'), '-ua-cloudlibrary')]",
+      "name": "[variables('uaCloudLibContainerAppName')]",
       "location": "[resourceGroup().location]",
       "identity": {
         "type": "UserAssigned",
@@ -337,7 +339,7 @@
               "env": [
                 {
                   "name": "UA_CLOUD_LIBRARY_URL",
-                  "value": "[concat('https://', reference(resourceId('Microsoft.App/containerApps', concat(variables('resourcesName'), '-ua-cloudlibrary')), '2024-03-01').configuration.ingress.fqdn)]"
+                  "value": "[concat('https://', reference(resourceId('Microsoft.App/containerApps', variables('uaCloudLibContainerAppName')), '2024-03-01').configuration.ingress.fqdn)]"
                 },
                 {
                   "name": "UA_CLOUD_LIBRARY_USERNAME",
@@ -386,7 +388,7 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
-        "[resourceId('Microsoft.App/containerApps', concat(variables('resourcesName'), '-ua-cloudlibrary'))]",
+        "[resourceId('Microsoft.App/containerApps', variables('uaCloudLibContainerAppName'))]",
         "[resourceId('Microsoft.Kusto/clusters/databases/scripts', variables('adxClusterName'), 'ontologies', 'OPCUA-parsing-script')]"
       ]
     },
@@ -736,7 +738,6 @@
       ]
     },
     {
-      "comment": "Waits for the ADX cluster to reach a terminal provisioning state before the Event Hub data connections are created. ARM dependsOn only waits for each child resource's own call to return, not for the cluster itself to settle, which intermittently caused 'RequestConflict: provisioning state is not terminal' when a data connection started while the cluster was still transitioning.",
       "type": "Microsoft.Resources/deploymentScripts",
       "apiVersion": "2020-10-01",
       "name": "[concat(variables('resourcesName'), '-WaitForAdxCluster')]",

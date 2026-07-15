@@ -37,9 +37,12 @@ az ad sp show --id bc313c14-388c-4e7d-a58e-70017303ee3b --query id -o tsv
 
 In addition, the deployment process prompts you to provide a password for the virtual machine (VM) that hosts the production line simulation and the Edge infrastructure.
 
-The reference solution also deploys Azure IoT Operations, which requires the following resource providers to be registered in the subscription. Registering a resource provider is a subscription-scope action, so it must be done once by a subscription Owner or Contributor before deployment. You can do so via the following Azure CLI commands:
+The reference solution deploys networking, a PostgreSQL database, an Azure Data Explorer cluster and Azure IoT Operations, which require the following resource providers to be registered in the subscription. Registering a resource provider is a subscription-scope action, so it must be done once by a subscription Owner or Contributor before deployment. On a fresh subscription that has not previously used these namespaces the deployment otherwise fails with `MissingSubscriptionRegistration`. You can register them via the following Azure CLI commands:
 
 ```azurecli
+az provider register --namespace Microsoft.Network
+az provider register --namespace Microsoft.DBforPostgreSQL
+az provider register --namespace Microsoft.Kusto
 az provider register --namespace Microsoft.ExtendedLocation
 az provider register --namespace Microsoft.Kubernetes
 az provider register --namespace Microsoft.KubernetesConfiguration

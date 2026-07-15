@@ -773,13 +773,20 @@ fi
 # server certificate the station presents.
 #
 # 'az iot ops connector opcua trust add' stores the trust list as a synced secret, so AIO secret
-# sync must be enabled first. We reuse the solution's existing Key Vault (<resourcesName>-KV) and
-# the shared user-assigned managed identity. The identity is pre-granted 'Key Vault Secrets User'
+# sync must be enabled first. We reuse the solution's existing Key Vault (see the name computation
+# below, which mirrors the ARM template's keyVaultName) and the shared user-assigned managed identity.
 # and 'Key Vault Reader' by the ARM template, so we pass --skip-ra (the identity cannot create the
 # Key Vault role assignments itself - that needs Microsoft.Authorization/roleAssignments/write).
 echo
-echo "=== Enabling AIO secret sync (reusing ${RESOURCES_NAME}-KV) ==="
-KEY_VAULT_NAME="${RESOURCES_NAME}-KV"
+# The Key Vault name MUST match the name computed by the ARM template (Deployment/arm.json):
+#   keyVaultName = toLower(take(concat(replace(resourcesName, '-', ''), 'kv'), 24))
+# i.e. strip hyphens from the resource group name, append 'kv', lowercase, and truncate to 24
+# characters (the Key Vault name length limit). Reproduce that here so both resolve the same vault;
+# a divergent name silently breaks AIO secret sync, so the OPC UA trust list never populates and all
+# station connections fail while health checks still report green.
+KEY_VAULT_NAME="$(echo "${RESOURCES_NAME}" | tr -d '-' | tr '[:upper:]' '[:lower:]')kv"
+KEY_VAULT_NAME="${KEY_VAULT_NAME:0:24}"
+echo "=== Enabling AIO secret sync (reusing Key Vault ${KEY_VAULT_NAME}) ==="
 KEY_VAULT_ID="$(az keyvault show --name "${KEY_VAULT_NAME}" --resource-group "${RESOURCE_GROUP}" --query id -o tsv 2>/dev/null)"
 # Whether secret sync is enabled gates the OPC UA trust-list step below. Key off the
 # result of 'secretsync enable' (RUN_LAST_RC) rather than probing 'connector opcua trust
@@ -808,6 +815,9 @@ if [ "${secret_sync_enabled}" != "true" ]; then
   echo "    After enabling it, add each station cert (from /mnt/c/K3s/<Station>/<Line>/PKI/own/certs) with:"
   echo "      az iot ops connector opcua trust add --instance ${AIO_INSTANCE_NAME} \\"
   echo "        --resource-group ${RESOURCE_GROUP} --certificate-file <station>.der"
+  echo "    Then restart the OPC UA connector and commander pods so they reload the trust list (they cache"
+  echo "    it at startup and do NOT hot-reload it):"
+  echo "      kubectl -n azure-iot-operations rollout restart deployment -l app=aio-opc"
 else
   station_cert_found=false
   for line in "${LINES[@]}"; do
@@ -845,6 +855,10 @@ else
     echo "    a station, export that station's server certificate and run:"
     echo "      az iot ops connector opcua trust add --instance ${AIO_INSTANCE_NAME} \\"
     echo "        --resource-group ${RESOURCE_GROUP} --certificate-file <station>.der"
+    echo "    IMPORTANT: the OPC UA connector and commander pods cache the trust list at startup and do"
+    echo "    NOT hot-reload it. After adding a certificate you MUST restart them to pick up the change:"
+    echo "      kubectl rollout restart deployment -n azure-iot-operations -l app.kubernetes.io/name=connector"
+    echo "      kubectl -n azure-iot-operations delete pod -l app=aio-opc  # or restart the aio-opc-* deployments"
   fi
   # The station certs were just synced into the 'aio-opc-ua-broker-trust-list' secret, but the OPC UA
   # connector AND commander pods load their trusted-certificate store at startup and do NOT hot-reload

@@ -43,7 +43,7 @@ There is also a public instance operated by the OPC Foundation and a reference i
 
 It is moving OPC UA closer to a “model-driven ecosystem with cloud-native discovery”, rather than purely runtime coupling.
 
-## Import an OPC UA Information Models from the UA Cloud Library into Azure Data Explorer
+## Import OPC UA Information Models from the UA Cloud Library into Azure Data Explorer
 
 To read OPC UA Information Models directly from Azure Data Explorer, import the OPC UA nodes defined in an OPC UA Information Model into a table. You can use the imported information for lookup of more metadata within queries.
 
@@ -155,7 +155,7 @@ edges
 
 :::image type="content" source="../media/concepts-iot-industrial-solution-architecture/station-graph.png" alt-text="Graph of the station Info Model." lightbox="../media/concepts-iot-industrial-solution-architecture/station-graph.png" border="false" :::
 
-## Import an OPC UA Information Models from the UA Cloud Library into Fabric
+## Import OPC UA Information Models from the UA Cloud Library into Fabric
 
 You can import entire OPC UA Information Models into your Eventhouse from the [UA Cloud Library](https://uacloudlibrary.opcfoundation.org), an online store of OPC UA Information Models hosted by the OPC Foundation. Importing the OPC UA nodes defined in an Information Model into a table lets you look up richer semantics within your queries, including the full model hierarchy, complex type definitions and all available telemetry from your sites.
 
@@ -294,7 +294,7 @@ edges
 | make-graph source --> target with nodes on source
 ```
 
-## Import an OPC UA Information Models from the UA Cloud Library into Databricks
+## Import OPC UA Information Models from the UA Cloud Library into Databricks
 
 Many customers want to import entire **OPC UA Information Models** into their analytics platform from the [UA Cloud Library](https://uacloudlibrary.opcfoundation.org). This provides richer semantics beyond what OPC UA PubSub metadata alone can offer, including:
 

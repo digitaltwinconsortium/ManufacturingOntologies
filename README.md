@@ -323,7 +323,7 @@ curl -H "Authorization: Bearer $ACCESS_TOKEN" https://<host>/v1/objects
 - `iss` matches the v2.0 issuer `https://login.microsoftonline.com/<tenant-id>/v2.0`. If your token is a v1 token (`iss` = `https://sts.windows.net/<tenant-id>/`), either request a v2 token or set `I3X_OAUTH2_ISSUER` to match.
 - The token has not expired (`exp`).
 
-### Example: OAuth2 environment variables
+#### Example: OAuth2 environment variables
 ```bash
 # Enable OAuth2 bearer-token authentication against an Entra ID tenant.
 export I3X_OAUTH2_AUTHORITY="https://login.microsoftonline.com/<tenant-id>/v2.0"

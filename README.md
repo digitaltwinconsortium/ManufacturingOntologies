@@ -26,6 +26,7 @@
     - [Elevation of privilege](#elevation-of-privilege)
   - [Analytics-path-specific considerations (ADX, Databricks, Fabric)](#analytics-path-specific-considerations-adx-databricks-fabric)
   - [Summary of recommendations for production](#summary-of-recommendations-for-production)
+  - [Configuring OAuth2 for the I3X API via Azure Entra ID](#configuring-oauth2-for-the-i3x-api-via-azure-entra-id)
 
 ## About this solution
 
@@ -276,8 +277,62 @@ Data flows edge → cloud through a common pipeline, then fans out to one of thr
 
 1. **Remove public exposure** — Private Endpoints/VNet for Key Vault, ADX, PostgreSQL, Event Hubs; gateway/WAF for the API and dashboards; drop AllowAllAzureIps.
 2. **Least privilege** — per-workload managed identities; database viewer/ingestor roles instead of ADX Admin; no RG-wide Contributor; scoped, short-lived Kubernetes tokens.
-3. **Eliminate credential reuse** — distinct, rotated secrets per service; prefer Entra/managed-identity auth over connection strings and shared passwords; OAuth2 for the API.
+3. **Eliminate credential reuse** — distinct, rotated secrets per service; prefer Entra/managed-identity auth over connection strings and shared passwords; OAuth2 for the API (see next section below).
 4. **Proper PKI** — CA-issued (or GDS-managed) OPC UA certificates; minimize provisioning-mode/anonymous windows.
 5. **Auditability** — enable diagnostic/audit logs on all services, per-user identities, and a signed audit trail for control commands; forward to a SIEM.
 6. **Harden the edge** — separate the simulation from real edge infrastructure; isolate and monitor the VM; never actuate safety-critical equipment directly from the cloud.
 7. **Secure the supply chain** — pin deployment scripts/templates to immutable, verified refs instead of GitHub `main`.
+
+### Configuring OAuth2 for the I3X API via Azure Entra ID
+
+Follow these steps to protect the API with Entra ID and call it with a bearer token.
+
+**1. Register the API (the resource being protected)**
+- In the Azure portal, go to **Entra ID → App registrations → New registration** and create an app for I3X4Kusto.
+- Open the new app's **Expose an API** blade and set the **Application ID URI**, e.g. `api://<api-client-id>`. This value becomes `I3X_OAUTH2_AUDIENCE`.
+- Add a scope (e.g. `access_as_user`) or an app role so tokens can be requested for this API.
+- Note your **Directory (tenant) ID** — it forms `I3X_OAUTH2_AUTHORITY`.
+
+**2. Configure the API**
+```bash
+export I3X_OAUTH2_AUTHORITY="https://login.microsoftonline.com/<tenant-id>/v2.0"
+export I3X_OAUTH2_AUDIENCE="api://<api-client-id>"
+# Optional: pin the expected issuer (otherwise taken from the authority metadata).
+export I3X_OAUTH2_ISSUER="https://login.microsoftonline.com/<tenant-id>/v2.0"
+```
+
+**3. Acquire a token.** For a quick end-to-end test, add a **client secret** to the app registration and request an app-only token via the client-credentials flow:
+```bash
+ACCESS_TOKEN=$(curl -s -X POST \
+  https://login.microsoftonline.com/<tenant-id>/oauth2/v2.0/token \
+  -d "grant_type=client_credentials" \
+  -d "client_id=<api-client-id>" \
+  -d "client_secret=<client-secret>" \
+  -d "scope=api://<api-client-id>/.default" \
+  | jq -r .access_token)
+```
+For user sign-in scenarios, use a separate client app that has been granted the API's scope and acquire a delegated token instead.
+
+**4. Call the API with the token:**
+```bash
+curl -H "Authorization: Bearer $ACCESS_TOKEN" https://<host>/v1/objects
+```
+
+**Troubleshooting.** If you get a 401, decode the token at [jwt.ms](https://jwt.ms) and verify:
+- `aud` exactly matches `I3X_OAUTH2_AUDIENCE`.
+- `iss` matches the v2.0 issuer `https://login.microsoftonline.com/<tenant-id>/v2.0`. If your token is a v1 token (`iss` = `https://sts.windows.net/<tenant-id>/`), either request a v2 token or set `I3X_OAUTH2_ISSUER` to match.
+- The token has not expired (`exp`).
+
+### Example: OAuth2 environment variables
+```bash
+# Enable OAuth2 bearer-token authentication against an Entra ID tenant.
+export I3X_OAUTH2_AUTHORITY="https://login.microsoftonline.com/<tenant-id>/v2.0"
+export I3X_OAUTH2_AUDIENCE="api://<application-client-id>"
+# Optional: pin the expected issuer (otherwise taken from the authority metadata).
+export I3X_OAUTH2_ISSUER="https://login.microsoftonline.com/<tenant-id>/v2.0"
+```
+
+Clients then acquire a token from the authority and call the API with it:
+```bash
+curl -H "Authorization: Bearer $ACCESS_TOKEN" https://<host>/v1/objects
+```

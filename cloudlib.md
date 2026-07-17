@@ -1,9 +1,9 @@
 # Import OPC UA Information Models from the UA Cloud Library
 
-The UA Cloud Library is a standardized, Internet‑hosted (by the OPC Foundation) repository for OPC UA information models. It was developed by a joint working group of the OPC Foundation and CESMII to make OPC UA models globally discoverable, reusable, and accessible via web APIs.
+The UA Cloud Library is a standardized, Internet-hosted (by the OPC Foundation) repository for OPC UA information models. It was developed by a joint working group of the OPC Foundation and CESMII to make OPC UA models globally discoverable, reusable, and accessible via web APIs.
 
 ## Core concept
-It is essentially an online database (“store”) of OPC UA AddressSpaces / namespaces / information models. The library is hosted in the cloud and accessible over the Internet. A mandatory RESTful interface allows clients to upload models, download models and query/search models. This eliminates the traditional dependency on a live OPC UA server to discover its data model.
+It is essentially an online database ("store") of OPC UA AddressSpaces / namespaces / information models. The library is hosted in the cloud and accessible over the Internet. A mandatory RESTful interface allows clients to upload models, download models and query/search models. This eliminates the traditional dependency on a live OPC UA server to discover its data model.
 
 ## The Problem it solves
 
@@ -12,7 +12,7 @@ In classic OPC UA usage: A client must connect to a running server and browse it
 The UA Cloud Library changes that by:
 
 1. Providing the model ahead of time, independently of device availability
-1. Enabling offline engineering and pre‑configuration at global scale
+1. Enabling offline engineering and pre-configuration at global scale
 
 What is stored:
 1. Standardized information models (e.g., Companion Specifications)
@@ -39,9 +39,9 @@ There is also a public instance operated by the OPC Foundation and a reference i
 1. Global sharing of industry models across vendors and ecosystems
 1. It acts as a neutral distribution mechanism for information models
 1. It decouples protocol/runtime discovery from information model lifecycle and governance
-1. It supports cross‑organization reuse, which is critical for Companion Specs and Digital Product Passport scenarios
+1. It supports cross-organization reuse, which is critical for Companion Specs and Digital Product Passport scenarios
 
-It is moving OPC UA closer to a “model-driven ecosystem with cloud-native discovery”, rather than purely runtime coupling.
+It is moving OPC UA closer to a "model-driven ecosystem with cloud-native discovery", rather than purely runtime coupling.
 
 ## Import OPC UA Information Models from the UA Cloud Library into Azure Data Explorer
 
@@ -65,7 +65,7 @@ evaluate http_request(uri, headers)
 | project title = tostring(ResponseBody.['title']), contributor = tostring(ResponseBody.contributor.name), nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
 | mv-expand UAVariable=nodeset.UANodeSet.UAVariable
 | project-away nodeset
-| extend NodeId = UAVariable.['@NodeId'], DisplayName = tostring(UAVariable.DisplayName.['#text']), BrowseName = tostring(UAVariable.['@BrowseName']), DataType = tostring(UAVariable.['@DataType'])
+| extend NodeId = UAVariable.['@NodeId'], DisplayName = tostring(coalesce(UAVariable.DisplayName.['#text'], UAVariable.DisplayName)), BrowseName = tostring(UAVariable.['@BrowseName']), DataType = tostring(UAVariable.['@DataType'])
 | project-away UAVariable
 | take 10000
 ```
@@ -84,12 +84,12 @@ evaluate http_request(uri, headers)
 | project title = tostring(ResponseBody.['title']), nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
 | extend ModelNamespaceUri = tostring(nodeset.UANodeSet.NamespaceUris.Uri)
 | mv-expand UAVariable = nodeset.UANodeSet.UAVariable
-| extend NodeId = tostring(UAVariable.['@NodeId']), DisplayName = tostring(UAVariable.DisplayName.['#text']), DataType = tostring(UAVariable.['@DataType'])
+| extend NodeId = tostring(UAVariable.['@NodeId']), DisplayName = tostring(coalesce(UAVariable.DisplayName.['#text'], UAVariable.DisplayName)), DataType = tostring(UAVariable.['@DataType'])
 | where isnotempty(DisplayName)
 | project
     Subject = NodeId,
     Timestamp = now(),
-    DataSetName = title,
+    DataSetName = ['title'],
     MajorVersion = tolong(0),
     MinorVersion = tolong(0),
     Name = DisplayName,
@@ -98,7 +98,7 @@ evaluate http_request(uri, headers)
     ValueRank = toint(-1),
     Type = '',
     DisplayName = DisplayName,
-    Workcell = title,
+    Workcell = ['title'],
     Line = '[Future]',
     Area = '[Future]',
     Site = '[Future]',
@@ -116,7 +116,7 @@ let headers=dynamic({'accept':'text/plain', 'Authorization':'Basic <HASHED_CLOUD
 evaluate http_request(uri, headers)
 | project nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
 | mv-expand UAVariable = nodeset.UANodeSet.UAVariable
-| extend NodeId = tostring(UAVariable.['@NodeId']), DisplayName = tostring(UAVariable.DisplayName.['#text'])
+| extend NodeId = tostring(UAVariable.['@NodeId']), DisplayName = tostring(coalesce(UAVariable.DisplayName.['#text'], UAVariable.DisplayName))
 | where isnotempty(DisplayName)
 | project
     Subject = NodeId,
@@ -190,7 +190,7 @@ evaluate http_request(uri, headers)
 | project title = tostring(ResponseBody.['title']), contributor = tostring(ResponseBody.contributor.name), nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
 | mv-expand UAVariable=nodeset.UANodeSet.UAVariable
 | project-away nodeset
-| extend NodeId = UAVariable.['@NodeId'], DisplayName = tostring(UAVariable.DisplayName.['#text']), BrowseName = tostring(UAVariable.['@BrowseName']), DataType = tostring(UAVariable.['@DataType'])
+| extend NodeId = UAVariable.['@NodeId'], DisplayName = tostring(coalesce(UAVariable.DisplayName.['#text'], UAVariable.DisplayName)), BrowseName = tostring(UAVariable.['@BrowseName']), DataType = tostring(UAVariable.['@DataType'])
 | project-away UAVariable
 | take 10000
 ```
@@ -204,7 +204,7 @@ let headers=dynamic({'accept':'text/plain', 'Authorization':'Basic <HASHED_CLOUD
 evaluate http_request(uri, headers)
 | project title = tostring(ResponseBody.['title']), contributor = tostring(ResponseBody.contributor.name), nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
 | mv-expand UAVariable=nodeset.UANodeSet.UAVariable
-| extend NodeId = tostring(UAVariable.['@NodeId']), DisplayName = tostring(UAVariable.DisplayName.['#text']), BrowseName = tostring(UAVariable.['@BrowseName']), DataType = tostring(UAVariable.['@DataType'])
+| extend NodeId = tostring(UAVariable.['@NodeId']), DisplayName = tostring(coalesce(UAVariable.DisplayName.['#text'], UAVariable.DisplayName)), BrowseName = tostring(UAVariable.['@BrowseName']), DataType = tostring(UAVariable.['@DataType'])
 | project title, contributor, NodeId, DisplayName, BrowseName, DataType
 | take 10000
 ```
@@ -223,12 +223,12 @@ evaluate http_request(uri, headers)
 | project title = tostring(ResponseBody.['title']), nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
 | extend ModelNamespaceUri = tostring(nodeset.UANodeSet.NamespaceUris.Uri)
 | mv-expand UAVariable = nodeset.UANodeSet.UAVariable
-| extend NodeId = tostring(UAVariable.['@NodeId']), DisplayName = tostring(UAVariable.DisplayName.['#text']), DataType = tostring(UAVariable.['@DataType'])
+| extend NodeId = tostring(UAVariable.['@NodeId']), DisplayName = tostring(coalesce(UAVariable.DisplayName.['#text'], UAVariable.DisplayName)), DataType = tostring(UAVariable.['@DataType'])
 | where isnotempty(DisplayName)
 | project
     Subject = NodeId,
     Timestamp = now(),
-    DataSetName = title,
+    DataSetName = ['title'],
     MajorVersion = tolong(0),
     MinorVersion = tolong(0),
     Name = DisplayName,
@@ -237,7 +237,7 @@ evaluate http_request(uri, headers)
     ValueRank = toint(-1),
     Type = '',
     DisplayName = DisplayName,
-    Workcell = title,
+    Workcell = ['title'],
     Line = '[Future]',
     Area = '[Future]',
     Site = '[Future]',
@@ -255,7 +255,7 @@ let headers=dynamic({'accept':'text/plain', 'Authorization':'Basic <HASHED_CLOUD
 evaluate http_request(uri, headers)
 | project nodeset = parse_xml(tostring(ResponseBody.nodeset.nodesetXml))
 | mv-expand UAVariable = nodeset.UANodeSet.UAVariable
-| extend NodeId = tostring(UAVariable.['@NodeId']), DisplayName = tostring(UAVariable.DisplayName.['#text'])
+| extend NodeId = tostring(UAVariable.['@NodeId']), DisplayName = tostring(coalesce(UAVariable.DisplayName.['#text'], UAVariable.DisplayName))
 | where isnotempty(DisplayName)
 | project
     Subject = NodeId,
@@ -298,7 +298,7 @@ edges
 
 Many customers want to import entire **OPC UA Information Models** into their analytics platform from the [UA Cloud Library](https://uacloudlibrary.opcfoundation.org). This provides richer semantics beyond what OPC UA PubSub metadata alone can offer, including:
 
-- **Full Information Model context** — not just the published data points, but the entire model hierarchy
+- **Full Information Model context** - not just the published data points, but the entire model hierarchy
 - **Complex type definitions** and references to other data needed for deeper analysis
 - **Visibility into all available telemetry** from your sites, enabling informed decisions about what to publish to the cloud
 

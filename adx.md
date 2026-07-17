@@ -1,6 +1,8 @@
 
 # Connect Azure Data Explorer to the Reference Solution
 
+[Azure Data Explorer](https://learn.microsoft.com/en-us/azure/data-explorer/data-explorer-overview) is a fast, fully managed data analytics service for real-time analysis on large volumes of streaming data such as the OPC UA telemetry produced by this reference solution. It is purpose-built for time-series and log data, ingests millions of events per second with low latency, and lets you explore the data interactively using the powerful Kusto Query Language (KQL). Built-in capabilities for time-series analysis, pattern recognition, anomaly detection, and forecasting make it ideal for industrial use cases such as condition monitoring, overall equipment effectiveness (OEE) calculation, and predictive maintenance, and its native dashboards visualize the results without any extra tooling.
+
 ![Architecture diagram of the reference solution](Docs/arch.png)
 
 ## Automated deployment

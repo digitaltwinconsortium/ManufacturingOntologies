@@ -1,5 +1,7 @@
 # Connect Azure Databricks to the Reference Solution
 
+[Azure Databricks](https://learn.microsoft.com/en-us/azure/databricks/introduction/) is a unified, open analytics platform built on Apache Spark and the Delta Lake lakehouse architecture for building, deploying, and maintaining data engineering, data science, and machine learning workloads at scale. For this reference solution it ingests the OPC UA telemetry from Azure Event Hubs with Structured Streaming into governed Delta Lake tables, so you get reliable, ACID-compliant storage with full history that combines the flexibility of a data lake with the performance of a data warehouse. Its collaborative notebooks, built-in machine learning and MLflow, and seamless integration with the rest of the Azure ecosystem make it well suited to advanced analytics such as forecasting and anomaly detection over your industrial data.
+
 ![Architecture diagram of the reference solution](Docs/arch.png)
 
 ## Automated deployment

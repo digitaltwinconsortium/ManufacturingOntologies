@@ -1,5 +1,7 @@
 # Connect Microsoft Power BI to the Reference Solution
 
+[Microsoft Power BI](https://learn.microsoft.com/en-us/power-bi/fundamentals/power-bi-overview) is a unified, self-service business intelligence platform that turns data from many sources into interactive, shareable dashboards and reports. For this reference solution it connects to the OPC UA telemetry and lets business users and plant managers explore key manufacturing metrics — such as OEE, production counts, and energy consumption — through rich, drag-and-drop visualizations, without writing queries. With natural-language Q&A, automatic insights, mobile access, and easy sharing across the organization, Power BI makes the industrial data accessible to decision-makers so they can act on it quickly.
+
 To connect the solution Power BI, you need access to a Power BI subscription.
 
 ![Architecture diagram of the reference solution](Docs/powerbi.png)

@@ -75,6 +75,16 @@ The Plant Copilot is deployed for you as part of the reference solution. There i
 
 To surface the Plant Copilot inside the **Microsoft 365 Copilot** experience, you register it as a Model Context Protocol tool, add it to a custom agent, and publish that agent to Microsoft 365 Copilot.
 
+> **Permissions and governance prerequisites.** Registering a custom MCP connector and publishing an agent are governed by tenant-level policies that only administrators can configure. Before you start, make sure a **Power Platform administrator** (and, where noted, a **Microsoft 365 administrator** and an **Entra ID administrator**) has arranged the following, otherwise the connection fails at creation or sign-in:
+>
+> - **Copilot Studio maker access** — a Power Platform environment you can build agents in (Environment Maker role), ideally a dedicated dev/sandbox environment.
+> - **DLP data policy** — the Plant Copilot custom connector must be classified into an allowed group (Business or Non-Business, matching the agent's other connectors), not **Blocked**. Configured under **Security → Data policies** in the Power Platform admin center.
+> - **Tenant isolation / connector endpoint filtering** — outbound OAuth to the Plant Copilot host (`https://<resourcesName>-plantcopilot.<region>.azurecontainerapps.io`) must be allowed. These are **tenant-scoped** settings that only a Global or Power Platform administrator can view or change.
+> - **Entra ID (production auth mode only)** — if the server runs with `AUTH_AUTHORITY` set to Entra ID, an admin registers the connector app and must ensure no Conditional Access policy blocks the sign-in. The exact blocking policy is shown in **Entra ID → Sign-in logs**.
+> - **Microsoft 365 admin approval** — publishing the agent to the Microsoft 365 Copilot channel may require approval in the [Microsoft 365 admin center](https://admin.microsoft.com/) under **Settings → Integrated apps**.
+>
+> If you are not an administrator, share this list (plus the connector name and host URL) with your tenant admin. Nothing in the Plant Copilot code or deployment can bypass these tenant governance controls.
+
 ### 1. Register the MCP server as a tool
 
 In [Microsoft Copilot Studio](https://copilotstudio.microsoft.com/), select **Tools → New tool → Model Context Protocol** and provide:

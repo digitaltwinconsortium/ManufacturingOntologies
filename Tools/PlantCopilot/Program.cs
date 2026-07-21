@@ -26,35 +26,61 @@ builder.Services.AddSingleton<OAuthStore>();
 
 if (oauth.Enabled)
 {
-    builder.Services
-        .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddJwtBearer(options =>
-        {
-            options.MapInboundClaims = false;
-            options.TokenValidationParameters = new TokenValidationParameters
+    if (oauth.UseExternalAuthority)
+    {
+        // Production mode: validate JWT access tokens issued by an external identity provider
+        // (e.g. Microsoft Entra ID). The server does NOT run its own Authorization Server, so there
+        // is no Dynamic Client Registration; register the client in the external IdP instead.
+        builder.Services
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
             {
-                ValidateIssuer = false,   // issuer is derived from the request base URL at runtime
-                ValidateAudience = false, // audience equals the issuer; skip strict binding for the demo
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = oauth.SigningKey,
-            };
-
-            // On 401, point MCP hosts at the RFC 9728 protected-resource metadata for discovery.
-            options.Events = new JwtBearerEvents
-            {
-                OnChallenge = context =>
+                options.MapInboundClaims = false;
+                options.Authority = oauth.Authority;
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    context.HandleResponse();
-                    string issuer = oauth.ResolveIssuer(context.Request);
-                    string resourceMetadata = $"{issuer}/.well-known/oauth-protected-resource";
-                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    context.Response.Headers.WWWAuthenticate =
-                        $"Bearer resource_metadata=\"{resourceMetadata}\"";
-                    return Task.CompletedTask;
-                },
-            };
-        });
+                    ValidateIssuer = true,
+                    ValidateAudience = oauth.Audiences.Count > 0,
+                    ValidAudiences = oauth.Audiences,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                };
+            });
+    }
+    else
+    {
+        // Demo mode: the server is its own self-contained Authorization Server and signs/validates
+        // tokens with an in-process key. MCP hosts self-register via Dynamic Client Registration.
+        builder.Services
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.MapInboundClaims = false;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,   // issuer is derived from the request base URL at runtime
+                    ValidateAudience = false, // audience equals the issuer; skip strict binding for the demo
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = oauth.SigningKey,
+                };
+
+                // On 401, point MCP hosts at the RFC 9728 protected-resource metadata for discovery.
+                options.Events = new JwtBearerEvents
+                {
+                    OnChallenge = context =>
+                    {
+                        context.HandleResponse();
+                        string issuer = oauth.ResolveIssuer(context.Request);
+                        string resourceMetadata = $"{issuer}/.well-known/oauth-protected-resource";
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        context.Response.Headers.WWWAuthenticate =
+                            $"Bearer resource_metadata=\"{resourceMetadata}\"";
+                        return Task.CompletedTask;
+                    },
+                };
+            });
+    }
 
     builder.Services.AddAuthorization();
 }
@@ -74,8 +100,13 @@ if (oauth.Enabled)
     app.UseAuthentication();
     app.UseAuthorization();
 
-    // OAuth 2.0 metadata, Dynamic Client Registration, authorize and token endpoints.
-    app.MapOAuth(oauth, app.Services.GetRequiredService<OAuthStore>());
+    // The built-in Authorization Server (metadata, Dynamic Client Registration, authorize and token
+    // endpoints) is only mapped in demo mode. In external-authority mode the identity provider owns
+    // these endpoints, so the server acts purely as a Resource Server.
+    if (!oauth.UseExternalAuthority)
+    {
+        app.MapOAuth(oauth, app.Services.GetRequiredService<OAuthStore>());
+    }
 
     // Expose the MCP Streamable HTTP endpoint at /mcp, protected by OAuth.
     app.MapMcp("/mcp").RequireAuthorization();

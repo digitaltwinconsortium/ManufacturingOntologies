@@ -30,7 +30,9 @@ The server reads its connection settings from environment variables:
 | `I3X_PASSWORD` | if the API requires auth | HTTP Basic auth password (the deployment `adminPassword`). |
 | `AUTH_ENABLED` | no | OAuth 2.0 on `/mcp` is **enabled by default**. Set to `false` to leave the endpoint open. |
 | `AUTH_ISSUER` | no | Public base URL of this server, e.g. `https://<fqdn>`. Used as the token issuer/audience and to build discovery URLs. If unset it is derived from the incoming request. |
-| `AUTH_TOKEN_LIFETIME_MINUTES` | no | Access-token lifetime in minutes (default: `60`). |
+| `AUTH_TOKEN_LIFETIME_MINUTES` | no | Access-token lifetime in minutes (default: `60`). Built-in authorization server only. |
+| `AUTH_AUTHORITY` | no | OIDC authority of an **external** identity provider (e.g. Microsoft Entra ID, `https://login.microsoftonline.com/<tenant>/v2.0`). When set, the server validates tokens from that provider and disables its own authorization server / Dynamic Client Registration. |
+| `AUTH_AUDIENCE` | no | Expected audience (`aud`) claim(s), comma-separated. Recommended when `AUTH_AUTHORITY` is set. |
 
 ## Authentication (OAuth 2.0 with Dynamic Client Registration)
 
@@ -49,7 +51,22 @@ The following endpoints are exposed while OAuth is enabled (the default):
 
 Typical MCP flow: the host calls `/mcp` without a token, receives `401` with a `WWW-Authenticate: Bearer resource_metadata="…/.well-known/oauth-protected-resource"` header, discovers the authorization server, performs DCR at `/register`, runs the authorization-code + PKCE flow (`/authorize` → `/token`), then retries `/mcp` with the bearer token.
 
-> **Demo-grade authorization server.** The built-in `/authorize` endpoint **auto-approves** requests — there is no interactive user login or consent UI, clients and codes are held in-memory (they reset on restart and do not span multiple instances), and tokens are signed with an in-process key. This is intended to make DCR-capable hosts work against the reference solution out of the box. For production, front the MCP server with a real identity provider (e.g. Microsoft Entra ID) and validate its tokens instead.
+> **Demo-grade authorization server.** The built-in `/authorize` endpoint **auto-approves** requests — there is no interactive user login or consent UI, clients and codes are held in-memory (they reset on restart and do not span multiple instances), and tokens are signed with an in-process key. This is intended to make DCR-capable hosts work against the reference solution out of the box. For production, use the external identity provider mode below instead.
+
+### Production: external identity provider (Microsoft Entra ID)
+
+For production, front the MCP server with a real identity provider and validate its tokens instead of relying on the built-in authorization server. Set `AUTH_AUTHORITY` (and, recommended, `AUTH_AUDIENCE`) to switch the server into **Resource Server only** mode: it validates JWT access tokens issued by that provider and stops exposing the built-in `/register`, `/authorize` and `/token` endpoints.
+
+Because Microsoft Entra ID does not support open, unauthenticated Dynamic Client Registration, you register the client yourself rather than relying on DCR:
+
+1. In Entra ID, create an **app registration for the MCP server** (the API/resource) that exposes a scope, e.g. `PlantCopilot.Read`, and note its Application ID URI (used as the token `aud`).
+2. Create (or reuse) an **app registration for the client** (the Copilot Studio connector) and grant it that scope.
+3. Run the server with, for example:
+   - `AUTH_AUTHORITY=https://login.microsoftonline.com/<tenant-id>/v2.0`
+   - `AUTH_AUDIENCE=api://<mcp-app-id>` (or the exposed scope's audience)
+4. In Copilot Studio, configure the MCP tool with a **manual OAuth 2.0 connection** (client id, client secret, authorization/token URLs and scope) instead of "OAuth 2.0 with dynamic discovery".
+
+In this mode there is no DCR and no built-in login/consent — authentication, consent and per-user/per-client identity are all handled by Entra ID.
 
 To disable authentication locally (e.g. for quick testing), add `-e AUTH_ENABLED=false` to the `docker run` command below; optionally set `-e AUTH_ISSUER=...` to pin the public issuer URL.
 

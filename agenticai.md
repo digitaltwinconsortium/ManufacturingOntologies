@@ -28,7 +28,7 @@ This reference solution includes a small MCP server, **Plant Copilot**, under [`
    │ (chat / app) │  ◄───────────────────────────  │  (Microsoft 365      │
    └──────────────┘        grounded answer         │  Copilot, Foundry…)  │
 												   └──────────┬───────────┘
-													   	      │ MCP over HTTPS (/mcp)
+													   	      │ MCP over HTTPS
 															  ▼
 												   ┌──────────────────────┐
 												   │   Plant Copilot      │

@@ -12,6 +12,8 @@
   <ItemGroup>
     <!-- Official Model Context Protocol C# SDK with ASP.NET Core (Streamable HTTP) transport. -->
     <PackageReference Include="ModelContextProtocol.AspNetCore" Version="1.4.1" />
+    <!-- Resource-server JWT bearer validation for the optional OAuth 2.0 authorization layer. -->
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
   </ItemGroup>
 
 </Project>

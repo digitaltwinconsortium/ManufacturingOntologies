@@ -28,6 +28,30 @@ The server reads its connection settings from environment variables:
 | `I3X_BASE_URL` | yes | Base URL of the i3X API, e.g. `https://<resourcesName>-i3x4kusto.<region>.azurecontainerapps.io`. |
 | `I3X_USERNAME` | if the API requires auth | HTTP Basic auth user (the deployment `adminUsername`). |
 | `I3X_PASSWORD` | if the API requires auth | HTTP Basic auth password (the deployment `adminPassword`). |
+| `AUTH_ENABLED` | no | OAuth 2.0 on `/mcp` is **enabled by default**. Set to `false` to leave the endpoint open. |
+| `AUTH_ISSUER` | no | Public base URL of this server, e.g. `https://<fqdn>`. Used as the token issuer/audience and to build discovery URLs. If unset it is derived from the incoming request. |
+| `AUTH_TOKEN_LIFETIME_MINUTES` | no | Access-token lifetime in minutes (default: `60`). |
+
+## Authentication (OAuth 2.0 with Dynamic Client Registration)
+
+By default the `/mcp` endpoint **requires OAuth 2.0**. The server acts as self-contained OAuth 2.0 Authorization Server **and** Resource Server so that MCP hosts which support [Dynamic Client Registration (RFC 7591)](https://www.rfc-editor.org/rfc/rfc7591) — Microsoft 365 Copilot, Copilot Studio, Claude — can register and obtain a token automatically, with no external identity provider to configure. Set `AUTH_ENABLED=false` to leave the endpoint open (any caller that can reach the ingress may call the read-only tools).
+
+The following endpoints are exposed while OAuth is enabled (the default):
+
+| Endpoint | Standard | Purpose |
+|----------|----------|---------|
+| `GET /.well-known/oauth-protected-resource` | [RFC 9728](https://www.rfc-editor.org/rfc/rfc9728) | Protected-resource metadata; advertises the authorization server. |
+| `GET /.well-known/oauth-authorization-server` | [RFC 8414](https://www.rfc-editor.org/rfc/rfc8414) | Authorization-server metadata (endpoints, PKCE, grant types). |
+| `GET /.well-known/jwks.json` | JWKS | Public key used to validate access tokens. |
+| `POST /register` | [RFC 7591](https://www.rfc-editor.org/rfc/rfc7591) | Dynamic Client Registration. |
+| `GET /authorize` | OAuth 2.0 | Authorization Code grant with **PKCE (S256, required)**. |
+| `POST /token` | OAuth 2.0 | Exchanges the code for a signed RS256 JWT access token. |
+
+Typical MCP flow: the host calls `/mcp` without a token, receives `401` with a `WWW-Authenticate: Bearer resource_metadata="…/.well-known/oauth-protected-resource"` header, discovers the authorization server, performs DCR at `/register`, runs the authorization-code + PKCE flow (`/authorize` → `/token`), then retries `/mcp` with the bearer token.
+
+> **Demo-grade authorization server.** The built-in `/authorize` endpoint **auto-approves** requests — there is no interactive user login or consent UI, clients and codes are held in-memory (they reset on restart and do not span multiple instances), and tokens are signed with an in-process key. This is intended to make DCR-capable hosts work against the reference solution out of the box. For production, front the MCP server with a real identity provider (e.g. Microsoft Entra ID) and validate its tokens instead.
+
+To disable authentication locally (e.g. for quick testing), add `-e AUTH_ENABLED=false` to the `docker run` command below; optionally set `-e AUTH_ISSUER=...` to pin the public issuer URL.
 
 ## Deployed (Azure Container Apps) — automatic
 

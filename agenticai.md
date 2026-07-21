@@ -39,7 +39,7 @@ This reference solution includes a small MCP server, **Plant Copilot**, under [`
 															  ▼
 												   ┌──────────────────────┐
 												   │  I3X API (i3x4kusto) │
-												   └──────────┬─-─────────┘
+												   └──────────┬───────────┘
 													  	      │ KQL
 															  ▼
 												   ┌──────────────────────┐

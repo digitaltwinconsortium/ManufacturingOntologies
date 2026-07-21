@@ -34,3 +34,5 @@
 /Tools/FactorySimulation/Station/pki
 /Tools/FactorySimulation/Station/Station.csproj.user
 /Tools/FactorySimulation/Station/logs
+/Tools/PlantCopilot/bin/Debug/net10.0
+/Tools/PlantCopilot/obj

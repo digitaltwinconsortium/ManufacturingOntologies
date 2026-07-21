@@ -1,0 +1,7 @@
+bin/
+obj/
+*.user
+.vs/
+Dockerfile
+.dockerignore
+README.md

@@ -67,6 +67,7 @@
     "databricksDashboardUri": "https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Tools/DatabricksQueries/dashboard-ontologies.lvdash.json",
     "contributorRoleId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacContributor'))]",
     "i3xContainerAppName": "[concat(variables('resourcesName'), '-i3x4kusto')]",
+    "plantCopilotContainerAppName": "[concat(variables('resourcesName'), '-plantcopilot')]",
     "azureRbacAzureEventHubsDataSender": "2b629674-e913-4c01-ae53-ef4638d8f975",
     "azureRbacAzureEventHubsDataReceiver": "a638d3c7-ab3a-418d-83e6-5f17a39d4fde",
     "aioStorageAccountName": "[toLower(take(concat(replace(variables('resourcesName'), '-', ''), 'aiostorage'), 24))]",
@@ -1212,12 +1213,88 @@
         "[resourceId('Microsoft.Kusto/clusters', variables('adxClusterName'))]",
         "[resourceId('Microsoft.Kusto/clusters/databases/principalAssignments', variables('adxClusterName'), 'ontologies', guid(resourceId('Microsoft.Kusto/clusters/databases', variables('adxClusterName'), 'ontologies'), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity')), 'Admin'))]"
       ]
+    },
+    {
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2024-03-01",
+      "name": "[variables('plantCopilotContainerAppName')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]": {}
+        }
+      },
+      "properties": {
+        "workloadProfileName": "Consumption",
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
+        "configuration": {
+          "activeRevisionsMode": "Single",
+          "secrets": [
+            {
+              "name": "i3xbasicauthpassword",
+              "value": "[parameters('adminPassword')]"
+            }
+          ],
+          "ingress": {
+            "external": true,
+            "transport": "Auto",
+            "targetPort": 8080,
+            "allowInsecure": false,
+            "traffic": [
+              {
+                "latestRevision": true,
+                "weight": 100
+              }
+            ]
+          }
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "plantcopilot",
+              "image": "ghcr.io/digitaltwinconsortium/manufacturingontologies/plantcopilot:main",
+              "env": [
+                {
+                  "name": "I3X_BASE_URL",
+                  "value": "[concat('https://', reference(resourceId('Microsoft.App/containerApps', variables('i3xContainerAppName')), '2024-03-01').configuration.ingress.fqdn)]"
+                },
+                {
+                  "name": "I3X_USERNAME",
+                  "value": "[parameters('adminUsername')]"
+                },
+                {
+                  "name": "I3X_PASSWORD",
+                  "secretRef": "i3xbasicauthpassword"
+                }
+              ],
+              "resources": {
+                "cpu": 0.5,
+                "memory": "1Gi"
+              }
+            }
+          ],
+          "scale": {
+            "minReplicas": 1,
+            "maxReplicas": 1
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments', concat(variables('resourcesName'), '-AppEnvironment'))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat(variables('resourcesName'), '-Identity'))]",
+        "[resourceId('Microsoft.App/containerApps', variables('i3xContainerAppName'))]"
+      ]
     }
   ],
   "outputs": {
     "i3x4KustoUrl": {
       "type": "string",
       "value": "[concat('https://', reference(resourceId('Microsoft.App/containerApps', variables('i3xContainerAppName')), '2024-03-01').configuration.ingress.fqdn)]"
+    },
+    "plantCopilotMcpUrl": {
+      "type": "string",
+      "value": "[concat('https://', reference(resourceId('Microsoft.App/containerApps', variables('plantCopilotContainerAppName')), '2024-03-01').configuration.ingress.fqdn, '/mcp')]"
     }
   }
 }

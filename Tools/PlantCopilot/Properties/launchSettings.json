@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "PlantCopilot": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:60841;http://localhost:60842"
+    }
+  }
+}

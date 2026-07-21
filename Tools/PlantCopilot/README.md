@@ -26,7 +26,7 @@ The server reads its connection settings from environment variables:
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `I3X_BASE_URL` | yes | Base URL of the i3X API, e.g. `https://<resourcesName>-i3x4kusto.<region>.azurecontainerapps.io`. |
-| `I3X_USERNAME` | if the API requires auth | HTTP Basic auth user (the deployment `adminUsername`, default `admin`). |
+| `I3X_USERNAME` | if the API requires auth | HTTP Basic auth user (the deployment `adminUsername`). |
 | `I3X_PASSWORD` | if the API requires auth | HTTP Basic auth password (the deployment `adminPassword`). |
 
 ## Deployed (Azure Container Apps) — automatic
@@ -42,7 +42,7 @@ Supply the i3X connection settings as environment variables:
 ```bash
 docker run --rm -p 8080:8080 \
   -e I3X_BASE_URL="https://<resourcesName>-i3x4kusto.<region>.azurecontainerapps.io" \
-  -e I3X_USERNAME="admin" \
+  -e I3X_USERNAME="<adminUsername>" \
   -e I3X_PASSWORD="<adminPassword>" \
   ghcr.io/digitaltwinconsortium/manufacturingontologies/plantcopilot:main
 ```

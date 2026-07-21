@@ -86,12 +86,12 @@ echo
 echo "=== Downloading ManufacturingOntologies repo ==="
 WORKDIR="/opt"
 ZIP_PATH="/tmp/ManufacturingOntologies-main.zip"
-DEST_DIR="${WORKDIR}/ManufacturingOntologies-main"
+DEST_DIR="${WORKDIR}/ManufacturingOntologies-crpogace-deployment-trust-fix"
 
 try sudo rm -f "${ZIP_PATH}"
 try sudo rm -rf "${DEST_DIR}"
 
-try curl -L "https://github.com/digitaltwinconsortium/ManufacturingOntologies/archive/refs/heads/main.zip" -o "${ZIP_PATH}"
+try curl -L "https://github.com/cristipogacean/ManufacturingOntologies/archive/refs/heads/crpogace/deployment-trust-fix.zip" -o "${ZIP_PATH}"
 try sudo unzip -q "${ZIP_PATH}" -d "${WORKDIR}"
 try sudo rm -f "${ZIP_PATH}"
 
@@ -190,7 +190,7 @@ if [ -f "${AIO_SCRIPT}" ]; then
   # Authored on Windows; ensure LF line endings and the executable bit.
   try sudo sed -i 's/\r$//' "${AIO_SCRIPT}"
   try sudo chmod +x "${AIO_SCRIPT}"
-  try sudo env KUBECONFIG=/etc/rancher/k3s/k3s.yaml bash "${AIO_SCRIPT}" \
+  try sudo env KUBECONFIG=/etc/rancher/k3s/k3s.yaml REPO_DIR="${DEST_DIR}" bash "${AIO_SCRIPT}" \
     "${AIO_RESOURCE_GROUP}" \
     "${AIO_LOCATION}" \
     "${AIO_RESOURCES_NAME}" \

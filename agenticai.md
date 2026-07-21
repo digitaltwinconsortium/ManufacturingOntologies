@@ -1,4 +1,4 @@
-# Agentic AI for the reference solution
+# Agentic AI for the Reference Solution
 
 Once the reference solution is deployed, the factory's OPC UA telemetry is connected, normalized against the ISA-95 asset hierarchy, and made queryable through Azure Data Explorer (or a Microsoft Fabric Eventhouse) and the [I3X](https://api.i3x.dev) API. This is exactly the kind of grounded, well-structured, real-time data that an **agentic AI** solution needs. This article describes how an AI agent on top of the reference solution works, starting with an automatically deployed, read-only **Plant Copilot** that answers natural-language questions about the plant, and outlines a safe path toward agents that can take action.
 

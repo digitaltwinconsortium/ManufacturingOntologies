@@ -27,25 +27,25 @@ This reference solution includes a small MCP server, **Plant Copilot**, under [`
    │    User      │  ───────────────────────────►  │   Agent runtime      │
    │ (chat / app) │  ◄───────────────────────────  │  (Microsoft 365      │
    └──────────────┘        grounded answer         │  Copilot, Foundry…)  │
-												   └───────────┬──────────┘
-															   │ MCP over HTTPS (/mcp)
-															   ▼
-													┌──────────────────────┐
-													│   Plant Copilot      │
-													│   MCP server         │
-													│  (read-only tools)   │
-													└──────────┬───────────┘
-															   │ HTTPS + Basic auth
-															   ▼
-													┌──────────────────────┐
-													│  I3X API (i3x4kusto) │
-													└──────────┬─-─────────┘
-															   │ KQL
-															   ▼
-													┌──────────────────────┐
-													│ Azure Data Explorer  │
-													│ / Fabric Eventhouse  │
-													└──────────────────────┘
+												   └──────────┬───────────┘
+													   	      │ MCP over HTTPS (/mcp)
+															  ▼
+												   ┌──────────────────────┐
+												   │   Plant Copilot      │
+												   │   MCP server         │
+												   │  (read-only tools)   │
+												   └──────────┬───────────┘
+													   	      │ HTTPS
+															  ▼
+												   ┌──────────────────────┐
+												   │  I3X API (i3x4kusto) │
+												   └──────────┬─-─────────┘
+													  	      │ KQL
+															  ▼
+												   ┌──────────────────────┐
+												   │ Azure Data Explorer  │
+												   │ / Fabric Eventhouse  │
+												   └──────────────────────┘
 ```
 
 The agent never touches the database directly. It only sees the curated, read-only tools, and the I3X layer enforces authentication and the ISA-95 shape of the data.
@@ -72,7 +72,7 @@ With just these tools an agent can answer questions such as:
 
 ## Running the Plant Copilot
 
-The Plant Copilot is deployed for you as part of the reference solution — there is nothing extra to set up. Its container image is built and published automatically to `ghcr.io/digitaltwinconsortium/manufacturingontologies/plantcopilot:main`, and the ARM template ([`Deployment/arm.json`](Deployment/arm.json)) provisions it as an Azure Container App wired to the in-cluster i3X app. The deployment exposes its remote MCP endpoint as the `plantCopilotMcpUrl` output, e.g. `https://<resourcesName>-plantcopilot.<region>.azurecontainerapps.io/mcp`.
+The Plant Copilot is deployed for you as part of the reference solution. There is nothing extra to set up. Its container image is built and published automatically to `ghcr.io/digitaltwinconsortium/manufacturingontologies/plantcopilot:main`, and the deployment template provisions it as an Azure Container App wired to the in-cluster I3X app. The deployment exposes its remote MCP endpoint as the `plantCopilotMcpUrl` output, e.g. `https://<resourcesName>-plantcopilot.<region>.azurecontainerapps.io/mcp`.
 
 To use it, add the Plant Copilot as a tool for the **Microsoft 365 Copilot** experience. Using [Microsoft Copilot Studio](https://learn.microsoft.com/microsoft-copilot-studio/agent-extend-action-mcp), add a new **Model Context Protocol** tool that points at the deployed endpoint, then publish the agent to Microsoft 365 Copilot:
 

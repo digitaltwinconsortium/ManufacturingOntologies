@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A2784944-F23E-4528-B46F-4D258835BABA}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\adx.md = ..\..\..\adx.md
+		..\..\..\agenticai.md = ..\..\..\agenticai.md
 		..\..\..\Deployment\arm.json = ..\..\..\Deployment\arm.json
 		..\..\..\Deployment\Bootstrap.sh = ..\..\..\Deployment\Bootstrap.sh
 		..\..\ADXQueries\CalculateOEEForLine.kql = ..\..\ADXQueries\CalculateOEEForLine.kql

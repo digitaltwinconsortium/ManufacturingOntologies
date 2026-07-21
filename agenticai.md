@@ -25,20 +25,19 @@ This reference solution includes a small MCP server, **Plant Copilot**, under [`
 ```text
    ┌──────────────┐        natural language        ┌──────────────────────┐
    │    User      │  ───────────────────────────►  │   Agent runtime      │
-   │ (chat / app) │  ◄───────────────────────────  │  (Microsoft 365      │
-   └──────────────┘        grounded answer         │  Copilot, Foundry…)  │
+   │ (chat / app) │  ◄───────────────────────────  │   (Microsoft 365     │
+   └──────────────┘        grounded answer         │   Copilot, Foundry…) │
 												   └──────────┬───────────┘
-													   	      │ MCP over HTTPS
+													   	      │ MCP
 															  ▼
 												   ┌──────────────────────┐
-												   │   Plant Copilot      │
-												   │   MCP server         │
-												   │  (read-only tools)   │
+												   │     Plant Copilot    │
+												   │      MCP server      │
 												   └──────────┬───────────┘
-													   	      │ HTTPS
+													   	      │ I3X
 															  ▼
 												   ┌──────────────────────┐
-												   │  I3X API (i3x4kusto) │
+												   │       I3X4Kusto      │
 												   └──────────┬───────────┘
 													  	      │ KQL
 															  ▼

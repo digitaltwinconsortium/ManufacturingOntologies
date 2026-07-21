@@ -28,20 +28,20 @@ This reference solution includes a small MCP server, **Plant Copilot**, under [`
    │ (chat / app) │  ◄───────────────────────────  │ (Microsoft 365       │
    └──────────────┘        grounded answer         │  Copilot, Foundry…)  │
 												   └───────────┬──────────┘
-																│ MCP over HTTPS (/mcp)
-																▼
+															   │ MCP over HTTPS (/mcp)
+															   ▼
 													┌──────────────────────┐
 													│   Plant Copilot      │
 													│   MCP server         │
 													│  (read-only tools)   │
-													└───────────┬──────────┘
-																│ HTTPS + Basic auth
-																▼
+													└──────────┬─-─────────┘
+															   │ HTTPS + Basic auth
+															   ▼
 													┌──────────────────────┐
 													│  I3X API (i3x4kusto) │
-													└───────────┬──────────┘
-																│ KQL
-																▼
+													└──────────┬─-─────────┘
+															   │ KQL
+															   ▼
 													┌──────────────────────┐
 													│ Azure Data Explorer  │
 													│ / Fabric Eventhouse  │

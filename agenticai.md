@@ -34,7 +34,7 @@ This reference solution includes a small MCP server, **Plant Copilot**, under [`
 													│   Plant Copilot      │
 													│   MCP server         │
 													│  (read-only tools)   │
-													└──────────┬─-─────────┘
+													└──────────┬───────────┘
 															   │ HTTPS + Basic auth
 															   ▼
 													┌──────────────────────┐

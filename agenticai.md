@@ -111,7 +111,7 @@ Create the tool. On first connection Copilot Studio performs the OAuth flow agai
 
 Once published and approved, users can select the agent in Microsoft 365 Copilot (in Teams, Outlook or the Microsoft 365 Copilot app) and ask the plant questions directly. Copilot grounds its answers in the tool results returned by the Plant Copilot.
 
-## Alternative: a Fabric Data Agent over the Eventhouse
+## Alternative: A Fabric Data Agent over the Eventhouse
 
 If you are using the [Microsoft Fabric](fabric.md) path of the reference solution, you can build the same grounded plant-copilot experience **entirely inside Fabric**, without the MCP server, Copilot Studio, or the associated connector governance. A [Fabric data agent](https://learn.microsoft.com/fabric/data-science/concept-data-agent) answers natural-language questions over Fabric data sources by generating queries (KQL) directly against them. Because the reference solution already mirrors the same OPC UA tables, functions and views into the Fabric **Eventhouse**, the plant data is right there for the agent to query.
 

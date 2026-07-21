@@ -105,7 +105,7 @@ The following articles describe how to deploy this reference solution as well as
 - [Connect SAP to the reference solution](https://learn.microsoft.com/en-us/azure/architecture/guide/iot/howto-connect-on-premises-sap-to-azure) describes how to connect SAP to the reference solution.
 - [Connect an industrial data space to the reference solution](dataspaces.md) describes how to connect an industrial data space to the reference solution.
 - [Import OPC UA Information Models from the UA Cloud Library into Azure services](cloudlib.md) describes how to import standardized OPC UA information models from the OPC Foundation's UA Cloud Library into Azure services.
-- [Using the Plant Copilot AI agent](agenticai.md) describes how to use the Plant Copilot AI agent on top of the reference solution, starting with a read-only MCP server that answers natural-language questions grounded in the plant's live and historical data.
+- [Agentic AI for the reference solution](agenticai.md) describes how to use the Plant Copilot AI agent on top of the reference solution, starting with a read-only MCP server that answers natural-language questions grounded in the plant's live and historical data.
 
 ## Production line simulation
 

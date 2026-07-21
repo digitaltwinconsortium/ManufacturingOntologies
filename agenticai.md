@@ -111,6 +111,22 @@ Create the tool. On first connection Copilot Studio performs the OAuth flow agai
 
 Once published and approved, users can select the agent in Microsoft 365 Copilot (in Teams, Outlook or the Microsoft 365 Copilot app) and ask the plant questions directly. Copilot grounds its answers in the tool results returned by the Plant Copilot.
 
+## Alternative: a Fabric Data Agent over the Eventhouse
+
+If you are using the [Microsoft Fabric](fabric.md) path of the reference solution, you can build the same grounded plant-copilot experience **entirely inside Fabric**, without the MCP server, Copilot Studio, or the associated connector governance. A [Fabric data agent](https://learn.microsoft.com/fabric/data-science/concept-data-agent) answers natural-language questions over Fabric data sources by generating queries (KQL) directly against them. Because the reference solution already mirrors the same OPC UA tables, functions and views into the Fabric **Eventhouse**, the plant data is right there for the agent to query.
+
+> **When to use which.** The Plant Copilot **MCP server** is the cross-host option: one read-only tool surface reusable across many agent runtimes (Microsoft 365 Copilot, Claude, and others). A **Fabric data agent** is the fastest in-Fabric path — it needs only Fabric access, but is scoped to the Fabric experience and queries KQL directly rather than the curated I3X read-only tools. Note that a Fabric data agent is not an MCP host; it does not call the Plant Copilot MCP server. Instead, Fabric can expose a data agent *as* an MCP server for other hosts to consume.
+
+To build one:
+
+1. Open the **Fabric workspace** that contains the Eventhouse provisioned by the reference solution.
+2. Create a **data agent** and add the **Eventhouse / KQL database** as its data source.
+3. Set instructions that keep it grounded, for example: *"You are a plant assistant. Answer questions about assets, live values and history using the Eventhouse. Always ground answers in query results and cite the asset id, value and timestamp. Never invent data."*
+4. Optionally add a few example questions and their KQL queries to steer the agent toward the ISA-95 tables, functions and views (see [Connect Microsoft Fabric to the reference solution](fabric.md)).
+5. Test with the same questions ("What is the current energy consumption of the assembly station in Seattle?", "How did the Munich production line's throughput trend over the last shift?"); the agent generates KQL against the Eventhouse and grounds its answers in the results.
+
+Because the reference solution normalizes telemetry against the ISA-95 asset hierarchy and OPC UA information model, the Eventhouse already provides the semantic structure a data agent needs to reason about the plant.
+
 ## Beyond read-only: agents that take action
 
 Answering questions is only the first scenario. Because the reference solution already contains normalized, model-driven data, several higher-value agentic scenarios become possible:

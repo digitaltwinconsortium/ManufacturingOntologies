@@ -15,7 +15,12 @@ using PlantCopilot.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.ConfigureKestrel(options => options.ListenAnyIP(8080));
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(8080);
+    // Do not advertise the server implementation (avoids fingerprinting).
+    options.AddServerHeader = false;
+});
 
 builder.Services.AddHttpClient<I3xClient>();
 

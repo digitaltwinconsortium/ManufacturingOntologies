@@ -17,10 +17,12 @@ namespace PlantCopilot;
 public sealed class I3xClient
 {
     private readonly HttpClient _http;
+    private readonly ILogger<I3xClient> _logger;
 
-    public I3xClient(HttpClient http)
+    public I3xClient(HttpClient http, ILogger<I3xClient> logger)
     {
         _http = http;
+        _logger = logger;
 
         string baseUrl = (Environment.GetEnvironmentVariable("I3X_BASE_URL") ?? "http://localhost:8080").TrimEnd('/');
         _http.BaseAddress = new Uri(baseUrl + "/");
@@ -101,24 +103,31 @@ public sealed class I3xClient
 
     private async Task<string> GetAsync(string path, CancellationToken ct)
     {
+        _logger.LogInformation("AUDIT i3X access: GET {Path}", path);
         using var resp = await _http.GetAsync(path, ct).ConfigureAwait(false);
-        return await ReadAsync(resp, ct).ConfigureAwait(false);
+        return await ReadAsync(resp, path, ct).ConfigureAwait(false);
     }
 
     private async Task<string> PostAsync(string path, object body, CancellationToken ct)
     {
+        _logger.LogInformation("AUDIT i3X access: POST {Path}", path);
         string json = JsonSerializer.Serialize(body);
         using var content = new StringContent(json, Encoding.UTF8, "application/json");
         using var resp = await _http.PostAsync(path, content, ct).ConfigureAwait(false);
-        return await ReadAsync(resp, ct).ConfigureAwait(false);
+        return await ReadAsync(resp, path, ct).ConfigureAwait(false);
     }
 
-    private static async Task<string> ReadAsync(HttpResponseMessage resp, CancellationToken ct)
+    private async Task<string> ReadAsync(HttpResponseMessage resp, string path, CancellationToken ct)
     {
         string text = await resp.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
         if (!resp.IsSuccessStatusCode)
         {
-            return $"{{\"error\":\"I3X request failed with HTTP {(int)resp.StatusCode} {resp.StatusCode}\",\"detail\":{JsonSerializer.Serialize(text)}}}";
+            // Log the full upstream detail server-side for diagnostics, but return only a generic
+            // error to the caller so internal i3X details are not disclosed to the agent/client.
+            _logger.LogWarning(
+                "i3X request to {Path} failed with HTTP {StatusCode}: {Detail}",
+                path, (int)resp.StatusCode, text);
+            return $"{{\"error\":\"The upstream i3X request failed with HTTP {(int)resp.StatusCode}.\"}}";
         }
         return string.IsNullOrWhiteSpace(text) ? "{}" : text;
     }

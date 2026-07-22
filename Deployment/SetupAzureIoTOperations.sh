@@ -431,6 +431,221 @@ run az iot ops dataflow endpoint apply \
   --config-file "${MQTT_ENDPOINT_CONFIG}"
 
 # --------------------------
+# 9b. Pre-establish AIO -> station trust BEFORE onboarding devices/assets
+# --------------------------
+# AIO does NOT auto-accept untrusted OPC UA server certificates: it validates each station's server
+# certificate against the connector's trust list (Kubernetes secret 'aio-opc-ua-broker-trust-list',
+# populated here via Key Vault secret sync). We deliberately populate that trust list BEFORE section 10
+# creates the devices/assets, because the Supervisor only spawns the OPC UA connector (and commander)
+# pods once assets exist. A pod picks up the CURRENT contents of a mounted secret at startup with no
+# delay; only UPDATES to an already-mounted secret incur the kubelet refresh lag (~60-90s). By trusting
+# the stations first (and waiting for the synced secret to populate below), the connector pods mount a
+# fully-populated trust list at startup and connect to the stations immediately - no pod restart needed.
+#
+# The connector/commander do NOT cache the trust list in memory: they back their trusted store with the
+# mounted folder and re-read it from disk on each new session. The historical "restart to reload" step
+# was only working around trust being added AFTER the pods had already started (an update-after-mount
+# race), which this reordering removes.
+echo
+# The Key Vault name MUST match the name computed by the ARM template (Deployment/arm.json):
+#   keyVaultName = toLower(take(concat(replace(resourcesName, '-', ''), 'kv'), 24))
+# i.e. strip hyphens from the resource group name, append 'kv', lowercase, and truncate to 24
+# characters (the Key Vault name length limit). Reproduce that here so both resolve the same vault;
+# a divergent name silently breaks AIO secret sync, so the OPC UA trust list never populates and all
+# station connections fail while health checks still report green.
+KEY_VAULT_NAME="$(echo "${RESOURCES_NAME}" | tr -d '-' | tr '[:upper:]' '[:lower:]')kv"
+KEY_VAULT_NAME="${KEY_VAULT_NAME:0:24}"
+echo "=== Enabling AIO secret sync (reusing Key Vault ${KEY_VAULT_NAME}) ==="
+KEY_VAULT_ID="$(az keyvault show --name "${KEY_VAULT_NAME}" --resource-group "${RESOURCE_GROUP}" --query id -o tsv 2>/dev/null)"
+# Whether secret sync is enabled gates the OPC UA trust-list step below. Key off the
+# result of 'secretsync enable' (RUN_LAST_RC) rather than probing 'connector opcua trust
+# show': on a freshly enabled instance no trust list secret exists yet, so 'trust show'
+# returns non-zero and would wrongly report secret sync as disabled, skipping the trust add.
+secret_sync_enabled=false
+if [ -n "${KEY_VAULT_ID}" ] && [ -n "${MANAGED_IDENTITY_RESOURCE_ID}" ]; then
+  run az iot ops secretsync enable \
+    --instance "${AIO_INSTANCE_NAME}" \
+    --resource-group "${RESOURCE_GROUP}" \
+    --mi-user-assigned "${MANAGED_IDENTITY_RESOURCE_ID}" \
+    --kv-resource-id "${KEY_VAULT_ID}" \
+    --skip-ra
+  if [ "${RUN_LAST_RC}" -eq 0 ]; then
+    secret_sync_enabled=true
+  fi
+else
+  echo "!!! WARNING: could not resolve ${KEY_VAULT_NAME} or the managed identity; secret sync not enabled."
+  echo "    The OPC UA trust list (below) requires secret sync and will be skipped."
+fi
+
+echo
+echo "=== Adding the stations' OPC UA certificates to AIO's trust list (before onboarding) ==="
+AIO_TRUST_LIST_SECRET="aio-opc-ua-broker-trust-list"
+trust_added_count=0
+if [ "${secret_sync_enabled}" != "true" ]; then
+  echo "!!! NOTE: AIO secret sync is not enabled, so the OPC UA trust list cannot be updated."
+  echo "    After enabling it, add each station cert (from /mnt/c/K3s/<Station>/<Line>/PKI/own/certs) with:"
+  echo "      az iot ops connector opcua trust add --instance ${AIO_INSTANCE_NAME} \\"
+  echo "        --resource-group ${RESOURCE_GROUP} --certificate-file <station>.der"
+else
+  for line in "${LINES[@]}"; do
+    for station in Assembly Test Packaging; do
+      # The station's public certs live under its host-mounted PKI own store. pki/own/certs holds
+      # the RSA application instance cert plus alternate ECC curve variants; AIO connects with
+      # Basic256Sha256 (RSA), so add only the RSA cert and skip the curve-tagged variants.
+      cert_dir="/mnt/c/K3s/${station}/${line}/PKI/own/certs"
+      [ -d "${cert_dir}" ] || continue
+      for cert_file in "${cert_dir}"/*.der; do
+        [ -f "${cert_file}" ] || continue
+        case "${cert_file}" in
+          *NistP256*|*NistP384*|*BrainpoolP256r1*|*BrainpoolP384r1*) continue ;;
+        esac
+        echo ">>> Trusting ${station}/${line}: ${cert_file}"
+        # 'az iot ops connector opcua trust add' derives two names from the certificate file: the
+        # Key Vault secret name (must match ^[0-9A-Za-z-]+$) and the secretSync targetKey (must match
+        # ^[A-Za-z0-9.]([-A-Za-z0-9]+([-._a-zA-Z0-9]?[A-Za-z0-9])*)?...$). The station cert file names
+        # contain dots, spaces and '[thumbprint]', which fail both. Copy the cert to a sanitized
+        # <stem>.der file (valid targetKey) and pass a hyphen-only --secret-name from the same stem.
+        cert_stem="$(basename "${cert_file}" | sed 's/\.[^.]*$//; s/[^0-9A-Za-z]/-/g; s/--*/-/g; s/^-//; s/-$//')"
+        safe_cert_file="${AIO_CONFIG_DIR}/${cert_stem}.der"
+        cp "${cert_file}" "${safe_cert_file}"
+        run az iot ops connector opcua trust add \
+          --instance "${AIO_INSTANCE_NAME}" \
+          --resource-group "${RESOURCE_GROUP}" \
+          --certificate-file "${safe_cert_file}" \
+          --secret-name "${cert_stem}"
+        if [ "${RUN_LAST_RC}" -eq 0 ]; then
+          trust_added_count=$((trust_added_count + 1))
+        fi
+      done
+    done
+  done
+  if [ "${trust_added_count}" -eq 0 ]; then
+    echo "!!! NOTE: no station OPC UA certificate was found on disk yet. If AIO fails to connect to"
+    echo "    a station, export that station's server certificate and run:"
+    echo "      az iot ops connector opcua trust add --instance ${AIO_INSTANCE_NAME} \\"
+    echo "        --resource-group ${RESOURCE_GROUP} --certificate-file <station>.der"
+  else
+    # Wait until the certs actually land in the synced trust-list secret BEFORE we onboard assets
+    # (which is what makes the Supervisor spawn the connector/commander pods). This turns the former
+    # "add then restart" race into a deterministic "trust list is ready before the pods start".
+    # Key Vault -> secret sync has its own reconcile interval, so poll for up to ~5 minutes.
+    echo ">>> Waiting for ${trust_added_count} station cert(s) to sync into '${AIO_TRUST_LIST_SECRET}'..."
+    synced=0
+    for _i in $(seq 1 60); do
+      synced="$(kubectl -n "${AIO_NAMESPACE}" get secret "${AIO_TRUST_LIST_SECRET}" \
+        -o jsonpath='{.data}' 2>/dev/null | jq 'length' 2>/dev/null || echo 0)"
+      [ "${synced:-0}" -ge "${trust_added_count}" ] && break
+      sleep 5
+    done
+    if [ "${synced:-0}" -ge "${trust_added_count}" ]; then
+      echo ">>> Trust list ready: ${synced} certificate(s) present in '${AIO_TRUST_LIST_SECRET}'."
+    else
+      echo "!!! WARNING: only ${synced:-0}/${trust_added_count} station cert(s) visible in '${AIO_TRUST_LIST_SECRET}' after waiting."
+      echo "    The connector may reject stations with 'BadCertificateUntrusted' until secret sync catches up"
+      echo "    (it recovers on its own once the secret populates; no restart is required)."
+    fi
+  fi
+fi
+
+# --------------------------
+# 9c/9d. Establish the reverse trust (stations trust AIO / Commander / MES) BEFORE onboarding
+# --------------------------
+# Complements 9b (AIO -> station trust) with the other direction, so trust is fully mutual before the
+# Supervisor spawns the connector/commander pods at onboarding (section 10). AIO's connector presents a
+# cert-manager-managed, self-signed application instance certificate (secret
+# aio-opc-opcuabroker-default-application-cert) when it connects to a station; each station accepts a
+# peer certificate only if it is in pki/trusted/certs or signed by an issuer in pki/issuer/certs (see
+# Station/Program.cs CertificateValidationCallback). Doing this before onboarding means AIO's very first
+# connection to each station succeeds instead of being rejected until the certs are distributed. The
+# station-side stores are host-mounted directories that the OPC UA .NET validator re-reads on each
+# validation, so no station restart is required.
+echo
+echo "=== Establishing OPC UA mutual trust between AIO and the stations ==="
+
+AIO_CERT_CRT="${AIO_CONFIG_DIR}/opcuabroker.crt"
+AIO_CERT_DER="${AIO_CONFIG_DIR}/opcuabroker.der"
+
+# 9c. Retrieve AIO's connector application instance certificate (public key) and copy it into each
+# telemetry station's host-mounted trusted store so the stations trust AIO's client certificate.
+# cert-manager provisions this secret at AIO install time (after 'az iot ops create', independent of
+# the connector pods), but it may lag a few seconds, so wait briefly for it before reading.
+for _i in $(seq 1 36); do
+  kubectl -n "${AIO_NAMESPACE}" get secret "${AIO_OPCUA_CERT_SECRET}" >/dev/null 2>&1 && break
+  sleep 5
+done
+if kubectl -n "${AIO_NAMESPACE}" get secret "${AIO_OPCUA_CERT_SECRET}" >/dev/null 2>&1; then
+  kubectl -n "${AIO_NAMESPACE}" get secret "${AIO_OPCUA_CERT_SECRET}" \
+    -o jsonpath='{.data.tls\.crt}' | base64 -d > "${AIO_CERT_CRT}" 2>/dev/null
+
+  if [ -s "${AIO_CERT_CRT}" ]; then
+    # The stations (OPC UA .NET stack) expect DER-encoded certs in the PKI folders.
+    if command -v openssl >/dev/null 2>&1; then
+      run openssl x509 -outform der -in "${AIO_CERT_CRT}" -out "${AIO_CERT_DER}"
+    fi
+    aio_cert_to_copy="${AIO_CERT_DER}"
+    [ -s "${AIO_CERT_DER}" ] || aio_cert_to_copy="${AIO_CERT_CRT}"
+
+    # Copy AIO's certificate into each telemetry station's host-mounted trusted store. Each station's
+    # /app/pki is host-mounted at /mnt/c/K3s/<Station>/<Line>/PKI (see Deployment/<Line>/
+    # ProductionLine.yaml), so writing on the host persists across pod restarts. Only Assembly/Test/
+    # Packaging are onboarded to AIO.
+    cert_basename="aio-opcuabroker.${aio_cert_to_copy##*.}"
+    for line in "${LINES[@]}"; do
+      for station in Assembly Test Packaging; do
+        dest_dir="/mnt/c/K3s/${station}/${line}/PKI/trusted/certs"
+        run mkdir -p "${dest_dir}"
+        run cp "${aio_cert_to_copy}" "${dest_dir}/${cert_basename}"
+        echo ">>> ${station}/${line}: AIO certificate installed into ${dest_dir}"
+      done
+    done
+  else
+    echo "!!! WARNING: AIO connector certificate was empty; stations will not trust AIO."
+  fi
+else
+  echo "!!! WARNING: secret ${AIO_OPCUA_CERT_SECRET} not found in ${AIO_NAMESPACE};"
+  echo "    cannot distribute AIO's certificate to the stations. AIO connections may be refused."
+fi
+
+# 9d. Make the stations trust the OPC UA clients that connect to them: the UA Cloud Commander (issues
+# commands) and the MES (drives the assembly line). With GDS Server Push disabled their certificates are
+# not distributed automatically, so copy each client's own cert (host-mounted at
+# /mnt/c/K3s/<Component>/<Line>/PKI/own/certs) into each station's trusted/certs. pki/own/certs holds the
+# RSA application instance cert plus alternate ECC curve variants; the stations negotiate Basic256Sha256
+# (RSA), so copy only the RSA cert and skip the curve-tagged variants.
+echo
+echo "=== Establishing trust for the OPC UA clients (Commander, MES) at the stations ==="
+# Each entry maps a host PKI component directory to the filename prefix used in trusted/certs.
+CLIENT_COMPONENTS="Commander:commander MES:mes"
+for client in ${CLIENT_COMPONENTS}; do
+  component="${client%%:*}"
+  prefix="${client##*:}"
+  client_cert_found=false
+  for line in "${LINES[@]}"; do
+    client_cert_dir="/mnt/c/K3s/${component}/${line}/PKI/own/certs"
+    [ -d "${client_cert_dir}" ] || continue
+    for cert_file in "${client_cert_dir}"/*.der; do
+      [ -f "${cert_file}" ] || continue
+      case "${cert_file}" in
+        *NistP256*|*NistP384*|*BrainpoolP256r1*|*BrainpoolP384r1*) continue ;;
+      esac
+      client_cert_found=true
+      cert_basename="${prefix}.$(basename "${cert_file}")"
+      for station in Assembly Test Packaging; do
+        dest_dir="/mnt/c/K3s/${station}/${line}/PKI/trusted/certs"
+        run mkdir -p "${dest_dir}"
+        run cp "${cert_file}" "${dest_dir}/${cert_basename}"
+        echo ">>> ${station}/${line}: ${component} certificate installed into ${dest_dir}"
+      done
+    done
+  done
+  if [ "${client_cert_found}" != "true" ]; then
+    echo "!!! NOTE: no ${component} OPC UA certificate was found under"
+    echo "    /mnt/c/K3s/${component}/<Line>/PKI/own/certs yet. If the stations reject ${component},"
+    echo "    copy its own cert into each station's PKI/trusted/certs and retry."
+  fi
+done
+
+# --------------------------
 # 10. Register the simulation OPC UA servers as AIO devices/assets (both lines)
 # --------------------------
 # The set of published OPC UA nodes is taken directly from persistency.json
@@ -515,7 +730,8 @@ for line in "${LINES[@]}"; do
 
 	# AIO does NOT auto-accept untrusted server certificates. Instead, AIO is made to trust each
 	# station's own OPC UA server certificate explicitly by adding it to AIO's connector trust list
-	# (via Key Vault secret sync) in section 12c below.
+	# (via Key Vault secret sync). That trust was established earlier, in section 9b above, BEFORE these
+	# devices/assets are onboarded, so the connector pods start with a fully-populated trust list.
 	run az iot ops ns device endpoint inbound add opcua \
 	  --resource-group "${RESOURCE_GROUP}" \
 	  --instance "${AIO_INSTANCE_NAME}" \
@@ -706,237 +922,15 @@ run az iot ops dataflow apply \
 # command source endpoint and no command/response dataflows are needed here.
 
 # --------------------------
-# 12. Establish OPC UA application-authentication mutual trust with the stations
+# 12. AIO OPC UA commander action + edge command path (post-onboarding)
 # --------------------------
-# AIO's connector for OPC UA presents a cert-manager-managed, self-signed application instance
-# certificate (secret aio-opc-opcuabroker-default-application-cert) when it connects to a station.
-# The stations accept anonymous/untrusted OPC UA sessions ONLY while their pki/issuer/certs store is
-# empty ("provisioning mode"); once populated, each station accepts a peer certificate only if it is
-# in pki/trusted/certs or is signed by an issuer in pki/issuer/certs (see Station/Program.cs
-# CertificateValidationCallback). Two-way trust is established here:
-#  - Stations trust AIO (12a/12b): copy AIO's certificate into each station's host-mounted
-#    pki/trusted/certs (/mnt/c/K3s/<Station>/<Line>/PKI). The validator re-reads that directory on
-#    each validation, so no station restart is required.
-#  - AIO trusts the stations (12c): add each station's own OPC UA server certificate to AIO's
-#    connector trust list via Key Vault secret sync, so AIO validates (does not auto-accept) the
-#    server certificate each station presents.
-#  - Stations trust the UA Cloud Commander and the MES (12d): both are OPC UA clients that connect to
-#    the stations (the commander to issue commands, the MES to drive the assembly line). With GDS
-#    Server Push disabled their certificates are no longer distributed automatically, so copy each
-#    client's own OPC UA client certificate (exposed on the host at
-#    /mnt/c/K3s/<Component>/<Line>/PKI/own/certs) into each station's trusted/certs.
-echo
-echo "=== Establishing OPC UA mutual trust between AIO and the stations ==="
-
-AIO_CERT_CRT="${AIO_CONFIG_DIR}/opcuabroker.crt"
-AIO_CERT_DER="${AIO_CONFIG_DIR}/opcuabroker.der"
-
-# 12a. Retrieve AIO's connector application instance certificate (public key) from the secret.
-if kubectl -n "${AIO_NAMESPACE}" get secret "${AIO_OPCUA_CERT_SECRET}" >/dev/null 2>&1; then
-  kubectl -n "${AIO_NAMESPACE}" get secret "${AIO_OPCUA_CERT_SECRET}" \
-    -o jsonpath='{.data.tls\.crt}' | base64 -d > "${AIO_CERT_CRT}" 2>/dev/null
-
-  if [ -s "${AIO_CERT_CRT}" ]; then
-    # The stations (OPC UA .NET stack) expect DER-encoded certs in the PKI folders.
-    if command -v openssl >/dev/null 2>&1; then
-      run openssl x509 -outform der -in "${AIO_CERT_CRT}" -out "${AIO_CERT_DER}"
-    fi
-    aio_cert_to_copy="${AIO_CERT_DER}"
-    [ -s "${AIO_CERT_DER}" ] || aio_cert_to_copy="${AIO_CERT_CRT}"
-
-    # 12b. Copy AIO's certificate into each telemetry station's host-mounted trusted store so the
-    # stations trust AIO's client certificate. Each station's /app/pki is host-mounted at
-    # /mnt/c/K3s/<Station>/<Line>/PKI (see Deployment/<Line>/ProductionLine.yaml), so writing on the
-    # host persists across pod restarts and the OPC UA .NET validator re-reads trusted/certs on each
-    # validation (no station restart required). Only Assembly/Test/Packaging are onboarded to AIO.
-    cert_basename="aio-opcuabroker.${aio_cert_to_copy##*.}"
-    for line in "${LINES[@]}"; do
-      for station in Assembly Test Packaging; do
-        dest_dir="/mnt/c/K3s/${station}/${line}/PKI/trusted/certs"
-        run mkdir -p "${dest_dir}"
-        run cp "${aio_cert_to_copy}" "${dest_dir}/${cert_basename}"
-        echo ">>> ${station}/${line}: AIO certificate installed into ${dest_dir}"
-      done
-    done
-  else
-    echo "!!! WARNING: AIO connector certificate was empty; stations will not trust AIO."
-  fi
-else
-  echo "!!! WARNING: secret ${AIO_OPCUA_CERT_SECRET} not found in ${AIO_NAMESPACE};"
-  echo "    cannot distribute AIO's certificate to the stations. AIO connections may be refused."
-fi
-
-# 12c. Make AIO trust the stations. Each simulation station presents its own self-signed OPC UA
-# application instance (server) certificate. Its /app/pki is host-mounted at
-# /mnt/c/K3s/<Station>/<Line>/PKI, so the public certs live under .../PKI/own/certs. Add each
-# station's certificate to AIO's connector trust list so AIO validates (does not auto-accept) the
-# server certificate the station presents.
-#
-# 'az iot ops connector opcua trust add' stores the trust list as a synced secret, so AIO secret
-# sync must be enabled first. We reuse the solution's existing Key Vault (see the name computation
-# below, which mirrors the ARM template's keyVaultName) and the shared user-assigned managed identity.
-# and 'Key Vault Reader' by the ARM template, so we pass --skip-ra (the identity cannot create the
-# Key Vault role assignments itself - that needs Microsoft.Authorization/roleAssignments/write).
-echo
-# The Key Vault name MUST match the name computed by the ARM template (Deployment/arm.json):
-#   keyVaultName = toLower(take(concat(replace(resourcesName, '-', ''), 'kv'), 24))
-# i.e. strip hyphens from the resource group name, append 'kv', lowercase, and truncate to 24
-# characters (the Key Vault name length limit). Reproduce that here so both resolve the same vault;
-# a divergent name silently breaks AIO secret sync, so the OPC UA trust list never populates and all
-# station connections fail while health checks still report green.
-KEY_VAULT_NAME="$(echo "${RESOURCES_NAME}" | tr -d '-' | tr '[:upper:]' '[:lower:]')kv"
-KEY_VAULT_NAME="${KEY_VAULT_NAME:0:24}"
-echo "=== Enabling AIO secret sync (reusing Key Vault ${KEY_VAULT_NAME}) ==="
-KEY_VAULT_ID="$(az keyvault show --name "${KEY_VAULT_NAME}" --resource-group "${RESOURCE_GROUP}" --query id -o tsv 2>/dev/null)"
-# Whether secret sync is enabled gates the OPC UA trust-list step below. Key off the
-# result of 'secretsync enable' (RUN_LAST_RC) rather than probing 'connector opcua trust
-# show': on a freshly enabled instance no trust list secret exists yet, so 'trust show'
-# returns non-zero and would wrongly report secret sync as disabled, skipping the trust add.
-secret_sync_enabled=false
-if [ -n "${KEY_VAULT_ID}" ] && [ -n "${MANAGED_IDENTITY_RESOURCE_ID}" ]; then
-  run az iot ops secretsync enable \
-    --instance "${AIO_INSTANCE_NAME}" \
-    --resource-group "${RESOURCE_GROUP}" \
-    --mi-user-assigned "${MANAGED_IDENTITY_RESOURCE_ID}" \
-    --kv-resource-id "${KEY_VAULT_ID}" \
-    --skip-ra
-  if [ "${RUN_LAST_RC}" -eq 0 ]; then
-    secret_sync_enabled=true
-  fi
-else
-  echo "!!! WARNING: could not resolve ${KEY_VAULT_NAME} or the managed identity; secret sync not enabled."
-  echo "    The OPC UA trust list (below) requires secret sync and will be skipped."
-fi
-
-echo
-echo "=== Adding the stations' OPC UA certificates to AIO's trust list ==="
-if [ "${secret_sync_enabled}" != "true" ]; then
-  echo "!!! NOTE: AIO secret sync is not enabled, so the OPC UA trust list cannot be updated."
-  echo "    After enabling it, add each station cert (from /mnt/c/K3s/<Station>/<Line>/PKI/own/certs) with:"
-  echo "      az iot ops connector opcua trust add --instance ${AIO_INSTANCE_NAME} \\"
-  echo "        --resource-group ${RESOURCE_GROUP} --certificate-file <station>.der"
-  echo "    Then restart the OPC UA connector and commander pods so they reload the trust list (they cache"
-  echo "    it at startup and do NOT hot-reload it):"
-  echo "      kubectl -n azure-iot-operations rollout restart deployment -l app=aio-opc"
-else
-  station_cert_found=false
-  for line in "${LINES[@]}"; do
-    for station in Assembly Test Packaging; do
-      # The station's public certs live under its host-mounted PKI own store. pki/own/certs holds
-      # the RSA application instance cert plus alternate ECC curve variants; AIO connects with
-      # Basic256Sha256 (RSA), so add only the RSA cert and skip the curve-tagged variants.
-      cert_dir="/mnt/c/K3s/${station}/${line}/PKI/own/certs"
-      [ -d "${cert_dir}" ] || continue
-      for cert_file in "${cert_dir}"/*.der; do
-        [ -f "${cert_file}" ] || continue
-        case "${cert_file}" in
-          *NistP256*|*NistP384*|*BrainpoolP256r1*|*BrainpoolP384r1*) continue ;;
-        esac
-        station_cert_found=true
-        echo ">>> Trusting ${station}/${line}: ${cert_file}"
-        # 'az iot ops connector opcua trust add' derives two names from the certificate file: the
-        # Key Vault secret name (must match ^[0-9A-Za-z-]+$) and the secretSync targetKey (must match
-        # ^[A-Za-z0-9.]([-A-Za-z0-9]+([-._a-zA-Z0-9]?[A-Za-z0-9])*)?...$). The station cert file names
-        # contain dots, spaces and '[thumbprint]', which fail both. Copy the cert to a sanitized
-        # <stem>.der file (valid targetKey) and pass a hyphen-only --secret-name from the same stem.
-        cert_stem="$(basename "${cert_file}" | sed 's/\.[^.]*$//; s/[^0-9A-Za-z]/-/g; s/--*/-/g; s/^-//; s/-$//')"
-        safe_cert_file="${AIO_CONFIG_DIR}/${cert_stem}.der"
-        cp "${cert_file}" "${safe_cert_file}"
-        run az iot ops connector opcua trust add \
-          --instance "${AIO_INSTANCE_NAME}" \
-          --resource-group "${RESOURCE_GROUP}" \
-          --certificate-file "${safe_cert_file}" \
-          --secret-name "${cert_stem}"
-      done
-    done
-  done
-  if [ "${station_cert_found}" != "true" ]; then
-    echo "!!! NOTE: no station OPC UA certificate was found on disk yet. If AIO fails to connect to"
-    echo "    a station, export that station's server certificate and run:"
-    echo "      az iot ops connector opcua trust add --instance ${AIO_INSTANCE_NAME} \\"
-    echo "        --resource-group ${RESOURCE_GROUP} --certificate-file <station>.der"
-    echo "    IMPORTANT: the OPC UA connector and commander pods cache the trust list at startup and do"
-    echo "    NOT hot-reload it. After adding a certificate you MUST restart them to pick up the change:"
-    echo "      kubectl rollout restart deployment -n azure-iot-operations -l app.kubernetes.io/name=connector"
-    echo "      kubectl -n azure-iot-operations delete pod -l app=aio-opc  # or restart the aio-opc-* deployments"
-  fi
-  # The station certs were just synced into the 'aio-opc-ua-broker-trust-list' secret, but the OPC UA
-  # connector AND commander pods load their trusted-certificate store at startup and do NOT hot-reload
-  # the updated synced secret. Without a restart the commander keeps its stale (empty) trust list and
-  # rejects the stations with 'BadCertificateUntrusted' (e.g. CN=packaging.seattle), which blocks method
-  # calls and process-control schema generation. Restart the OPC UA workloads so they pick up the new
-  # trust list. Best-effort: never fail the whole setup if a restart is unavailable.
-  if [ "${station_cert_found}" = "true" ]; then
-    echo ">>> Restarting the AIO OPC UA connector and commander so they reload the updated trust list..."
-    # Discover the OPC UA workloads by NAME (label schemes differ across AIO builds, so name matching is
-    # more robust). This catches the connector (aio-opc-opc.tcp-*) and the commander (aio-opc-opcua-
-    # commander-*) deployments. Best-effort: never fail the whole setup if a restart is unavailable.
-    OPCUA_DEPLOYMENTS="$(sudo kubectl get deployment -n azure-iot-operations -o name 2>/dev/null \
-      | grep -Ei 'aio-opc' || true)"
-    if [ -n "${OPCUA_DEPLOYMENTS}" ]; then
-      echo "${OPCUA_DEPLOYMENTS}" | while IFS= read -r _dep; do
-        [ -z "${_dep}" ] && continue
-        echo "    restarting ${_dep}"
-        sudo kubectl rollout restart "${_dep}" -n azure-iot-operations 2>/dev/null || true
-      done
-    else
-      # Fallback: delete OPC UA pods by name match so they are recreated and reload the trust list.
-      echo "    no matching deployments found by name; deleting OPC UA pods so they are recreated..."
-      sudo kubectl get pods -n azure-iot-operations -o name 2>/dev/null \
-        | grep -Ei 'aio-opc' \
-        | while IFS= read -r _pod; do
-            [ -z "${_pod}" ] && continue
-            sudo kubectl delete "${_pod}" -n azure-iot-operations 2>/dev/null || true
-          done
-    fi
-    echo ">>> OPC UA connector/commander restart requested (trust list will be reloaded on pod start)."
-  fi
-fi
-
-# 12d. Make the stations trust the OPC UA clients that connect to them. Two simulation components act
-# as OPC UA clients against the stations: the UA Cloud Commander (issues commands) and the MES
-# (drives the assembly line and reads station status). With GDS Server Push disabled, their
-# certificates are no longer distributed automatically, so each station rejects these clients once it
-# leaves provisioning mode unless the client certificate is present in trusted/certs. Each client's
-# /app/pki is host-mounted at /mnt/c/K3s/<Component>/<Line>/PKI (see Deployment/<Line>/
-# ProductionLine.yaml), so its public cert lives under .../PKI/own/certs. pki/own/certs holds the RSA
-# application instance cert plus alternate ECC curve variants; the stations negotiate Basic256Sha256
-# (RSA), so copy only the RSA cert and skip the curve-tagged variants. Both client certs are
-# distributed in the same pass so no station is left in provisioning mode with an incomplete trust
-# list. The OPC UA .NET validator re-reads trusted/certs on each validation, so no station restart is
-# required.
-echo
-echo "=== Establishing trust for the OPC UA clients (Commander, MES) at the stations ==="
-# Each entry maps a host PKI component directory to the filename prefix used in trusted/certs.
-CLIENT_COMPONENTS="Commander:commander MES:mes"
-for client in ${CLIENT_COMPONENTS}; do
-  component="${client%%:*}"
-  prefix="${client##*:}"
-  client_cert_found=false
-  for line in "${LINES[@]}"; do
-    client_cert_dir="/mnt/c/K3s/${component}/${line}/PKI/own/certs"
-    [ -d "${client_cert_dir}" ] || continue
-    for cert_file in "${client_cert_dir}"/*.der; do
-      [ -f "${cert_file}" ] || continue
-      case "${cert_file}" in
-        *NistP256*|*NistP384*|*BrainpoolP256r1*|*BrainpoolP384r1*) continue ;;
-      esac
-      client_cert_found=true
-      cert_basename="${prefix}.$(basename "${cert_file}")"
-      for station in Assembly Test Packaging; do
-        dest_dir="/mnt/c/K3s/${station}/${line}/PKI/trusted/certs"
-        run mkdir -p "${dest_dir}"
-        run cp "${cert_file}" "${dest_dir}/${cert_basename}"
-        echo ">>> ${station}/${line}: ${component} certificate installed into ${dest_dir}"
-      done
-    done
-  done
-  if [ "${client_cert_found}" != "true" ]; then
-    echo "!!! NOTE: no ${component} OPC UA certificate was found under"
-    echo "    /mnt/c/K3s/${component}/<Line>/PKI/own/certs yet. If the stations reject ${component},"
-    echo "    copy its own cert into each station's PKI/trusted/certs and retry."
-  fi
-done
+# OPC UA mutual trust (stations <-> AIO, and stations <-> UA Cloud Commander / MES) is established
+# earlier, in sections 9b-9d, BEFORE the devices/assets are onboarded - so the connector pods start
+# already trusting the stations and the stations trust AIO. The steps below intentionally run AFTER
+# onboarding because they operate on the onboarded assets and the edge command path, not on trust:
+#  - 12e: register the commander management-group 'Call' action on each onboarded asset (needs the asset).
+#  - 12f: copy the AIO broker CA trust bundle into the production-line namespaces.
+#  - 12g: federate the UA-CloudAction service accounts with the shared managed identity.
 
 # 12e. Register an OPC UA command (management-group action) so the AIO OPC UA connector's built-in
 # commander can execute a command on the station directly - the AIO-native alternative to UA Cloud

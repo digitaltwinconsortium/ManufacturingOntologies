@@ -296,7 +296,7 @@ edges
 
 ## Import OPC UA Information Models from the UA Cloud Library into Databricks
 
-Many customers want to import entire **OPC UA Information Models** into their analytics platform from the [UA Cloud Library](https://uacloudlibrary.opcfoundation.org). This provides richer semantics beyond what OPC UA PubSub metadata alone can offer, including:
+Many customers want to import entire **OPC UA Information Models** into their analytics platform from the [UA Cloud Library](https://uacloudlibrary.opcfoundation.org). This provides richer semantics beyond what OPC UA metadata alone can offer, including:
 
 - **Full Information Model context** - not just the published data points, but the entire model hierarchy
 - **Complex type definitions** and references to other data needed for deeper analysis

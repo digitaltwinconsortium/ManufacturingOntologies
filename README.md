@@ -1,7 +1,7 @@
 # OPC UA Reference Solution
 
 > [!NOTE]
-> This article is the **Microsoft OPC UA reference solution**, which uses **IEC 62541 standard OPC UA** to send telemetry data from the edge to the cloud. It is **different** from other telemetry configurations of Azure IoT Operations, since Azure IoT Operations also caters for scenarions where no OPC UA-enabled telemetry sources are involved, i.e. OPC UA PubSub is **not required** between Azure IoT Operations and cloud endpoints. The Azure IoT Operations architecture is described in the [**Azure IoT Operations Overview**](https://learn.microsoft.com/en-us/azure/iot-operations/overview-iot-operations#architecture-overview).
+> This article is the **Microsoft OPC UA reference solution**, which uses **IEC 62541 standard OPC UA** to send telemetry data from the edge to the cloud. It is **different** from other telemetry configurations of Azure IoT Operations, since Azure IoT Operations also caters for scenarions where no OPC UA-enabled telemetry sources are involved, i.e. OPC UA is **not required** for Azure IoT Operations to work. The Azure IoT Operations architecture is described in the [**Azure IoT Operations Overview**](https://learn.microsoft.com/en-us/azure/iot-operations/overview-iot-operations#architecture-overview).
 
 ## Table of contents
 

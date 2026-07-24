@@ -292,28 +292,43 @@ Follow these steps to protect the API with Entra ID and call it with a bearer to
 **1. Register the API (the resource being protected)**
 - In the Azure portal, go to **Entra ID → App registrations → New registration** and create an app for I3X4Kusto.
 - Open the new app's **Expose an API** blade and set the **Application ID URI**, e.g. `api://<api-client-id>`. This value becomes `I3X_OAUTH2_AUDIENCE`.
-- Add a scope (e.g. `access_as_user`) or an app role so tokens can be requested for this API.
+- Decide how callers will authenticate and add the matching permission on this app:
+  - **App-only (client-credentials) — used by the quick test and by service callers such as the Plant Copilot:** go to **App roles → Create app role**, with **Allowed member types = Applications** (e.g. display name `I3X.Read`, value `I3X.Read`). Client-credentials tokens carry app roles in the `roles` claim, not delegated scopes.
+  - **Delegated (user sign-in):** under **Expose an API → Add a scope**, add a delegated scope such as `access_as_user`. Delegated tokens carry it in the `scp` claim.
 - Note your **Directory (tenant) ID** — it forms `I3X_OAUTH2_AUTHORITY`.
 
-**2. Configure the API**
+**2. Configure the deployed API.** The `i3x4kusto` Container App reads its OAuth settings from environment variables, so you must set them **on the deployed app** (setting them in your local shell has no effect). Update the app and let Container Apps roll out a new revision:
 ```bash
-export I3X_OAUTH2_AUTHORITY="https://login.microsoftonline.com/<tenant-id>/v2.0"
-export I3X_OAUTH2_AUDIENCE="api://<api-client-id>"
-# Optional: pin the expected issuer (otherwise taken from the authority metadata).
-export I3X_OAUTH2_ISSUER="https://login.microsoftonline.com/<tenant-id>/v2.0"
+az containerapp update \
+  --name <resourcesName>-i3x4kusto \
+  --resource-group <resourcesName> \
+  --set-env-vars \
+    I3X_OAUTH2_AUTHORITY="https://login.microsoftonline.com/<tenant-id>/v2.0" \
+    I3X_OAUTH2_AUDIENCE="api://<api-client-id>" \
+    I3X_OAUTH2_ISSUER="https://login.microsoftonline.com/<tenant-id>/v2.0"
 ```
+`I3X_OAUTH2_ISSUER` is optional (otherwise taken from the authority metadata). Changing environment variables creates a new revision automatically; if the app is running in single-revision mode you can force a restart with:
+```bash
+az containerapp revision restart \
+  --name <resourcesName>-i3x4kusto \
+  --resource-group <resourcesName> \
+  --revision $(az containerapp show --name <resourcesName>-i3x4kusto --resource-group <resourcesName> --query properties.latestRevisionName -o tsv)
+```
+Once the new revision is running, bearer-token authentication is active on the API (HTTP Basic auth remains accepted as well, if configured).
 
-**3. Acquire a token.** For a quick end-to-end test, add a **client secret** to the app registration and request an app-only token via the client-credentials flow:
+**3. Acquire a token.** For a quick end-to-end test, use the **app-only client-credentials flow** with the app role from step 1:
+- Add a **client secret** to the app registration (**Certificates & secrets → New client secret**).
+- Grant the calling application the **`I3X.Read` app role** (application permission): in the **API permissions** blade of the *client* app registration, select **Add a permission → My APIs →** *your I3X4Kusto app* **→ Application permissions →** `I3X.Read`, then **Grant admin consent**. (For a self-test you can reuse the same app registration as both client and API; the app role must still be granted and admin-consented so it appears in the token's `roles` claim.)
 ```bash
 ACCESS_TOKEN=$(curl -s -X POST \
   https://login.microsoftonline.com/<tenant-id>/oauth2/v2.0/token \
   -d "grant_type=client_credentials" \
-  -d "client_id=<api-client-id>" \
+  -d "client_id=<client-id>" \
   -d "client_secret=<client-secret>" \
   -d "scope=api://<api-client-id>/.default" \
   | jq -r .access_token)
 ```
-For user sign-in scenarios, use a separate client app that has been granted the API's scope and acquire a delegated token instead.
+For user sign-in scenarios, use a separate client app that has been granted the API's **delegated** scope (`access_as_user`) and acquire a delegated token instead.
 
 **4. Call the API with the token:**
 ```bash
@@ -323,15 +338,18 @@ curl -H "Authorization: Bearer $ACCESS_TOKEN" https://<host>/v1/objects
 **Troubleshooting.** If you get a 401, decode the token at [jwt.ms](https://jwt.ms) and verify:
 - `aud` exactly matches `I3X_OAUTH2_AUDIENCE`.
 - `iss` matches the v2.0 issuer `https://login.microsoftonline.com/<tenant-id>/v2.0`. If your token is a v1 token (`iss` = `https://sts.windows.net/<tenant-id>/`), either request a v2 token or set `I3X_OAUTH2_ISSUER` to match.
+- The permission is present: an app-only token carries the app role in the `roles` claim (e.g. `I3X.Read`); a delegated token carries the scope in the `scp` claim (e.g. `access_as_user`). A missing `roles` claim usually means the application permission was not granted **and** admin-consented.
 - The token has not expired (`exp`).
 
 #### Example: OAuth2 environment variables
+
+These are the variables the `i3x4kusto` container consumes. Set them **on the deployed Container App** as shown in step 2 above (not in your local shell); the values are listed here for reference:
 ```bash
 # Enable OAuth2 bearer-token authentication against an Entra ID tenant.
-export I3X_OAUTH2_AUTHORITY="https://login.microsoftonline.com/<tenant-id>/v2.0"
-export I3X_OAUTH2_AUDIENCE="api://<application-client-id>"
+I3X_OAUTH2_AUTHORITY="https://login.microsoftonline.com/<tenant-id>/v2.0"
+I3X_OAUTH2_AUDIENCE="api://<application-client-id>"
 # Optional: pin the expected issuer (otherwise taken from the authority metadata).
-export I3X_OAUTH2_ISSUER="https://login.microsoftonline.com/<tenant-id>/v2.0"
+I3X_OAUTH2_ISSUER="https://login.microsoftonline.com/<tenant-id>/v2.0"
 ```
 
 Clients then acquire a token from the authority and call the API with it:

@@ -35,6 +35,10 @@ spec:
           value: "myUsername"
         - name: OPCUA_PASSWORD
           value: "myPassword"
+        - name: PUBLISHER_USERNAME
+          value: "myUsername"
+        - name: PUBLISHER_PASSWORD
+          value: "myPassword"
         ports:
         - containerPort: 8080
         volumeMounts:

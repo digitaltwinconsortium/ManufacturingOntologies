@@ -1266,6 +1266,14 @@
                 {
                   "name": "I3X_PASSWORD",
                   "secretRef": "i3xbasicauthpassword"
+                },
+                {
+                  "name": "AUTH_BASIC_USERNAME",
+                  "value": "[parameters('adminUsername')]"
+                },
+                {
+                  "name": "AUTH_BASIC_PASSWORD",
+                  "secretRef": "i3xbasicauthpassword"
                 }
               ],
               "resources": {

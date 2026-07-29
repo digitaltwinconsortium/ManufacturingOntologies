@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using PlantCopilot;
@@ -29,15 +30,40 @@ var oauth = OAuthOptions.FromEnvironment();
 builder.Services.AddSingleton(oauth);
 builder.Services.AddSingleton<OAuthStore>();
 
+// Optional HTTP Basic authentication, accepted alongside OAuth bearer tokens.
+var basicAuth = BasicAuthOptions.FromEnvironment();
+builder.Services.AddSingleton(basicAuth);
+
 if (oauth.Enabled)
 {
+    // When Basic auth is also configured, a policy scheme picks the handler per request based on the
+    // Authorization header ("Basic ..." -> Basic, anything else -> Bearer).
+    const string selectorScheme = "PlantCopilot";
+    string defaultScheme = basicAuth.Configured ? selectorScheme : JwtBearerDefaults.AuthenticationScheme;
+
+    var authentication = builder.Services.AddAuthentication(defaultScheme);
+
+    if (basicAuth.Configured)
+    {
+        authentication.AddPolicyScheme(selectorScheme, selectorScheme, options =>
+        {
+            options.ForwardDefaultSelector = context =>
+                context.Request.Headers.Authorization.ToString()
+                    .StartsWith("Basic ", StringComparison.OrdinalIgnoreCase)
+                        ? BasicAuthenticationHandler.SchemeName
+                        : JwtBearerDefaults.AuthenticationScheme;
+        });
+
+        authentication.AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>(
+            BasicAuthenticationHandler.SchemeName, null);
+    }
+
     if (oauth.UseExternalAuthority)
     {
         // Production mode: validate JWT access tokens issued by an external identity provider
         // (e.g. Microsoft Entra ID). The server does NOT run its own Authorization Server, so there
         // is no Dynamic Client Registration; register the client in the external IdP instead.
-        builder.Services
-            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        authentication
             .AddJwtBearer(options =>
             {
                 options.MapInboundClaims = false;
@@ -56,8 +82,7 @@ if (oauth.Enabled)
     {
         // Demo mode: the server is its own self-contained Authorization Server and signs/validates
         // tokens with an in-process key. MCP hosts self-register via Dynamic Client Registration.
-        builder.Services
-            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        authentication
             .AddJwtBearer(options =>
             {
                 options.MapInboundClaims = false;
@@ -89,6 +114,16 @@ if (oauth.Enabled)
 
     builder.Services.AddAuthorization();
 }
+else if (basicAuth.Configured)
+{
+    // OAuth is disabled but Basic auth is configured: protect /mcp with Basic auth alone.
+    builder.Services
+        .AddAuthentication(BasicAuthenticationHandler.SchemeName)
+        .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>(
+            BasicAuthenticationHandler.SchemeName, null);
+
+    builder.Services.AddAuthorization();
+}
 
 builder.Services
     .AddMcpServer()
@@ -113,7 +148,15 @@ if (oauth.Enabled)
         app.MapOAuth(oauth, app.Services.GetRequiredService<OAuthStore>());
     }
 
-    // Expose the MCP Streamable HTTP endpoint at /mcp, protected by OAuth.
+    // Expose the MCP Streamable HTTP endpoint at /mcp, protected by OAuth (and Basic auth if configured).
+    app.MapMcp("/mcp").RequireAuthorization();
+}
+else if (basicAuth.Configured)
+{
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    // Expose the MCP Streamable HTTP endpoint at /mcp, protected by HTTP Basic authentication.
     app.MapMcp("/mcp").RequireAuthorization();
 }
 else

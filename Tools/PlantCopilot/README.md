@@ -33,6 +33,33 @@ The server reads its connection settings from environment variables:
 | `AUTH_TOKEN_LIFETIME_MINUTES` | no | Access-token lifetime in minutes (default: `60`). Built-in authorization server only. |
 | `AUTH_AUTHORITY` | no | OIDC authority of an **external** identity provider (e.g. Microsoft Entra ID, `https://login.microsoftonline.com/<tenant>/v2.0`). When set, the server validates tokens from that provider and disables its own authorization server / Dynamic Client Registration. |
 | `AUTH_AUDIENCE` | no | Expected audience (`aud`) claim(s), comma-separated. Recommended when `AUTH_AUTHORITY` is set. |
+| `AUTH_BASIC_USERNAME` | no | User name for HTTP **Basic** authentication on `/mcp`. Basic auth is enabled only when this and `AUTH_BASIC_PASSWORD` are both set, and is accepted alongside OAuth bearer tokens. |
+| `AUTH_BASIC_PASSWORD` | no | Password for HTTP Basic authentication on `/mcp`. |
+
+## Authentication (HTTP Basic)
+
+As a simpler alternative to the OAuth flow, the server also supports **HTTP Basic authentication** for callers (scripts, tests, MCP hosts without OAuth support) that can only send a static credential. Set both `AUTH_BASIC_USERNAME` and `AUTH_BASIC_PASSWORD` to enable it:
+
+```bash
+docker run --rm -p 8080:8080 \
+  -e AUTH_BASIC_USERNAME="admin" \
+  -e AUTH_BASIC_PASSWORD="<password>" \
+  ... plantcopilot:local
+```
+
+Call the endpoint with the credential:
+
+```bash
+curl -u admin:<password> https://<fqdn>/mcp
+```
+
+Behavior:
+
+- **Basic + OAuth (default):** both are accepted. The scheme is chosen per request from the `Authorization` header — `Basic ...` is validated against the configured credentials, anything else is validated as an OAuth bearer token.
+- **Basic only (`AUTH_ENABLED=false` + Basic configured):** `/mcp` is protected by Basic auth alone, with no OAuth endpoints.
+- **Neither configured with `AUTH_ENABLED=false`:** `/mcp` is open.
+
+Credentials are compared in fixed time to avoid leaking how much of the credential was correct. Because Basic auth only base64-encodes the credential, **always use it over HTTPS** (the Container Apps ingress terminates TLS and rejects plain HTTP).
 
 ## Authentication (OAuth 2.0 with Dynamic Client Registration)
 

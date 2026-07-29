@@ -79,8 +79,8 @@ To surface the Plant Copilot inside the **Microsoft 365 Copilot** experience, yo
 >
 > - **Copilot Studio maker access** — a Power Platform environment you can build agents in (Environment Maker role), ideally a dedicated dev/sandbox environment.
 > - **DLP data policy** — the Plant Copilot custom connector must be classified into an allowed group (Business or Non-Business, matching the agent's other connectors), not **Blocked**. Configured under **Security → Data policies** in the Power Platform admin center.
-> - **Tenant isolation / connector endpoint filtering** — outbound OAuth to the Plant Copilot host (`https://<resourcesName>-plantcopilot.<region>.azurecontainerapps.io`) must be allowed. These are **tenant-scoped** settings that only a Global or Power Platform administrator can view or change.
-> - **Entra ID (production auth mode only)** — if the server runs with `AUTH_AUTHORITY` set to Entra ID, an admin registers the connector app and must ensure no Conditional Access policy blocks the sign-in. The exact blocking policy is shown in **Entra ID → Sign-in logs**.
+> - **Tenant isolation / connector endpoint filtering** — outbound calls to the Plant Copilot host (`https://<resourcesName>-plantcopilot.<region>.azurecontainerapps.io`) must be allowed. These are **tenant-scoped** settings that only a Global or Power Platform administrator can view or change.
+> - **Entra ID (external identity provider mode only)** — if the server runs with `AUTH_AUTHORITY` set to Entra ID, an admin registers the connector app and must ensure no Conditional Access policy blocks the sign-in. The exact blocking policy is shown in **Entra ID → Sign-in logs**.
 > - **Microsoft 365 admin approval** — publishing the agent to the Microsoft 365 Copilot channel may require approval in the [Microsoft 365 admin center](https://admin.microsoft.com/) under **Settings → Integrated apps**.
 >
 > If you are not an administrator, share this list (plus the connector name and host URL) with your tenant admin. Nothing in the Plant Copilot code or deployment can bypass these tenant governance controls.
@@ -92,9 +92,11 @@ In [Microsoft Copilot Studio](https://copilotstudio.microsoft.com/), select **To
 - **Server name:** `Plant Copilot`
 - **Server description:** `A read-only MCP server that exposes the plant's ISA-95 asset hierarchy, OPC UA information model, and live/historical telemetry.`
 - **Server URL:** `https://<resourcesName>-plantcopilot.<region>.azurecontainerapps.io/mcp`
-- **Authentication:** OAuth 2.0 with dynamic discovery (the Plant Copilot advertises its authorization server and supports Dynamic Client Registration, so no client id/secret needs to be entered)
+- **Authentication:** Basic authentication — enter the deployment's `adminUsername` and `adminPassword` as the user name and password. The deployment configures the Plant Copilot with exactly these credentials.
 
-Create the tool. On first connection Copilot Studio performs the OAuth flow against the Plant Copilot; approve it to establish the connection.
+Create the tool. Copilot Studio stores the credential as a connection and sends it on every call.
+
+> If you have configured the Plant Copilot with an external identity provider instead (`AUTH_AUTHORITY`), choose **OAuth 2.0** here and enter the client id, client secret, authorization/token URLs and scope of the app registration you created in that provider. The Plant Copilot does not issue tokens itself and does not support Dynamic Client Registration.
 
 ### 2. Create the agent
 

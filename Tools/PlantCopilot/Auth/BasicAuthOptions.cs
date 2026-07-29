@@ -4,29 +4,41 @@ using System.Text;
 namespace PlantCopilot.Auth;
 
 /// <summary>
-/// Configuration for the optional HTTP Basic authentication layer of the Plant Copilot MCP server.
+/// Configuration for the HTTP Basic authentication layer of the Plant Copilot MCP server.
+///
+/// Basic authentication is the **default** authentication method and is enabled as soon as a password
+/// is supplied. The reference deployment sets these from the deployment's adminUsername/adminPassword.
 ///
 /// Environment variables:
-///   AUTH_BASIC_USERNAME - user name accepted on the Authorization: Basic header.
-///   AUTH_BASIC_PASSWORD - password accepted on the Authorization: Basic header.
+///   AUTH_BASIC_USERNAME - user name accepted on the Authorization: Basic header (default: "admin").
+///   AUTH_BASIC_PASSWORD - password accepted on the Authorization: Basic header. Basic authentication
+///                         is active only when a non-empty password is configured.
 ///
-/// Basic auth is enabled only when both variables are set. It is accepted alongside OAuth 2.0 bearer
-/// tokens so that simple callers can authenticate without running an OAuth flow.
+/// It can be used alongside OAuth 2.0 bearer tokens from an external identity provider.
 /// </summary>
 public sealed class BasicAuthOptions
 {
+    /// <summary>Default user name used when AUTH_BASIC_USERNAME is not set.</summary>
+    public const string DefaultUserName = "admin";
+
     public string? UserName { get; init; }
 
     public string? Password { get; init; }
 
-    /// <summary>True when both a user name and a password are configured.</summary>
+    /// <summary>True when a password is configured, which enables Basic authentication.</summary>
     public bool Configured => !string.IsNullOrEmpty(UserName) && !string.IsNullOrEmpty(Password);
 
-    public static BasicAuthOptions FromEnvironment() => new()
+    public static BasicAuthOptions FromEnvironment()
     {
-        UserName = Environment.GetEnvironmentVariable("AUTH_BASIC_USERNAME"),
-        Password = Environment.GetEnvironmentVariable("AUTH_BASIC_PASSWORD"),
-    };
+        string? userName = Environment.GetEnvironmentVariable("AUTH_BASIC_USERNAME");
+
+        return new BasicAuthOptions
+        {
+            // Basic authentication is on by default: only the password has to be supplied.
+            UserName = string.IsNullOrWhiteSpace(userName) ? DefaultUserName : userName,
+            Password = Environment.GetEnvironmentVariable("AUTH_BASIC_PASSWORD"),
+        };
+    }
 
     /// <summary>
     /// Compares the supplied credentials with the configured ones in fixed time, so that a failed

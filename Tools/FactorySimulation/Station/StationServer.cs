@@ -68,6 +68,15 @@ namespace Station.Simulation
             AnonymousIdentityToken anonymousToken = args.NewIdentity as AnonymousIdentityToken;
             if (anonymousToken != null)
             {
+                // Assign an identity object for anonymous sessions as well. Without this
+                // args.Identity stays null, so the session has no IUserIdentity at all and
+                // any privileged call made on it fails with BadUserAccessDenied before the
+                // role check can even run (see ConfigurationNodeManager.
+                // HasApplicationSecureAdminAccess). The anonymous identity deliberately
+                // carries no roles - GDS operations still require the username token, which
+                // VerifyPassword maps to SystemConfigurationIdentity (SecurityAdmin).
+                args.Identity = new UserIdentity(anonymousToken);
+
                 Console.WriteLine("Anonymous token accepted: {0}", args.Identity?.DisplayName);
                 return;
             }

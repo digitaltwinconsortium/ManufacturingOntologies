@@ -58,6 +58,9 @@ public sealed class I3xClient
         return GetAsync(path, ct);
     }
 
+    /// <summary>GET /v1/relationshiptypes - the relationship types available in the model.</summary>
+    public Task<string> GetRelationshipTypesAsync(CancellationToken ct) => GetAsync("v1/relationshiptypes", ct);
+
     /// <summary>
     /// GET /v1/objects with optional filters. root=true returns the top of the ISA-95 hierarchy;
     /// typeElementId returns the objects of a given type; includeMetadata adds type/namespace metadata.

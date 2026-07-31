@@ -13,6 +13,7 @@ The server is deliberately read-only: it exposes browsing and querying tools onl
 | `get_server_info` | `GET /v1/info` | Health / capabilities check. |
 | `list_namespaces` | `GET /v1/namespaces` | List OPC UA namespaces. |
 | `list_object_types` | `GET /v1/objecttypes` | List the information model (types). |
+| `list_relationship_types` | `GET /v1/relationshiptypes` | List the relationship types in the model. |
 | `list_root_objects` | `GET /v1/objects?root=true` | Top of the ISA-95 asset hierarchy. |
 | `list_objects_of_type` | `GET /v1/objects?typeElementId=` | All objects of a given type. |
 | `get_related_objects` | `POST /v1/objects/related` | Children/variables of the given elements. |

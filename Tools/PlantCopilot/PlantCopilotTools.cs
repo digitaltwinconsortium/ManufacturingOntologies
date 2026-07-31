@@ -29,29 +29,37 @@ public sealed class PlantCopilotTools
     [McpServerTool(Name = "list_object_types")]
     [Description("Lists the object and variable types (the information model). Optionally filter to a single namespace via namespaceUri.")]
     public Task<string> ListObjectTypes(
-        [Description("Optional OPC UA namespace URI to scope the types to. Omit to return all types.")] string? namespaceUri,
-        CancellationToken ct) => _client.GetObjectTypesAsync(namespaceUri, ct);
+        CancellationToken ct,
+        [Description("Optional OPC UA namespace URI to scope the types to. Leave unset to return all types.")] string? namespaceUri = null)
+        => _client.GetObjectTypesAsync(namespaceUri, ct);
+
+    [McpServerTool(Name = "list_relationship_types")]
+    [Description("Lists the relationship types available in the model. Only needed if you want to filter get_related_objects to one specific relationship.")]
+    public Task<string> ListRelationshipTypes(CancellationToken ct) => _client.GetRelationshipTypesAsync(ct);
 
     [McpServerTool(Name = "list_root_objects")]
     [Description("Returns the top of the ISA-95 asset hierarchy (enterprise/site/area/line/cell). Start here to browse the plant.")]
     public Task<string> ListRootObjects(
-        [Description("Set true to include type/namespace metadata for each object.")] bool includeMetadata,
-        CancellationToken ct) => _client.GetObjectsAsync(root: true, typeElementId: null, includeMetadata, ct);
+        CancellationToken ct,
+        [Description("Set true to include type/namespace metadata for each object. Defaults to false.")] bool includeMetadata = false)
+        => _client.GetObjectsAsync(root: true, typeElementId: null, includeMetadata, ct);
 
     [McpServerTool(Name = "list_objects_of_type")]
     [Description("Returns all objects (assets or variables) of a given type. typeElementId is formatted '<namespaceUri>#<typeToken>' (see list_object_types).")]
     public Task<string> ListObjectsOfType(
         [Description("The type element id to filter by, formatted '<namespaceUri>#<typeToken>'.")] string typeElementId,
-        [Description("Set true to include type/namespace metadata for each object.")] bool includeMetadata,
-        CancellationToken ct) => _client.GetObjectsAsync(root: null, typeElementId, includeMetadata, ct);
+        CancellationToken ct,
+        [Description("Set true to include type/namespace metadata for each object. Defaults to false.")] bool includeMetadata = false)
+        => _client.GetObjectsAsync(root: null, typeElementId, includeMetadata, ct);
 
     [McpServerTool(Name = "get_related_objects")]
-    [Description("Returns objects related to the given element ids (e.g. the children of an ISA-95 line, or the variables of an asset).")]
+    [Description("Returns objects related to the given element ids (e.g. the children of an ISA-95 line, or the variables of an asset). By default all relationships are returned; do not ask the user for a relationship type.")]
     public Task<string> GetRelatedObjects(
         [Description("The element ids to expand.")] string[] elementIds,
-        [Description("Optional relationship type to filter by (e.g. a 'hasChild'/'contains' relationship). Omit for all relationships.")] string? relationshipType,
-        [Description("Set true to include type/namespace metadata for each related object.")] bool includeMetadata,
-        CancellationToken ct) => _client.GetRelatedAsync(elementIds, relationshipType, includeMetadata, ct);
+        CancellationToken ct,
+        [Description("Optional relationship type to filter by. Leave unset to return all relationships, which is almost always what you want. Use list_relationship_types first if you need a specific one.")] string? relationshipType = null,
+        [Description("Set true to include type/namespace metadata for each related object. Defaults to false.")] bool includeMetadata = false)
+        => _client.GetRelatedAsync(elementIds, relationshipType, includeMetadata, ct);
 
     [McpServerTool(Name = "get_current_values")]
     [Description("Returns the latest value/quality/timestamp (VQT) for one or more variable element ids. Use this for 'what is X right now' questions.")]
@@ -63,7 +71,8 @@ public sealed class PlantCopilotTools
     [Description("Returns historical values for one or more variable element ids over a time range. Use for trends, averages, min/max and 'over the last N hours' questions.")]
     public Task<string> GetValueHistory(
         [Description("The variable element ids to read history for.")] string[] elementIds,
-        [Description("ISO-8601 start time (UTC), e.g. '2024-06-01T00:00:00Z'. Omit to use the server default window.")] string? startTime,
-        [Description("ISO-8601 end time (UTC), e.g. '2024-06-01T12:00:00Z'. Omit for 'now'.")] string? endTime,
-        CancellationToken ct) => _client.GetHistoryAsync(elementIds, startTime, endTime, ct);
+        CancellationToken ct,
+        [Description("ISO-8601 start time (UTC), e.g. '2024-06-01T00:00:00Z'. Leave unset to use the server default window.")] string? startTime = null,
+        [Description("ISO-8601 end time (UTC), e.g. '2024-06-01T12:00:00Z'. Leave unset for 'now'.")] string? endTime = null)
+        => _client.GetHistoryAsync(elementIds, startTime, endTime, ct);
 }

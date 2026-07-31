@@ -397,6 +397,23 @@
                 m_timer = null;
             }
 
+            // Disposing the timer does not stop a cycle that is already running. Take the same lock
+            // MesLogicAsync holds so the in-flight cycle finishes before we null the session
+            // handlers, and so no new cycle can start while the rotation is in progress.
+            await m_mesStatusLock.WaitAsync().ConfigureAwait(false);
+
+            try
+            {
+                await ApplyUpdatedCertificatesUnderLockAsync().ConfigureAwait(false);
+            }
+            finally
+            {
+                m_mesStatusLock.Release();
+            }
+        }
+
+        private static async Task ApplyUpdatedCertificatesUnderLockAsync()
+        {
             await DisconnectAllSessionsAsync().ConfigureAwait(false);
 
             Log.Information("Disconnected from all stations, reloading certificates...");
@@ -535,6 +552,16 @@
                             m_lastOutsideShiftLog = DateTime.UtcNow;
                         }
 
+                        m_lastActivity = DateTime.UtcNow;
+                        return;
+                    }
+
+                    // A certificate rotation (GDS push) tears all three sessions down and sets the
+                    // handlers to null while it reconnects. A cycle that was already in flight when
+                    // the rotation started would dereference them here, so skip this cycle instead;
+                    // ApplyUpdatedCertificatesAsync restarts the timer once the sessions are back.
+                    if (m_sessionAssembly == null || m_sessionTest == null || m_sessionPackaging == null)
+                    {
                         m_lastActivity = DateTime.UtcNow;
                         return;
                     }

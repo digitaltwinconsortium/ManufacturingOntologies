@@ -40,6 +40,9 @@
 
         private static SemaphoreSlim m_mesStatusLock = new SemaphoreSlim(1, 1);
 
+        // Serializes GDS certificate-push driven disconnect/reconnect cycles.
+        private static readonly SemaphoreSlim m_certUpdateLock = new SemaphoreSlim(1, 1);
+
         private static StationStatus m_statusAssembly = StationStatus.Ready;
         private static StationStatus m_statusTest = StationStatus.Ready;
         private static StationStatus m_statusPackaging = StationStatus.Ready;
@@ -62,6 +65,10 @@
         private const int c_updateRate = 1000;
         private const int c_waitTime = 60 * 1000;
         private const int c_connectTimeout = 300 * 1000;
+
+        // Time allowed for the OPC UA secure channels to finish unwinding after CloseAsync() before
+        // we open new ones (e.g. after a GDS certificate push).
+        private const int c_disconnectSettleMs = 2000;
 
         private static Timer m_timer = null;
 
@@ -160,6 +167,23 @@
                 application.ApplicationConfiguration.CertificateValidator = new CertificateValidator(Telemetry);
                 application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(CertificateValidationCallback);
                 await application.ApplicationConfiguration.CertificateValidator.UpdateAsync(application.ApplicationConfiguration).ConfigureAwait(false);
+
+                // A GDS Server Push replaces our application instance certificate and/or trust
+                // lists at runtime. The client certificate is only presented while a secure channel
+                // is being opened, so existing sessions keep using the OLD certificate. Fully
+                // disconnect from every station and reconnect so all three sessions use the new
+                // material (see ApplyUpdatedCertificatesAsync).
+                application.ApplicationConfiguration.CertificateValidator.CertificateUpdate += async (sender, args) =>
+                {
+                    try
+                    {
+                        await ApplyUpdatedCertificatesAsync().ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Failed to reconnect after certificate update");
+                    }
+                };
 
                 string issuerPath = Path.Combine(Directory.GetCurrentDirectory(), "pki", "issuer", "certs");
                 if (!Directory.Exists(issuerPath))
@@ -299,10 +323,9 @@
         /// </summary>
         private static async Task ConnectAllSessionsAsync()
         {
-            // Dispose sessions to close transport channels cleanly
-            await (m_sessionAssembly?.DisposeAsync() ?? default).ConfigureAwait(false);
-            await (m_sessionTest?.DisposeAsync() ?? default).ConfigureAwait(false);
-            await (m_sessionPackaging?.DisposeAsync() ?? default).ConfigureAwait(false);
+            // Fully disconnect first so no stale transport channel survives into the new
+            // connection attempt (see DisconnectAllSessionsAsync).
+            await DisconnectAllSessionsAsync().ConfigureAwait(false);
 
             m_sessionAssembly = new SessionHandler();
             m_sessionTest = new SessionHandler();
@@ -311,6 +334,127 @@
             await m_sessionAssembly.EndpointConnectAsync(m_endpoints[c_Assembly], m_appConfiguration, Telemetry).ConfigureAwait(false);
             await m_sessionTest.EndpointConnectAsync(m_endpoints[c_Test], m_appConfiguration, Telemetry).ConfigureAwait(false);
             await m_sessionPackaging.EndpointConnectAsync(m_endpoints[c_Packaging], m_appConfiguration, Telemetry).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Closes and disposes all three station sessions and waits until none of them report a
+        /// connection any more. Every session must be gone before we reconnect: the stations
+        /// validate the client certificate when the secure channel is opened, so a channel that was
+        /// established with the OLD certificate would otherwise linger and keep publishing while the
+        /// new session tries to authenticate with the NEW one.
+        /// </summary>
+        private static async Task DisconnectAllSessionsAsync()
+        {
+            await (m_sessionAssembly?.DisposeAsync() ?? default).ConfigureAwait(false);
+            await (m_sessionTest?.DisposeAsync() ?? default).ConfigureAwait(false);
+            await (m_sessionPackaging?.DisposeAsync() ?? default).ConfigureAwait(false);
+
+            m_sessionAssembly = null;
+            m_sessionTest = null;
+            m_sessionPackaging = null;
+
+            // Give the stack a moment to finish tearing the secure channels down. CloseAsync()
+            // returns once the CloseSession service call completes, but the underlying transport
+            // channel and its publish loop are unwound asynchronously.
+            await Task.Delay(c_disconnectSettleMs).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Re-reads the application instance certificate and trust lists after a GDS Server Push
+        /// (certificate/trust-list update), then reconnects to all stations with the new material.
+        ///
+        /// The MES MUST be completely disconnected from every station before reconnecting: the
+        /// client certificate is presented while the secure channel is opened, so an already-open
+        /// channel keeps using the old certificate. Reconnecting without a full disconnect leaves
+        /// half the sessions on the previous identity and the stations reject the rest.
+        /// </summary>
+        private static async Task ApplyUpdatedCertificatesAsync()
+        {
+            // Serialize certificate rotations: a GDS push can raise several updates in quick
+            // succession (application certificate, then trust list), and each must not interleave
+            // with the previous disconnect/reconnect.
+            await m_certUpdateLock.WaitAsync().ConfigureAwait(false);
+
+            try
+            {
+                await ApplyUpdatedCertificatesCoreAsync().ConfigureAwait(false);
+            }
+            finally
+            {
+                m_certUpdateLock.Release();
+            }
+        }
+
+        private static async Task ApplyUpdatedCertificatesCoreAsync()
+        {
+            Log.Information("Certificate update received (GDS push): disconnecting from all stations...");
+
+            // Stop the MES logic timer so no cycle runs against sessions we are tearing down and
+            // so the recovery path cannot re-open a session mid-rotation.
+            if (m_timer != null)
+            {
+                await m_timer.DisposeAsync().ConfigureAwait(false);
+                m_timer = null;
+            }
+
+            await DisconnectAllSessionsAsync().ConfigureAwait(false);
+
+            Log.Information("Disconnected from all stations, reloading certificates...");
+
+            try
+            {
+                // Pick up the pushed application instance certificate and the updated trust lists.
+                await m_appConfiguration.CertificateValidator.UpdateAsync(m_appConfiguration).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to reload certificates after GDS push");
+            }
+
+            Log.Information("Reconnecting to all stations with the updated certificates...");
+
+            // The stations re-validate our new certificate when the secure channel is opened, and a
+            // station may still be distributing/refreshing its own trust list, so retry with backoff
+            // instead of leaving the MES disconnected.
+            int retryDelayMs = 5_000;
+            const int maxRetryDelayMs = 60_000;
+
+            for (int attempt = 1; ; attempt++)
+            {
+                try
+                {
+                    await ConnectAllSessionsAsync().ConfigureAwait(false);
+
+                    if (!m_sessionAssembly.SessionConnected ||
+                        !m_sessionTest.SessionConnected ||
+                        !m_sessionPackaging.SessionConnected)
+                    {
+                        throw new Exception("Not all stations accepted the updated certificate yet.");
+                    }
+
+                    // Re-create the monitored items; the previous subscriptions died with the old sessions.
+                    await CreateMonitoredItemAsync(m_station.StatusNode, m_sessionAssembly, new MonitoredItemNotificationEventHandler(MonitoredItem_AssemblyStationAsync)).ConfigureAwait(false);
+                    await CreateMonitoredItemAsync(m_station.StatusNode, m_sessionTest, new MonitoredItemNotificationEventHandler(MonitoredItem_TestStationAsync)).ConfigureAwait(false);
+                    await CreateMonitoredItemAsync(m_station.StatusNode, m_sessionPackaging, new MonitoredItemNotificationEventHandler(MonitoredItem_PackagingStationAsync)).ConfigureAwait(false);
+
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex, "Reconnect after certificate update failed (attempt {Attempt}), retrying in {Delay}ms...", attempt, retryDelayMs);
+
+                    await Task.Delay(retryDelayMs).ConfigureAwait(false);
+
+                    retryDelayMs = Math.Min(retryDelayMs * 2, maxRetryDelayMs);
+                }
+            }
+
+            // Treat the reconnect as activity so the watchdog does not restart the MES.
+            m_lastActivity = DateTime.UtcNow;
+
+            RestartTimer(c_updateRate);
+
+            Log.Information("Reconnected to all stations after certificate update");
         }
 
         /// <summary>

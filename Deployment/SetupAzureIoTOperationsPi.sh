@@ -1789,6 +1789,41 @@ for line in "${PRODUCTION_LINES[@]}"; do
         || echo "  note: ua-cloud-action deployment not found in '${line_ns}' yet (it will pick up the changes on next start)."
 done
 
+# --------------------------
+# 13. Re-trigger the one-time OPC UA metadata
+# --------------------------
+# The connector for OPC UA publishes an asset's metadata to azure-iot-operations/metadata/... only when the
+# asset is created or its spec changes. The assets are created (section 10) BEFORE the metadata dataflow
+# exists (section 11), so that first metadata message is never forwarded to Event Hubs. On the VM path
+# SetupFabric.sh re-triggers it, but on the Pi path Fabric is deployed by arm.json before the Pi assets
+# exist. So once the dataflows are up, update properties.description on each asset of the selected lines
+# (a real spec change; a tag update is not enough) to make the connector re-publish its metadata.
+echo
+echo "=== Re-triggering OPC UA metadata for the onboarded assets ==="
+echo "  waiting 60s for the data flows to become ready..."
+sleep 60
+TOUCH_STAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+TOUCHED=0
+for line in "${PRODUCTION_LINES[@]}"; do
+    line_ns="$(echo "${line}" | tr '[:upper:]' '[:lower:]')"
+    LINE_ASSET_IDS="$(az resource list \
+        --resource-group "${RESOURCE_GROUP}" \
+        --resource-type "Microsoft.DeviceRegistry/namespaces/assets" \
+        --query "[?ends_with(name, '-${line_ns}-asset')].id" -o tsv 2>/dev/null || true)"
+    while IFS= read -r ASSET_ID; do
+        [ -z "${ASSET_ID}" ] && continue
+        if az resource update --ids "${ASSET_ID}" \
+            --set "properties.description=Metadata refresh at ${TOUCH_STAMP}" \
+            --output none; then
+            echo "  touched: ${ASSET_ID##*/}"
+            TOUCHED=$((TOUCHED + 1))
+        else
+            echo "  warning: could not touch ${ASSET_ID##*/}; edit its description in the operations experience."
+        fi
+    done <<< "${LINE_ASSET_IDS}"
+done
+echo "  re-triggered metadata for ${TOUCHED} OPC UA asset(s)."
+
 # Clean up the generated config files (they contain no secrets).
 rm -rf "${AIO_CONFIG_DIR}"
 

@@ -15,8 +15,9 @@
 # MAGIC The Event Hubs namespace connection string is supplied by the deployment as the
 # MAGIC `eventHubsConnectionString` widget (namespace-level `RootManageSharedAccessKey`, no `EntityPath`).
 # MAGIC Ingestion uses the built-in Spark Kafka connector against the Event Hubs Kafka endpoint, so no
-# MAGIC extra Maven library is required and it also runs on Unity Catalog clusters and Databricks
-# MAGIC Runtime 13.3 LTS and later.
+# MAGIC extra Maven library is required and it also runs on Unity Catalog clusters. Databricks Runtime
+# MAGIC 16.4 LTS or later is required to read the Unity Catalog managed tables with catalog commits
+# MAGIC (`catalogManaged`) that the SQL warehouse creates during deployment.
 
 # COMMAND ----------
 

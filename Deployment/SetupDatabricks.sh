@@ -26,7 +26,7 @@
 #   WORKSPACE_FOLDER=/Shared/ManufacturingOntologies
 #   WAREHOUSE_NAME=ManufacturingOntologies
 #   JOB_NAME=ManufacturingOntologies-OPCUA-Ingestion
-#   DATABRICKS_RUNTIME=15.4.x-scala2.12
+#   DATABRICKS_RUNTIME=16.4.x-scala2.12
 #   NODE_TYPE_ID=Standard_DS3_v2
 #   UC_CATALOG=<workspace catalog>   (default: the SQL warehouse's current_catalog())
 #   UC_SCHEMA=ontologies
@@ -39,7 +39,9 @@ export WAREHOUSE_NAME="${WAREHOUSE_NAME:-ManufacturingOntologies}"
 export JOB_NAME="${JOB_NAME:-ManufacturingOntologies-OPCUA-Ingestion}"
 # Databricks Runtime 13.3 LTS or above is required on workspaces where legacy access / legacy DBFS are
 # disabled (older runtimes are rejected, and Unity Catalog volumes for checkpoints need 13.3+).
-export DATABRICKS_RUNTIME="${DATABRICKS_RUNTIME:-15.4.x-scala2.12}"
+# 16.4 LTS or above is required because the serverless SQL warehouse below creates Unity Catalog managed
+# tables with catalog commits (the `catalogManaged` Delta feature) enabled, which 15.4 can't read.
+export DATABRICKS_RUNTIME="${DATABRICKS_RUNTIME:-16.4.x-scala2.12}"
 export NODE_TYPE_ID="${NODE_TYPE_ID:-Standard_DS3_v2}"
 # UC_CATALOG is intentionally left unset by default here. Many Unity Catalog workspaces use Default
 # Storage with no metastore storage root, where the built-in `main` catalog doesn't exist and can't be

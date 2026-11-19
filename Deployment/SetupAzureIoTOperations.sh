@@ -79,7 +79,7 @@ AIO_CONFIG_DIR="$(mktemp -d)"
 REPO_DIR="${REPO_DIR:-/opt/ManufacturingOntologies-main}"
 PUBLISHER_CONFIG_DIR="${REPO_DIR}/Tools/FactorySimulation/PublisherConfig"
 # Production lines to onboard (one PublisherConfig/<line>/persistency.json each).
-LINES=("Munich" "Seattle")
+PRODUCTION_LINES=("Munich" "Seattle")
 # Default OPC UA port for endpoints whose persistency.json EndpointUrl omits it.
 OPC_UA_PORT="4840"
 # Stations (first dotted label of the OPC UA host) that must NOT be onboarded as AIO OPC UA
@@ -489,7 +489,7 @@ if [ "${secret_sync_enabled}" != "true" ]; then
   echo "      az iot ops connector opcua trust add --instance ${AIO_INSTANCE_NAME} \\"
   echo "        --resource-group ${RESOURCE_GROUP} --certificate-file <station>.der"
 else
-  for line in "${LINES[@]}"; do
+  for line in "${PRODUCTION_LINES[@]}"; do
     for station in Assembly Test Packaging; do
       # The station's public certs live under its host-mounted PKI own store. pki/own/certs holds
       # the RSA application instance cert plus alternate ECC curve variants; AIO connects with
@@ -592,7 +592,7 @@ if kubectl -n "${AIO_NAMESPACE}" get secret "${AIO_OPCUA_CERT_SECRET}" >/dev/nul
     # ProductionLine.yaml), so writing on the host persists across pod restarts. Only Assembly/Test/
     # Packaging are onboarded to AIO.
     cert_basename="aio-opcuabroker.${aio_cert_to_copy##*.}"
-    for line in "${LINES[@]}"; do
+    for line in "${PRODUCTION_LINES[@]}"; do
       for station in Assembly Test Packaging; do
         dest_dir="/mnt/c/K3s/${station}/${line}/PKI/trusted/certs"
         run mkdir -p "${dest_dir}"
@@ -622,7 +622,7 @@ for client in ${CLIENT_COMPONENTS}; do
   component="${client%%:*}"
   prefix="${client##*:}"
   client_cert_found=false
-  for line in "${LINES[@]}"; do
+  for line in "${PRODUCTION_LINES[@]}"; do
     client_cert_dir="/mnt/c/K3s/${component}/${line}/PKI/own/certs"
     [ -d "${client_cert_dir}" ] || continue
     for cert_file in "${client_cert_dir}"/*.der; do
@@ -677,7 +677,7 @@ if [ -f "${STATION_NODESET}" ]; then
   [ -n "${NODE_NAME_MAP}" ] || NODE_NAME_MAP="{}"
 fi
 
-for line in "${LINES[@]}"; do
+for line in "${PRODUCTION_LINES[@]}"; do
   persistency="${PUBLISHER_CONFIG_DIR}/${line}/persistency.json"
   if [ ! -f "${persistency}" ]; then
 	echo "!!! WARNING: ${persistency} not found; skipping line ${line}."
@@ -1033,7 +1033,7 @@ done
 echo
 echo "=== Copying the AIO broker CA trust bundle into the production-line namespaces ==="
 CA_TRUST_BUNDLE="azure-iot-operations-aio-ca-trust-bundle"
-for line in "${LINES[@]}"; do
+for line in "${PRODUCTION_LINES[@]}"; do
     line_ns="$(echo "${line}" | tr '[:upper:]' '[:lower:]')"
     # Ensure the namespace exists (StartSimulation.sh normally creates it via ProductionLine.yaml).
     sudo kubectl create namespace "${line_ns}" 2>/dev/null || true
@@ -1062,7 +1062,7 @@ done
 echo
 echo "=== Federating UA-CloudAction service accounts with '${RESOURCES_NAME}-Identity' (workload identity) ==="
 if [ -n "${ISSUER_URL}" ]; then
-    for line in "${LINES[@]}"; do
+    for line in "${PRODUCTION_LINES[@]}"; do
         line_ns="$(echo "${line}" | tr '[:upper:]' '[:lower:]')"
         run az identity federated-credential create \
             --name "ua-cloud-action-${line_ns}" \
@@ -1083,7 +1083,7 @@ fi
 # first deployed by StartSimulation.sh: the CA trust bundle copied in 12f, and (via the workload-identity
 # admission webhook) the projected federated token now that the federated credential exists. Without this
 # the pods keep running with the missing configMap / no federated token until the next manual restart.
-for line in "${LINES[@]}"; do
+for line in "${PRODUCTION_LINES[@]}"; do
     line_ns="$(echo "${line}" | tr '[:upper:]' '[:lower:]')"
     sudo kubectl rollout restart deployment/ua-cloud-action -n "${line_ns}" 2>/dev/null \
         && echo "  restarted ua-cloud-action in '${line_ns}'." \

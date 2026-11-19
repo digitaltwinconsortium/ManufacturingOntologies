@@ -14,11 +14,13 @@
 # Unlike the VM variant (invoked unattended by Bootstrap.sh through the VM CustomScript extension), this
 # script is run MANUALLY on the Pi after the cloud deployment (Deployment/arm.json) completed with
 # edgeDeploymentTarget=RaspberryPi (the deployment's 'raspberryPiSetupCommand' output contains the exact
-# command). A Pi has no Azure managed identity, so the Azure CLI is signed in with your own account
-# (device code flow) or a service principal, and every deployment value (location, managed identity,
+# command). A Pi has no Azure managed identity, so the Azure CLI is signed in with a service principal
+# (recommended; create it with Deployment/CreateRaspberryPiServicePrincipal.sh in Azure Cloud Shell, which
+# prints the complete Pi command) or with your own account via the device code flow - which many tenants
+# block with Conditional Access (sign-in error 53003). Every deployment value (location, managed identity,
 # Event Hubs, custom locations OID) is derived from the resource group. The AIO instance itself still
 # uses the shared '<rg>-Identity' user-assigned managed identity (federated with the Arc cluster's OIDC
-# issuer) for Event Hubs and Key Vault, so no Azure secret is stored on the Pi.
+# issuer) for Event Hubs and Key Vault, so no Azure secret is needed by the running solution.
 #
 # Prerequisites:
 #   - Raspberry Pi 5 with 16 GB RAM (8 GB minimum) and a 64-bit OS with a 64-bit (arm64) userland:
@@ -30,9 +32,10 @@
 #     Raspberry Pi OS works with K3s and AIO but is not on AIO's validated list (fine for evaluation).
 #     Prefer NVMe/SSD storage over an SD card, with at least 32 GB free.
 #   - Outbound internet access (Azure Arc, Azure IoT Operations, container registries).
-#   - An Azure account (or service principal) with Owner - or Contributor + User Access Administrator -
-#     on the resource group, permission to register resource providers on the subscription, and
-#     Microsoft Graph read access (to look up the 'custom-locations' application).
+#   - A service principal or Azure account with Owner - or Contributor + User Access Administrator - on
+#     the resource group. The subscription's resource providers for Azure IoT Operations must be
+#     registered (CreateRaspberryPiServicePrincipal.sh does that; an account with subscription rights
+#     can also let this script do it).
 #
 # Usage (on the Pi) - run it straight from GitHub:
 #   curl -fsSL https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/SetupAzureIoTOperationsPi.sh | sudo bash -s -- <resource-group> [subscription-id]
@@ -46,7 +49,9 @@
 #
 # Optional environment overrides (pass them through sudo: '... | sudo VAR=value bash -s -- <resource-group>'):
 #   AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID  Sign in non-interactively with a service principal
-#   CUSTOM_LOCATIONS_OID   Object ID of the 'custom-locations' Entra application (looked up automatically otherwise)
+#                          (omit AZURE_CLIENT_SECRET to be prompted for it instead)
+#   CUSTOM_LOCATIONS_OID   Object ID of the 'custom-locations' Entra application (otherwise looked up in
+#                          Microsoft Graph or read from the arm.json deployment's customLocationsOid)
 #   PI_PUBLIC_IP           Public egress IPv4 of the Pi to allow through the Key Vault firewall (auto-detected
 #                          otherwise; only needed if the connection uses several egress IPs)
 #   AIO_CLI_VERSION        azure-iot-ops CLI extension version (default 2.11.2, which bundles the 2610 preview runtime)
@@ -495,21 +500,34 @@ fi
 # --------------------------
 # 1. Authenticate to Azure (the Pi has no managed identity)
 # --------------------------
+SP_HELPER_URL="https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/CreateRaspberryPiServicePrincipal.sh"
 echo
 echo "=== Signing in to Azure ==="
-if [ -n "${AZURE_CLIENT_ID:-}" ] && [ -n "${AZURE_CLIENT_SECRET:-}" ] && [ -n "${AZURE_TENANT_ID:-}" ]; then
+if [ -n "${AZURE_CLIENT_ID:-}" ] && [ -n "${AZURE_TENANT_ID:-}" ]; then
+  if [ -z "${AZURE_CLIENT_SECRET:-}" ]; then
+	# Prompt on the terminal (stdin may be the piped script), keeping the secret out of the shell history.
+	read -r -s -p "Client secret of service principal ${AZURE_CLIENT_ID}: " AZURE_CLIENT_SECRET </dev/tty 2>/dev/null || true
+	echo
+  fi
   echo ">>> az login --service-principal (client id ${AZURE_CLIENT_ID})"
-  if ! az login --service-principal --username "${AZURE_CLIENT_ID}" --password "${AZURE_CLIENT_SECRET}" \
+  if ! az login --service-principal --username "${AZURE_CLIENT_ID}" --password "${AZURE_CLIENT_SECRET:-}" \
 	--tenant "${AZURE_TENANT_ID}" --output none; then
-	echo "!!! ERROR: service principal sign-in failed. Aborting AIO setup."
+	echo "!!! ERROR: service principal sign-in failed (wrong/expired secret?). Create a new secret by re-running"
+	echo "    CreateRaspberryPiServicePrincipal.sh in Azure Cloud Shell. Aborting AIO setup."
 	exit 1
   fi
 elif az account show >/dev/null 2>&1; then
   echo "Reusing the existing Azure CLI session ($(az account show --query user.name -o tsv 2>/dev/null))."
 else
-  echo "Follow the instructions below to sign in with the device code flow."
+  echo "No service principal given (AZURE_CLIENT_ID/AZURE_TENANT_ID/AZURE_CLIENT_SECRET); trying the device"
+  echo "code flow. Follow the instructions below to sign in."
   if ! az login --use-device-code --output none; then
-	echo "!!! ERROR: az login failed. Aborting AIO setup."
+	echo
+	echo "!!! ERROR: az login failed. If the browser showed error 53003 ('blocked by Conditional Access'), your"
+	echo "    tenant does not allow the device code flow. Use a service principal instead - run this in Azure"
+	echo "    Cloud Shell (https://shell.azure.com, Bash) and then run the command it prints on the Pi:"
+	echo "      curl -fsSL ${SP_HELPER_URL} | bash -s -- ${RESOURCE_GROUP} ${SUBSCRIPTION_ID}"
+	echo "    Aborting AIO setup."
 	exit 1
   fi
 fi
@@ -522,14 +540,23 @@ echo "Subscription: ${SUBSCRIPTION_ID}"
 # Tenant ID is required by the Event Hubs (Kafka) dataflow endpoint's managed-identity auth.
 TENANT_ID="$(az account show --query tenantId -o tsv 2>/dev/null)"
 # Object ID and type of the signed-in principal (user or service principal), used for the Key Vault role in 9b.
-SIGNED_IN_OID=""
+# Read the 'oid' claim of the ARM access token so no Microsoft Graph permission is needed (a resource-group
+# scoped service principal cannot read Graph); fall back to Graph if decoding fails.
+access_token_claim() {
+  local payload
+  payload="$(az account get-access-token --query accessToken -o tsv 2>/dev/null | cut -d. -f2 | tr '_-' '/+')"
+  while [ $(( ${#payload} % 4 )) -ne 0 ]; do payload="${payload}="; done
+  printf '%s' "${payload}" | base64 -d 2>/dev/null | jq -r --arg c "$1" '.[$c] // empty' 2>/dev/null
+}
+SIGNED_IN_OID="$(access_token_claim oid)"
 if [ "$(az account show --query user.type -o tsv 2>/dev/null)" = "servicePrincipal" ]; then
   SIGNED_IN_PRINCIPAL_TYPE="ServicePrincipal"
-  SIGNED_IN_OID="$(az ad sp show --id "$(az account show --query user.name -o tsv)" --query id -o tsv 2>/dev/null)"
+  [ -n "${SIGNED_IN_OID}" ] || SIGNED_IN_OID="$(az ad sp show --id "$(az account show --query user.name -o tsv)" --query id -o tsv 2>/dev/null)"
 else
   SIGNED_IN_PRINCIPAL_TYPE="User"
-  SIGNED_IN_OID="$(az ad signed-in-user show --query id -o tsv 2>/dev/null)"
+  [ -n "${SIGNED_IN_OID}" ] || SIGNED_IN_OID="$(az ad signed-in-user show --query id -o tsv 2>/dev/null)"
 fi
+echo "Signed in as ${SIGNED_IN_PRINCIPAL_TYPE} ${SIGNED_IN_OID:-<object id unknown>}"
 
 # --------------------------
 # 1b. Derive the deployment context from the resource group
@@ -544,6 +571,13 @@ if ! az eventhubs namespace show --name "${EVENTHUBS_NAMESPACE}" --resource-grou
 fi
 if [ -z "${CUSTOM_LOCATIONS_OID}" ]; then
   CUSTOM_LOCATIONS_OID="$(az ad sp show --id "${CUSTOM_LOCATIONS_APP_ID}" --query id -o tsv 2>/dev/null)"
+fi
+if [ -z "${CUSTOM_LOCATIONS_OID}" ]; then
+  # No Graph access (e.g. a resource-group scoped service principal): reuse the value the arm.json
+  # deployment was given as its required 'customLocationsOid' parameter.
+  CUSTOM_LOCATIONS_OID="$(az deployment group list --resource-group "${RESOURCE_GROUP}" \
+    --query "[?properties.parameters.customLocationsOid].properties.parameters.customLocationsOid.value | [0]" \
+    -o tsv 2>/dev/null)"
 fi
 echo "Location: ${LOCATION:-<not found>}"
 echo "Managed identity client id: ${MANAGED_IDENTITY_CLIENT_ID:-<not found>}"
@@ -571,10 +605,10 @@ if [ -n "${missing}" ]; then
 fi
 
 if [ -z "${CUSTOM_LOCATIONS_OID}" ]; then
-  echo "!!! ERROR: could not look up the object ID of the 'custom-locations' Microsoft Entra application"
-  echo "    (az ad sp show --id ${CUSTOM_LOCATIONS_APP_ID} --query id -o tsv). Run that command with an"
-  echo "    account that can read Microsoft Graph and pass the result as CUSTOM_LOCATIONS_OID=<oid>."
-  echo "    Aborting AIO setup."
+  echo "!!! ERROR: could not determine the object ID of the 'custom-locations' Microsoft Entra application"
+  echo "    (neither from Microsoft Graph nor from the arm.json deployment's customLocationsOid parameter). Get"
+  echo "    it with 'az ad sp show --id ${CUSTOM_LOCATIONS_APP_ID} --query id -o tsv' (e.g. in Azure Cloud Shell)"
+  echo "    and pass it as CUSTOM_LOCATIONS_OID=<oid>. Aborting AIO setup."
   exit 1
 fi
 
@@ -636,8 +670,9 @@ fi
 # 3. Register the resource providers AIO/Arc need
 # --------------------------
 # On the VM, the deployment's managed identity lacks the subscription-scope right to register providers.
-# On the Pi the CLI runs as you, so register any missing provider and wait for it ('az iot ops init'
-# fails until they are all registered).
+# On the Pi, CreateRaspberryPiServicePrincipal.sh normally registered them already; otherwise register any
+# missing provider (needs subscription rights) and wait for it ('az iot ops init' fails until they are all
+# registered).
 echo
 echo "=== Registering the required resource providers ==="
 AIO_PROVIDERS="Microsoft.ExtendedLocation Microsoft.Kubernetes Microsoft.KubernetesConfiguration Microsoft.IoTOperations Microsoft.DeviceRegistry Microsoft.SecretSyncController"
@@ -663,7 +698,8 @@ for _i in $(seq 1 40); do
 done
 if [ -n "${unregistered}" ]; then
   echo "!!! WARNING: the following resource providers are NOT registered on subscription ${SUBSCRIPTION_ID}:${unregistered}"
-  echo "    'az iot ops init' will fail until they are registered. A subscription Owner/Contributor must run:"
+  echo "    'az iot ops init' will fail until they are registered. Re-run CreateRaspberryPiServicePrincipal.sh in"
+  echo "    Azure Cloud Shell, or have a subscription Owner/Contributor run:"
   for rp in ${unregistered}; do
 	echo "      az provider register --namespace ${rp} --subscription ${SUBSCRIPTION_ID}"
   done
@@ -997,8 +1033,8 @@ if [ -n "${KEY_VAULT_ID}" ]; then
     echo "    may block secret sync and the OPC UA trust list."
   fi
   if [ -n "${SIGNED_IN_OID}" ]; then
-    existing_ra="$(az role assignment list --assignee "${SIGNED_IN_OID}" --role "Key Vault Secrets Officer" \
-      --scope "${KEY_VAULT_ID}" --query "[0].id" -o tsv 2>/dev/null)"
+    existing_ra="$(az role assignment list --scope "${KEY_VAULT_ID}" --role "Key Vault Secrets Officer" \
+      --fill-principal-name false --query "[?principalId=='${SIGNED_IN_OID}'].id | [0]" -o tsv 2>/dev/null)"
     if [ -z "${existing_ra}" ]; then
       run az role assignment create \
         --assignee-object-id "${SIGNED_IN_OID}" \

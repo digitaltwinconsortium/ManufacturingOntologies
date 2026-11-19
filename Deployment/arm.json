@@ -24,7 +24,7 @@
         "RaspberryPi"
       ],
       "metadata": {
-        "description": "Where the edge (K3s, Azure IoT Operations and the factory simulation) runs. AzureVM deploys and bootstraps an Ubuntu VM in Azure (Azure IoT Operations GA). RaspberryPi skips the VM; after this deployment completes, run Deployment/SetupAzureIoTOperationsPi.sh on a Raspberry Pi 5 (Raspberry Pi OS 64-bit or Ubuntu Server 24.04 ARM64, 16 GB RAM recommended) running K3s, which installs the Azure IoT Operations 2610 (v1.6.0-preview.60) public preview. See the raspberryPiSetupCommand output."
+        "description": "Where the edge (K3s, Azure IoT Operations and the factory simulation) runs. AzureVM deploys and bootstraps an Ubuntu VM in Azure (Azure IoT Operations GA). RaspberryPi skips the VM; after this deployment completes, run Deployment/SetupAzureIoTOperationsPi.sh on a Raspberry Pi 5 (Raspberry Pi OS 64-bit or Ubuntu Server 24.04 ARM64, 16 GB RAM recommended) running K3s, which installs the Azure IoT Operations 2610 (v1.6.0-preview.60) public preview. See the raspberryPiCloudShellCommand output (creates a service principal for tenants that block device code sign-in) and the raspberryPiSetupCommand output."
       }
     },
     "deployDatabricks": {
@@ -53,6 +53,7 @@
     "resourcesName": "[resourceGroup().name]",
     "deployVm": "[equals(parameters('edgeDeploymentTarget'), 'AzureVM')]",
     "aioPiSetupScriptUri": "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'SetupAzureIoTOperationsPi.sh')]",
+    "piServicePrincipalScriptUri": "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'CreateRaspberryPiServicePrincipal.sh')]",
     "addressPrefix": "10.0.0.0/16",
     "subnetPrefix": "10.0.0.0/24",
     "subnetPrefix2": "10.0.0.0/23",
@@ -1320,6 +1321,11 @@
     "plantCopilotMcpUrl": {
       "type": "string",
       "value": "[concat('https://', reference(resourceId('Microsoft.App/containerApps', variables('plantCopilotContainerAppName')), '2024-03-01').configuration.ingress.fqdn, '/mcp')]"
+    },
+    "raspberryPiCloudShellCommand": {
+      "condition": "[not(variables('deployVm'))]",
+      "type": "string",
+      "value": "[concat('curl -fsSL ', variables('piServicePrincipalScriptUri'), ' | bash -s -- ', resourceGroup().name, ' ', subscription().subscriptionId)]"
     },
     "raspberryPiSetupCommand": {
       "condition": "[not(variables('deployVm'))]",

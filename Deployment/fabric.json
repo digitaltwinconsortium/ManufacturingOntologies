@@ -34,7 +34,7 @@
     "fabricSetupScriptUri": "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'SetupFabric.sh')]",
     "fabricKqlUri": "https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Tools/FabricQueries/opcua_setup.kql",
     "fabricDashboardUri": "https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Tools/ADXQueries/dashboard-ontologies.json",
-    "i3xFabricContainerAppName": "[concat(variables('resourcesName'), '-i3x4kusto-fabric')]"
+    "i3xFabricContainerAppName": "[toLower(concat(variables('resourcesName'), '-i3x4kusto-fabric'))]"
   },
   "resources": [
     {

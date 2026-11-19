@@ -68,7 +68,7 @@
     "adxClusterName": "[toLower(take(concat(replace(variables('resourcesName'), '-', ''), 'adx'), 22))]",
     "adxDBName": "[concat(variables('resourcesName'), '-DB')]",
     "keyVaultName": "[toLower(take(concat(replace(variables('resourcesName'), '-', ''), 'kv'), 24))]",
-    "uaCloudLibContainerAppName": "[take(concat(variables('resourcesName'), '-ua-cloudlib'), 32)]",
+    "uaCloudLibContainerAppName": "[toLower(take(concat(variables('resourcesName'), '-ua-cloudlib'), 32))]",
     "uaCloudLibPostgresName": "[toLower(concat(variables('resourcesName'), '-uacloudlib-pg'))]",
     "uaCloudLibDatabaseName": "uacloudlib",
     "fabricCapacityName": "[toLower(take(concat(replace(variables('resourcesName'), '-', ''), 'fabric'), 63))]",
@@ -79,8 +79,8 @@
     "databricksNotebookUri": "https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Tools/DatabricksQueries/opcua_setup.py",
     "databricksDashboardUri": "https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Tools/DatabricksQueries/dashboard-ontologies.lvdash.json",
     "contributorRoleId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', variables('azureRbacContributor'))]",
-    "i3xContainerAppName": "[concat(variables('resourcesName'), '-i3x4kusto')]",
-    "plantCopilotContainerAppName": "[concat(variables('resourcesName'), '-plantcopilot')]",
+    "i3xContainerAppName": "[toLower(concat(variables('resourcesName'), '-i3x4kusto'))]",
+    "plantCopilotContainerAppName": "[toLower(concat(variables('resourcesName'), '-plantcopilot'))]",
     "azureRbacAzureEventHubsDataSender": "2b629674-e913-4c01-ae53-ef4638d8f975",
     "azureRbacAzureEventHubsDataReceiver": "a638d3c7-ab3a-418d-83e6-5f17a39d4fde",
     "aioStorageAccountName": "[toLower(take(concat(replace(variables('resourcesName'), '-', ''), 'aiostorage'), 24))]",
@@ -325,7 +325,7 @@
     {
       "type": "Microsoft.App/containerApps",
       "apiVersion": "2024-03-01",
-      "name": "[concat(variables('resourcesName'), '-ua-dataprocessor')]",
+      "name": "[toLower(concat(variables('resourcesName'), '-ua-dataprocessor'))]",
       "location": "[resourceGroup().location]",
       "identity": {
         "type": "UserAssigned",
@@ -932,7 +932,7 @@
     },
     {
       "type": "Microsoft.DeviceRegistry/schemaRegistries",
-      "apiVersion": "2024-09-01-preview",
+      "apiVersion": "2025-10-01",
       "name": "[variables('aioSchemaRegistryName')]",
       "location": "[resourceGroup().location]",
       "identity": {

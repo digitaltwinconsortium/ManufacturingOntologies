@@ -1090,6 +1090,52 @@ for line in "${PRODUCTION_LINES[@]}"; do
         || echo "  note: ua-cloud-action deployment not found in '${line_ns}' yet (it will pick up the changes on next start)."
 done
 
+# --------------------------
+# 13. Enable and (re-)publish the OPC UA PubSub metadata
+# --------------------------
+# Breaking change in AIO 2610: the connector for OPC UA publishes OPC UA PubSub metadata only when
+# 'opcUaConformance' is true in the dataset or asset-default configuration (it was on by default before).
+# It then publishes the DataSetMetaData as a retained message to
+# azure-iot-operations/metadata/<asset>/data/<dataset>, which the metadata dataflow (section 11) forwards
+# to the 'metadata' event hub. The CLI has no option for it, so merge it into each asset's
+# defaultDatasetsConfiguration via ARM. Updating properties.description in the same call is a spec change
+# that also makes the connector re-publish metadata for consumers that subscribed after the first publication.
+echo
+echo "=== Enabling and re-publishing OPC UA metadata for the onboarded assets ==="
+echo "  waiting 60s for the data flows to become ready..."
+sleep 60
+TOUCH_STAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+TOUCHED=0
+for line in "${PRODUCTION_LINES[@]}"; do
+    line_ns="$(echo "${line}" | tr '[:upper:]' '[:lower:]')"
+    LINE_ASSET_IDS="$(az resource list \
+        --resource-group "${RESOURCE_GROUP}" \
+        --resource-type "Microsoft.DeviceRegistry/namespaces/assets" \
+        --query "[?ends_with(name, '-${line_ns}-asset')].id" -o tsv 2>/dev/null || true)"
+    while IFS= read -r ASSET_ID; do
+        [ -z "${ASSET_ID}" ] && continue
+        # Merge into the existing defaults; the value is passed as a JSON string literal so that
+        # 'az resource update --set' stores it as the stringified JSON the property expects.
+        CURRENT_DEFAULTS="$(az resource show --ids "${ASSET_ID}" \
+            --query "properties.defaultDatasetsConfiguration" -o tsv 2>/dev/null || true)"
+        NEW_DEFAULTS="$(printf '%s' "${CURRENT_DEFAULTS}" \
+            | jq -Rsc '(try fromjson catch {}) // {} | if type == "object" then . else {} end
+                      | .opcUaConformance = true | tojson' 2>/dev/null)"
+        [ -n "${NEW_DEFAULTS}" ] || NEW_DEFAULTS='"{\"opcUaConformance\":true}"'
+        if az resource update --ids "${ASSET_ID}" \
+            --set "properties.defaultDatasetsConfiguration=${NEW_DEFAULTS}" \
+                  "properties.description=Metadata refresh at ${TOUCH_STAMP}" \
+            --output none; then
+            echo "  metadata enabled/re-published: ${ASSET_ID##*/}"
+            TOUCHED=$((TOUCHED + 1))
+        else
+            echo "  warning: could not update ${ASSET_ID##*/}; set {\"opcUaConformance\":true} in its default"
+            echo "           dataset configuration manually (operations experience or 'az resource update')."
+        fi
+    done <<< "${LINE_ASSET_IDS}"
+done
+echo "  enabled/re-published metadata for ${TOUCHED} OPC UA asset(s)."
+
 # Clean up the generated config files (they contain no secrets).
 rm -rf "${AIO_CONFIG_DIR}"
 

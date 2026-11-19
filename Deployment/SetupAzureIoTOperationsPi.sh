@@ -62,6 +62,12 @@
 #   INSTALL_K3S_VERSION    K3s version to install when K3s is not installed yet (default: latest stable)
 #   SKIP_SIMULATION=true   Do not (re)start the production line simulation
 #   ALLOW_LOW_MEMORY=true  Continue on a Pi with less than 8 GB RAM (not recommended)
+#   ONBOARD_LINES          Comma/space-separated production lines to process (default: "Munich Seattle")
+#   ONBOARD_ONLY=true      Repair mode for an already installed Pi: skip host prep, K3s, Arc, the AIO install,
+#                          the simulation start, the data flow endpoints and the data flows, and only redo the
+#                          per-line steps (OPC UA trust, devices/assets, commander action, CA bundle,
+#                          UA-CloudAction federation). E.g. re-onboard one line:
+#                            ... | sudo ONBOARD_ONLY=true ONBOARD_LINES=Munich AZURE_CLIENT_ID=... bash -s -- <rg> <sub>
 #
 # Like the VM variant, the script is idempotent/best-effort: individual steps log warnings but do not
 # abort the whole run, so a partially-provisioned Pi can simply be re-run. If a host change requires a
@@ -145,8 +151,7 @@ METADATA_DATAFLOW_NAME="opcua-metadata-to-eventhubs"
 # created here. The commander's action topic is per-asset and MUST match the asset/management-group/action
 # registered in section 12e (it is the topic UA-CloudAction publishes to). The pressure-relief command is
 # enabled on the 'assembly' station of BOTH production lines; the object/method IDs are identical because
-# both lines run the same Station.NodeSet2.xml.
-COMMAND_ASSETS=("assembly-seattle-asset" "assembly-munich-asset")
+# both lines run the same Station.NodeSet2.xml. COMMAND_ASSETS is derived from PRODUCTION_LINES below.
 COMMAND_MGMT_GROUP="managementGroup"
 COMMAND_ACTION_NAME="OpenPressureReliefValve"
 COMMAND_OBJECT_ID="ns=2;i=424"
@@ -166,6 +171,22 @@ PUBLISHER_CONFIG_DIR="${REPO_DIR}/Tools/FactorySimulation/PublisherConfig"
 # bash overwrites $LINES (= LINES[0]) with the terminal height after every external command when run
 # from a terminal, which silently replaced "Munich" with e.g. "62".
 PRODUCTION_LINES=("Munich" "Seattle")
+ONBOARD_ONLY="${ONBOARD_ONLY:-false}"
+if [ -n "${ONBOARD_LINES:-}" ]; then
+  PRODUCTION_LINES=()
+  for _l in ${ONBOARD_LINES//,/ }; do
+    _l="${_l,,}"
+    case "${_l}" in
+      munich|seattle) PRODUCTION_LINES+=("${_l^}") ;;
+      *) echo "!!! ERROR: unknown production line '${_l}' in ONBOARD_LINES (use Munich and/or Seattle)."; exit 1 ;;
+    esac
+  done
+fi
+# Pressure-relief command assets of the selected lines (see COMMAND_* above).
+COMMAND_ASSETS=()
+for _l in "${PRODUCTION_LINES[@]}"; do
+  COMMAND_ASSETS+=("assembly-${_l,,}-asset")
+done
 # Default OPC UA port for endpoints whose persistency.json EndpointUrl omits it.
 OPC_UA_PORT="4840"
 # Stations (first dotted label of the OPC UA host) that must NOT be onboarded as AIO OPC UA
@@ -197,6 +218,8 @@ exec > >(tee -a "${LOG_FILE}") 2>&1
 
 echo "=== Azure IoT Operations ${AIO_EXPECTED_VERSION} (Raspberry Pi 5 / K3s) setup started: $(date -Is) ==="
 echo "Log file: ${LOG_FILE}"
+echo "Production lines: ${PRODUCTION_LINES[*]}"
+[ "${ONBOARD_ONLY}" = "true" ] && echo "ONBOARD_ONLY=true: only re-running the per-line onboarding steps."
 
 # RUN_LAST_RC holds the exit code of the most recent `run` invocation. run() always
 # returns 0 (best-effort: warn but continue) so the script keeps going on failure;
@@ -227,6 +250,11 @@ wait_for_k3s() {
   done
   return 1
 }
+
+# --------------------------
+# P1-P4 are skipped in ONBOARD_ONLY mode (the Pi is already prepared; see the 'else' branch after P4).
+# --------------------------
+if [ "${ONBOARD_ONLY}" != "true" ]; then
 
 # --------------------------
 # P1. Base packages
@@ -509,6 +537,24 @@ else
   exit 1
 fi
 
+else
+  # ONBOARD_ONLY: reuse the prepared host, the Azure CLI and the repo copy from the previous full run.
+  for _cmd in az jq kubectl openssl; do
+    if ! command -v "${_cmd}" >/dev/null 2>&1; then
+      echo "!!! ERROR: '${_cmd}' not found; run the full setup (without ONBOARD_ONLY) first. Aborting."
+      exit 1
+    fi
+  done
+  if [ ! -f "${PUBLISHER_CONFIG_DIR}/${PRODUCTION_LINES[0]}/persistency.json" ]; then
+    echo "!!! ERROR: ${PUBLISHER_CONFIG_DIR} is incomplete; run the full setup (without ONBOARD_ONLY) first."
+    exit 1
+  fi
+  if ! wait_for_k3s; then
+    echo "!!! ERROR: the K3s node is not Ready. Check 'journalctl -u k3s'. Aborting."
+    exit 1
+  fi
+fi
+
 # --------------------------
 # 1. Authenticate to Azure (the Pi has no managed identity)
 # --------------------------
@@ -623,6 +669,12 @@ if [ -z "${CUSTOM_LOCATIONS_OID}" ]; then
   echo "    and pass it as CUSTOM_LOCATIONS_OID=<oid>. Aborting AIO setup."
   exit 1
 fi
+
+# --------------------------
+# Sections 1c-9 (simulation, extensions, providers, Arc, AIO install, identity, endpoints) are skipped in
+# ONBOARD_ONLY mode; the 'else' branch after section 9 only re-reads the values the later sections need.
+# --------------------------
+if [ "${ONBOARD_ONLY}" != "true" ]; then
 
 # --------------------------
 # 1c. Start the production line simulation
@@ -992,6 +1044,25 @@ run az iot ops dataflow endpoint apply \
   --instance "${AIO_INSTANCE_NAME}" \
   --name "default" \
   --config-file "${MQTT_ENDPOINT_CONFIG}"
+
+else
+  echo
+  echo "=== ONBOARD_ONLY: reading the existing Arc cluster and AIO instance ==="
+  AIO_INSTALLED_VERSION="$(az iot ops show --name "${AIO_INSTANCE_NAME}" --resource-group "${RESOURCE_GROUP}" \
+    --query properties.version -o tsv 2>/dev/null)"
+  if [ -z "${AIO_INSTALLED_VERSION}" ]; then
+    echo "!!! ERROR: AIO instance '${AIO_INSTANCE_NAME}' not found in '${RESOURCE_GROUP}'; run the full setup"
+    echo "    (without ONBOARD_ONLY) first. Aborting."
+    exit 1
+  fi
+  echo "AIO instance '${AIO_INSTANCE_NAME}': version ${AIO_INSTALLED_VERSION}"
+  ISSUER_URL="$(az connectedk8s show --name "${CLUSTER_NAME}" --resource-group "${RESOURCE_GROUP}" \
+    --query oidcIssuerProfile.issuerUrl -o tsv 2>/dev/null)"
+  MANAGED_IDENTITY_RESOURCE_ID="$(az identity show --name "${RESOURCES_NAME}-Identity" \
+    --resource-group "${RESOURCE_GROUP}" --query id -o tsv 2>/dev/null)"
+  echo "OIDC issuer URL: ${ISSUER_URL:-<not found>}"
+  echo "Managed identity: ${MANAGED_IDENTITY_RESOURCE_ID:-<not found>}"
+fi
 
 # --------------------------
 # 9b. Pre-establish AIO -> station trust BEFORE onboarding devices/assets
@@ -1431,6 +1502,8 @@ done
 # CloudEvent subject/time into DataSetWriterId/Timestamp so the existing policies work
 # unchanged. See the "Azure IoT Operations configuration for OPC UA PubSub" section of the
 # repository README. Two flows are created: telemetry -> 'data' hub, metadata -> 'metadata' hub.
+# They subscribe to all assets' topics, so ONBOARD_ONLY does not need to recreate them.
+if [ "${ONBOARD_ONLY}" != "true" ]; then
 echo
 echo "=== Creating the OPC UA PubSub data flows (telemetry + metadata) ==="
 
@@ -1537,6 +1610,7 @@ run az iot ops dataflow apply \
   --profile default \
   --name "${METADATA_DATAFLOW_NAME}" \
   --config-file "${METADATA_DATAFLOW_CONFIG}"
+fi
 
 # --------------------------
 # 11b. Cloud-to-edge command path (runs on the edge, not via a dataflow)

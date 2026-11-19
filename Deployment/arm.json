@@ -6,14 +6,25 @@
       "type": "string",
       "minLength": 2,
       "metadata": {
-        "description": "Username for the Virtual Machine."
+        "description": "Username for the Virtual Machine (also used as the administrator login of other deployed services, so it is required even when edgeDeploymentTarget is RaspberryPi)."
       }
     },
     "adminPassword": {
       "type": "secureString",
       "minLength": 12,
       "metadata": {
-        "description": "Password for the Virtual Machine."
+        "description": "Password for the Virtual Machine (also used as the administrator password of other deployed services, so it is required even when edgeDeploymentTarget is RaspberryPi)."
+      }
+    },
+    "edgeDeploymentTarget": {
+      "type": "string",
+      "defaultValue": "AzureVM",
+      "allowedValues": [
+        "AzureVM",
+        "RaspberryPi"
+      ],
+      "metadata": {
+        "description": "Where the edge (K3s, Azure IoT Operations and the factory simulation) runs. AzureVM deploys and bootstraps an Ubuntu VM in Azure (Azure IoT Operations GA). RaspberryPi skips the VM; after this deployment completes, run Deployment/SetupAzureIoTOperationsPi.sh on a Raspberry Pi 5 (Raspberry Pi OS 64-bit or Ubuntu Server 24.04 ARM64, 16 GB RAM recommended) running K3s, which installs the Azure IoT Operations 2610 (v1.6.0-preview.60) public preview. See the raspberryPiSetupCommand output."
       }
     },
     "deployDatabricks": {
@@ -40,6 +51,8 @@
   },
   "variables": {
     "resourcesName": "[resourceGroup().name]",
+    "deployVm": "[equals(parameters('edgeDeploymentTarget'), 'AzureVM')]",
+    "aioPiSetupScriptUri": "[uri('https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/', 'SetupAzureIoTOperationsPi.sh')]",
     "addressPrefix": "10.0.0.0/16",
     "subnetPrefix": "10.0.0.0/24",
     "subnetPrefix2": "10.0.0.0/23",
@@ -394,6 +407,7 @@
       ]
     },
     {
+      "condition": "[variables('deployVm')]",
       "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2020-11-01",
       "name": "[concat(variables('resourcesName'), '-IPAddress')]",
@@ -504,6 +518,7 @@
       }
     },
     {
+      "condition": "[variables('deployVm')]",
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2020-11-01",
       "name": "[concat(variables('resourcesName'), '-IF')]",
@@ -530,6 +545,7 @@
       ]
     },
     {
+      "condition": "[variables('deployVm')]",
       "apiVersion": "2025-04-01",
       "type": "microsoft.compute/virtualmachines",
       "name": "[concat(variables('resourcesName'), '-VM')]",
@@ -592,6 +608,7 @@
       ]
     },
     {
+      "condition": "[variables('deployVm')]",
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(variables('resourcesName'), '-VM','/Bootstrap')]",
       "apiVersion": "2022-11-01",
@@ -1303,6 +1320,11 @@
     "plantCopilotMcpUrl": {
       "type": "string",
       "value": "[concat('https://', reference(resourceId('Microsoft.App/containerApps', variables('plantCopilotContainerAppName')), '2024-03-01').configuration.ingress.fqdn, '/mcp')]"
+    },
+    "raspberryPiSetupCommand": {
+      "condition": "[not(variables('deployVm'))]",
+      "type": "string",
+      "value": "[concat('curl -fsSL ', variables('aioPiSetupScriptUri'), ' | sudo bash -s -- ', resourceGroup().name, ' ', subscription().subscriptionId)]"
     }
   }
 }

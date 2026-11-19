@@ -1250,16 +1250,16 @@
     },
     {
       "id": "1bccbda7-4250-4e72-9bb0-5ea48fba7a7c",
-      "title": "UNS / ISA-95 Graph",
-      "visualType": "plotly",
+      "title": "UNS / ISA-95 Asset Hierarchy",
+      "visualType": "table",
       "pageId": "1604d4fc-a7b5-4e47-82c6-640286103fde",
       "layout": {
         "x": 0,
         "y": 129,
         "width": 24,
-        "height": 10
+        "height": 20
       },
-      "description": "Unified Namespace (UNS) / ISA-95 asset hierarchy rendered as an interactive Plotly node-link graph. Requires the Python plugin on the database.",
+      "description": "Unified Namespace (UNS) / ISA-95 asset hierarchy (Enterprise, Site, Area, Line, Workcell, data point) rendered as an indented tree from the OPC UA metadata.",
       "queryRef": {
         "kind": "query",
         "queryId": "c41c70fc-a56c-4272-bd32-f521aaf91258"
@@ -1268,10 +1268,10 @@
         "colorRulesDisabled": true,
         "crossFilterDisabled": false,
         "drillthroughDisabled": false,
-        "xColumn": null,
-        "plotly__version": "2",
-        "imageAllowlist": "",
+        "table__enableRenderLinks": true,
         "crossFilter": [
+        ],
+        "table__renderLinks": [
         ],
         "drillthrough": [
         ],
@@ -1748,7 +1748,7 @@
         "kind": "inline",
         "dataSourceId": "09ab8651-b041-4b8e-ba7b-347796f7911c"
       },
-      "text": "let compacted =\n    opcua_metadata_lkv\n    | project levels = pack_array(Enterprise, Site, Area, Line, Workcell, DisplayName)\n    | mv-apply with_itemindex = i level = levels to typeof(string) on (\n        where isnotempty(level)\n        | sort by i asc\n        | summarize compact = make_list(level)\n    )\n    | where array_length(compact) > 0\n    | summarize by compactStr = tostring(compact);\nlet expanded =\n    compacted\n    | extend compact = todynamic(compactStr)\n    | mv-expand with_itemindex = d level = compact to typeof(string)\n    | extend d = toint(d), lvl = tostring(level)\n    | extend id = strcat_array(array_slice(compact, 0, d), \" / \")\n    | extend parent = iff(d > 0, strcat_array(array_slice(compact, 0, d - 1), \" / \"), \"\");\nlet nodes =\n    expanded\n    | summarize by id, label = lvl, depth = d;\nlet edges =\n    expanded\n    | where isnotempty(parent)\n    | summarize by source = parent, target = id;\nlet graphData =\n    (edges | project rowType = \"E\", source, target, id = \"\", label = \"\", depth = toint(0))\n    | union (nodes | project rowType = \"V\", source = \"\", target = \"\", id, label, depth = toint(depth));let pythonCode = ```\nimport pandas as pd\nimport plotly.graph_objects as go\n\nedges_df = df[df['rowType'] == 'E']\nnodes_df = df[df['rowType'] == 'V']\n\n# Build the tree (a forest: one root per top-level ISA-95 branch, e.g. munich and seattle).\nchildren = {}\nparent = {}\nlabel = {}\ndepth = {}\nfor _, r in nodes_df.iterrows():\n    nid = str(r['id'])\n    label[nid] = str(r['label'])\n    depth[nid] = int(r['depth'])\n    children.setdefault(nid, [])\nfor _, r in edges_df.iterrows():\n    s = str(r['source']); t = str(r['target'])\n    children.setdefault(s, []); children.setdefault(t, [])\n    children[s].append(t)\n    parent[t] = s\n    label.setdefault(s, s); label.setdefault(t, t)\n    depth.setdefault(s, 0); depth.setdefault(t, 0)\n\nroots = sorted([n for n in children if n not in parent], key=lambda n: label.get(n, n))\nfor n in children:\n    children[n] = sorted(children[n], key=lambda c: label.get(c, c))\n\nmaxd = max(depth.values()) if depth else 0\n\n# Tidy-tree x assignment: leaves get sequential slots; internal nodes are centred over their children.\nxpos = {}\ncounter = [0.0]\ndef assign(n):\n    ch = children.get(n, [])\n    if not ch:\n        xpos[n] = counter[0]\n        counter[0] += 1.0\n        return xpos[n]\n    xs = [assign(c) for c in ch]\n    xpos[n] = (xs[0] + xs[-1]) / 2.0\n    return xpos[n]\n\ngap = 2.0  # blank columns between separate root trees so branches never touch\nfor r in roots:\n    assign(r)\n    counter[0] += gap\n\npos = {n: (xpos[n], float(maxd - depth.get(n, 0))) for n in xpos}\nleaf_count = max(counter[0], 1.0)\n\nedge_x = []; edge_y = []\nfor _, r in edges_df.iterrows():\n    s = str(r['source']); t = str(r['target'])\n    if s in pos and t in pos:\n        x0, y0 = pos[s]; x1, y1 = pos[t]\n        edge_x += [x0, x1, None]; edge_y += [y0, y1, None]\nedge_trace = go.Scatter(x=edge_x, y=edge_y, mode='lines', line=dict(width=1, color='#888'), hoverinfo='none')\n\nnode_x = []; node_y = []; node_text = []; node_hover = []; node_color = []\nfor n in pos:\n    x, y = pos[n]; node_x.append(x); node_y.append(y)\n    node_text.append(label.get(n, n)); node_hover.append(n); node_color.append(depth.get(n, 0))\n# Leaf labels are dense, so render them vertically and give the deepest tier extra bottom margin.\nnode_trace = go.Scatter(x=node_x, y=node_y, mode='markers', hovertext=node_hover, hoverinfo='text', marker=dict(size=12, color=node_color, colorscale='Viridis', line=dict(width=1, color='#333')))\n# Labels are drawn as annotations (Scatter has no textangle): rotate the dense leaf tier vertically and keep shallow tiers horizontal.\nannotations = []\nfor n in pos:\n    ax, ay = pos[n]\n    is_leaf = not children.get(n)\n    annotations.append(dict(x=ax, y=ay, text=label.get(n, n), showarrow=False, font=dict(size=9), textangle=(90 if is_leaf else 0), xanchor='center', yanchor=('top' if is_leaf else 'bottom'), yshift=(-10 if is_leaf else 10)))\n\n# Scale the figure width with the number of leaves so labels have room to breathe.\nfig_width = int(max(1200, min(6000, leaf_count * 34)))\nfig = go.Figure(data=[edge_trace, node_trace], layout=go.Layout(title='UNS / ISA-95 asset hierarchy', showlegend=False, hovermode='closest', width=fig_width, height=650, margin=dict(b=140, l=20, r=20, t=40), xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[-1, leaf_count]), yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[-0.6, maxd + 0.6]), annotations=annotations))\nresult = pd.DataFrame(data=[fig.to_json()], columns=['plotly'])```;\ngraphData\n| evaluate python(typeof(plotly:string), pythonCode)\n| render plotly",
+      "text": "// UNS / ISA-95 asset hierarchy as an indented tree. Empty levels are skipped, so each branch shows only\n// the levels the OPC UA metadata actually provides. Native table visual, so no Python plugin is required.\nlet levelNames = dynamic([\"Enterprise\", \"Site\", \"Area\", \"Line\", \"Workcell\", \"Data point\"]);\nlet nodes =\n    opcua_metadata_lkv\n    | project levels = pack_array(Enterprise, Site, Area, Line, Workcell, DisplayName)\n    | mv-apply with_itemindex = i level = levels to typeof(string) on (\n        where isnotempty(level)\n        | sort by i asc\n        | summarize compact = make_list(level), kinds = make_list(i)\n    )\n    | where array_length(compact) > 0\n    | summarize by compactStr = tostring(compact), kindsStr = tostring(kinds)\n    | extend compact = todynamic(compactStr), kinds = todynamic(kindsStr)\n    | mv-expand with_itemindex = d level = compact to typeof(string)\n    | extend Depth = toint(d), Label = tostring(level)\n    | extend Level = tostring(levelNames[toint(kinds[Depth])])\n    | extend Path = strcat_array(array_slice(compact, 0, Depth), \"\\t\")\n    | extend Parent = iff(Depth > 0, strcat_array(array_slice(compact, 0, Depth - 1), \"\\t\"), \"\")\n    | summarize DataPoints = count() by Path, Parent, Label, Level, Depth;\nnodes\n| join kind=inner (nodes | summarize LastLabel = max(Label) by Parent) on Parent\n| extend Hierarchy = iff(Depth == 0, Label, strcat(strrep(\"\\u00a0\\u00a0\\u00a0\\u00a0\", Depth - 1), iff(Label == LastLabel, \"\\u2514\\u2500\\u00a0\", \"\\u251c\\u2500\\u00a0\"), Label))\n| sort by Path asc\n| project Hierarchy, Level, [\"Data points\"] = DataPoints",
       "id": "c41c70fc-a56c-4272-bd32-f521aaf91258",
       "usedVariables": [
       ]

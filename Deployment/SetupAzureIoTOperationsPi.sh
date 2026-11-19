@@ -23,14 +23,14 @@
 # issuer) for Event Hubs and Key Vault, so no Azure secret is needed by the running solution.
 #
 # Prerequisites:
-#   - Raspberry Pi 5 with 16 GB RAM (8 GB minimum) and a 64-bit OS with a 64-bit (arm64) userland:
+#   - Raspberry Pi 5 or Compute Module 5 with 16 GB RAM (8 GB minimum) and a 64-bit OS with a 64-bit (arm64) userland:
 #       * Raspberry Pi OS (64-bit), Bookworm or Trixie - the native OS flashed by Raspberry Pi Imager. The
 #         script switches it to the 4K-page kernel and enables the memory cgroup (one reboot + re-run),
 #         stops NetworkManager from managing the K3s CNI interfaces, and - because Microsoft does not
 #         publish an apt repository for Trixie - installs the Azure CLI from PyPI into /opt/azure-cli.
 #       * Ubuntu Server 24.04 LTS (ARM64), the OS on Azure IoT Operations' validated environment list.
 #     Raspberry Pi OS works with K3s and AIO but is not on AIO's validated list (fine for evaluation).
-#     Prefer NVMe/SSD storage over an SD card, with at least 32 GB free.
+#     Prefer NVMe/SSD (or Compute Module 5 eMMC) storage over an SD card, with at least 32 GB free.
 #   - Outbound internet access (Azure Arc, Azure IoT Operations, container registries).
 #   - A service principal or Azure account with Owner - or Contributor + User Access Administrator - on
 #     the resource group. The subscription's resource providers for Azure IoT Operations must be
@@ -95,7 +95,9 @@ LOCATION=""
 MANAGED_IDENTITY_CLIENT_ID=""
 CUSTOM_LOCATIONS_OID="${CUSTOM_LOCATIONS_OID:-}"
 EVENTHUBS_NAMESPACE="${RESOURCES_NAME}-EventHubs"
-EVENTHUBS_HOST="${EVENTHUBS_NAMESPACE}.servicebus.windows.net"
+# Lowercase: the AIO dataflow admission webhook rejects an endpoint whose audience/scope host differs in
+# case from the (lowercased) endpoint host, e.g. for upper-case resource group names.
+EVENTHUBS_HOST="${EVENTHUBS_NAMESPACE,,}.servicebus.windows.net"
 # Well-known application ID of the 'custom-locations' Microsoft Entra application (same in every tenant).
 CUSTOM_LOCATIONS_APP_ID="bc313c14-388c-4e7d-a58e-70017303ee3b"
 
@@ -257,10 +259,11 @@ fi
 
 PI_MODEL="$(tr -d '\0' </proc/device-tree/model 2>/dev/null || echo unknown)"
 echo "Model: ${PI_MODEL}"
-case "${PI_MODEL}" in
-  *"Raspberry Pi 5"*) ;;
-  *) echo "!!! WARNING: this host does not report itself as a Raspberry Pi 5; continuing anyway." ;;
-esac
+# Any BCM2712 board counts: Raspberry Pi 5, Pi 500 and Compute Module 5 share the same SoC and kernel.
+if ! tr '\0' '\n' </proc/device-tree/compatible 2>/dev/null | grep -qx 'brcm,bcm2712' \
+  && ! grep -qE 'Raspberry Pi (5|Compute Module 5)' <<<"${PI_MODEL}"; then
+  echo "!!! WARNING: this host is not a Raspberry Pi 5 / Compute Module 5 (BCM2712); continuing anyway."
+fi
 
 OS_ID="unknown"
 OS_VERSION_ID="unknown"
@@ -312,8 +315,15 @@ if [ "${FREE_KB}" -lt 33554432 ]; then
   echo "!!! WARNING: less than 32 GiB free under /var/lib/rancher; container images and AIO broker"
   echo "    persistence may run out of space."
 fi
-if df -P /var/lib/rancher | awk 'NR==2 {print $1}' | grep -q mmcblk; then
-  echo "!!! WARNING: K3s data is on the SD card. Use NVMe/SSD storage for acceptable AIO performance."
+# mmcblk devices are either an SD card or on-board eMMC (Compute Module 5); the kernel reports which one.
+K3S_DATA_DEV="$(df -P /var/lib/rancher | awk 'NR==2 {print $1}')"
+K3S_DATA_MMC="$(grep -oE 'mmcblk[0-9]+' <<<"${K3S_DATA_DEV}" | head -n 1)"
+if [ -n "${K3S_DATA_MMC}" ]; then
+  case "$(cat "/sys/block/${K3S_DATA_MMC}/device/type" 2>/dev/null)" in
+    MMC) echo "K3s data is on eMMC (${K3S_DATA_DEV})." ;;
+    *)   echo "!!! WARNING: K3s data is on the SD card (${K3S_DATA_DEV}). Use eMMC or NVMe/SSD storage for"
+         echo "    acceptable AIO performance." ;;
+  esac
 fi
 
 # Raspberry Pi firmware files: /boot/firmware on current Ubuntu/Raspberry Pi OS, /boot on older images.

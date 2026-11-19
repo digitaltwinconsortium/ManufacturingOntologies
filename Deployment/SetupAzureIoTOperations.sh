@@ -30,7 +30,9 @@ RESOURCES_NAME="${3:-}"
 MANAGED_IDENTITY_CLIENT_ID="${4:-}"
 SUBSCRIPTION_ID="${5:-}"
 CUSTOM_LOCATIONS_OID="${6:-}"
-EVENTHUBS_HOST="${7:-}"
+# Lowercase: the AIO dataflow admission webhook rejects an endpoint whose audience/scope host differs in
+# case from the (lowercased) endpoint host, e.g. for upper-case resource group names.
+EVENTHUBS_HOST="$(printf '%s' "${7:-}" | tr '[:upper:]' '[:lower:]')"
 
 KUBECONFIG_PATH="/etc/rancher/k3s/k3s.yaml"
 export KUBECONFIG="${KUBECONFIG_PATH}"

@@ -640,7 +640,7 @@
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[concat('bash Bootstrap.sh ''', listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString, ''' ''', resourceGroup().name, ''' ''', resourceGroup().location, ''' ''', variables('resourcesName'), ''' ''', reference(concat(variables('resourcesName'), '-Identity')).clientId, ''' ''', subscription().subscriptionId, ''' ''', parameters('customLocationsOid'), ''' ''', concat(variables('eventHubsNamespaceName'), '.servicebus.windows.net'), '''')]"
+          "commandToExecute": "[concat('bash Bootstrap.sh ''', listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString, ''' ''', resourceGroup().name, ''' ''', resourceGroup().location, ''' ''', variables('resourcesName'), ''' ''', reference(concat(variables('resourcesName'), '-Identity')).clientId, ''' ''', subscription().subscriptionId, ''' ''', parameters('customLocationsOid'), ''' ''', toLower(concat(variables('eventHubsNamespaceName'), '.servicebus.windows.net')), '''')]"
         }
       }
     },

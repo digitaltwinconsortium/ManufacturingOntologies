@@ -657,14 +657,22 @@ echo
 echo "=== Installing Azure CLI extensions (connectedk8s, azure-iot-ops ${AIO_CLI_VERSION}) ==="
 run az extension add --upgrade --yes --name connectedk8s
 run az extension add --upgrade --yes --name azure-iot-ops --version "${AIO_CLI_VERSION}" --allow-preview
-echo "azure-iot-ops extension: $(az extension show --name azure-iot-ops --query version -o tsv 2>/dev/null)"
+AIO_CLI_INSTALLED="$(az extension show --name azure-iot-ops --query version -o tsv 2>/dev/null)"
+echo "azure-iot-ops extension: ${AIO_CLI_INSTALLED:-<not installed>}"
 # Keep the CLI from nagging about newer extension versions; the version is pinned on purpose.
 run az config set iotops.check_latest=false
-if ! az iot ops create --help 2>/dev/null | grep -q -- '--use-preview'; then
-  echo "!!! ERROR: the installed azure-iot-ops extension does not support 'az iot ops create --use-preview',"
-  echo "    so the ${AIO_EXPECTED_VERSION} preview runtime cannot be selected. Aborting AIO setup."
+# Capture the help first: piping it straight into 'grep -q' makes az fail with a broken pipe once grep
+# exits on the first match, which 'set -o pipefail' turns into a false negative.
+AIO_CREATE_HELP="$(az iot ops create --help 2>&1)"
+if ! grep -q -- '--use-preview' <<<"${AIO_CREATE_HELP}"; then
+  echo "!!! ERROR: the installed azure-iot-ops extension (${AIO_CLI_INSTALLED:-not installed}, expected"
+  echo "    ${AIO_CLI_VERSION}) does not support 'az iot ops create --use-preview', so the ${AIO_EXPECTED_VERSION}"
+  echo "    preview runtime cannot be selected. Output of 'az iot ops create --help':"
+  printf '%s\n' "${AIO_CREATE_HELP}" | tail -n 20 | sed 's/^/      /'
+  echo "    Aborting AIO setup."
   exit 1
 fi
+unset AIO_CREATE_HELP
 
 # --------------------------
 # 3. Register the resource providers AIO/Arc need

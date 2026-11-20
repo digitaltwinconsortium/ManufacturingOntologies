@@ -568,10 +568,37 @@ if [ -n "${AZURE_CLIENT_ID:-}" ] && [ -n "${AZURE_TENANT_ID:-}" ]; then
 	echo
   fi
   echo ">>> az login --service-principal (client id ${AZURE_CLIENT_ID})"
-  if ! az login --service-principal --username "${AZURE_CLIENT_ID}" --password "${AZURE_CLIENT_SECRET:-}" \
-	--tenant "${AZURE_TENANT_ID}" --output none; then
-	echo "!!! ERROR: service principal sign-in failed (wrong/expired secret?). Create a new secret by re-running"
-	echo "    CreateRaspberryPiServicePrincipal.sh in Azure Cloud Shell. Aborting AIO setup."
+  # A new service principal or secret takes a few minutes to replicate in Entra ID; until then the sign-in
+  # fails with AADSTS7000229 (no service principal), AADSTS700016 (unknown app) or AADSTS7000215 (invalid
+  # secret). Retry those for up to 3 minutes.
+  sp_login_ok=false
+  for _i in $(seq 1 12); do
+	if SP_LOGIN_OUTPUT="$(az login --service-principal --username "${AZURE_CLIENT_ID}" --password "${AZURE_CLIENT_SECRET:-}" \
+		 --tenant "${AZURE_TENANT_ID}" --output none 2>&1)"; then
+	  sp_login_ok=true
+	  break
+	fi
+	case "${SP_LOGIN_OUTPUT}" in
+	  *AADSTS7000229*|*AADSTS700016*|*AADSTS7000215*) ;;
+	  *) break ;;
+	esac
+	[ "${_i}" -lt 12 ] || break
+	echo "    Entra ID has not replicated the service principal/secret yet; retrying in 15s (${_i}/11)..."
+	sleep 15
+  done
+  if [ "${sp_login_ok}" != "true" ]; then
+	printf '%s\n' "${SP_LOGIN_OUTPUT}" | grep -E '^(ERROR|WARNING)' || printf '%s\n' "${SP_LOGIN_OUTPUT}"
+	case "${SP_LOGIN_OUTPUT}" in
+	  *AADSTS7000229*)
+		echo "!!! ERROR: app ${AZURE_CLIENT_ID} has no service principal (enterprise application) in tenant ${AZURE_TENANT_ID}."
+		echo "    Create it and its role in Azure Cloud Shell, then re-run this command:"
+		echo "      az ad sp create --id ${AZURE_CLIENT_ID}"
+		echo "      az role assignment create --assignee ${AZURE_CLIENT_ID} --role Owner --scope /subscriptions/${SUBSCRIPTION_ID:-<subscription-id>}/resourceGroups/${RESOURCE_GROUP}"
+		echo "    Or re-run CreateRaspberryPiServicePrincipal.sh (it creates a missing service principal). Aborting AIO setup." ;;
+	  *)
+		echo "!!! ERROR: service principal sign-in failed (wrong/expired secret?). Create a new secret by re-running"
+		echo "    CreateRaspberryPiServicePrincipal.sh in Azure Cloud Shell. Aborting AIO setup." ;;
+	esac
 	exit 1
   fi
 elif az account show >/dev/null 2>&1; then

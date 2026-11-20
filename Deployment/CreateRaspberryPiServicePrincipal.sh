@@ -110,6 +110,26 @@ if [ -z "${APP_ID}" ]; then
   echo "       registrations (or the 'Application Developer' role) and Owner on the resource group."
   exit 1
 fi
+# create-for-rbac reuses an existing app registration with this name. Make sure its service principal
+# (enterprise application) exists too - e.g. when only that was deleted - otherwise the Pi's sign-in fails
+# with AADSTS7000229 ('missing service principal in the tenant').
+SP_OID="$(az ad sp show --id "${APP_ID}" --query id -o tsv 2>/dev/null)"
+if [ -z "${SP_OID}" ]; then
+  echo "  creating the missing service principal of app ${APP_ID}"
+  SP_OID="$(az ad sp create --id "${APP_ID}" --query id -o tsv 2>/dev/null)"
+fi
+if [ -z "${SP_OID}" ]; then
+  echo "ERROR: app ${APP_ID} has no service principal and one could not be created ('az ad sp create --id ${APP_ID}')."
+  exit 1
+fi
+if [ -z "$(az role assignment list --assignee "${SP_OID}" --scope "${RG_ID}" --role Owner --query '[0].id' -o tsv 2>/dev/null)" ]; then
+  echo "  assigning Owner on ${RESOURCE_GROUP}"
+  if ! az role assignment create --assignee-object-id "${SP_OID}" --assignee-principal-type ServicePrincipal \
+	 --role Owner --scope "${RG_ID}" --output none; then
+	echo "ERROR: could not assign Owner on ${RESOURCE_GROUP} to the service principal ${APP_ID}."
+	exit 1
+  fi
+fi
 END_DATE="$(date -u -d "+${SECRET_DAYS} days" +%Y-%m-%d 2>/dev/null || date -u -v+"${SECRET_DAYS}"d +%Y-%m-%d)"
 # Overwrites any previous secret of this service principal, so only one short-lived secret ever exists.
 CLIENT_SECRET="$(az ad app credential reset --id "${APP_ID}" --display-name "pi-setup" \
@@ -130,8 +150,9 @@ echo
 echo "curl -fsSL ${PI_SCRIPT_URL} | sudo ${PI_ENV} bash -s -- ${RESOURCE_GROUP} ${SUBSCRIPTION_ID}"
 echo
 echo "=================================================================================================="
-echo "The service principal can sign in for ${SECRET_DAYS} days (re-run this helper for a new secret). The"
-echo "role assignment and the new secret can take a minute to become effective. When you no longer need to"
+echo "The service principal can sign in for ${SECRET_DAYS} days (re-run this helper for a new secret). A new"
+echo "service principal, secret or role assignment can take a few minutes to replicate in Entra ID; the Pi script"
+echo "retries the sign-in for up to 3 minutes. When you no longer need to"
 echo "re-run the Pi setup, delete the service principal (Azure IoT Operations keeps working without it):"
 echo "  az ad app delete --id ${APP_ID}"
 

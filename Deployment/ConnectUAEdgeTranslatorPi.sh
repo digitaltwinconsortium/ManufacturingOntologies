@@ -149,6 +149,42 @@ sp_instructions() {
   echo "      curl -fsSL ${SP_HELPER_URL} | PI_SCRIPT=ConnectUAEdgeTranslatorPi.sh bash -s -- ${RESOURCE_GROUP} ${SUBSCRIPTION_ID}"
   echo "    and run the command it prints on the Pi. Aborting."
 }
+# A new service principal or secret takes a few minutes to replicate in Entra ID; until then the sign-in
+# fails with AADSTS7000229 (no service principal), AADSTS700016 (unknown app) or AADSTS7000215 (invalid
+# secret). Retry those for up to 3 minutes.
+SP_LOGIN_OUTPUT=""
+sp_login() {
+  local i
+  for i in $(seq 1 12); do
+    if SP_LOGIN_OUTPUT="$(az login --service-principal --username "${AZURE_CLIENT_ID}" --password "${AZURE_CLIENT_SECRET:-}" \
+         --tenant "${AZURE_TENANT_ID}" --output none 2>&1)"; then
+      return 0
+    fi
+    case "${SP_LOGIN_OUTPUT}" in
+      *AADSTS7000229*|*AADSTS700016*|*AADSTS7000215*) ;;
+      *) break ;;
+    esac
+    [ "${i}" -lt 12 ] || break
+    echo "    Entra ID has not replicated the service principal/secret yet; retrying in 15s (${i}/11)..."
+    sleep 15
+  done
+  printf '%s\n' "${SP_LOGIN_OUTPUT}" | grep -E '^(ERROR|WARNING)' || printf '%s\n' "${SP_LOGIN_OUTPUT}"
+  return 1
+}
+sp_login_hint() {
+  case "${SP_LOGIN_OUTPUT}" in
+    *AADSTS7000229*)
+      echo "    App ${AZURE_CLIENT_ID} has no service principal (enterprise application) in tenant ${AZURE_TENANT_ID}."
+      echo "    Create it and its role in Azure Cloud Shell, then re-run this command:"
+      echo "      az ad sp create --id ${AZURE_CLIENT_ID}"
+      echo "      az role assignment create --assignee ${AZURE_CLIENT_ID} --role Owner --scope /subscriptions/${SUBSCRIPTION_ID:-<subscription-id>}/resourceGroups/${RESOURCE_GROUP}"
+      echo "    Or re-run the helper below (it now creates a missing service principal)." ;;
+    *AADSTS7000215*|*AADSTS7000222*)
+      echo "    The client secret is wrong or expired; the helper below issues a new one." ;;
+    *AADSTS700016*|*AADSTS90002*)
+      echo "    App ${AZURE_CLIENT_ID} or tenant ${AZURE_TENANT_ID} does not exist (deleted, or a different tenant)." ;;
+  esac
+}
 echo
 echo "=== Signing in to Azure ==="
 if [ -n "${AZURE_CLIENT_ID:-}" ] && [ -n "${AZURE_TENANT_ID:-}" ]; then
@@ -158,9 +194,9 @@ if [ -n "${AZURE_CLIENT_ID:-}" ] && [ -n "${AZURE_TENANT_ID:-}" ]; then
 	echo
   fi
   echo ">>> az login --service-principal (client id ${AZURE_CLIENT_ID})"
-  if ! az login --service-principal --username "${AZURE_CLIENT_ID}" --password "${AZURE_CLIENT_SECRET:-}" \
-	--tenant "${AZURE_TENANT_ID}" --output none; then
-	echo "!!! ERROR: service principal sign-in failed (wrong/expired secret?)."
+  if ! sp_login; then
+	echo "!!! ERROR: service principal sign-in failed."
+	sp_login_hint
 	sp_instructions
 	exit 1
   fi

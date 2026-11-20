@@ -18,12 +18,13 @@
 #     SignAndEncrypt/Basic256Sha256 with the synced username/password,
 #   - installs 'aio-wot', a helper that calls the WoT endpoint's on-demand mRPC methods (createAsset,
 #     listAssets, ...) through the in-cluster mqtt-client pod,
-#   - enables OPC UA PubSub metadata (opcUaConformance, required since AIO 2610) on the asset
-#     '<station>-<site>-asset' once it exists (re-run the script after importing it).
+#   - enables OPC UA PubSub metadata (opcUaConformance, required since AIO 2610) on every asset of the device
+#     already imported; for assets imported later, run the fast OnboardUAEdgeTranslatorAsset.sh instead.
 # Onboarding is manual: send each Thing Description with 'sudo aio-wot createAsset <td.jsonld>'. The OPC UA
 # Commander uploads it through EdgeTranslator's OPC 10100-1 WoT Connectivity API and runs discovery on the
 # variables EdgeTranslator materializes; the results show up as (Akri) discovered assets, which you import
-# as '<station>-<site>-asset' in the operations experience. The existing data flows forward it to Event Hubs,
+# in the operations experience under a name starting with '<station>-<site>-' (the discovered name does).
+# The existing data flows forward it to Event Hubs,
 # so it shows up in ADX/Fabric/Databricks as Site=<site>, Workcell=<station>.
 #
 # Usage (on the Pi, as root):
@@ -68,14 +69,12 @@ MQTT_CLIENT_POD="mqtt-client"
 MQTT_CLIENT_MANIFEST="https://raw.githubusercontent.com/Azure-Samples/explore-iot-operations/main/samples/quickstarts/mqtt-client.yaml"
 WOT_HELPER="/usr/local/bin/aio-wot"
 
-# Same naming as SetupAzureIoTOperationsPi.sh: the cloud parsers derive Workcell/Site from the dataset
-# name '<station>-<site>-asset_telemetry'.
+# Same naming as SetupAzureIoTOperationsPi.sh: the cloud parsers derive Workcell/Site from the first two
+# '-' separated parts of the asset name ('<station>-<site>-...').
 DEVICE_NAME="${STATION}-${SITE}"
 ENDPOINT_NAME="${DEVICE_NAME}-ep"
 WOT_ENDPOINT_NAME="${DEVICE_NAME}-wot"
 ASSET_NAME="${DEVICE_NAME}-asset"
-DATASET_NAME="telemetry"
-DATA_TOPIC="azure-iot-operations/data/${DEVICE_NAME}"
 
 AIO_INSTANCE_NAME="$(printf '%s-aio' "${RESOURCES_NAME}" | tr '[:upper:]' '[:lower:]')"
 AIO_NAMESPACE_NAME="$(printf '%s-aions' "${RESOURCES_NAME}" | tr '[:upper:]' '[:lower:]')"
@@ -119,7 +118,7 @@ LOG_FILE="/var/log/bootstrap/ConnectUAEdgeTranslatorPi.log"
 exec > >(tee -a "${LOG_FILE}") 2>&1
 
 echo "=== Connecting UA Edge Translator to Azure IoT Operations: $(date -Is) ==="
-echo "Site: ${SITE}  Station: ${STATION}  Device: ${DEVICE_NAME}  Asset: ${ASSET_NAME}"
+echo "Site: ${SITE}  Station: ${STATION}  Device: ${DEVICE_NAME}"
 echo "Endpoints: ${ENDPOINT_NAME} (telemetry), ${WOT_ENDPOINT_NAME} (WoT connectivity)"
 echo "Log file: ${LOG_FILE}"
 
@@ -623,7 +622,6 @@ fi
 echo
 echo "=== Configuring AIO device ${DEVICE_NAME} (endpoints ${ENDPOINT_NAME} and ${WOT_ENDPOINT_NAME}) ==="
 NS_ID="/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.DeviceRegistry/namespaces/${AIO_NAMESPACE_NAME}"
-ASSET_ID="${NS_ID}/assets/${ASSET_NAME}"
 
 # Discovered assets only exist as custom resources on the cluster until resource sync is enabled; only then
 # are they synced to Azure Device Registry and listed under Discovery in the operations experience.
@@ -777,20 +775,43 @@ run install -m 0755 "${WORK_DIR}/aio-wot" "${WOT_HELPER}"
 # --------------------------
 # 9. OPC UA PubSub metadata (AIO 2610: only published with opcUaConformance=true)
 # --------------------------
+# The operations experience imports a discovered asset under its discovered name (e.g.
+# '<device>-<wotEndpoint>-<td>-<hash>-0') with a dataset 'dataset-0' unless renamed, and one TD becomes one
+# asset, so enable the metadata on every asset bound to this device rather than on one fixed name.
 echo
-if az resource show --ids "${ASSET_ID}" --output none 2>/dev/null; then
-  echo "=== Enabling OPC UA metadata for ${ASSET_NAME} ==="
-  CURRENT_DEFAULTS="$(az resource show --ids "${ASSET_ID}" --query "properties.defaultDatasetsConfiguration" -o tsv 2>/dev/null || true)"
+echo "=== Enabling OPC UA metadata for the assets of device ${DEVICE_NAME} ==="
+DEVICE_ASSETS=""
+ASSETS_URL="https://management.azure.com${NS_ID}/assets?api-version=2025-10-01"
+while [ -n "${ASSETS_URL}" ]; do
+  ASSETS_PAGE="$(az rest --method get --url "${ASSETS_URL}" -o json 2>/dev/null || true)"
+  [ -n "${ASSETS_PAGE}" ] || break
+  DEVICE_ASSETS="${DEVICE_ASSETS}$(printf '%s' "${ASSETS_PAGE}" | jq -r --arg d "${DEVICE_NAME}" \
+	'.value[]? | select(.properties.deviceRef.deviceName == $d) | .name')"$'\n'
+  ASSETS_URL="$(printf '%s' "${ASSETS_PAGE}" | jq -r '.nextLink // empty')"
+done
+DEVICE_ASSET_COUNT=0
+while read -r _asset; do
+  [ -n "${_asset}" ] || continue
+  DEVICE_ASSET_COUNT=$((DEVICE_ASSET_COUNT + 1))
+  _asset_id="${NS_ID}/assets/${_asset}"
+  echo ">>> ${_asset}"
+  case "${_asset}" in
+	"${STATION}-${SITE}-"*) ;;
+	*) echo "!!! WARNING: '${_asset}' does not start with '${STATION}-${SITE}-'; ADX/Fabric/Databricks derive"
+	   echo "    Workcell/Site from the first two '-' separated parts of the asset name." ;;
+  esac
+  CURRENT_DEFAULTS="$(az resource show --ids "${_asset_id}" --query "properties.defaultDatasetsConfiguration" -o tsv 2>/dev/null || true)"
   NEW_DEFAULTS="$(printf '%s' "${CURRENT_DEFAULTS}" \
 	| jq -Rsc '(try fromjson catch {}) // {} | if type == "object" then . else {} end
 		| .opcUaConformance = true | tojson' 2>/dev/null)"
   [ -n "${NEW_DEFAULTS}" ] || NEW_DEFAULTS='"{\"opcUaConformance\":true}"'
-  run az resource update --ids "${ASSET_ID}" \
+  run az resource update --ids "${_asset_id}" \
 	--set "properties.defaultDatasetsConfiguration=${NEW_DEFAULTS}" \
 		  "properties.description=UA Edge Translator (site ${SITE}), metadata refresh at $(date -u +%Y-%m-%dT%H:%M:%SZ)" \
 	--output none
-else
-  echo "=== Asset ${ASSET_NAME} not imported yet; re-run this script afterwards to enable its OPC UA metadata ==="
+done <<< "${DEVICE_ASSETS}"
+if [ "${DEVICE_ASSET_COUNT}" -eq 0 ]; then
+  echo "=== No asset of device ${DEVICE_NAME} imported yet; re-run this script afterwards to enable its OPC UA metadata ==="
 fi
 
 echo
@@ -811,19 +832,22 @@ is '${ET_USERNAME}' with the adminPassword of the arm.json deployment (unless ov
 	 kubectl get devices.namespaces.deviceregistry.microsoft.com ${DEVICE_NAME} -n ${AIO_NAMESPACE} -o jsonpath='{.status.endpoints.inbound}'; echo
 
 3. Import them in the operations experience (Discovery > Discovered assets > select the asset > Import and
-   create asset; they appear there a minute or two after discovery, once resource sync has synced them) as
-   asset '${ASSET_NAME}' on endpoint '${ENDPOINT_NAME}', with the data points in a dataset '${DATASET_NAME}'
-   publishing to '${DATA_TOPIC}'. The cloud parsers derive Site=${SITE} and Workcell=${STATION}
-   from '${ASSET_NAME}_${DATASET_NAME}'.
+   create asset; they appear there a minute or two after discovery, once resource sync has synced them).
+   Only the dataset is needed (events and management groups can stay empty). Keep an asset name that starts
+   with '${STATION}-${SITE}-' (the discovered name does, or use e.g. '${ASSET_NAME}'): the cloud parsers
+   derive Workcell=${STATION} and Site=${SITE} from it. The suggested dataset name/topic can stay as is,
+   since the data flows forward everything under azure-iot-operations/data/#.
 
-4. Re-run this script once: it enables the OPC UA metadata (opcUaConformance) of ${ASSET_NAME}.
+4. After each import, enable the OPC UA metadata (opcUaConformance) of the new asset with the fast follow-up
+   script (takes seconds; also runs in Azure Cloud Shell without sudo), instead of re-running this one:
+     curl -fsSL https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/OnboardUAEdgeTranslatorAsset.sh | sudo bash -s -- ${RESOURCE_GROUP} ${SUBSCRIPTION_ID}
 
-Verify the telemetry:
-  kubectl get assets.namespaces.deviceregistry.microsoft.com ${ASSET_NAME} -n ${AIO_NAMESPACE} -o jsonpath='{.status.healthState.status}'; echo
+Verify the telemetry and metadata:
+  kubectl get assets.namespaces.deviceregistry.microsoft.com -n ${AIO_NAMESPACE}
   kubectl exec mqtt-client -n ${AIO_NAMESPACE} -- sh -c 'mosquitto_sub --host aio-broker --port 18883 \\
-	-t "${DATA_TOPIC}" -t "azure-iot-operations/assets/+/+/${ASSET_NAME}/status" -V mqttv5 -F "%t %p" -C 5 -W 120 \\
+	-t "azure-iot-operations/data/#" -t "azure-iot-operations/metadata/#" -V mqttv5 -F "%t %p" -C 20 -W 120 \\
 	--cafile /var/run/certs/ca.crt -D CONNECT authentication-method K8S-SAT \\
-	-D CONNECT authentication-data "\$(cat /var/run/secrets/tokens/broker-sat)"'
+	-D CONNECT authentication-data "\$(cat /var/run/secrets/tokens/broker-sat)"' | grep ${STATION}-${SITE}
 
 Troubleshooting:
   kubectl get pods -n ${AIO_NAMESPACE} | grep aio-opc-   # then: kubectl logs -n ${AIO_NAMESPACE} <pod> | grep -i 'translator\\|wot'

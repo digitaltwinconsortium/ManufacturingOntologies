@@ -136,6 +136,45 @@ run() {
   return 0
 }
 
+# Edge-to-cloud resource sync ('az iot ops enable-rsync'): grants the first-party K8 Bridge application the
+# 'Azure Kubernetes Service Arc Contributor Role' on the instance's custom location, so that resources created
+# on the edge - e.g. Akri discovered devices/assets - are projected into Azure Device Registry and show up in
+# the operations experience. The VM's managed identity can neither read K8 Bridge's object ID from Microsoft
+# Graph nor create role assignments, so this usually only prints the one-time command for an Owner.
+enable_resource_sync() {
+  local k8_bridge_app_id="319f651f-7ddb-4fc6-9857-7aef9250bd05"
+  local cl_id k8_oid
+  local -a rsync_cmd
+  echo
+  echo "=== Enabling resource sync (edge -> Azure Device Registry) for ${AIO_INSTANCE_NAME} ==="
+  cl_id="$(az iot ops show --name "${AIO_INSTANCE_NAME}" --resource-group "${RESOURCE_GROUP}" \
+	--query extendedLocation.name -o tsv 2>/dev/null)"
+  if [ -z "${cl_id}" ]; then
+	echo "!!! WARNING: could not read the custom location of ${AIO_INSTANCE_NAME}; resource sync not enabled."
+	return 0
+  fi
+  k8_oid="${K8_BRIDGE_OID:-}"
+  if [ -z "${k8_oid}" ]; then
+	k8_oid="$(az ad sp show --id "${k8_bridge_app_id}" --query id -o tsv 2>/dev/null)"
+  fi
+  if [ -n "${k8_oid}" ]; then
+	if az iot ops enable-rsync --help >/dev/null 2>&1; then
+	  rsync_cmd=(enable-rsync)
+	else
+	  rsync_cmd=(rsync enable)
+	fi
+	run az iot ops "${rsync_cmd[@]}" --name "${AIO_INSTANCE_NAME}" --resource-group "${RESOURCE_GROUP}" \
+	  --k8-bridge-sp-oid "${k8_oid}"
+	[ "${RUN_LAST_RC}" -eq 0 ] && return 0
+  else
+	echo "!!! WARNING: could not look up the K8 Bridge service principal (needs Microsoft Graph access)."
+  fi
+  echo "    Discovered assets will not show up in the operations experience until you run this once in Azure"
+  echo "    Cloud Shell (https://shell.azure.com) as an Owner of the resource group:"
+  echo "      az role assignment create --assignee ${k8_bridge_app_id} --role \"Azure Kubernetes Service Arc Contributor Role\" --scope ${cl_id}"
+  return 0
+}
+
 # --------------------------
 # 1. Authenticate to Azure with the VM's user-assigned managed identity
 # --------------------------
@@ -331,6 +370,8 @@ run az iot ops create \
 # identity cannot create that role assignment (it requires Microsoft.Authorization/roleAssignments
 # /write, a subscription-scope right the MI lacks). The instance is still created; if schema
 # operations later fail, a subscription Owner should grant that role on the schema registry.
+
+enable_resource_sync
 
 # --------------------------
 # 7b. Create an Azure Arc site (site manager) scoped to the resource group

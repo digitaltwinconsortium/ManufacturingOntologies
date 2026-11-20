@@ -52,6 +52,9 @@
 #                          (omit AZURE_CLIENT_SECRET to be prompted for it instead)
 #   CUSTOM_LOCATIONS_OID   Object ID of the 'custom-locations' Entra application (otherwise looked up in
 #                          Microsoft Graph or read from the arm.json deployment's customLocationsOid)
+#   K8_BRIDGE_OID          Object ID of the 'K8 Bridge' Entra application, used to enable resource sync so that
+#                          discovered devices/assets appear in the operations experience (otherwise looked up in
+#                          Microsoft Graph; CreateRaspberryPiServicePrincipal.sh passes it)
 #   PI_PUBLIC_IP           Public egress IPv4 of the Pi to allow through the Key Vault firewall (auto-detected
 #                          otherwise; only needed if the connection uses several egress IPs)
 #   AIO_CLI_VERSION        azure-iot-ops CLI extension version (default 2.11.2, which bundles the 2610 preview runtime)
@@ -235,6 +238,45 @@ run() {
   if [ "${rc}" -ne 0 ]; then
 	echo "!!! WARNING: command failed (rc=${rc}): $*"
   fi
+  return 0
+}
+
+# Edge-to-cloud resource sync ('az iot ops enable-rsync'): grants the first-party K8 Bridge application the
+# 'Azure Kubernetes Service Arc Contributor Role' on the instance's custom location, so that resources created
+# on the edge - e.g. Akri discovered devices/assets - are projected into Azure Device Registry and show up in
+# the operations experience. Looking up K8 Bridge's object ID needs Microsoft Graph, which a resource-group
+# scoped service principal cannot read, so CreateRaspberryPiServicePrincipal.sh passes it as K8_BRIDGE_OID.
+enable_resource_sync() {
+  local k8_bridge_app_id="319f651f-7ddb-4fc6-9857-7aef9250bd05"
+  local cl_id k8_oid
+  local -a rsync_cmd
+  echo
+  echo "=== Enabling resource sync (edge -> Azure Device Registry) for ${AIO_INSTANCE_NAME} ==="
+  cl_id="$(az iot ops show --name "${AIO_INSTANCE_NAME}" --resource-group "${RESOURCE_GROUP}" \
+    --query extendedLocation.name -o tsv 2>/dev/null)"
+  if [ -z "${cl_id}" ]; then
+    echo "!!! WARNING: could not read the custom location of ${AIO_INSTANCE_NAME}; resource sync not enabled."
+    return 0
+  fi
+  k8_oid="${K8_BRIDGE_OID:-}"
+  if [ -z "${k8_oid}" ]; then
+    k8_oid="$(az ad sp show --id "${k8_bridge_app_id}" --query id -o tsv 2>/dev/null)"
+  fi
+  if [ -n "${k8_oid}" ]; then
+    if az iot ops enable-rsync --help >/dev/null 2>&1; then
+      rsync_cmd=(enable-rsync)
+    else
+      rsync_cmd=(rsync enable)
+    fi
+    run az iot ops "${rsync_cmd[@]}" --name "${AIO_INSTANCE_NAME}" --resource-group "${RESOURCE_GROUP}" \
+      --k8-bridge-sp-oid "${k8_oid}"
+    [ "${RUN_LAST_RC}" -eq 0 ] && return 0
+  else
+    echo "!!! WARNING: could not look up the K8 Bridge service principal (needs Microsoft Graph access)."
+  fi
+  echo "    Discovered assets will not show up in the operations experience until you run this once in Azure"
+  echo "    Cloud Shell (https://shell.azure.com) as an Owner of the resource group:"
+  echo "      az role assignment create --assignee ${k8_bridge_app_id} --role \"Azure Kubernetes Service Arc Contributor Role\" --scope ${cl_id}"
   return 0
 }
 
@@ -970,6 +1012,8 @@ else
   echo "    ${AIO_EXPECTED_VERSION}. An existing GA instance cannot be upgraded to a preview version; delete it"
   echo "    ('az iot ops delete --name ${AIO_INSTANCE_NAME} -g ${RESOURCE_GROUP} --include-deps') and re-run."
 fi
+
+enable_resource_sync
 
 # --------------------------
 # 7b. Create an Azure Arc site (site manager) scoped to the resource group

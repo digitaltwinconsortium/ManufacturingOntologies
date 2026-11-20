@@ -43,6 +43,9 @@
 #   ET_ENDPOINT           OPC UA endpoint URL (default: opc.tcp://<service>.<namespace>.svc.cluster.local:4840/UA/UAEdgeTranslator)
 #   ET_SECURITY_POLICY    Basic256Sha256 (default), Aes128_Sha256_RsaOaep or Aes256_Sha256_RsaPss
 #   PI_PUBLIC_IP          Public egress IPv4 to allow through the Key Vault firewall (auto-detected)
+#   K8_BRIDGE_OID         Object ID of the 'K8 Bridge' Entra application, needed to enable resource sync so that
+#                         discovered assets appear in the operations experience (passed by
+#                         CreateRaspberryPiServicePrincipal.sh; otherwise looked up in Microsoft Graph)
 
 SCRIPT_URL="https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/ConnectUAEdgeTranslatorPi.sh"
 
@@ -130,6 +133,45 @@ run() {
   if [ "${rc}" -ne 0 ]; then
 	echo "!!! WARNING: command failed (rc=${rc}): $*"
   fi
+  return 0
+}
+
+# Edge-to-cloud resource sync ('az iot ops enable-rsync'): grants the first-party K8 Bridge application the
+# 'Azure Kubernetes Service Arc Contributor Role' on the instance's custom location, so that resources created
+# on the edge - e.g. Akri discovered devices/assets - are projected into Azure Device Registry. Looking up
+# K8 Bridge's object ID needs Microsoft Graph, which a resource-group scoped service principal cannot read,
+# so CreateRaspberryPiServicePrincipal.sh passes it as K8_BRIDGE_OID.
+enable_resource_sync() {
+  local k8_bridge_app_id="319f651f-7ddb-4fc6-9857-7aef9250bd05"
+  local cl_id k8_oid
+  local -a rsync_cmd
+  echo
+  echo "=== Enabling resource sync (edge -> Azure Device Registry) for ${AIO_INSTANCE_NAME} ==="
+  cl_id="$(az iot ops show --name "${AIO_INSTANCE_NAME}" --resource-group "${RESOURCE_GROUP}" \
+	--query extendedLocation.name -o tsv 2>/dev/null)"
+  if [ -z "${cl_id}" ]; then
+	echo "!!! WARNING: could not read the custom location of ${AIO_INSTANCE_NAME}; resource sync not enabled."
+	return 0
+  fi
+  k8_oid="${K8_BRIDGE_OID:-}"
+  if [ -z "${k8_oid}" ]; then
+	k8_oid="$(az ad sp show --id "${k8_bridge_app_id}" --query id -o tsv 2>/dev/null)"
+  fi
+  if [ -n "${k8_oid}" ]; then
+	if az iot ops enable-rsync --help >/dev/null 2>&1; then
+	  rsync_cmd=(enable-rsync)
+	else
+	  rsync_cmd=(rsync enable)
+	fi
+	run az iot ops "${rsync_cmd[@]}" --name "${AIO_INSTANCE_NAME}" --resource-group "${RESOURCE_GROUP}" \
+	  --k8-bridge-sp-oid "${k8_oid}"
+	[ "${RUN_LAST_RC}" -eq 0 ] && return 0
+  else
+	echo "!!! WARNING: could not look up the K8 Bridge service principal (needs Microsoft Graph access)."
+  fi
+  echo "    Discovered assets will not show up in the operations experience until you run this once in Azure"
+  echo "    Cloud Shell (https://shell.azure.com) as an Owner of the resource group:"
+  echo "      az role assignment create --assignee ${k8_bridge_app_id} --role \"Azure Kubernetes Service Arc Contributor Role\" --scope ${cl_id}"
   return 0
 }
 
@@ -583,6 +625,10 @@ echo "=== Configuring AIO device ${DEVICE_NAME} (endpoints ${ENDPOINT_NAME} and 
 NS_ID="/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.DeviceRegistry/namespaces/${AIO_NAMESPACE_NAME}"
 ASSET_ID="${NS_ID}/assets/${ASSET_NAME}"
 
+# Discovered assets only exist as custom resources on the cluster until resource sync is enabled; only then
+# are they synced to Azure Device Registry and listed under Discovery in the operations experience.
+enable_resource_sync
+
 if az resource show --ids "${NS_ID}/devices/${DEVICE_NAME}" --output none 2>/dev/null; then
   echo ">>> Device ${DEVICE_NAME} already exists."
 else
@@ -764,7 +810,8 @@ is '${ET_USERNAME}' with the adminPassword of the arm.json deployment (unless ov
 	 kubectl get discoveredassets.namespaces.deviceregistry.microsoft.com -n ${AIO_NAMESPACE}
 	 kubectl get devices.namespaces.deviceregistry.microsoft.com ${DEVICE_NAME} -n ${AIO_NAMESPACE} -o jsonpath='{.status.endpoints.inbound}'; echo
 
-3. Import them in the operations experience (Discovery > select the asset > Import and create asset) as
+3. Import them in the operations experience (Discovery > Discovered assets > select the asset > Import and
+   create asset; they appear there a minute or two after discovery, once resource sync has synced them) as
    asset '${ASSET_NAME}' on endpoint '${ENDPOINT_NAME}', with the data points in a dataset '${DATASET_NAME}'
    publishing to '${DATA_TOPIC}'. The cloud parsers derive Site=${SITE} and Workcell=${STATION}
    from '${ASSET_NAME}_${DATASET_NAME}'.

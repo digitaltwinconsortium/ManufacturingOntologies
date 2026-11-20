@@ -43,6 +43,7 @@ PI_SCRIPT_URL="https://raw.githubusercontent.com/digitaltwinconsortium/Manufactu
 SP_NAME="${SP_NAME:-${RESOURCE_GROUP}-pi-setup}"
 SECRET_DAYS="${SECRET_DAYS:-30}"
 CUSTOM_LOCATIONS_APP_ID="bc313c14-388c-4e7d-a58e-70017303ee3b"
+K8_BRIDGE_APP_ID="319f651f-7ddb-4fc6-9857-7aef9250bd05"
 AIO_PROVIDERS="Microsoft.ExtendedLocation Microsoft.Kubernetes Microsoft.KubernetesConfiguration Microsoft.IoTOperations Microsoft.DeviceRegistry Microsoft.SecretSyncController"
 
 if [ -z "${RESOURCE_GROUP}" ]; then
@@ -101,6 +102,15 @@ else
 fi
 
 echo
+echo "=== Looking up the 'K8 Bridge' application (resource sync of discovered assets) ==="
+K8_BRIDGE_OID="$(az ad sp show --id "${K8_BRIDGE_APP_ID}" --query id -o tsv 2>/dev/null)"
+if [ -n "${K8_BRIDGE_OID}" ]; then
+  echo "  object ID: ${K8_BRIDGE_OID}"
+else
+  echo "  WARNING: could not read it from Microsoft Graph; the Pi prints a role assignment command to run instead."
+fi
+
+echo
 echo "=== Creating service principal '${SP_NAME}' (Owner on resource group ${RESOURCE_GROUP}) ==="
 # Re-running patches the existing app registration and keeps the role assignment.
 APP_ID="$(az ad sp create-for-rbac --name "${SP_NAME}" --role Owner --scopes "${RG_ID}" \
@@ -142,6 +152,7 @@ echo "  client ID: ${APP_ID}, secret valid until ${END_DATE}"
 
 PI_ENV="AZURE_CLIENT_ID=${APP_ID} AZURE_TENANT_ID=${TENANT_ID} AZURE_CLIENT_SECRET='${CLIENT_SECRET}'"
 [ -n "${CUSTOM_LOCATIONS_OID}" ] && PI_ENV="${PI_ENV} CUSTOM_LOCATIONS_OID=${CUSTOM_LOCATIONS_OID}"
+[ -n "${K8_BRIDGE_OID}" ] && PI_ENV="${PI_ENV} K8_BRIDGE_OID=${K8_BRIDGE_OID}"
 
 echo
 echo "=================================================================================================="

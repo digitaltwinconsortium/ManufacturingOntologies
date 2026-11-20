@@ -728,6 +728,16 @@ case "${method}" in
 	[ -f "${2:-}" ] || usage
 	# Strip a UTF-8 BOM; EdgeTranslator tolerates it, jq does not.
 	td="$(sed '1s/^\xEF\xBB\xBF//' "$2")"
+	if ! printf '%s' "${td}" | jq -e 'type == "object"' >/dev/null 2>&1; then
+	  echo "aio-wot: $2 is not a JSON Thing Description." >&2
+	  case "${td,,}" in
+		*'<!doctype html'*|*'<html'*)
+		  echo "         It is an HTML page - download the raw file (https://raw.githubusercontent.com/...)," >&2
+		  echo "         not the github.com/.../blob/... page." >&2 ;;
+		*) { printf '%s' "${td}" | jq . 2>&1 >/dev/null || true; } | sed 's/^/         /' >&2 ;;
+	  esac
+	  exit 1
+	fi
 	# EdgeTranslator names the asset after the TD's 'name'; sending a TD it already has updates that asset.
 	name="${3:-$(printf '%s' "${td}" | jq -r '.name // empty')}"
 	if [ -z "${name}" ]; then

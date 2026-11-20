@@ -243,17 +243,47 @@ detect_public_ipv4() {
   return 1
 }
 kv_reachable() { az keyvault secret list --vault-name "${KEY_VAULT_NAME}" --maxresults 1 --output none 2>/dev/null; }
+# Object ID of the signed-in principal from the ARM token's 'oid' claim (no Microsoft Graph permission needed).
+access_token_claim() {
+  local payload
+  payload="$(az account get-access-token --query accessToken -o tsv 2>/dev/null | cut -d. -f2 | tr '_-' '/+')"
+  while [ $(( ${#payload} % 4 )) -ne 0 ]; do payload="${payload}="; done
+  printf '%s' "${payload}" | base64 -d 2>/dev/null | jq -r --arg c "$1" '.[$c] // empty' 2>/dev/null
+}
 if ! kv_reachable; then
-  # The Pi's public IP changed or arm.json was re-deployed (which resets the vault's IP rules).
+  # Firewall: the Pi's public IP changed or arm.json was re-deployed (which resets the vault's IP rules).
+  # RBAC: arm.json grants Key Vault data roles only to the managed identity and SetupAzureIoTOperationsPi.sh
+  # to the principal it ran as - a new service principal (new object ID) needs its own role assignment.
+  KEY_VAULT_ID="$(az keyvault show --name "${KEY_VAULT_NAME}" --resource-group "${RESOURCE_GROUP}" --query id -o tsv 2>/dev/null)"
   PI_PUBLIC_IP="${PI_PUBLIC_IP:-$(detect_public_ipv4)}"
   if [ -n "${PI_PUBLIC_IP}" ]; then
+	echo ">>> Allowing the Pi's public IP ${PI_PUBLIC_IP} through the Key Vault firewall"
 	run az keyvault network-rule add --name "${KEY_VAULT_NAME}" --resource-group "${RESOURCE_GROUP}" \
 	  --ip-address "${PI_PUBLIC_IP}/32" --output none
-	for _i in $(seq 1 30); do
-	  kv_reachable && break
-	  sleep 10
-	done
+  else
+	echo "!!! WARNING: could not detect the Pi's public IP (set PI_PUBLIC_IP=<ip>)."
   fi
+  SIGNED_IN_OID="$(access_token_claim oid)"
+  SIGNED_IN_PRINCIPAL_TYPE="User"
+  [ "$(az account show --query user.type -o tsv 2>/dev/null)" = "servicePrincipal" ] && SIGNED_IN_PRINCIPAL_TYPE="ServicePrincipal"
+  if [ -n "${KEY_VAULT_ID}" ] && [ -n "${SIGNED_IN_OID}" ]; then
+	existing_ra="$(az role assignment list --scope "${KEY_VAULT_ID}" --role "Key Vault Secrets Officer" \
+	  --fill-principal-name false --query "[?principalId=='${SIGNED_IN_OID}'].id | [0]" -o tsv 2>/dev/null)"
+	if [ -z "${existing_ra}" ]; then
+	  echo ">>> Granting ${SIGNED_IN_PRINCIPAL_TYPE} ${SIGNED_IN_OID} 'Key Vault Secrets Officer' on ${KEY_VAULT_NAME}"
+	  run az role assignment create --assignee-object-id "${SIGNED_IN_OID}" \
+		--assignee-principal-type "${SIGNED_IN_PRINCIPAL_TYPE}" --role "Key Vault Secrets Officer" \
+		--scope "${KEY_VAULT_ID}" --output none
+	fi
+  else
+	echo "!!! WARNING: could not resolve Key Vault ${KEY_VAULT_NAME} or the signed-in principal; grant it"
+	echo "    'Key Vault Secrets Officer' on the vault manually."
+  fi
+  echo ">>> Waiting for Key Vault access (firewall and role changes take a few minutes to propagate)..."
+  for _i in $(seq 1 36); do
+	kv_reachable && break
+	sleep 10
+  done
 fi
 # Latest deployment in the resource group that has an adminUsername parameter (arm.json; fabric.json uses the same).
 ARM_USERNAME="$(az deployment group list --resource-group "${RESOURCE_GROUP}" \
@@ -263,7 +293,8 @@ ARM_PASSWORD=""
 if kv_reachable; then
   ARM_PASSWORD="$(az keyvault secret show --vault-name "${KEY_VAULT_NAME}" --name adminpassword --query value -o tsv 2>/dev/null)"
 else
-  echo "!!! WARNING: Key Vault ${KEY_VAULT_NAME} is not reachable from the Pi (firewall/RBAC)."
+  echo "!!! WARNING: Key Vault ${KEY_VAULT_NAME} is not reachable from the Pi:"
+  az keyvault secret list --vault-name "${KEY_VAULT_NAME}" --maxresults 1 --output none 2>&1 | grep -m 3 -v '^$' | sed 's/^/    /'
 fi
 echo "adminUsername: ${ARM_USERNAME:-<not found>}"
 echo "adminPassword: $([ -n "${ARM_PASSWORD}" ] && echo "<read from ${KEY_VAULT_NAME}/adminpassword>" || echo '<not found>')"
@@ -277,9 +308,10 @@ if ! curl -fsSL --retry 3 "${ET_MANIFEST_URL}" -o "${WORK_DIR}/ua-edgetranslator
   echo "!!! ERROR: could not download ${ET_MANIFEST_URL}. Aborting."
   exit 1
 fi
-# Render the manifest to JSON client-side so it can be inspected and patched with jq.
+# Render the manifest to JSON client-side so it can be inspected and patched with jq. kubectl prints one
+# JSON object per YAML document (or a List), so slurp and flatten them into one array.
 if ! kubectl create --dry-run=client -o json -f "${WORK_DIR}/ua-edgetranslator.yaml" \
-	 | jq -c 'if .kind == "List" then .items else [.] end' > "${WORK_DIR}/et-objects.json"; then
+	 | jq -sc '[.[] | if .kind == "List" then .items[] else . end]' > "${WORK_DIR}/et-objects.json"; then
   echo "!!! ERROR: could not parse ${ET_MANIFEST_URL}. Aborting."
   exit 1
 fi

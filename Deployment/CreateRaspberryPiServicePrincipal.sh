@@ -26,6 +26,8 @@
 # Optional environment overrides:
 #   SP_NAME       Display name of the service principal (default: <resource-group>-pi-setup)
 #   SECRET_DAYS   Lifetime of the client secret in days (default: 30)
+#   PI_SCRIPT     Pi script the printed command runs (default: SetupAzureIoTOperationsPi.sh; e.g.
+#                 ConnectUAEdgeTranslatorPi.sh)
 #
 # After the Pi setup completed and you no longer need to re-run it, delete the service principal with the
 # 'az ad app delete' command printed at the end.
@@ -37,7 +39,7 @@ set -o pipefail
 
 RESOURCE_GROUP="${1:-}"
 SUBSCRIPTION_ID="${2:-}"
-PI_SCRIPT_URL="https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/SetupAzureIoTOperationsPi.sh"
+PI_SCRIPT_URL="https://raw.githubusercontent.com/digitaltwinconsortium/ManufacturingOntologies/main/Deployment/${PI_SCRIPT:-SetupAzureIoTOperationsPi.sh}"
 SP_NAME="${SP_NAME:-${RESOURCE_GROUP}-pi-setup}"
 SECRET_DAYS="${SECRET_DAYS:-30}"
 CUSTOM_LOCATIONS_APP_ID="bc313c14-388c-4e7d-a58e-70017303ee3b"

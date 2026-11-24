@@ -707,7 +707,8 @@ done
   echo '#!/usr/bin/env bash'
   echo '# aio-wot - on-demand mRPC calls to the OPC UA WoT connectivity endpoint of Azure IoT Operations'
   echo "# (installed by ConnectUAEdgeTranslatorPi.sh for ${DEVICE_NAME}/${WOT_ENDPOINT_NAME})."
-  printf 'AIO_NAMESPACE=%q\nWOT_TOPIC_PREFIX=%q\nMQTT_CLIENT_POD=%q\n' "${AIO_NAMESPACE}" "${WOT_TOPIC_PREFIX}" "${MQTT_CLIENT_POD}"
+  printf 'AIO_NAMESPACE=%q\nWOT_TOPIC_PREFIX=%q\nMQTT_CLIENT_POD=%q\nMQTT_CLIENT_MANIFEST=%q\n' \
+    "${AIO_NAMESPACE}" "${WOT_TOPIC_PREFIX}" "${MQTT_CLIENT_POD}" "${MQTT_CLIENT_MANIFEST}"
   cat <<'HELPER'
 set -euo pipefail
 usage() {
@@ -756,8 +757,28 @@ if ! printf '%s' "${payload}" | jq -e . >/dev/null 2>&1; then
   echo "aio-wot: the payload is not valid JSON." >&2
   exit 1
 fi
-kubectl -n "${AIO_NAMESPACE}" exec "${MQTT_CLIENT_POD}" -- sh -c \
-  'command -v mosquitto_rr >/dev/null 2>&1 || apk add --no-cache mosquitto >/dev/null'
+# The quickstart mqtt-client is a bare Pod (no controller), so a node reboot/drain or an AIO upgrade can
+# remove it for good. Recreate it on demand instead of failing with 'pods "mqtt-client" not found'.
+if ! kubectl -n "${AIO_NAMESPACE}" get pod "${MQTT_CLIENT_POD}" >/dev/null 2>&1; then
+  echo "aio-wot: ${AIO_NAMESPACE}/${MQTT_CLIENT_POD} not found; recreating it..." >&2
+  kubectl apply -f "${MQTT_CLIENT_MANIFEST}" >/dev/null
+fi
+kubectl -n "${AIO_NAMESPACE}" wait --for=condition=Ready "pod/${MQTT_CLIENT_POD}" --timeout=300s >/dev/null
+# mosquitto_rr is in Alpine's 'mosquitto' package. Retry while a fresh pod's own startup 'apk add' may
+# still hold the package database lock.
+rr_ready=false
+for _i in $(seq 1 30); do
+  if kubectl -n "${AIO_NAMESPACE}" exec "${MQTT_CLIENT_POD}" -- sh -c \
+	 'command -v mosquitto_rr >/dev/null 2>&1 || apk add --no-cache mosquitto >/dev/null 2>&1' 2>/dev/null; then
+	rr_ready=true
+	break
+  fi
+  sleep 10
+done
+if [ "${rr_ready}" != "true" ]; then
+  echo "aio-wot: could not install mosquitto_rr in ${MQTT_CLIENT_POD}." >&2
+  exit 1
+fi
 # AIO RPC protocol (https://github.com/Azure/iot-operations-sdks/blob/main/doc/reference/rpc-protocol.md):
 # fresh correlation data and response topic per request; the payload is streamed in so large TDs stay off
 # the command line.
